@@ -328,7 +328,7 @@ func GetCommitsForPathsSinceTag(repo *Repo, paths []string, tagName string) ([]o
 // Librarian-Release-Id: <release-id>. These commits are expected to be contiguous, from head,
 // with all commits having a single parent.
 func GetCommitsForReleaseID(repo *Repo, releaseID string) ([]object.Commit, error) {
-	releaseIDLine := fmt.Sprintf("Librarian-Release-ID: %s", releaseID)
+	releaseIDLine := fmt.Sprintf("Library release: %s", releaseID)
 	commits := []object.Commit{}
 
 	headRef, err := repo.repo.Head()

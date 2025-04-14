@@ -69,7 +69,7 @@ var CmdCreateReleasePR = &Command{
 			return err
 		}
 
-		releaseID := fmt.Sprintf("release-%s", formatTimestamp(ctx.startTime))
+		releaseID := formatTimestamp(ctx.startTime)
 		if err := appendResultEnvironmentVariable(ctx, releaseIDEnvVarName, releaseID); err != nil {
 			return err
 		}
