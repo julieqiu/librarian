@@ -329,6 +329,7 @@ func GetCommitsForPathsSinceTag(repo *Repo, paths []string, tagName string) ([]o
 // with all commits having a single parent.
 func GetCommitsForReleaseID(repo *Repo, releaseID string) ([]object.Commit, error) {
 	releaseIDLine := fmt.Sprintf("Library release: %s", releaseID)
+	slog.Info(fmt.Sprintf("Searching for %s", releaseIDLine))
 	commits := []object.Commit{}
 
 	headRef, err := repo.repo.Head()
@@ -344,6 +345,8 @@ func GetCommitsForReleaseID(repo *Repo, releaseID string) ([]object.Commit, erro
 	// have our expected line in the message.
 	candidateCommit := headCommit
 	for {
+		slog.Info(fmt.Sprintf("Checking commit %s", candidateCommit.Hash.String()))
+		slog.Info(fmt.Sprintf("Commit message: %s", candidateCommit.Message))
 		messageLines := strings.Split(candidateCommit.Message, "\n")
 		gotReleaseID := slices.Contains(messageLines, releaseIDLine)
 		if !gotReleaseID {
