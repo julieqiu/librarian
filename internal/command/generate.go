@@ -57,8 +57,9 @@ var CmdGenerate = &Command{
 		slog.Info(fmt.Sprintf("Code will be generated in %s", outputDir))
 
 		//if (languageRepo != nil) && (languageRepo.Repo == nil) {
+		generatorInput := filepath.Join(ctx.languageRepo.Dir, "generator-input")
 
-		if err := container.GenerateLibrary(ctx.containerConfig, apiRoot, outputDir, ctx.languageRepo.Dir, "Google.Cloud.NetworkSecurity.V1Beta1"); err != nil {
+		if err := container.GenerateLibrary(ctx.containerConfig, apiRoot, outputDir, generatorInput, "Google.Cloud.NetworkSecurity.V1Beta1"); err != nil {
 			return err
 		}
 
