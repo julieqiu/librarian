@@ -22,7 +22,6 @@ import (
 	"path/filepath"
 
 	"github.com/googleapis/librarian/internal/container"
-	"github.com/googleapis/librarian/internal/gitrepo"
 )
 
 var CmdGenerate = &Command{
@@ -36,10 +35,8 @@ var CmdGenerate = &Command{
 		addFlagLanguage,
 		addFlagBuild,
 	},
-	// Currently we never clone a language repo, and always do raw generation.
-	maybeGetLanguageRepo: func(workRoot string) (*gitrepo.Repo, error) {
-		return nil, nil
-	},
+	// Clone repo to check if the API exists.  If so need to use
+	maybeGetLanguageRepo: cloneOrOpenLanguageRepo,
 	execute: func(ctx *CommandContext) error {
 		if err := validateRequiredFlag("api-path", flagAPIPath); err != nil {
 			return err
@@ -59,12 +56,14 @@ var CmdGenerate = &Command{
 		}
 		slog.Info(fmt.Sprintf("Code will be generated in %s", outputDir))
 
-		if err := container.GenerateRaw(ctx.containerConfig, apiRoot, outputDir, flagAPIPath); err != nil {
+		//if (languageRepo != nil) && (languageRepo.Repo == nil) {
+
+		if err := container.GenerateLibrary(ctx.containerConfig, apiRoot, outputDir, ctx.languageRepo.Dir, "Google.Cloud.NetworkSecurity.V1Beta1"); err != nil {
 			return err
 		}
 
 		if flagBuild {
-			if err := container.BuildRaw(ctx.containerConfig, outputDir, flagAPIPath); err != nil {
+			if err := container.BuildLibrary(ctx.containerConfig, ctx.languageRepo.Dir, "Google.Cloud.NetworkSecurity.V1Beta1"); err != nil {
 				return err
 			}
 		}
