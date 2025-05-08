@@ -56,6 +56,7 @@ func checkPRStatus(prNumber int, repoOwner string, repoName string, statusCheck 
 				time.Sleep(pollInterval)
 			}
 		} else if statusCheck == "mergeable" {
+			checkIfAllRequiredChecksAreSuccessful(client, ctx, repoOwner, repoName, pr.GetHead().GetSHA())
 			if pr.GetMergeable() || pr.GetMerged() {
 				slog.Info("PR is mergable or already merged", "mergeable status", pr.GetMergeable(), "merged status", pr.GetMerged())
 				return
@@ -74,6 +75,40 @@ func checkPRStatus(prNumber int, repoOwner string, repoName string, statusCheck 
 		}
 
 	}
+}
+
+func checkIfAllRequiredChecksAreSuccessful(client *github.Client, ctx context.Context, owner string, repo string, prHash string) bool {
+	opt := &github.ListOptions{PerPage: 100}
+	//var allChecks []*github.CombinedStatus
+	protection, _, err := client.Repositories.GetBranchProtection(ctx, owner, repo, "main")
+	if err != nil {
+		log.Fatalf("Failed to get branch protection: %v", err)
+	}
+
+	requiredChecks := protection.GetRequiredStatusChecks().Contexts
+	if requiredChecks == nil || len(*requiredChecks) == 0 {
+		fmt.Println("No required status checks configured.")
+		return true
+	}
+	for _, check := range *requiredChecks {
+
+		fmt.Printf("Required check not passing: %s \n", check)
+
+	}
+	slog.Info("Getting all checks for PR", "prHash", prHash)
+	checks, _, err := client.Repositories.GetCombinedStatus(ctx, owner, repo, prHash, opt)
+	if err != nil {
+		log.Fatalf("Error listing checks: %v", err)
+		os.Exit(1)
+	}
+
+	for _, check := range checks.Statuses {
+		slog.Info("Check: %s, State: %s", *check.Context, check.GetState())
+		if check.GetState() != "success" {
+			return false
+		}
+	}
+	return true
 }
 
 // Gets a list of reviews for a PR and checks if any current status is approved
