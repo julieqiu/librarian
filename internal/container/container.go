@@ -71,6 +71,17 @@ func GenerateRaw(config *ContainerConfig, apiRoot, output, apiPath string) error
 }
 
 func GenerateLibrary(config *ContainerConfig, apiRoot, output, generatorInput, libraryID string) error {
+	args1 := []string{
+		"run",
+		"--rm",
+		"-v",
+		generatorInput + ":/generator-input",
+		"alpine",
+		"ls -l /generator-input"}
+
+	runCommand("ls", []string{"-la", generatorInput}...)
+	runCommand("docker", args1...)
+
 	if apiRoot == "" {
 		return fmt.Errorf("apiRoot cannot be empty")
 	}
