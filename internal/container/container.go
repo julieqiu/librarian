@@ -77,7 +77,9 @@ func GenerateLibrary(config *ContainerConfig, apiRoot, output, generatorInput, l
 		"-v",
 		generatorInput + ":/generator-input",
 		"alpine",
-		"ls -l /generator-input"}
+		"ls",
+		"-l",
+		"/generator-input"}
 
 	runCommand("ls", []string{"-la", generatorInput}...)
 	runCommand("docker", args1...)
