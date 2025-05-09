@@ -34,6 +34,7 @@ WORKDIR /app
 # From https://docs.docker.com/engine/install/debian/
 # Add Docker's official GPG key
 RUN apt update
+RUN apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
 RUN apt install -y ca-certificates curl
 RUN install -m 0755 -d /etc/apt/keyrings
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
