@@ -91,17 +91,7 @@ func runGenerateCommand(ctx *CommandContext, outputDir string) error {
 		}
 		generatorInput := filepath.Join(ctx.languageRepo.Dir, "generator-input")
 		slog.Info("Performing refined generation for library ID", "libraryID", libraryID)
-		args1:= []string{
-			"run",
-			"--rm",
-			"-v",
-			generatorInput+":/generator-input",
-			"alpine",
-			"ls -l /generator-input",
 
-			
-		docker run --rm -v /tmp/librarian-20250509T181304/google-cloud-dotnet/generator-input:/generator-input alpine ls -l /generator-input
-		
 		return container.GenerateLibrary(ctx.containerConfig, apiRoot, outputDir, generatorInput, libraryID)
 	} else {
 		slog.Info("No matching library found performing raw generation", "flagAPIPath", flagAPIPath)
