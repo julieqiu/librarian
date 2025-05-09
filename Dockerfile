@@ -32,10 +32,16 @@ FROM golang:1.24
 WORKDIR /app
 
 # From https://docs.docker.com/engine/install/debian/
-# Add Docker's official GPG key
+
 RUN apt update
-RUN apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
-RUN apt install -y ca-certificates curl
+RUN apt-get install -y unzip \
+  gnupg \
+  apt-transport-https \
+  ca-certificates \
+  curl \
+  && rm -rf /var/lib/apt/lists/*
+
+  # Add Docker's official GPG key
 RUN install -m 0755 -d /etc/apt/keyrings
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
 RUN chmod a+r /etc/apt/keyrings/docker.asc
@@ -49,6 +55,11 @@ RUN apt update
 
 # Install Docker
 RUN apt-get -y install docker-ce
+
+# Install the gcloud CLI
+RUN apt-get update && apt-get install -y google-cloud-sdk
+
+RUN gcloud --version
 
 COPY --from=build /src/librarian .
 ENTRYPOINT ["/app/librarian"]
