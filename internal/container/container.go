@@ -80,8 +80,8 @@ func GenerateLibrary(config *ContainerConfig, apiRoot, output, generatorInput, l
 	"ls",
 	"-l",
 	"/generator-input"}*/
-	slog.Info("printoutput")
-	runCommand("ls", []string{"-la", output}...)
+	slog.Info("generatorinput")
+	runCommand("ls", []string{"-la", generatorInput}...)
 	//runCommand("docker", args1...)
 
 	if apiRoot == "" {
