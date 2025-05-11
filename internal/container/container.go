@@ -71,7 +71,7 @@ func GenerateRaw(config *ContainerConfig, apiRoot, output, apiPath string) error
 }
 
 func GenerateLibrary(config *ContainerConfig, apiRoot, output, generatorInput, libraryID string) error {
-	args1 := []string{
+	/*args1 := []string{
 		"run",
 		"--rm",
 		"-v",
@@ -82,7 +82,7 @@ func GenerateLibrary(config *ContainerConfig, apiRoot, output, generatorInput, l
 		"/generator-input"}
 	slog.Info("generatorinput")
 	runCommand("ls", []string{"-la", generatorInput}...)
-	runCommand("docker", args1...)
+	runCommand("docker", args1...)*/
 
 	if apiRoot == "" {
 		return fmt.Errorf("apiRoot cannot be empty")
@@ -140,6 +140,7 @@ func BuildRaw(config *ContainerConfig, generatorOutput, apiPath string) error {
 		"--generator-output=/generator-output",
 		fmt.Sprintf("--api-path=%s", apiPath),
 	}
+	runCommand("ls", []string{"-la", generatorOutput}...)
 	return runDocker(config, ContainerCommandBuildRaw, mounts, commandArgs)
 }
 
