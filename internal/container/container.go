@@ -140,7 +140,7 @@ func BuildRaw(config *ContainerConfig, generatorOutput, apiPath string) error {
 		"--generator-output=/generator-output",
 		fmt.Sprintf("--api-path=%s", apiPath),
 	}
-	runCommand("ls", []string{"-la", generatorOutput}...)
+	runCommand("ls", []string{"-la", generatorOutput + "/apis"}...)
 	return runDocker(config, ContainerCommandBuildRaw, mounts, commandArgs)
 }
 
