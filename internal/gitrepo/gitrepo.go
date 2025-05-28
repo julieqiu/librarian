@@ -328,10 +328,12 @@ func GetCommitsForReleaseID(repo *Repo, releaseID string) ([]object.Commit, erro
 
 	headRef, err := repo.repo.Head()
 	if err != nil {
+		slog.Info("error 3 ")
 		return nil, err
 	}
 	headCommit, err := repo.repo.CommitObject(headRef.Hash())
 	if err != nil {
+		slog.Info("error 4 ")
 		return nil, err
 	}
 
@@ -357,6 +359,7 @@ func GetCommitsForReleaseID(repo *Repo, releaseID string) ([]object.Commit, erro
 		}
 		candidateCommit, err = candidateCommit.Parent(0)
 		if err != nil {
+			slog.Info("error 5 ")
 			return nil, err
 		}
 	}

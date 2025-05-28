@@ -154,11 +154,13 @@ func buildTestPackageRelease(ctx *CommandContext, outputRoot string, release Lib
 func parseCommitsForReleases(repo *gitrepo.Repo, releaseID string) ([]LibraryRelease, error) {
 	commits, err := gitrepo.GetCommitsForReleaseID(repo, releaseID)
 	if err != nil {
+		slog.Info("error 1 ")
 		return nil, err
 	}
 	releases := []LibraryRelease{}
 	for _, commit := range commits {
 		release, err := parseCommitMessageForRelease(commit.Message, commit.Hash.String())
+		slog.Info("error 1 ")
 		if err != nil {
 			return nil, err
 		}
