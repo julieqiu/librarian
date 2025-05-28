@@ -74,7 +74,7 @@ func createReleaseArtifactsImpl(ctx *CommandContext) error {
 		return err
 	}
 
-	slog.Info(fmt.Sprintf("Got here! ))
+	slog.Info(fmt.Sprintf("Got here!"))
 
 	for _, release := range releases {
 		if err := buildTestPackageRelease(ctx, outputRoot, release); err != nil {
