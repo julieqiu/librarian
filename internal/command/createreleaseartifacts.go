@@ -70,11 +70,15 @@ func createReleaseArtifactsImpl(ctx *CommandContext) error {
 
 	releases, err := parseCommitsForReleases(ctx.languageRepo, flagReleaseID)
 	if err != nil {
+		slog.Info(fmt.Sprintf("received error parsing commits for release %s", err.Error()))
 		return err
 	}
 
+	slog.Info(fmt.Sprintf("Got here! ))
+
 	for _, release := range releases {
 		if err := buildTestPackageRelease(ctx, outputRoot, release); err != nil {
+			slog.Info(fmt.Sprintf("received error building test package %s", err.Error()))
 			return err
 		}
 	}
@@ -126,6 +130,7 @@ func buildTestPackageRelease(ctx *CommandContext, outputRoot string, release Lib
 	languageRepo := ctx.languageRepo
 
 	if err := gitrepo.Checkout(languageRepo, release.CommitHash); err != nil {
+		slog.Info(fmt.Sprintf("received error checking out commit %s: %s", release.CommitHash, err.Error()))
 		return err
 	}
 	if err := container.BuildLibrary(containerConfig, languageRepo.Dir, release.LibraryID); err != nil {
