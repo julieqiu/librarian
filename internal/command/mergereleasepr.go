@@ -189,30 +189,6 @@ func waitForPullRequestReadinessSingleIteration(ctx *CommandContext, prMetadata 
 		return false, reportBlockingReason(ctx, prMetadata, "PR is not mergeable (e.g. there are conflicting commit)")
 	}
 
-	// Check that all the statuses have passed.
-	checkRuns, err := githubrepo.GetPullRequestCheckRuns(ctx.ctx, pr)
-	if err != nil {
-		return false, err
-	}
-	for _, checkRun := range checkRuns {
-		// Skip the do-not-merge check and conventional commits checks
-		// (Once b/416489721 has been fixed, we can remove the conventional commits check)
-		if checkRun.GetApp().GetID() == DoNotMergeAppId || checkRun.GetApp().GetID() == ConventionalCommitsAppId {
-			continue
-		}
-
-		// For now, we assume that every other check must be complete and successful.
-		// We can't get at the required status checks with the current access token;
-		// we can rethink this if it turns out to be too conservative.
-		if checkRun.GetStatus() != "completed" {
-			slog.Info(fmt.Sprintf("Check '%s' is not complete", *checkRun.Name))
-			return false, nil
-		}
-		if checkRun.GetConclusion() != "success" {
-			return false, reportBlockingReason(ctx, prMetadata, fmt.Sprintf("Check '%s' failed", *checkRun.Name))
-		}
-	}
-
 	// Check the commits in the pull request. If this returns false,
 	// the reason will already be logged (so we don't need to log it again).
 	commitStatus, err := checkPullRequestCommits(ctx, prMetadata, pr)
