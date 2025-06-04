@@ -43,13 +43,11 @@ var CmdGenerate = &Command{
 		addFlagRepoUrl,
 		addFlagSecretsProject,
 	},
-	// By default don't clone a language repo, we will clone later only if library exists in language repo.
-	maybeGetLanguageRepo: openOrCloneLanguageRepoIfLibraryExists,
-	// Currently, we don't load any repo state and config in the initial path.
-	// We should do so by moving the clone part to maybeGetLanguageRepo - because then we'll be set up
-	// with the right image etc.
-	maybeLoadStateAndConfig: loadRepoStateAndConfig,
-	execute: func(ctx *commandState) error {
+	Run: func(ctx *commandState) error {
+		state, err := createCommandStateforLanguage(ctx)
+		if err != nil {
+			return err
+		}
 		if err := validateRequiredFlag("api-path", flagAPIPath); err != nil {
 			return err
 		}
@@ -57,29 +55,29 @@ var CmdGenerate = &Command{
 			return err
 		}
 
-		outputDir := filepath.Join(ctx.workRoot, "output")
+		outputDir := filepath.Join(state.workRoot, "output")
 		if err := os.Mkdir(outputDir, 0755); err != nil {
 			return err
 		}
 		slog.Info(fmt.Sprintf("Code will be generated in %s", outputDir))
 
-		libraryID, err := runGenerateCommand(ctx, outputDir)
+		libraryID, err := runGenerateCommand(state, outputDir)
 		if err != nil {
 			return err
 		}
 		if flagBuild {
 			if libraryID != "" {
 				slog.Info("Build requested in the context of refined generation; cleaning and copying code to the local language repo before building.")
-				if err := container.Clean(ctx.containerConfig, ctx.languageRepo.Dir, libraryID); err != nil {
+				if err := container.Clean(state.containerConfig, state.languageRepo.Dir, libraryID); err != nil {
 					return err
 				}
-				if err := os.CopyFS(ctx.languageRepo.Dir, os.DirFS(outputDir)); err != nil {
+				if err := os.CopyFS(state.languageRepo.Dir, os.DirFS(outputDir)); err != nil {
 					return err
 				}
-				if err := container.BuildLibrary(ctx.containerConfig, ctx.languageRepo.Dir, libraryID); err != nil {
+				if err := container.BuildLibrary(state.containerConfig, state.languageRepo.Dir, libraryID); err != nil {
 					return err
 				}
-			} else if err := container.BuildRaw(ctx.containerConfig, outputDir, flagAPIPath); err != nil {
+			} else if err := container.BuildRaw(state.containerConfig, outputDir, flagAPIPath); err != nil {
 				return err
 			}
 		}

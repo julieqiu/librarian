@@ -42,6 +42,8 @@ type Command struct {
 	// Short is a concise description shown in the 'librarian -h' output.
 	Short string
 
+	Run func(ctx context.Context) error
+
 	// maybeGetLanguageRepo attempts to obtain a language-specific Git
 	// repository, cloning if necessary.  Returns nil if not applicable.
 	maybeGetLanguageRepo func(workRoot string) (*gitrepo.Repo, error)
@@ -147,31 +149,26 @@ func cloneOrOpenLanguageRepo(workRoot string) (*gitrepo.Repo, error) {
 	return languageRepo, nil
 }
 
-// RunCommand executes a given command, setting up its context including work
-// directory, language repository, pipeline state, and container configuration.
-func RunCommand(c *Command, ctx context.Context) error {
+func createCommandStateforLanguage(ctx context.Context) (*commandState, error) {
 	startTime := time.Now()
 	workRoot, err := createWorkRoot(startTime)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	languageRepo, err := c.maybeGetLanguageRepo(workRoot)
+	languageRepo, err := cloneOrOpenLanguageRepo(workRoot)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	state, config, err := c.maybeLoadStateAndConfig(languageRepo)
+	state, config, err := loadRepoStateAndConfig(languageRepo)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
 	image := deriveImage(state)
 	containerConfig, err := container.NewContainerConfig(ctx, workRoot, image, flagSecretsProject, config)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	cmdContext := &commandState{
+	return &commandState{
 		ctx:             ctx,
 		startTime:       startTime,
 		workRoot:        workRoot,
@@ -179,8 +176,7 @@ func RunCommand(c *Command, ctx context.Context) error {
 		pipelineConfig:  config,
 		pipelineState:   state,
 		containerConfig: containerConfig,
-	}
-	return c.execute(cmdContext)
+	}, nil
 }
 
 func appendResultEnvironmentVariable(ctx *commandState, name, value string) error {

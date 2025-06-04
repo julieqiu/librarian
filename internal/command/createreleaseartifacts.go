@@ -15,6 +15,7 @@
 package command
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -49,12 +50,14 @@ var CmdCreateReleaseArtifacts = &Command{
 		addFlagSecretsProject,
 		addFlagSkipIntegrationTests,
 	},
-	maybeGetLanguageRepo:    cloneOrOpenLanguageRepo,
-	maybeLoadStateAndConfig: loadRepoStateAndConfig,
-	execute:                 createReleaseArtifactsImpl,
+	Run: createReleaseArtifactsImpl,
 }
 
-func createReleaseArtifactsImpl(ctx *commandState) error {
+func createReleaseArtifactsImpl(ctx context.Context) error {
+	state, err := createCommandStateforLanguage(ctx)
+	if err != nil {
+		return err
+	}
 	if err := validateSkipIntegrationTests(); err != nil {
 		return err
 	}
@@ -62,24 +65,24 @@ func createReleaseArtifactsImpl(ctx *commandState) error {
 		return err
 	}
 
-	outputRoot := filepath.Join(ctx.workRoot, "output")
+	outputRoot := filepath.Join(state.workRoot, "output")
 	if err := os.Mkdir(outputRoot, 0755); err != nil {
 		return err
 	}
 	slog.Info(fmt.Sprintf("Packages will be created in %s", outputRoot))
 
-	releases, err := parseCommitsForReleases(ctx.languageRepo, flagReleaseID)
+	releases, err := parseCommitsForReleases(state.languageRepo, flagReleaseID)
 	if err != nil {
 		return err
 	}
 
 	for _, release := range releases {
-		if err := buildTestPackageRelease(ctx, outputRoot, release); err != nil {
+		if err := buildTestPackageRelease(state, outputRoot, release); err != nil {
 			return err
 		}
 	}
 
-	if err := copyMetadataFiles(ctx, outputRoot, releases); err != nil {
+	if err := copyMetadataFiles(state, outputRoot, releases); err != nil {
 		return err
 	}
 

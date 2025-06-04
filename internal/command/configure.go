@@ -15,6 +15,7 @@
 package command
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
@@ -47,14 +48,16 @@ var CmdConfigure = &Command{
 		addFlagRepoUrl,
 		addFlagSecretsProject,
 	},
-	maybeGetLanguageRepo:    cloneOrOpenLanguageRepo,
-	maybeLoadStateAndConfig: loadRepoStateAndConfig,
-	execute: func(ctx *commandState) error {
+	Run: func(ctx context.Context) error {
+		state, err := createCommandStateforLanguage(ctx)
+		if err != nil {
+			return err
+		}
 		if err := validatePush(); err != nil {
 			return err
 		}
 
-		outputRoot := filepath.Join(ctx.workRoot, "output")
+		outputRoot := filepath.Join(state.workRoot, "output")
 		if err := os.Mkdir(outputRoot, 0755); err != nil {
 			return err
 		}
@@ -62,7 +65,7 @@ var CmdConfigure = &Command{
 
 		var apiRoot string
 		if flagAPIRoot == "" {
-			repo, err := cloneGoogleapis(ctx.workRoot)
+			repo, err := cloneGoogleapis(state.workRoot)
 			if err != nil {
 				return err
 			}
@@ -76,20 +79,20 @@ var CmdConfigure = &Command{
 			}
 			apiRoot = absRoot
 		}
-		apiPaths, err := findApisToConfigure(apiRoot, ctx.pipelineState, flagLanguage)
+		apiPaths, err := findApisToConfigure(apiRoot, state.pipelineState, flagLanguage)
 		if err != nil {
 			return err
 		}
 
 		prContent := PullRequestContent{}
 		for _, apiPath := range apiPaths {
-			err = configureApi(ctx, outputRoot, apiRoot, apiPath, &prContent)
+			err = configureApi(state, outputRoot, apiRoot, apiPath, &prContent)
 			if err != nil {
 				return err
 			}
 		}
 
-		_, err = createPullRequest(ctx, &prContent, "feat: API configuration", "", "config")
+		_, err = createPullRequest(state, &prContent, "feat: API configuration", "", "config")
 		return err
 	},
 }

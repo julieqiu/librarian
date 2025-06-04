@@ -25,8 +25,6 @@ import (
 
 	"github.com/googleapis/librarian/internal/container"
 	"github.com/googleapis/librarian/internal/githubrepo"
-	"github.com/googleapis/librarian/internal/gitrepo"
-	"github.com/googleapis/librarian/internal/statepb"
 	"github.com/googleapis/librarian/internal/utils"
 )
 
@@ -41,25 +39,20 @@ var CmdPublishReleaseArtifacts = &Command{
 		addFlagSecretsProject,
 		addFlagTagRepoUrl,
 	},
-	maybeGetLanguageRepo: func(workRoot string) (*gitrepo.Repo, error) {
-		return nil, nil
-	},
-	maybeLoadStateAndConfig: func(languageRepo *gitrepo.Repo) (*statepb.PipelineState, *statepb.PipelineConfig, error) {
-		// Load the state and config from the artifact directory. These will have been created by create-release-artifacts.
-		state, err := loadPipelineStateFile(filepath.Join(flagArtifactRoot, pipelineStateFile))
-		if err != nil {
-			return nil, nil, err
-		}
-		config, err := loadPipelineConfigFile(filepath.Join(flagArtifactRoot, pipelineConfigFile))
-		if err != nil {
-			return nil, nil, err
-		}
-		return state, config, nil
-	},
 	execute: publishReleaseArtifactsImpl,
 }
 
 func publishReleaseArtifactsImpl(ctx *commandState) error {
+	// Load the state and config from the artifact directory. These will have been created by create-release-artifacts.
+	state, err := loadPipelineStateFile(filepath.Join(flagArtifactRoot, pipelineStateFile))
+	if err != nil {
+		return nil, nil, err
+	}
+	config, err := loadPipelineConfigFile(filepath.Join(flagArtifactRoot, pipelineConfigFile))
+	if err != nil {
+		return nil, nil, err
+	}
+
 	if err := validateRequiredFlag("artifact-root", flagArtifactRoot); err != nil {
 		return err
 	}

@@ -15,6 +15,7 @@
 package command
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -45,9 +46,11 @@ var CmdUpdateApis = &Command{
 		addFlagRepoUrl,
 		addFlagSecretsProject,
 	},
-	maybeGetLanguageRepo:    cloneOrOpenLanguageRepo,
-	maybeLoadStateAndConfig: loadRepoStateAndConfig,
-	execute: func(ctx *commandState) error {
+	Run: func(ctx context.Context) error {
+		state, err := createCommandStateforLanguage(ctx)
+		if err != nil {
+			return err
+		}
 		if err := validatePush(); err != nil {
 			return err
 		}
