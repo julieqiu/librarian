@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/googleapis/librarian/internal/config"
 )
 
 func TestParseAndSetFlags(t *testing.T) {
@@ -41,7 +40,7 @@ func TestParseAndSetFlags(t *testing.T) {
 	cmd.Flags.IntVar(&intFlag, "count", 0, "count flag")
 
 	args := []string{"-name=foo", "-count=5"}
-	if err := cmd.Parse(args); err != nil {
+	if err := cmd.Flags.Parse(args); err != nil {
 		t.Fatalf("Parse() failed: %v", err)
 	}
 
@@ -70,7 +69,7 @@ func TestLookup(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			cmd := &Command{}
 			cmd.Commands = commands
-			sub, err := cmd.Lookup(test.name)
+			sub, err := cmd.lookup(test.name)
 			if test.wantErr {
 				if err == nil {
 					t.Fatal(err)
@@ -88,22 +87,23 @@ func TestLookup(t *testing.T) {
 	}
 }
 
-func TestRun(t *testing.T) {
+func TestAction(t *testing.T) {
 	executed := false
 	cmd := &Command{
-		Short: "run runs the command",
-		Run: func(ctx context.Context, cfg *config.Config) error {
+		Short: "action runs the command",
+		Action: func(ctx context.Context, cmd *Command) error {
 			executed = true
 			return nil
 		},
 	}
+	cmd.Init()
+	cmd.Config.Repo = "test"
 
-	cfg := &config.Config{}
-	if err := cmd.Run(t.Context(), cfg); err != nil {
+	if err := cmd.Run(context.Background(), []string{}); err != nil {
 		t.Fatal(err)
 	}
 	if !executed {
-		t.Errorf("cmd.Run was not executed")
+		t.Errorf("cmd.Action was not executed")
 	}
 }
 
@@ -201,6 +201,137 @@ Usage:
 			got := buf.String()
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("mismatch(-want + got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestLookupCommand(t *testing.T) {
+	sub1sub1 := &Command{
+		Short:     "sub1sub1 does something",
+		UsageLine: "sub1sub1",
+		Long:      "sub1sub1 does something",
+	}
+	sub1 := &Command{
+		Short:     "sub1 does something",
+		UsageLine: "sub1",
+		Long:      "sub1 does something",
+		Commands:  []*Command{sub1sub1},
+	}
+	sub2 := &Command{
+		Short:     "sub2 does something",
+		UsageLine: "sub2",
+		Long:      "sub2 does something",
+	}
+	root := &Command{
+		Short:     "root does something",
+		UsageLine: "root",
+		Long:      "root does something",
+		Commands: []*Command{
+			sub1,
+			sub2,
+		},
+	}
+	root.Init()
+	sub1.Init()
+	sub2.Init()
+	sub1sub1.Init()
+
+	testCases := []struct {
+		name     string
+		cmd      *Command
+		args     []string
+		wantCmd  *Command
+		wantArgs []string
+		wantErr  bool
+	}{
+		{
+			name:    "no args",
+			cmd:     root,
+			args:    []string{},
+			wantCmd: root,
+		},
+		{
+			name:    "find sub1",
+			cmd:     root,
+			args:    []string{"sub1"},
+			wantCmd: sub1,
+		},
+		{
+			name:     "find sub2",
+			cmd:      root,
+			args:     []string{"sub2"},
+			wantCmd:  sub2,
+			wantArgs: []string{},
+		},
+		{
+			name:     "find sub1sub1",
+			cmd:      root,
+			args:     []string{"sub1", "sub1sub1"},
+			wantCmd:  sub1sub1,
+			wantArgs: []string{},
+		},
+		{
+			name:     "find sub1sub1 with args",
+			cmd:      root,
+			args:     []string{"sub1", "sub1sub1", "arg1"},
+			wantCmd:  sub1sub1,
+			wantArgs: []string{"arg1"},
+		},
+		{
+			name:    "unknown command",
+			cmd:     root,
+			args:    []string{"unknown"},
+			wantErr: true,
+		},
+		{
+			name:    "unknown subcommand",
+			cmd:     root,
+			args:    []string{"sub1", "unknown"},
+			wantErr: true,
+		},
+		{
+			name:     "find sub1 with flag arguments",
+			cmd:      root,
+			args:     []string{"sub1", "-h"},
+			wantCmd:  sub1,
+			wantArgs: []string{"-h"},
+		},
+		{
+			name:     "find sub1sub1 with flag arguments",
+			cmd:      root,
+			args:     []string{"sub1", "sub1sub1", "-h"},
+			wantCmd:  sub1sub1,
+			wantArgs: []string{"-h"},
+		},
+		{
+			name:     "find sub1 with a flag argument in between subcommands",
+			cmd:      root,
+			args:     []string{"sub1", "-h", "sub1sub1"},
+			wantCmd:  sub1,
+			wantArgs: []string{"-h", "sub1sub1"},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			gotCmd, gotArgs, err := lookupCommand(tc.cmd, tc.args)
+			if (err != nil) != tc.wantErr {
+				t.Errorf("lookupCommand() error = %v, wantErr %v", err, tc.wantErr)
+				return
+			}
+			if gotCmd != tc.wantCmd {
+				var gotName, wantName string
+				if gotCmd != nil {
+					gotName = gotCmd.Name()
+				}
+				if tc.wantCmd != nil {
+					wantName = tc.wantCmd.Name()
+				}
+				t.Errorf("lookupCommand() gotCmd.Name() = %q, want %q", gotName, wantName)
+			}
+			if diff := cmp.Diff(tc.wantArgs, gotArgs); diff != "" {
+				t.Errorf("lookupCommand() args mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
