@@ -66,7 +66,7 @@ func (c *Command) Run(ctx context.Context, args []string) error {
 	if cmd.Action == nil {
 		cmd.Flags.Usage()
 		if len(cmd.Commands) > 0 {
-			return fmt.Errorf("command %q requires a subcommand", cmd.Name())
+			return nil
 		}
 		return fmt.Errorf("no action defined for command %q", cmd.Name())
 	}
