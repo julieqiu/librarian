@@ -44,7 +44,7 @@ executing in such a directory the '--repo' flag must be provided.
 This command scans the git history since the last release, identifies changes
 (feat, fix, BREAKING CHANGE), and calculates the appropriate version bump
 according to semver rules. It then delegates all language-specific file
-modifications, such as updating a CHANGELOG.md or bumping the version in a pom.xml, 
+modifications, such as updating a CHANGELOG.md or bumping the version in a pom.xml,
 to the configured language-specific container.
 
 By default, 'release init' leaves the changes in your local working directory
@@ -62,8 +62,14 @@ Examples:
 
   # Manually specify a version for a single library, overriding the calculation.
   librarian release init --library=secretmanager --library-version=2.0.0 --push`,
-	Run: func(ctx context.Context, cfg *config.Config) error {
-		runner, err := newInitRunner(cfg)
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		if err := cmd.Config.SetDefaults(); err != nil {
+			return fmt.Errorf("failed to initialize config: %w", err)
+		}
+		if _, err := cmd.Config.IsValid(); err != nil {
+			return fmt.Errorf("failed to validate config: %s", err)
+		}
+		runner, err := newInitRunner(cmd.Config)
 		if err != nil {
 			return err
 		}
