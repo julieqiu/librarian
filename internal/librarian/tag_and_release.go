@@ -48,8 +48,17 @@ type tagAndReleaseRunner struct {
 }
 
 func newTagAndReleaseRunner(cfg *config.Config) (*tagAndReleaseRunner, error) {
-	if cfg.GitHubToken == "" {
-		return nil, fmt.Errorf("`LIBRARIAN_GITHUB_TOKEN` must be set")
+	languageRepo, err := cloneOrOpenRepo(cfg.WorkRoot, cfg.Repo, cfg.APISourceDepth, cfg.Branch, cfg.CI, cfg.GitHubToken)
+	if err != nil {
+		return nil, err
+	}
+	state, err := loadRepoState(languageRepo, "")
+	if err != nil {
+		return nil, err
+	}
+	ghClient, err := newGitHubClient(cfg.Repo, cfg.GitHubToken, languageRepo)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create GitHub client: %w", err)
 	}
 	repo, err := github.ParseRemote(cfg.Repo)
 	if err != nil {
@@ -68,6 +77,8 @@ func newTagAndReleaseRunner(cfg *config.Config) (*tagAndReleaseRunner, error) {
 	return &tagAndReleaseRunner{
 		ghClient:    ghClient,
 		pullRequest: cfg.PullRequest,
+		repo:        languageRepo,
+		state:       state,
 	}, nil
 }
 
