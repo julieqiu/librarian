@@ -15,14 +15,15 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 
-	"github.com/googleapis/librarian/internal/sidekick"
+	"github.com/googleapis/librarian/internal/sidekick/gcloud"
 )
 
 func main() {
-	if err := sidekick.Run(os.Args[1:]); err != nil {
+	if err := gcloud.Run(context.Background(), os.Args[1:]...); err != nil {
 		log.Fatal(err)
 	}
 }
