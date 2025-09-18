@@ -15,14 +15,12 @@
 package main
 
 import (
-	"log"
+	"flag"
 	"os"
-
-	"github.com/googleapis/librarian/internal/sidekick"
+	"testing"
 )
 
-func main() {
-	if err := sidekick.Run(os.Args[1:]); err != nil {
-		log.Fatal(err)
-	}
+func TestMain(m *testing.M) {
+	flag.Parse()
+	os.Exit(m.Run())
 }
