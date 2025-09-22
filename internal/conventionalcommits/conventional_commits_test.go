@@ -35,7 +35,7 @@ func TestParseCommits(t *testing.T) {
 		wantErrPhrase string
 	}{
 		{
-			name:    "simple feat",
+			name:    "simple_commit_with_no_library_association",
 			message: "feat: add new feature",
 			want: []*ConventionalCommit{
 				{
@@ -51,7 +51,7 @@ func TestParseCommits(t *testing.T) {
 			},
 		},
 		{
-			name:    "feat with scope",
+			name:    "simple_commit_with_scope",
 			message: "feat(scope): add new feature",
 			want: []*ConventionalCommit{
 				{
@@ -68,7 +68,7 @@ func TestParseCommits(t *testing.T) {
 			},
 		},
 		{
-			name:    "feat with breaking change",
+			name:    "simple_commit_with_breaking_change",
 			message: "feat!: add new feature",
 			want: []*ConventionalCommit{
 				{
@@ -85,7 +85,7 @@ func TestParseCommits(t *testing.T) {
 			},
 		},
 		{
-			name:    "feat with single footer",
+			name:    "commit_with_single_footer",
 			message: "feat: add new feature\n\nCo-authored-by: John Doe <john.doe@example.com>",
 			want: []*ConventionalCommit{
 				{
@@ -101,7 +101,7 @@ func TestParseCommits(t *testing.T) {
 			},
 		},
 		{
-			name:    "feat with multiple footers",
+			name:    "commit_with_multiple_footers",
 			message: "feat: add new feature\n\nCo-authored-by: John Doe <john.doe@example.com>\nReviewed-by: Jane Smith <jane.smith@example.com>",
 			want: []*ConventionalCommit{
 				{
@@ -120,14 +120,14 @@ func TestParseCommits(t *testing.T) {
 			},
 		},
 		{
-			name:    "feat with multiple footers for generated changes",
+			name:    "commit_with_multiple_footers_for_generated_changes",
 			message: "feat: [library-name] add new feature\nThis is the body.\n...\n\nPiperOrigin-RevId: piper_cl_number\n\nSource-Link: [googleapis/googleapis@{source_commit_hash}](https://github.com/googleapis/googleapis/commit/abcdefg1234567)",
 			want: []*ConventionalCommit{
 				{
 					Type:       "feat",
 					Subject:    "[library-name] add new feature",
 					Body:       "This is the body.\n...",
-					LibraryID:  "example-id",
+					LibraryID:  "library-name",
 					IsNested:   false,
 					IsBreaking: false,
 					Footers: map[string]string{
@@ -141,7 +141,7 @@ func TestParseCommits(t *testing.T) {
 			},
 		},
 		{
-			name:    "feat with breaking change footer",
+			name:    "commit_with_breaking_change_footer",
 			message: "feat: add new feature\n\nBREAKING CHANGE: this is a breaking change",
 			want: []*ConventionalCommit{
 				{
@@ -159,7 +159,7 @@ func TestParseCommits(t *testing.T) {
 			},
 		},
 		{
-			name:    "feat with wrong breaking change footer",
+			name:    "commit_with_wrong_breaking_change_footer",
 			message: "feat: add new feature\n\nBreaking change: this is a breaking change",
 			want: []*ConventionalCommit{
 				{
@@ -177,7 +177,7 @@ func TestParseCommits(t *testing.T) {
 			},
 		},
 		{
-			name:    "feat with body and footers",
+			name:    "commit_with_body_and_footers",
 			message: "feat: add new feature\n\nThis is the body of the commit message.\nIt can span multiple lines.\n\nCo-authored-by: John Doe <john.doe@example.com>",
 			want: []*ConventionalCommit{
 				{
@@ -194,7 +194,7 @@ func TestParseCommits(t *testing.T) {
 			},
 		},
 		{
-			name:    "feat with multi-line footer",
+			name:    "commit_with_multi-line_footer",
 			message: "feat: add new feature\n\nThis is the body.\n\nBREAKING CHANGE: this is a breaking change\nthat spans multiple lines.",
 			want: []*ConventionalCommit{
 				{
@@ -212,7 +212,7 @@ func TestParseCommits(t *testing.T) {
 			},
 		},
 		{
-			name: "commit override",
+			name: "commit_override",
 			message: `feat: original message
 
 BEGIN_COMMIT_OVERRIDE
@@ -238,13 +238,13 @@ END_COMMIT_OVERRIDE`,
 			},
 		},
 		{
-			name:    "invalid conventional commit",
+			name:    "invalid_conventional_commit",
 			message: "this is not a conventional commit",
 			wantErr: false,
 			want:    nil,
 		},
 		{
-			name:          "empty commit message",
+			name:          "empty_commit_message",
 			message:       "",
 			wantErr:       true,
 			wantErrPhrase: "empty commit",
@@ -303,7 +303,7 @@ END_NESTED_COMMIT
 			},
 		},
 		{
-			name: "commit with empty nested commit",
+			name: "commit_with_empty_nested_commit",
 			message: `feat(parser): main feature
 main commit body
 
@@ -326,7 +326,7 @@ END_NESTED_COMMIT
 			},
 		},
 		{
-			name: "commit override with nested commits",
+			name: "commit_override_with_nested_commits",
 			message: `feat: API regeneration main commit
 
 This pull request is generated with proto changes between
@@ -361,10 +361,10 @@ END_COMMIT_OVERRIDE
 					Type:       "feat",
 					Subject:    "[abc] nested commit 1",
 					Body:       "body of nested commit 1\n...",
-					LibraryID:  "example-id",
+					LibraryID:  "abc",
 					IsNested:   true,
 					Footers:    map[string]string{"PiperOrigin-RevId": "123456", "Source-Link": "fake-link"},
-					SHA:        sha.String(),
+					SHA:        sha.String(), // For each nested commit, the SHA should be the same (points to language repo's commit hash)
 					CommitHash: sha.String(),
 					When:       now,
 				},
@@ -373,16 +373,16 @@ END_COMMIT_OVERRIDE
 					Subject:    "[abc] nested commit 2",
 					IsNested:   true,
 					Body:       "body of nested commit 2\n...",
-					LibraryID:  "example-id",
+					LibraryID:  "abc",
 					Footers:    map[string]string{"PiperOrigin-RevId": "654321", "Source-Link": "fake-link"},
-					SHA:        sha.String(),
+					SHA:        sha.String(), // For each nested commit, the SHA should be the same (points to language repo's commit hash)
 					CommitHash: sha.String(),
 					When:       now,
 				},
 			},
 		},
 		{
-			name: "nest commit outside of override ignored",
+			name: "nest_commit_outside_of_override_ignored",
 			message: `feat: original message
 
 BEGIN_NESTED_COMMIT
@@ -411,7 +411,7 @@ END_NESTED_COMMIT`,
 			},
 		},
 		{
-			name: "parse multiple lines message inside nested commit, one line header",
+			name: "parse_multiple_lines_message_inside_nested_commit,_one_line_header",
 			message: `
 chore: Update generation configuration at Tue Aug 26 02:31:23 UTC 2025 (#11734)
 
@@ -436,7 +436,7 @@ END_COMMIT_OVERRIDE`,
 				{
 					Type:      "feat",
 					Subject:   "[texttospeech] Support promptable voices by specifying a model name and a prompt",
-					LibraryID: "example-id",
+					LibraryID: "texttospeech",
 					IsNested:  true,
 					Footers: map[string]string{
 						"PiperOrigin-RevId": "799242210",
@@ -449,7 +449,7 @@ END_COMMIT_OVERRIDE`,
 				{
 					Type:      "feat",
 					Subject:   "[texttospeech] Add enum value M4A to enum AudioEncoding",
-					LibraryID: "example-id",
+					LibraryID: "texttospeech",
 					IsNested:  true,
 					Footers: map[string]string{
 						"PiperOrigin-RevId": "799242210",
@@ -462,7 +462,7 @@ END_COMMIT_OVERRIDE`,
 				{
 					Type:      "docs",
 					Subject:   "[texttospeech] A comment for method 'StreamingSynthesize' in service 'TextToSpeech' is changed",
-					LibraryID: "example-id",
+					LibraryID: "texttospeech",
 					IsNested:  true,
 					Footers: map[string]string{
 						"PiperOrigin-RevId": "799242210",
@@ -499,7 +499,7 @@ END_COMMIT_OVERRIDE`,
 				{
 					Type:       "feat",
 					Subject:    "[texttospeech] Support promptable voices by specifying a model name and a prompt",
-					LibraryID:  "example-id",
+					LibraryID:  "texttospeech",
 					IsNested:   true,
 					Footers:    map[string]string{},
 					SHA:        sha.String(),
@@ -509,7 +509,7 @@ END_COMMIT_OVERRIDE`,
 				{
 					Type:       "feat",
 					Subject:    "[texttospeech] Add enum value M4A to enum AudioEncoding",
-					LibraryID:  "example-id",
+					LibraryID:  "texttospeech",
 					IsNested:   true,
 					Footers:    map[string]string{},
 					SHA:        sha.String(),
@@ -519,7 +519,54 @@ END_COMMIT_OVERRIDE`,
 				{
 					Type:       "docs",
 					Subject:    "[texttospeech] A comment for method 'StreamingSynthesize' in service 'TextToSpeech' is changed",
-					LibraryID:  "example-id",
+					LibraryID:  "texttospeech",
+					IsNested:   true,
+					Footers:    map[string]string{},
+					SHA:        sha.String(),
+					CommitHash: sha.String(),
+					When:       now,
+				},
+			},
+		},
+		{
+			name: "generation_commit_has_incorrect_libraryID_passed_in",
+			message: `
+chore: librarian generate pull request: 20250919T072957Z (#14501)
+
+This pull request is generated with proto changes between
+
+[googleapis/googleapis@f8776fe](googleapis/googleapis@f8776fe)
+(exclusive) and
+
+[googleapis/googleapis@36533b0](googleapis/googleapis@36533b0)
+(inclusive).
+
+BEGIN_COMMIT_OVERRIDE
+BEGIN_NESTED_COMMIT
+docs: [google-cloud-video-live-stream] Update requirements of resource ID fields to be more clear
+
+END_NESTED_COMMIT
+
+BEGIN_NESTED_COMMIT
+feat: [google-cloud-eventarc] add new fields to Eventarc resources
+
+END_NESTED_COMMIT
+END_COMMIT_OVERRIDE`,
+			want: []*ConventionalCommit{
+				{
+					Type:       "docs",
+					Subject:    "[google-cloud-video-live-stream] Update requirements of resource ID fields to be more clear",
+					LibraryID:  "google-cloud-video-live-stream",
+					IsNested:   true,
+					Footers:    map[string]string{},
+					SHA:        sha.String(),
+					CommitHash: sha.String(),
+					When:       now,
+				},
+				{
+					Type:       "feat",
+					Subject:    "[google-cloud-eventarc] add new fields to Eventarc resources",
+					LibraryID:  "google-cloud-eventarc",
 					IsNested:   true,
 					Footers:    map[string]string{},
 					SHA:        sha.String(),
