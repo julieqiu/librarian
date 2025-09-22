@@ -1140,7 +1140,6 @@ func TestProcessLibrary(t *testing.T) {
 			}
 			return
 		}
-
 		if err != nil {
 			t.Errorf("failed to run processLibrary(): %q", err.Error())
 		}
