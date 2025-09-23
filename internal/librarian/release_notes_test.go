@@ -529,11 +529,11 @@ Language Image: go:1.21
 
 ### Features
 
-* new feature ([1234567](https://github.com/owner/repo/commit/1234567890abcdef000000000000000000000000))
+* new feature  ([1234567](https://github.com/owner/repo/commit/1234567890abcdef000000000000000000000000))
 
 ### Bug Fixes
 
-* a bug fix ([fedcba0](https://github.com/owner/repo/commit/fedcba0987654321000000000000000000000000))
+* a bug fix  ([fedcba0](https://github.com/owner/repo/commit/fedcba0987654321000000000000000000000000))
 
 </details>`,
 				librarianVersion, today),
@@ -579,11 +579,11 @@ Language Image: go:1.21
 
 ### Features
 
-* new feature (PiperOrigin-RevId: 123456) ([1234567](https://github.com/owner/repo/commit/1234567890abcdef000000000000000000000000))
+* new feature  (PiperOrigin-RevId: 123456) ([1234567](https://github.com/owner/repo/commit/1234567890abcdef000000000000000000000000))
 
 ### Bug Fixes
 
-* a bug fix (PiperOrigin-RevId: 987654) ([fedcba0](https://github.com/owner/repo/commit/fedcba0987654321000000000000000000000000))
+* a bug fix  (PiperOrigin-RevId: 987654) ([fedcba0](https://github.com/owner/repo/commit/fedcba0987654321000000000000000000000000))
 
 </details>`,
 				librarianVersion, today),
@@ -623,9 +623,9 @@ Language Image: go:1.21
 
 ### Features
 
-* new feature ([1234567](https://github.com/owner/repo/commit/1234567890abcdef000000000000000000000000))
+* new feature  ([1234567](https://github.com/owner/repo/commit/1234567890abcdef000000000000000000000000))
 
-* another new feature ([fedcba0](https://github.com/owner/repo/commit/fedcba0987654321000000000000000000000000))
+* another new feature  ([fedcba0](https://github.com/owner/repo/commit/fedcba0987654321000000000000000000000000))
 
 </details>`,
 				librarianVersion, today),
@@ -674,7 +674,7 @@ Language Image: go:1.21
 
 ### Features
 
-* feature for a ([1234567](https://github.com/owner/repo/commit/1234567890abcdef000000000000000000000000))
+* feature for a  ([1234567](https://github.com/owner/repo/commit/1234567890abcdef000000000000000000000000))
 
 </details>
 
@@ -685,7 +685,7 @@ Language Image: go:1.21
 
 ### Bug Fixes
 
-* fix for b ([fedcba0](https://github.com/owner/repo/commit/fedcba0987654321000000000000000000000000))
+* fix for b  ([fedcba0](https://github.com/owner/repo/commit/fedcba0987654321000000000000000000000000))
 
 </details>`,
 				librarianVersion, today, today),
@@ -725,7 +725,43 @@ Language Image: go:1.21
 
 ### Features
 
-* new feature ([1234567](https://github.com/owner/repo/commit/1234567890abcdef000000000000000000000000))
+* new feature  ([1234567](https://github.com/owner/repo/commit/1234567890abcdef000000000000000000000000))
+
+</details>`,
+				librarianVersion, today),
+		},
+		{
+			name: "release_with_commit_description_and_body",
+			state: &config.LibrarianState{
+				Image: "go:1.21",
+				Libraries: []*config.LibraryState{
+					{
+						ID: "my-library",
+						// this is the newVersion in the release note.
+						Version:          "1.1.0",
+						PreviousVersion:  "1.0.0",
+						ReleaseTriggered: true,
+						Changes: []*conventionalcommits.ConventionalCommit{
+							{
+								Type:       "feat",
+								Subject:    "new feature",
+								Body:       "this is the body",
+								CommitHash: hash1.String(),
+							},
+						},
+					},
+				},
+			},
+			ghRepo: &github.Repository{Owner: "owner", Name: "repo"},
+			wantReleaseNote: fmt.Sprintf(`Librarian Version: %s
+Language Image: go:1.21
+<details><summary>my-library: 1.1.0</summary>
+
+## [1.1.0](https://github.com/owner/repo/compare/my-library-1.0.0...my-library-1.1.0) (%s)
+
+### Features
+
+* new feature this is the body ([1234567](https://github.com/owner/repo/commit/1234567890abcdef000000000000000000000000))
 
 </details>`,
 				librarianVersion, today),
