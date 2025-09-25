@@ -20,7 +20,7 @@ limitations under the License.
 /// # Example
 /// ```
 /// # use {{Parent.Codec.NameInExamples}};
-/// let x = {{Parent.Codec.Name}}::new().set_{{Codec.SetterName}}("example");
+/// let x = {{Parent.Codec.Name}}::new().set_{{Codec.SetterName}}(["a", "b", "c"]);
 /// ```
 {{/IsString}}
 {{#IsBytes}}
@@ -28,23 +28,25 @@ limitations under the License.
 /// # Example
 /// ```
 /// # use {{Parent.Codec.NameInExamples}};
-/// let x = {{Parent.Codec.Name}}::new().set_{{Codec.SetterName}}(bytes::Bytes::from_static(b"example"));
+/// let b1 = bytes::Bytes::from_static(b"abc");
+/// let b2 = bytes::Bytes::from_static(b"xyz");
+/// let x = {{Parent.Codec.Name}}::new().set_{{Codec.SetterName}}([b1, b2]);
 /// ```
 {{/IsBytes}}
-{{#IsBool}}
+{{#IsLikeBool}}
 ///
 /// # Example
 /// ```
 /// # use {{Parent.Codec.NameInExamples}};
-/// let x = {{Parent.Codec.Name}}::new().set_{{Codec.SetterName}}(true);
+/// let x = {{Parent.Codec.Name}}::new().set_{{Codec.SetterName}}([true, false, true]);
 /// ```
-{{/IsBool}}
+{{/IsLikeBool}}
 {{#IsLikeInt}}
 ///
 /// # Example
 /// ```
 /// # use {{Parent.Codec.NameInExamples}};
-/// let x = {{Parent.Codec.Name}}::new().set_{{Codec.SetterName}}(42);
+/// let x = {{Parent.Codec.Name}}::new().set_{{Codec.SetterName}}([1, 2, 3]);
 /// ```
 {{/IsLikeInt}}
 {{#IsLikeFloat}}
@@ -52,7 +54,7 @@ limitations under the License.
 /// # Example
 /// ```
 /// # use {{Parent.Codec.NameInExamples}};
-/// let x = {{Parent.Codec.Name}}::new().set_{{Codec.SetterName}}(42.0);
+/// let x = {{Parent.Codec.Name}}::new().set_{{Codec.SetterName}}([1.0, 2.0, 3.0]);
 /// ```
 {{/IsLikeFloat}}
 {{#IsEnum}}
@@ -61,7 +63,7 @@ limitations under the License.
 /// ```
 /// # use {{Parent.Codec.NameInExamples}};
 /// use {{EnumType.Codec.NameInExamples}};
-/// let x = {{Parent.Codec.Name}}::new().set_{{Codec.SetterName}}({{EnumType.Codec.Name}}::default());
+/// let x = {{Parent.Codec.Name}}::new().set_{{Codec.SetterName}}([ {{EnumType.Codec.Name}}::default() ]);
 /// ```
 {{/IsEnum}}
 {{#IsObject}}
@@ -70,7 +72,11 @@ limitations under the License.
 /// ```
 /// # use {{Parent.Codec.NameInExamples}};
 /// use {{MessageType.Codec.NameInExamples}};
-/// let x = {{Parent.Codec.Name}}::new().set_{{Codec.SetterName}}({{MessageType.Codec.Name}}::default()/* use setters */);
+/// let x = {{Parent.Codec.Name}}::new()
+///     .set_{{Codec.SetterName}}([
+///         {{MessageType.Codec.Name}}::default()/* use setters */,
+///         {{MessageType.Codec.Name}}::default()/* use (different) setters */,
+///     ]);
 /// ```
 {{/IsObject}}
 {{/ModelCodec.GenerateSetterSamples}}

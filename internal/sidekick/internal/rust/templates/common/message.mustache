@@ -104,13 +104,8 @@ impl {{Codec.Name}} {
     {{/Codec.IsBoxed}}
     {{/Optional}}
     {{/Singular}}
-    {{^Singular}}
-    /// Sets the value of [{{Codec.FieldName}}][{{Codec.FQMessageName}}::{{Codec.SetterName}}].
-    {{#Deprecated}}
-    #[deprecated]
-    {{/Deprecated}}
-    {{/Singular}}
     {{#Repeated}}
+    {{> /templates/common/setter_preamble/repeated}}
     pub fn set_{{Codec.SetterName}}<T, V>(mut self, v: T) -> Self
     where
         T: std::iter::IntoIterator<Item = V>,
@@ -122,6 +117,7 @@ impl {{Codec.Name}} {
     }
     {{/Repeated}}
     {{#Map}}
+    {{> /templates/common/setter_preamble/map}}
     pub fn set_{{Codec.SetterName}}<T, K, V>(mut self, v: T) -> Self
     where
         T: std::iter::IntoIterator<Item = (K, V)>,
