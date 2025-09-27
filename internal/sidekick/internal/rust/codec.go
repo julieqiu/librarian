@@ -65,13 +65,14 @@ func newCodec(protobufSource bool, options map[string]string) (*codec, error) {
 
 	year, _, _ := time.Now().Date()
 	codec := &codec{
-		generationYear:   fmt.Sprintf("%04d", year),
-		modulePath:       "crate::model",
-		extraPackages:    []*packagez{},
-		packageMapping:   map[string]*packagez{},
-		version:          "0.0.0",
-		releaseLevel:     "preview",
-		systemParameters: sysParams,
+		generationYear:          fmt.Sprintf("%04d", year),
+		modulePath:              "crate::model",
+		extraPackages:           []*packagez{},
+		packageMapping:          map[string]*packagez{},
+		version:                 "0.0.0",
+		releaseLevel:            "preview",
+		systemParameters:        sysParams,
+		serializeEnumsAsStrings: !protobufSource,
 	}
 
 	for key, definition := range options {
@@ -248,6 +249,8 @@ type codec struct {
 	disabledRustdocWarnings []string
 	// The default system parameters included in all requests.
 	systemParameters []systemParameter
+	// If true, enums are serialized as strings.
+	serializeEnumsAsStrings bool
 	// Overrides the template subdirectory.
 	templateOverride string
 	// If true, this includes gRPC-only methods, such as methods without HTTP
