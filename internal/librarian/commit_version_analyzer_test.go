@@ -179,49 +179,6 @@ func TestShouldIncludeForGeneration(t *testing.T) {
 	}
 }
 
-func TestFormatTag(t *testing.T) {
-	t.Parallel()
-	for _, test := range []struct {
-		name    string
-		library *config.LibraryState
-		want    string
-	}{
-		{
-			name: "default format",
-			library: &config.LibraryState{
-				ID:      "google.cloud.foo.v1",
-				Version: "1.2.3",
-			},
-			want: "google.cloud.foo.v1-1.2.3",
-		},
-		{
-			name: "custom format",
-			library: &config.LibraryState{
-				ID:        "google.cloud.foo.v1",
-				Version:   "1.2.3",
-				TagFormat: "v{version}-{id}",
-			},
-			want: "v1.2.3-google.cloud.foo.v1",
-		},
-		{
-			name: "custom format -- version only",
-			library: &config.LibraryState{
-				ID:        "google.cloud.foo.v1",
-				Version:   "1.2.3",
-				TagFormat: "v{version}",
-			},
-			want: "v1.2.3",
-		},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			got := formatTag(test.library.TagFormat, test.library.ID, test.library.Version)
-			if got != test.want {
-				t.Errorf("formatTag() = %q, want %q", got, test.want)
-			}
-		})
-	}
-}
-
 func TestGetConventionalCommitsSinceLastRelease(t *testing.T) {
 	t.Parallel()
 	pathAndMessages := []pathAndMessage{
@@ -345,21 +302,21 @@ func TestGetConventionalCommitsSinceLastRelease(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			got, err := getConventionalCommitsSinceLastRelease(test.repo, test.library)
+			got, err := getConventionalCommitsSinceLastRelease(test.repo, test.library, "")
 			if test.wantErr {
 				if err == nil {
-					t.Fatal("GetConventionalCommitsSinceLastRelease() should have failed")
+					t.Fatal("getConventionalCommitsSinceLastRelease() should have failed")
 				}
 				if !strings.Contains(err.Error(), test.wantErrPhrase) {
-					t.Errorf("GetConventionalCommitsSinceLastRelease() returned error %q, want to contain %q", err.Error(), test.wantErrPhrase)
+					t.Errorf("getConventionalCommitsSinceLastRelease() returned error %q, want to contain %q", err.Error(), test.wantErrPhrase)
 				}
 				return
 			}
 			if err != nil {
-				t.Fatalf("GetConventionalCommitsSinceLastRelease() failed: %v", err)
+				t.Fatalf("getConventionalCommitsSinceLastRelease() failed: %v", err)
 			}
 			if diff := cmp.Diff(test.want, got, cmpopts.IgnoreFields(conventionalcommits.ConventionalCommit{}, "SHA", "CommitHash", "Body", "IsBreaking", "When")); diff != "" {
-				t.Errorf("GetConventionalCommitsSinceLastRelease() mismatch (-want +got):\n%s", diff)
+				t.Errorf("getConventionalCommitsSinceLastRelease() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -453,15 +410,15 @@ func TestGetConventionalCommitsSinceLastGeneration(t *testing.T) {
 					t.Fatal("getConventionalCommitsSinceLastGeneration() should have failed")
 				}
 				if !strings.Contains(err.Error(), test.wantErrPhrase) {
-					t.Errorf("GetConventionalCommitsSinceLastRelease() returned error %q, want to contain %q", err.Error(), test.wantErrPhrase)
+					t.Errorf("getConventionalCommitsSinceLastRelease() returned error %q, want to contain %q", err.Error(), test.wantErrPhrase)
 				}
 				return
 			}
 			if err != nil {
-				t.Fatalf("GetConventionalCommitsSinceLastRelease() failed: %v", err)
+				t.Fatalf("getConventionalCommitsSinceLastRelease() failed: %v", err)
 			}
 			if diff := cmp.Diff(test.want, got, cmpopts.IgnoreFields(conventionalcommits.ConventionalCommit{}, "SHA", "CommitHash", "Body", "IsBreaking", "When")); diff != "" {
-				t.Errorf("GetConventionalCommitsSinceLastRelease() mismatch (-want +got):\n%s", diff)
+				t.Errorf("getConventionalCommitsSinceLastRelease() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
