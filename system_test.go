@@ -28,9 +28,11 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/librarian/internal/github"
 	"github.com/googleapis/librarian/internal/gitrepo"
+	"github.com/googleapis/librarian/internal/images"
 )
 
 var testToken = os.Getenv("TEST_GITHUB_TOKEN")
+var githubAction = os.Getenv("GITHUB_ACTION")
 
 func TestGetRawContentSystem(t *testing.T) {
 	if testToken == "" {
@@ -437,6 +439,69 @@ func TestCreateRelease(t *testing.T) {
 	}
 	if diff := cmp.Diff(release.GetBody(), body); diff != "" {
 		t.Fatalf("release body mismatch (-want + got):\n%s", diff)
+	}
+}
+
+func TestFindLatestImage(t *testing.T) {
+	// If we are able to configure system tests on GitHub actions, then update this
+	// guard clause.
+	if githubAction != "" {
+		t.Skip("skipping on GitHub actions")
+	}
+	for _, test := range []struct {
+		name     string
+		image    string
+		wantDiff bool
+		wantErr  bool
+	}{
+		{
+			name:     "AR unpinned",
+			image:    "us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-prod/librarian-go@sha256:dea280223eca5a0041fb5310635cec9daba2f01617dbfb1e47b90c77368b5620",
+			wantDiff: true,
+		},
+		{
+			name:     "AR pinned",
+			image:    "us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-prod/librarian-go@sha256:dea280223eca5a0041fb5310635cec9daba2f01617dbfb1e47b90c77368b5620",
+			wantDiff: true,
+		},
+		{
+			name:    "invalid image",
+			image:   "gcr.io/some-project/some-name",
+			wantErr: true,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			client, err := images.NewArtifactRegistryClient(t.Context())
+			if err != nil {
+				t.Fatalf("unexpected error in NewArtifactRegistryClient() %v", err)
+			}
+			defer client.Close()
+			got, err := client.FindLatest(t.Context(), test.image)
+			if test.wantErr {
+				if err == nil {
+					t.Errorf("FindLatestImage() error = %v, wantErr %v", err, test.wantErr)
+				}
+				return
+			}
+
+			if err != nil {
+				t.Fatalf("FindLatestImage() error = %v", err)
+			}
+
+			if !strings.HasPrefix(got, "us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-prod/librarian-go@sha256:") {
+				t.Fatalf("FindLatestImage() unexpected image format")
+			}
+			if test.wantDiff {
+				if got == test.image {
+					t.Fatalf("FindLatestImage() expected to change")
+				}
+			} else {
+				if got != test.image {
+					t.Fatalf("FindLatestImage() expected to stay the same")
+				}
+			}
+		})
 	}
 }
 
