@@ -45,6 +45,9 @@ func TestFormatGenerationPRBody(t *testing.T) {
 		languageRepo    gitrepo.Repository
 		idToCommits     map[string]string
 		failedLibraries []string
+		api             string
+		library         string
+		apiOnboarding   bool
 		want            string
 		wantErr         bool
 		wantErrPhrase   string
@@ -531,7 +534,14 @@ Language Image: %s`,
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			got, err := formatGenerationPRBody(test.sourceRepo, test.languageRepo, test.state, test.idToCommits, test.failedLibraries)
+			req := &generationPRRequest{
+				sourceRepo:      test.sourceRepo,
+				languageRepo:    test.languageRepo,
+				state:           test.state,
+				idToCommits:     test.idToCommits,
+				failedLibraries: test.failedLibraries,
+			}
+			got, err := formatGenerationPRBody(req)
 			if test.wantErr {
 				if err == nil {
 					t.Fatalf("%s should return error", test.name)
@@ -546,6 +556,136 @@ Language Image: %s`,
 			}
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("formatGenerationPRBody() mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestFormatOnboardPRBody(t *testing.T) {
+	t.Parallel()
+	librarianVersion := cli.Version()
+
+	for _, test := range []struct {
+		name          string
+		state         *config.LibrarianState
+		sourceRepo    gitrepo.Repository
+		api           string
+		library       string
+		want          string
+		wantErr       bool
+		wantErrPhrase string
+	}{
+		{
+			name: "onboarding_new_api",
+			state: &config.LibrarianState{
+				Image: "go:1.21",
+				Libraries: []*config.LibraryState{
+					{
+						ID:          "one-library",
+						SourceRoots: []string{"path/to"},
+						APIs: []*config.API{
+							{
+								Path:          "path/to",
+								ServiceConfig: "library_v1.yaml",
+							},
+						},
+					},
+				},
+			},
+			sourceRepo: &MockRepository{
+				GetLatestCommitByPath: map[string]*gitrepo.Commit{
+					"path/to/library_v1.yaml": {
+						Message: "feat: new feature\n\nThis is body.\n\nPiperOrigin-RevId: 98765",
+					},
+				},
+			},
+			api:     "path/to",
+			library: "one-library",
+			want: fmt.Sprintf(`feat: onboard a new library
+
+PiperOrigin-RevId: 98765
+Library-IDs: one-library
+Librarian Version: %s
+Language Image: %s`,
+				librarianVersion, "go:1.21"),
+		},
+		{
+			name: "no_latest_commit_during_api_onboarding",
+			state: &config.LibrarianState{
+				Image: "go:1.21",
+				Libraries: []*config.LibraryState{
+					{
+						ID:          "one-library",
+						SourceRoots: []string{"path/to"},
+						APIs: []*config.API{
+							{
+								Path:          "path/to",
+								ServiceConfig: "library_v1.yaml",
+							},
+						},
+					},
+				},
+			},
+			sourceRepo: &MockRepository{
+				GetLatestCommitError: errors.New("no latest commit"),
+			},
+			api:           "path/to",
+			library:       "one-library",
+			wantErr:       true,
+			wantErrPhrase: "no latest commit",
+		},
+		{
+			name: "latest_commit_does_not_contain_piper_during_api_onboarding",
+			state: &config.LibrarianState{
+				Image: "go:1.21",
+				Libraries: []*config.LibraryState{
+					{
+						ID:          "one-library",
+						SourceRoots: []string{"path/to"},
+						APIs: []*config.API{
+							{
+								Path:          "path/to",
+								ServiceConfig: "library_v1.yaml",
+							},
+						},
+					},
+				},
+			},
+			sourceRepo: &MockRepository{
+				GetLatestCommitByPath: map[string]*gitrepo.Commit{
+					"path/to/library_v1.yaml": {
+						Message: "feat: new feature\n\nThis is body.",
+					},
+				},
+			},
+			api:           "path/to",
+			library:       "one-library",
+			wantErr:       true,
+			wantErrPhrase: errPiperNotFound.Error(),
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			req := &onboardPRRequest{
+				sourceRepo: test.sourceRepo,
+				state:      test.state,
+				api:        test.api,
+				library:    test.library,
+			}
+			got, err := formatOnboardPRBody(req)
+			if test.wantErr {
+				if err == nil {
+					t.Fatalf("%s should return error", test.name)
+				}
+				if !strings.Contains(err.Error(), test.wantErrPhrase) {
+					t.Errorf("formatOnboardPRBody() returned error %q, want to contain %q", err.Error(), test.wantErrPhrase)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("formatOnboardPRBody() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -1072,6 +1212,58 @@ Language Image: go:1.21
 			}
 			if diff := cmp.Diff(test.wantReleaseNote, got); diff != "" {
 				t.Errorf("formatReleaseNotes() mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestFindPiperIDFrom(t *testing.T) {
+	for _, test := range []struct {
+		name    string
+		commit  *gitrepo.Commit
+		want    string
+		wantErr error
+	}{
+		{
+			name: "found_piper_id",
+			commit: &gitrepo.Commit{
+				Message: "feat: add a new API\n\nPiperOrigin-RevId: 745187558",
+			},
+			want: "745187558",
+		},
+		{
+			name: "invalid_commit",
+			commit: &gitrepo.Commit{
+				Message: "",
+			},
+			wantErr: gitrepo.ErrEmptyCommitMessage,
+		},
+		{
+			name: "unconventional_commit",
+			commit: &gitrepo.Commit{
+				Message: "unconventional commit message",
+			},
+			wantErr: errPiperNotFound,
+		},
+		{
+			name: "does_not_contain_piper_id",
+			commit: &gitrepo.Commit{
+				Message: "feat: add a new API",
+			},
+			wantErr: errPiperNotFound,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := findPiperIDFrom(test.commit, "example-id")
+			if test.wantErr != nil {
+				if !errors.Is(err, test.wantErr) {
+					t.Errorf("unexpected error type: got %v, want %v", err, test.wantErr)
+				}
+
+				return
+			}
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("findPiperIDFrom() mismatch (-want +got):%s", diff)
 			}
 		})
 	}
