@@ -133,7 +133,6 @@ func (r *updateImageRunner) run(ctx context.Context) error {
 		return formatUpdateImagePRBody(r.image, failedGenerations)
 	}
 	commitMessage := fmt.Sprintf("feat: update image to %s", r.image)
-	// TODO(#2588): open PR as draft if there are failures
 	return commitAndPush(ctx, &commitInfo{
 		branch:            r.branch,
 		commit:            r.commit,
@@ -148,6 +147,7 @@ func (r *updateImageRunner) run(ctx context.Context) error {
 		workRoot:          r.workRoot,
 		failedGenerations: len(failedGenerations),
 		prBodyBuilder:     prBodyBuilder,
+		isDraft:           len(failedGenerations) > 0,
 	})
 }
 
