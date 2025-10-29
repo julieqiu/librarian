@@ -370,3 +370,17 @@ When reviewing a pull request:
 - The
   [user-review-requested:@me](https://github.com/googleapis/librarian/pulls?q=is%3Apr+is%3Aopen+user-review-requested%3A%40me)
   search view is helpful for tracking PRs awaiting your review.
+
+### Test Health
+
+All pull requests require passing CI checks to be merged.
+
+The main branch must always be stable, and tests should never fail at HEAD. A
+red build on main is a critical issue that must be fixed immediately. If tests
+become flaky or the
+[main branch](https://github.com/googleapis/librarian/commits/main) is not
+consistently green, the team's top priority should shift to restoring
+stability.
+
+All other development should be deprioritized until green builds can
+be guaranteed.
