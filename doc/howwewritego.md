@@ -127,6 +127,10 @@ handling:
 - [Generics Tutorial](https://go.dev/doc/tutorial/generics)
 - [Error Handling with Generics](https://go.dev/blog/error-syntax)
 
+## Logging
+
+
+
 
 ## Need Help? Just Ask!
 
