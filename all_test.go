@@ -221,11 +221,11 @@ func recordGoVersion(path string, sfs fs.FS, re *regexp.Regexp, goVersions map[s
 }
 
 func TestGolangCILint(t *testing.T) {
-	rungo(t, "run", "github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.6.0", "run")
+	rungo(t, "tool", "golangci-lint", "run")
 }
 
 func TestGoImports(t *testing.T) {
-	cmd := exec.Command("go", "run", "golang.org/x/tools/cmd/goimports@v0.38.0", "-d", ".")
+	cmd := exec.Command("go", "tool", "goimports", "-d", ".")
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	cmd.Stderr = &out
@@ -243,11 +243,11 @@ func TestGoModTidy(t *testing.T) {
 }
 
 func TestGovulncheck(t *testing.T) {
-	rungo(t, "run", "golang.org/x/vuln/cmd/govulncheck@v1.1.4", "./...")
+	rungo(t, "tool", "govulncheck", "./...")
 }
 
 func TestGodocLint(t *testing.T) {
-	rungo(t, "run", "github.com/godoc-lint/godoc-lint/cmd/godoclint@v0.3.0",
+	rungo(t, "tool", "godoclint",
 		// TODO(https://github.com/googleapis/librarian/issues/1510): fix test
 		"-exclude", "internal/sidekick",
 		"./...")
