@@ -299,15 +299,21 @@ func cleanAndCopyLibrary(state *config.LibrarianState, repoDir, libraryID, outpu
 		return fmt.Errorf("failed to clean library, %s: %w", library.ID, err)
 	}
 
-	return copyLibraryFiles(state, repoDir, libraryID, outputDir)
+	return copyLibraryFiles(state, repoDir, libraryID, outputDir, true)
 }
 
 // copyLibraryFiles copies the files in state.SourceRoots relative to the src folder to the dest
-// folder. It overwrites any existing files.
+// folder.
+//
+// If `failOnExistingFile` is true, the function will check if a file already
+// exists at the destination. If it does, an error is returned immediately without copying.
+// If `failOnExistingFile` is false, it will overwrite any existing files.
+//
 // If there's no files in the library's SourceRoots under the src directory, no copy will happen.
+//
 // If a file is being copied to the library's SourceRoots in the dest folder but the folder does
 // not exist, the copy fails.
-func copyLibraryFiles(state *config.LibrarianState, dest, libraryID, src string) error {
+func copyLibraryFiles(state *config.LibrarianState, dest, libraryID, src string, failOnExistingFile bool) error {
 	library := state.LibraryByID(libraryID)
 	if library == nil {
 		return fmt.Errorf("library %q not found", libraryID)
@@ -324,6 +330,9 @@ func copyLibraryFiles(state *config.LibrarianState, dest, libraryID, src string)
 			slog.Debug("copying file", "file", file)
 			srcFile := filepath.Join(srcPath, file)
 			dstFile := filepath.Join(dstPath, file)
+			if _, err := os.Stat(dstFile); failOnExistingFile && err == nil {
+				return fmt.Errorf("file existed in destination: %s", dstFile)
+			}
 			if err := copyFile(dstFile, srcFile); err != nil {
 				return fmt.Errorf("failed to copy file %q for library %s: %w", srcFile, library.ID, err)
 			}
