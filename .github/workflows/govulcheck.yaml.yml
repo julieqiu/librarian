@@ -23,19 +23,13 @@ jobs:
         id: govulncheck-scan
         run: |
           # Run with -json (which never fails) and save to a file
-          govulncheck -json ./... > results.json
+          govulncheck -json ./... | jq 'select(.finding)' > results.json
           # Count the number of findings using jq.
           COUNT=$(jq -s 'length' results.json)
           echo "Found $COUNT vulnerabilities."
           # Set an output for the next steps to use
           echo "vuln_count=$COUNT" >> $GITHUB_OUTPUT
-      - name: Upload scan results artifact
-        if: steps.govulncheck-scan.outputs.vuln_count > 0
-        uses: actions/upload-artifact@v4
-        with:
-          name: govulncheck-results-json
-          path: results.json
-          retention-days: 7
+          cat results.json
       - name: Create GitHub Issue (if vulns found)
         if: steps.govulncheck-scan.outputs.vuln_count > 0
         env:
