@@ -1,4 +1,4 @@
-// Copyright 2024 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:generate go run -tags docgen ../doc_generate.go -cmd .
+
+/*
+Librarian manages Google API client libraries by automating onboarding,
+regeneration, and release. It runs language-agnostic workflows while
+delegating language-specific tasks—such as code generation, building, and
+testing—to Docker images.
+
+Usage:
+
+	librarian <command> [arguments]
+
+The commands are:
+*/
 package main
-
-import (
-	"context"
-	"log"
-	"os"
-
-	"github.com/googleapis/librarian/internal/automation"
-)
-
-func main() {
-	if err := automation.Run(context.Background(), os.Args[1:]); err != nil {
-		log.Fatal(err)
-	}
-}
