@@ -130,10 +130,26 @@ func (r *testGenerateRunner) cleanup() error {
 }
 
 // testSingleLibrary runs a generation test for a single library.
-// It prepares the source repository, runs generation, validates the output,
-// and cleans up the source repository by checking out the original commit.
-// It does not cleanup the source repository branch or worktree in code repository
-// created during test.
+// The test performs the following steps:
+//
+// 1.  Prepares the source repository:
+//   - Checks out the `last_generated_commit` from the source repository.
+//   - Injects unique GUIDs as comments into the first `message`/`enum` definition
+//     and the first `service` definition found in each proto file to simulate a change.
+//   - Commits these temporary changes to a new branch.
+//
+// 2.  Runs the `generate` command for the specified library.
+// 3.  Validates the output:
+//   - Ensures that the generation command did not fail.
+//   - Verifies that every injected GUID appears in the generated output,
+//     confirming that the simulated changes triggered a corresponding update.
+//   - Optionally, checks for any unexpected file additions, deletions, or modifications.
+//
+// 4.  Cleans up the source repository by checking out the original commit.
+//
+// Note: This function does not delete the temporary branch created in the source
+// repository or reset the worktree in the code repository; these cleanup actions
+// are handled by the caller.
 func (r *testGenerateRunner) testSingleLibrary(ctx context.Context, libraryID, sourceRepoHead, outputDir string) error {
 	defer func() {
 		slog.Debug("resetting source repo to original commit", "library", libraryID)
@@ -153,7 +169,7 @@ func (r *testGenerateRunner) testSingleLibrary(ctx context.Context, libraryID, s
 			return errGenerateBlocked
 		}
 	}
-	protoFileToGUID, err := r.prepareForGenerateTest(libraryState, libraryID)
+	protoFileToGUIDs, err := r.prepareForGenerateTest(libraryState, libraryID)
 	if err != nil {
 		return fmt.Errorf("failed in test preparing steps: %w", err)
 	}
@@ -161,7 +177,7 @@ func (r *testGenerateRunner) testSingleLibrary(ctx context.Context, libraryID, s
 	// We capture the error here and pass it to the validation step.
 	generateErr := generateSingleLibrary(ctx, r.containerClient, r.state, libraryState, r.repo, r.sourceRepo, outputDir)
 
-	if err := r.validateGenerateTest(generateErr, protoFileToGUID, libraryState); err != nil {
+	if err := r.validateGenerateTest(generateErr, protoFileToGUIDs, libraryState); err != nil {
 		return fmt.Errorf("failed in test validation steps: %w", err)
 	}
 
@@ -171,9 +187,9 @@ func (r *testGenerateRunner) testSingleLibrary(ctx context.Context, libraryID, s
 // prepareForGenerateTest sets up the source repository for a generation test. It
 // checks out a new branch from the library's last generated commit, injects unique
 // GUIDs as comments into the relevant proto files, and commits these temporary
-// changes. It returns a map of the modified proto file paths to the GUIDs that
-// were injected.
-func (r *testGenerateRunner) prepareForGenerateTest(libraryState *config.LibraryState, libraryID string) (map[string]string, error) {
+// changes. It returns a map of the modified proto file paths to the slice of
+// GUIDs that were injected.
+func (r *testGenerateRunner) prepareForGenerateTest(libraryState *config.LibraryState, libraryID string) (map[string][]string, error) {
 	if libraryState.LastGeneratedCommit == "" {
 		return nil, fmt.Errorf("last_generated_commit is not set for library %q", libraryID)
 	}
@@ -189,12 +205,12 @@ func (r *testGenerateRunner) prepareForGenerateTest(libraryState *config.Library
 		return nil, fmt.Errorf("failed finding proto files: %w", err)
 	}
 
-	protoFileToGUID, err := injectTestGUIDsIntoProtoFiles(protoFiles, r.sourceRepo.GetDir())
+	protoFileToGUIDs, err := injectTestGUIDsIntoProtoFiles(protoFiles, r.sourceRepo.GetDir())
 	if err != nil {
 		return nil, fmt.Errorf("failed to inject test GUIDs into proto files: %w", err)
 	}
 
-	if len(protoFileToGUID) == 0 {
+	if len(protoFileToGUIDs) == 0 {
 		return nil, fmt.Errorf("library %q configured to generate, but nothing to generate", libraryID)
 	}
 
@@ -205,7 +221,7 @@ func (r *testGenerateRunner) prepareForGenerateTest(libraryState *config.Library
 		return nil, err
 	}
 
-	return protoFileToGUID, nil
+	return protoFileToGUIDs, nil
 }
 
 // findProtoFiles recursively finds all .proto files within the API paths specified in
@@ -237,62 +253,85 @@ func findProtoFiles(libraryState *config.LibraryState, repo gitrepo.Repository) 
 	return protoFiles, nil
 }
 
-// injectTestGUIDsIntoProtoFiles injects a unique GUID into each one proto file
-// provided. It returns a map of file paths to the GUIDs that were successfully injected.
-func injectTestGUIDsIntoProtoFiles(protoFiles []string, repoPath string) (map[string]string, error) {
-	protoFileToGUID := make(map[string]string)
+// injectTestGUIDsIntoProtoFiles injects unique GUIDs into each proto file
+// provided. It returns a map of file paths to the GUIDs that were successfully
+// injected.
+func injectTestGUIDsIntoProtoFiles(protoFiles []string, repoPath string) (map[string][]string, error) {
+	protoFileToGUIDs := make(map[string][]string)
 	for _, protoFile := range protoFiles {
-		guid, err := injectGUIDIntoProto(filepath.Join(repoPath, protoFile))
+		guids, err := injectGUIDsIntoProto(filepath.Join(repoPath, protoFile))
 		if err != nil {
 			return nil, fmt.Errorf("failed to inject GUID into %s: %w", protoFile, err)
 		}
-		if guid != "" {
-			protoFileToGUID[protoFile] = guid
+		if len(guids) > 0 {
+			protoFileToGUIDs[protoFile] = guids
 		}
 	}
-	return protoFileToGUID, nil
+	return protoFileToGUIDs, nil
 }
 
-// injectGUIDIntoProto adds a unique GUID comment to a single proto file to simulate
-// a change. It finds a suitable insertion point (e.g., before a message, enum, or
-// service definition) and writes the modified content back to the file. It returns
-// the GUID that was injected or an empty string if no suitable insertion point was
-// found.
-func injectGUIDIntoProto(absPath string) (string, error) {
+// injectGUIDsIntoProto adds unique GUID comments to a single proto file to
+// simulate a change. It finds suitable insertion points (before a message, enum,
+// or service definition) and writes the modified content back to the file. It
+// returns the GUIDs that were injected.
+func injectGUIDsIntoProto(absPath string) ([]string, error) {
 	content, err := os.ReadFile(absPath)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	lines := strings.Split(string(content), "\n")
 	if len(content) == 0 {
-		return "", nil
+		return nil, nil
 	}
 
-	insertionLine := findProtoInsertionLine(lines)
-	if insertionLine == -1 {
-		// No suitable line found to inject the comment.
-		return "", nil
+	commentsByLine := make(map[int][]string)
+	var injectedGUIDs []string
+	// find the first occurrence of message/enum, and the first occurrence of service separately
+	// because they usually correspond to separate generated files.
+	if guid := prepareGUIDInjection(lines, []string{"message ", "enum "}, commentsByLine); guid != "" {
+		injectedGUIDs = append(injectedGUIDs, guid)
+	}
+	if guid := prepareGUIDInjection(lines, []string{"service "}, commentsByLine); guid != "" {
+		injectedGUIDs = append(injectedGUIDs, guid)
 	}
 
-	guid := uuid.New().String()
-	comment := "// test-change-" + guid
+	if len(injectedGUIDs) == 0 {
+		return nil, nil
+	}
+
 	var newLines []string
-	newLines = append(newLines, lines[:insertionLine]...)
-	newLines = append(newLines, comment)
-	newLines = append(newLines, lines[insertionLine:]...)
+	for i, line := range lines {
+		if comments, ok := commentsByLine[i]; ok {
+			newLines = append(newLines, comments...)
+		}
+		newLines = append(newLines, line)
+	}
 
 	output := strings.Join(newLines, "\n")
 	if err := os.WriteFile(absPath, []byte(output), 0644); err != nil {
-		return "", err
+		return nil, err
 	}
-	return guid, nil
+	return injectedGUIDs, nil
+}
+
+// prepareGUIDInjection finds the first occurrence of any of the provided search
+// terms and, if found, injects a new GUID comment into the commentsByLine map and
+// returns the generated GUID.
+func prepareGUIDInjection(lines []string, searchTerms []string, commentsByLine map[int][]string) string {
+	insertionLine := findProtoInsertionLine(lines, searchTerms)
+	if insertionLine != -1 {
+		guid := uuid.New().String()
+		comment := "// test-change-" + guid
+		commentsByLine[insertionLine] = append(commentsByLine[insertionLine], comment)
+		return guid
+	}
+	return ""
 }
 
 // findProtoInsertionLine determines the best line number to inject a test comment
-// in a proto file. It searches for the first occurrence of a top-level message,
-// enum, or service definition.
-func findProtoInsertionLine(lines []string) int {
-	searchTerms := []string{"message ", "enum ", "service "}
+// in a proto file. It searches for the first occurrence of a top-level definition
+// matching one of the search terms.
+func findProtoInsertionLine(lines []string, searchTerms []string) int {
 	for i, line := range lines {
 		for _, term := range searchTerms {
 			if strings.HasPrefix(strings.TrimSpace(line), term) {
@@ -307,7 +346,7 @@ func findProtoInsertionLine(lines []string) int {
 // that the generation command did not fail, that every injected proto change
 // resulted in a corresponding change in the generated code, and optionally
 // verifies that no other unexpected files were added, deleted, or modified.
-func (r *testGenerateRunner) validateGenerateTest(generateErr error, protoFileToGUID map[string]string, libraryState *config.LibraryState) error {
+func (r *testGenerateRunner) validateGenerateTest(generateErr error, protoFileToGUIDs map[string][]string, libraryState *config.LibraryState) error {
 	slog.Debug("validating generation results")
 	if generateErr != nil {
 		return fmt.Errorf("the generation command failed: %w", generateErr)
@@ -334,8 +373,10 @@ func (r *testGenerateRunner) validateGenerateTest(generateErr error, protoFileTo
 	}
 
 	guidsToFind := make(map[string]bool)
-	for _, guid := range protoFileToGUID {
-		guidsToFind[guid] = false
+	for _, guids := range protoFileToGUIDs {
+		for _, guid := range guids {
+			guidsToFind[guid] = false
+		}
 	}
 	filesWithGUIDs := make(map[string]bool)
 	repoDir := r.repo.GetDir()
@@ -363,9 +404,11 @@ func (r *testGenerateRunner) validateGenerateTest(generateErr error, protoFileTo
 		}
 	}
 
-	for protoFile, guid := range protoFileToGUID {
-		if !guidsToFind[guid] {
-			return fmt.Errorf("change in proto file %s (GUID %s) produced no corresponding generated file changes", protoFile, guid)
+	for protoFile, guids := range protoFileToGUIDs {
+		for _, guid := range guids {
+			if !guidsToFind[guid] {
+				return fmt.Errorf("change in proto file %s (GUID %s) produced no corresponding generated file changes", protoFile, guid)
+			}
 		}
 	}
 	slog.Debug("validation succeeded: all proto changes resulted in generated file changes")
