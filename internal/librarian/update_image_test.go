@@ -198,6 +198,8 @@ func TestUpdateImageRunnerRun(t *testing.T) {
 		build                      bool
 		commit                     bool
 		push                       bool
+		test                       bool
+		libraryToTest              string
 		wantErr                    bool
 		wantErrMsg                 string
 		wantFindLatestCalls        int
@@ -637,7 +639,7 @@ func TestUpdateImageRunnerRun(t *testing.T) {
 			wantCommitMsg:              "feat: update image to gcr.io/test/image@sha256:abc123",
 		},
 		{
-			name: "partial updates with push",
+			name: "runs test",
 			state: &config.LibrarianState{
 				Image: "gcr.io/test/image:v1.2.3",
 				Libraries: []*config.LibraryState{
@@ -649,6 +651,42 @@ func TestUpdateImageRunnerRun(t *testing.T) {
 						},
 						LastGeneratedCommit: "abcd1234",
 					},
+				},
+			},
+			containerClient: &mockContainerClient{},
+			imagesClient: &mockImagesClient{
+				latestImage: "gcr.io/test/image@sha256:abc123",
+			},
+			ghClient: &mockGitHubClient{
+				createdPR: &github.PullRequestMetadata{
+					Number: 1234,
+					Repo: &github.Repository{
+						Owner: "googleapis",
+						Name:  "google-cloud-go",
+					},
+				},
+			},
+			test:                true,
+			libraryToTest:       "lib1",
+			wantFindLatestCalls: 1,
+			wantGenerateCalls:   1,
+			wantCheckoutCalls:   3,
+			wantErr:             true,
+			// The test setup does not have protos, so the test fails in the preparation step.
+			wantErrMsg: "failed in test preparing steps",
+		},
+		{
+			name: "partial updates with push",
+			state: &config.LibrarianState{
+				Image: "gcr.io/test/image:v1.2.3",
+				Libraries: []*config.LibraryState{{
+					ID:   "lib1",
+					APIs: []*config.API{{Path: "some/api1"}},
+					SourceRoots: []string{
+						"src/a",
+					},
+					LastGeneratedCommit: "abcd1234",
+				},
 					{
 						ID:   "lib2",
 						APIs: []*config.API{{Path: "some/api2"}},
@@ -706,6 +744,8 @@ func TestUpdateImageRunnerRun(t *testing.T) {
 				build:           test.build,
 				commit:          test.commit,
 				push:            test.push,
+				test:            test.test,
+				libraryToTest:   test.libraryToTest,
 				image:           test.image,
 				containerClient: test.containerClient,
 				imagesClient:    test.imagesClient,
@@ -810,6 +850,98 @@ func TestFormatUpdateImagePRBody(t *testing.T) {
 			}
 			if diff := cmp.Diff(got, test.want); diff != "" {
 				t.Errorf("%s: formatUpdateImagePRBody() mismatch (-want +got):%s", test.name, diff)
+			}
+		})
+	}
+}
+
+func TestRunContainerGenerateTest(t *testing.T) {
+	t.Parallel()
+	for _, test := range []struct {
+		name           string
+		mockRepo       *MockRepository
+		testRunner     *testGenerateRunner
+		wantErrMsg     string
+		wantResetCalls int
+	}{
+		{
+			name: "AddAll fails",
+			mockRepo: &MockRepository{
+				AddAllError: fmt.Errorf("add all failed"),
+			},
+			testRunner: &testGenerateRunner{},
+			wantErrMsg: "failed to stage changes",
+		},
+		{
+			name: "Commit fails with unexpected error",
+			mockRepo: &MockRepository{
+				CommitError: fmt.Errorf("unexpected commit error"),
+			},
+			testRunner: &testGenerateRunner{},
+			wantErrMsg: "failed to create temporary commit",
+		},
+		{
+			name: "ResetSoft fails after successful test",
+			mockRepo: &MockRepository{
+				CommitError:    nil, // Commit succeeds
+				ResetSoftError: fmt.Errorf("reset soft failed"),
+			},
+			testRunner: &testGenerateRunner{
+				// Mocking a successful test run.
+				containerClient: &mockContainerClient{noGenerateResponse: true},
+				repo:            &MockRepository{},
+				sourceRepo:      &MockRepository{},
+				librarianConfig: &config.LibrarianConfig{},
+				state:           &config.LibrarianState{},
+			},
+			wantErrMsg:     "failed to reset temporary commit",
+			wantResetCalls: 1,
+		},
+		{
+			name: "Success with commit",
+			mockRepo: &MockRepository{
+				CommitError: nil,
+			},
+			testRunner: &testGenerateRunner{
+				containerClient: &mockContainerClient{noGenerateResponse: true},
+				sourceRepo:      &MockRepository{},
+				librarianConfig: &config.LibrarianConfig{},
+				repo:            &MockRepository{},
+				state:           &config.LibrarianState{},
+			},
+			wantResetCalls: 1,
+		},
+		{
+			name: "Success with no changes to commit",
+			mockRepo: &MockRepository{
+				CommitError: gitrepo.ErrNoModificationsToCommit,
+			},
+			testRunner: &testGenerateRunner{
+				containerClient: &mockContainerClient{noGenerateResponse: true},
+				sourceRepo:      &MockRepository{},
+				librarianConfig: &config.LibrarianConfig{},
+				repo:            &MockRepository{},
+				state:           &config.LibrarianState{},
+			},
+			wantResetCalls: 0,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			err := runContainerGenerateTest(t.Context(), test.mockRepo, "fake-head", test.testRunner)
+
+			if test.wantErrMsg != "" {
+				if err == nil {
+					t.Fatalf("runContainerGenerateTest() expected an error, but got nil")
+				}
+				if !strings.Contains(err.Error(), test.wantErrMsg) {
+					t.Errorf("runContainerGenerateTest() error = %q, want error containing %q", err.Error(), test.wantErrMsg)
+				}
+			} else if err != nil {
+				t.Fatalf("runContainerGenerateTest() returned unexpected error: %v", err)
+			}
+
+			if test.mockRepo.ResetSoftCalls != test.wantResetCalls {
+				t.Errorf("ResetSoft was called %d times, want %d", test.mockRepo.ResetSoftCalls, test.wantResetCalls)
 			}
 		})
 	}

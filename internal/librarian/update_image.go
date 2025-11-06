@@ -17,6 +17,7 @@ package librarian
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"html/template"
 	"log/slog"
@@ -34,20 +35,23 @@ const (
 )
 
 type updateImageRunner struct {
-	branch          string
-	containerClient ContainerClient
-	imagesClient    ImageRegistryClient
-	ghClient        GitHubClient
-	hostMount       string
-	librarianConfig *config.LibrarianConfig
-	repo            gitrepo.Repository
-	sourceRepo      gitrepo.Repository
-	state           *config.LibrarianState
-	build           bool
-	push            bool
-	commit          bool
-	image           string
-	workRoot        string
+	branch                 string
+	containerClient        ContainerClient
+	imagesClient           ImageRegistryClient
+	ghClient               GitHubClient
+	hostMount              string
+	librarianConfig        *config.LibrarianConfig
+	repo                   gitrepo.Repository
+	sourceRepo             gitrepo.Repository
+	state                  *config.LibrarianState
+	build                  bool
+	push                   bool
+	commit                 bool
+	image                  string
+	workRoot               string
+	test                   bool
+	libraryToTest          string
+	checkUnexpectedChanges bool
 }
 
 // ImageRegistryClient is an abstraction around interacting with image.
@@ -61,19 +65,22 @@ func newUpdateImageRunner(cfg *config.Config) (*updateImageRunner, error) {
 		return nil, err
 	}
 	return &updateImageRunner{
-		branch:          cfg.Branch,
-		containerClient: runner.containerClient,
-		ghClient:        runner.ghClient,
-		hostMount:       cfg.HostMount,
-		librarianConfig: runner.librarianConfig,
-		repo:            runner.repo,
-		sourceRepo:      runner.sourceRepo,
-		state:           runner.state,
-		build:           cfg.Build,
-		commit:          cfg.Commit,
-		push:            cfg.Push,
-		image:           cfg.Image,
-		workRoot:        runner.workRoot,
+		branch:                 cfg.Branch,
+		containerClient:        runner.containerClient,
+		ghClient:               runner.ghClient,
+		hostMount:              cfg.HostMount,
+		librarianConfig:        runner.librarianConfig,
+		repo:                   runner.repo,
+		sourceRepo:             runner.sourceRepo,
+		state:                  runner.state,
+		build:                  cfg.Build,
+		commit:                 cfg.Commit,
+		push:                   cfg.Push,
+		image:                  cfg.Image,
+		workRoot:               runner.workRoot,
+		test:                   cfg.Test,
+		libraryToTest:          cfg.LibraryToTest,
+		checkUnexpectedChanges: cfg.CheckUnexpectedChanges,
 	}, nil
 }
 
@@ -140,12 +147,29 @@ func (r *updateImageRunner) run(ctx context.Context) error {
 		return err
 	}
 
-	prBodyBuilder := func() (string, error) {
-		return formatUpdateImagePRBody(r.image, failedGenerations)
-	}
 	// Restore api source repo
 	if err := r.sourceRepo.Checkout(sourceHead); err != nil {
 		slog.Error(err.Error(), "repository", r.sourceRepo, "HEAD", sourceHead)
+	}
+	if r.test {
+		slog.Info("running container tests")
+		testRunner := &testGenerateRunner{
+			library:                r.libraryToTest,
+			repo:                   r.repo,
+			sourceRepo:             r.sourceRepo,
+			state:                  r.state,
+			librarianConfig:        r.librarianConfig,
+			workRoot:               r.workRoot,
+			containerClient:        r.containerClient,
+			checkUnexpectedChanges: r.checkUnexpectedChanges,
+			branchesToDelete:       []string{},
+		}
+		if err := runContainerGenerateTest(ctx, r.repo, sourceHead, testRunner); err != nil {
+			return fmt.Errorf("container generate test failed: %w", err)
+		}
+	}
+	prBodyBuilder := func() (string, error) {
+		return formatUpdateImagePRBody(r.image, failedGenerations)
 	}
 	commitMessage := fmt.Sprintf("feat: update image to %s", r.image)
 	return commitAndPush(ctx, &commitInfo{
@@ -191,6 +215,41 @@ func (r *updateImageRunner) regenerateSingleLibrary(ctx context.Context, library
 		return err
 	}
 
+	return nil
+}
+
+// runContainerGenerateTest creates a temporary commit to ensure a clean
+// repo state for the test runner, runs the tests, and then soft-resets
+// the commit to leave the working directory in its original dirty state
+// for the final commit operation.
+func runContainerGenerateTest(ctx context.Context, repo gitrepo.Repository, sourceHead string, testRunner *testGenerateRunner) error {
+	slog.Debug("creating temporary commit for testing")
+	committed := true
+	if err := repo.AddAll(); err != nil {
+		return fmt.Errorf("failed to stage changes for temporary commit: %w", err)
+	}
+
+	// Commit the generated changes so the repo is clean for the test runner.
+	if err := repo.Commit("chore: temporary commit for update-image test"); err != nil {
+		if !errors.Is(err, gitrepo.ErrNoModificationsToCommit) {
+			return fmt.Errorf("failed to create temporary commit for test: %w", err)
+		}
+		slog.Debug("no changes to commit for test, proceeding without temporary commit")
+		committed = false
+	}
+
+	if err := testRunner.runTests(ctx, sourceHead); err != nil {
+		// If tests fail, leave the temporary commit in place for diagnostics and return the error.
+		return fmt.Errorf("failure in container generate test: %w", err)
+	}
+
+	// If tests pass and temporary commit was made, reset it to restore the dirty state for the final commit.
+	if committed {
+		slog.Debug("tests passed, resetting temporary commit")
+		if err := repo.ResetSoft("HEAD~1"); err != nil {
+			return fmt.Errorf("failed to reset temporary commit after successful test: %w", err)
+		}
+	}
 	return nil
 }
 

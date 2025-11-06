@@ -39,6 +39,21 @@ func addFlagBuild(fs *flag.FlagSet, cfg *config.Config) {
 language-specific container.`)
 }
 
+func addFlagBranch(fs *flag.FlagSet, cfg *config.Config) {
+	fs.StringVar(&cfg.Branch, "branch", "main",
+		`The branch to use with remote code repositories. This is used to specify
+which branch to clone and which branch to use as the base for a pull
+request.`)
+}
+
+func addFlagCheckUnexpectedChanges(fs *flag.FlagSet, cfg *config.Config) {
+	fs.BoolVar(&cfg.CheckUnexpectedChanges, "check-unexpected-changes", false,
+		`Defaults to false. When used with --test, this flag verifies that no
+unexpected files are added, deleted, or modified outside of the changes caused
+by proto updates. You may want to skip this check when testing a container image
+change that is expected to add or delete files.`)
+}
+
 func addFlagCommit(fs *flag.FlagSet, cfg *config.Config) {
 	fs.BoolVar(&cfg.Commit, "commit", false,
 		`If true, librarian will create a commit for the change but not create
@@ -77,6 +92,12 @@ func addFlagLibrary(fs *flag.FlagSet, cfg *config.Config) {
 This corresponds to a releasable language unit.`)
 }
 
+func addFlagLibraryToTest(fs *flag.FlagSet, cfg *config.Config) {
+	fs.StringVar(&cfg.LibraryToTest, "library-to-test", "",
+		`When used with --test, this flag specifies the library ID to test
+(e.g. secretmanager). Will test on all configured libraries if omitted.`)
+}
+
 func addFlagLibraryVersion(fs *flag.FlagSet, cfg *config.Config) {
 	fs.StringVar(&cfg.LibraryVersion, "library-version", "",
 		`Overrides the automatic semantic version calculation and forces a specific
@@ -108,11 +129,12 @@ supported. If not specified, will try to detect if the current working directory
 is configured as a language repository.`)
 }
 
-func addFlagBranch(fs *flag.FlagSet, cfg *config.Config) {
-	fs.StringVar(&cfg.Branch, "branch", "main",
-		`The branch to use with remote code repositories. This is used to specify
-which branch to clone and which branch to use as the base for a pull
-request.`)
+func addFlagTest(fs *flag.FlagSet, cfg *config.Config) {
+	fs.BoolVar(&cfg.Test, "test", false,
+		`If true, run container tests after generation but before committing and pushing.
+These tests verify the interaction between language containers and the Librarian CLI's
+'generate' command. If a test fails, temporary branches and files will be preserved for
+debugging. This flag can be used with 'library-to-test' and 'check-unexpected-changes'.`)
 }
 
 func addFlagWorkRoot(fs *flag.FlagSet, cfg *config.Config) {
