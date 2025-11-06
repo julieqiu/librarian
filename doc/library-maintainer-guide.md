@@ -15,128 +15,13 @@ Librarian system, and `librarian` (lower case L, code font) for the CLI.
 If anything in this guide is unclear, please see go/g3doc-cloud-sdk-librarian-support
 for appropriate ways of obtaining more support.
 
-## Prerequisites
+## Configuring development environment
 
-`librarian` requires:
-
-- Linux
-- Go (or a prebuilt binary)
-- sudoless Docker
-- git (if you wish to build it locally)
-- gcloud (to set up Docker access to conatiner images)
-- [gh](https://github.com/cli/cli) for GitHub access tokens
-
-While in theory `librarian` can be run in non-Linux environments that support
-Linux Docker containers, Google policies make this at least somewhat infeasible
-(while staying conformant), so `librarian` is not tested other than on Linux.
-
-See go/docker for instructions on how to install Docker, ensuring that you
-follow the sudoless part.
-
-> Note that installing Docker will cause gLinux to warn you that Docker is
-> unsupported and discouraged. Within Cloud, support for Docker is a core
-> expectation (e.g. for Cloud Run and Cloud Build). Using Docker is the most
-> practical way of abstracting away language details. We are confident that
-> there are enough Googlers who require Docker to work on gLinux that it won't
-> actually go away any time soon. We may investigate using podman instead if
-> necessary.
-
-Docker needs to be configured to use gcloud for authentication. The following
-command line needs to be run, just once:
-
-```sh
-gcloud auth configure-docker us-central1-docker.pkg.dev
-```
+See [Setup Environment to Run Librarian](onboarding.md#step-1-setup-environment-to-run-librarian).
 
 ## Running `librarian`
 
-There are various options for running `librarian`. We recommend using `go run`
-(the first option) unless you're developing `librarian`. You may wish to use
-a bash alias for simplicity. For example, using the first option below you might
-use:
-
-```sh
-$ alias librarian='go run github.com/googleapis/librarian/cmd/librarian@latest'
-```
-
-In this guide, we just assume that `librarian` is either a binary in your path,
-or a suitable alias.
-
-### Using `go run`
-
-The latest released version of `librarian` can be run directly without cloning
-using:
-
-```sh
-$ go run github.com/googleapis/librarian/cmd/librarian@latest
-```
-
-### Using `go install`
-
-To install a binary locally, and then run it (assuming the `$GOBIN` directory
-is in your path):
-
-```sh
-$ go install github.com/googleapis/librarian/cmd/librarian@latest
-```
-
-Note that while this makes it easier to run `librarian`, you'll need to know
-to install a new version when it's released.
-
-### Building locally
-
-Clone the source code, then run it:
-
-```sh
-$ git clone https://github.com/googleapis/librarian
-$ cd librarian
-$ go run ./cmd/librarian
-```
-
-## Obtaining a GitHub access token
-
-`librarian` commands which perform write operations on GitHub require
-a GitHub access token to be specified via the `LIBRARIAN_GITHUB_TOKEN`
-environment variable. While access tokens can be generated manually
-and then stored in environment variables in other ways, it's simplest
-to use the [`gh` tool](https://github.com/cli/cli).
-
-Once installed, use `gh auth login` to log into GitHub. After that,
-when running `librarian` you can use `gh auth token` to obtain an access
-token and set it in the environment variable just for that invocation:
-
-```sh
-$ LIBRARIAN_GITHUB_TOKEN=$(gh auth token) librarian ...
-```
-
-The examples below assume include this for convenience; if you have
-set the environment variable in a different way, just remove the
-`LIBRARIAN_GITHUB_TOKEN=$(gh auth token)` part from the command.
-
-## Repository and library options
-
-`librarian` can either operate on a local clone of the library repo,
-or it can clone the repo itself. Unless you have a particular need to use a
-local clone (e.g. to the impact of a local change) we recommend you let
-`librarian` clone the library repo itself, using the `-repo` flag - just specify
-the GitHub repository, e.g.
-`-repo=https://github.com/googleapis/google-cloud-go`. This avoids any
-risk of unwanted local changes accidentally becoming part of a generation/release
-PR.
-
-If you wish to use a local clone, you can specify the directory in the `-repo`
-flag, or just run `librarian` from the root directory of the clone and omit the
-`-repo` flag entirely.
-
-The commands in this guide are specifically for generating/releasing a single
-library, specified with the `library` flag. This is typically the name of the
-package or module, e.g. `bigtable` or `google-cloud-bigtable`. Consult the
-state file (`.librarian/state.yaml`) in the library repository to find the
-library IDs in use (and ideally record this in a team-specific playbook).
-
-The remainder of this guide uses
-`https://github.com/googleapis/google-cloud-go` as the repository and `bigtable`
-as the library ID, in order to provide concrete examples.
+See [Running Librarian](onboarding.md#step-6-running-librarian).
 
 ## Initiating a release
 
