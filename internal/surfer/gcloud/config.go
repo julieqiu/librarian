@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package gcloudyaml provides Go type definitions for parsing and representing
-// Google Cloud CLI (gcloud) configuration files.
-package gcloudyaml
+// Package gcloud provides utilities for generating gcloud command configurations and related types.
+package gcloud
 
 // Config represents the top-level schema of a gcloud config YAML file.
 type Config struct {
