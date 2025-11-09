@@ -24,13 +24,13 @@ import (
 func TestGlobalConfig_Validate(t *testing.T) {
 	for _, test := range []struct {
 		name       string
-		config     *LibrarianConfig
+		config     *OldLibrarianConfig
 		wantErr    bool
 		wantErrMsg string
 	}{
 		{
 			name: "valid config",
-			config: &LibrarianConfig{
+			config: &OldLibrarianConfig{
 				GlobalFilesAllowlist: []*GlobalFile{
 					{
 						Path:        "a/path",
@@ -49,7 +49,7 @@ func TestGlobalConfig_Validate(t *testing.T) {
 		},
 		{
 			name: "invalid path in config",
-			config: &LibrarianConfig{
+			config: &OldLibrarianConfig{
 				GlobalFilesAllowlist: []*GlobalFile{
 					{
 						Path:        "a/path",
@@ -66,7 +66,7 @@ func TestGlobalConfig_Validate(t *testing.T) {
 		},
 		{
 			name: "invalid permission in config",
-			config: &LibrarianConfig{
+			config: &OldLibrarianConfig{
 				GlobalFilesAllowlist: []*GlobalFile{
 					{
 						Path:        "a/path",
@@ -106,7 +106,7 @@ func TestGlobalConfig_Validate(t *testing.T) {
 func TestLibraryConfigFor(t *testing.T) {
 	cases := []struct {
 		name          string
-		config        *LibrarianConfig
+		config        *OldLibrarianConfig
 		LibraryID     string
 		wantLibrary   *LibraryConfig
 		wantErr       bool
@@ -114,7 +114,7 @@ func TestLibraryConfigFor(t *testing.T) {
 	}{
 		{
 			name: "library found",
-			config: &LibrarianConfig{
+			config: &OldLibrarianConfig{
 				Libraries: []*LibraryConfig{
 					{LibraryID: "lib1", NextVersion: "1.0.0"},
 					{LibraryID: "lib2", NextVersion: "2.0.0"},
@@ -125,7 +125,7 @@ func TestLibraryConfigFor(t *testing.T) {
 		},
 		{
 			name: "library not found",
-			config: &LibrarianConfig{
+			config: &OldLibrarianConfig{
 				Libraries: []*LibraryConfig{
 					{LibraryID: "lib1", NextVersion: "1.0.0"},
 					{LibraryID: "lib2", NextVersion: "2.0.0"},
@@ -136,7 +136,7 @@ func TestLibraryConfigFor(t *testing.T) {
 		},
 		{
 			name: "empty libraries",
-			config: &LibrarianConfig{
+			config: &OldLibrarianConfig{
 				Libraries: []*LibraryConfig{},
 			},
 			LibraryID:   "lib1",
@@ -144,7 +144,7 @@ func TestLibraryConfigFor(t *testing.T) {
 		},
 		{
 			name: "multiple libraries with target in middle",
-			config: &LibrarianConfig{
+			config: &OldLibrarianConfig{
 				Libraries: []*LibraryConfig{
 					{LibraryID: "lib1", NextVersion: "1.0.0"},
 					{LibraryID: "lib2", NextVersion: "2.0.0"},
@@ -170,12 +170,12 @@ func TestLibraryConfigFor(t *testing.T) {
 func TestGetGlobalFiles(t *testing.T) {
 	for _, test := range []struct {
 		name   string
-		config *LibrarianConfig
+		config *OldLibrarianConfig
 		want   []string
 	}{
 		{
 			name: "get_global_files",
-			config: &LibrarianConfig{
+			config: &OldLibrarianConfig{
 				GlobalFilesAllowlist: []*GlobalFile{
 					{
 						Path:        "a/path",
@@ -199,14 +199,14 @@ func TestGetGlobalFiles(t *testing.T) {
 		},
 		{
 			name: "empty_global_files",
-			config: &LibrarianConfig{
+			config: &OldLibrarianConfig{
 				GlobalFilesAllowlist: []*GlobalFile{},
 			},
 			want: nil,
 		},
 		{
 			name:   "nil_global_files",
-			config: &LibrarianConfig{},
+			config: &OldLibrarianConfig{},
 			want:   nil,
 		},
 	} {
@@ -222,7 +222,7 @@ func TestGetGlobalFiles(t *testing.T) {
 func TestIsGenerationBlocked(t *testing.T) {
 	for _, test := range []struct {
 		name      string
-		config    *LibrarianConfig
+		config    *OldLibrarianConfig
 		libraryID string
 		want      bool
 	}{
@@ -234,7 +234,7 @@ func TestIsGenerationBlocked(t *testing.T) {
 		},
 		{
 			name: "library not in config",
-			config: &LibrarianConfig{
+			config: &OldLibrarianConfig{
 				Libraries: []*LibraryConfig{
 					{LibraryID: "lib2", GenerateBlocked: true},
 				},
@@ -244,7 +244,7 @@ func TestIsGenerationBlocked(t *testing.T) {
 		},
 		{
 			name: "library in config, generate_blocked is false",
-			config: &LibrarianConfig{
+			config: &OldLibrarianConfig{
 				Libraries: []*LibraryConfig{
 					{LibraryID: "lib1", GenerateBlocked: false},
 				},
@@ -254,7 +254,7 @@ func TestIsGenerationBlocked(t *testing.T) {
 		},
 		{
 			name: "library in config, generate_blocked is true",
-			config: &LibrarianConfig{
+			config: &OldLibrarianConfig{
 				Libraries: []*LibraryConfig{
 					{LibraryID: "lib1", GenerateBlocked: true},
 				},

@@ -599,7 +599,7 @@ func TestDockerRun(t *testing.T) {
 				releaseInitRequest := &ReleaseStageRequest{
 					State:           state,
 					Output:          testOutput,
-					LibrarianConfig: &config.LibrarianConfig{},
+					LibrarianConfig: &config.OldLibrarianConfig{},
 					RepoDir:         partialRepoDir,
 				}
 
@@ -633,7 +633,7 @@ func TestDockerRun(t *testing.T) {
 				releaseInitRequest := &ReleaseStageRequest{
 					State:           state,
 					Output:          testOutput,
-					LibrarianConfig: &config.LibrarianConfig{},
+					LibrarianConfig: &config.OldLibrarianConfig{},
 					RepoDir:         partialRepoDir,
 					Image:           "custom-image:abcd123",
 				}
@@ -669,7 +669,7 @@ func TestDockerRun(t *testing.T) {
 					State:           state,
 					RepoDir:         partialRepoDir,
 					Output:          testOutput,
-					LibrarianConfig: &config.LibrarianConfig{},
+					LibrarianConfig: &config.OldLibrarianConfig{},
 				}
 				defer os.RemoveAll(partialRepoDir)
 
@@ -710,7 +710,7 @@ func TestDockerRun(t *testing.T) {
 					RepoDir:         partialRepoDir,
 					Output:          testOutput,
 					LibraryID:       testLibraryID,
-					LibrarianConfig: &config.LibrarianConfig{},
+					LibrarianConfig: &config.OldLibrarianConfig{},
 				}
 				defer os.RemoveAll(partialRepoDir)
 
@@ -745,7 +745,7 @@ func TestDockerRun(t *testing.T) {
 					Output:          testOutput,
 					LibraryID:       testLibraryID,
 					LibraryVersion:  "1.2.3",
-					LibrarianConfig: &config.LibrarianConfig{},
+					LibrarianConfig: &config.OldLibrarianConfig{},
 				}
 				defer os.RemoveAll(partialRepoDir)
 
@@ -1151,7 +1151,7 @@ func TestReleaseStageRequestContent(t *testing.T) {
 		State:           stateWithChanges,
 		RepoDir:         partialRepoDir,
 		Output:          filepath.Join(tmpDir, "output"),
-		LibrarianConfig: &config.LibrarianConfig{},
+		LibrarianConfig: &config.OldLibrarianConfig{},
 	}
 	if err := d.ReleaseStage(t.Context(), req); err != nil {
 		t.Fatalf("d.ReleaseStage() failed: %v", err)

@@ -22,7 +22,7 @@ import (
 const defaultTagFormat = "{id}-{version}"
 
 // DetermineTagFormat finds the tag_format config given a library ID.
-func DetermineTagFormat(libraryID string, libraryState *LibraryState, librarianConfig *LibrarianConfig) string {
+func DetermineTagFormat(libraryID string, libraryState *LibraryState, librarianConfig *OldLibrarianConfig) string {
 	// Order of preference:
 	// 1. per-library from config.yaml
 	// 2. top-level from config.yaml

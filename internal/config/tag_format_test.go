@@ -24,7 +24,7 @@ func TestDetermineTagFormat(t *testing.T) {
 	for _, test := range []struct {
 		name            string
 		libraryState    *LibraryState
-		librarianConfig *LibrarianConfig
+		librarianConfig *OldLibrarianConfig
 		want            string
 		wantErrMsg      string
 	}{
@@ -33,7 +33,7 @@ func TestDetermineTagFormat(t *testing.T) {
 			libraryState: &LibraryState{
 				ID: "example-library",
 			},
-			librarianConfig: &LibrarianConfig{},
+			librarianConfig: &OldLibrarianConfig{},
 			want:            defaultTagFormat,
 		},
 		{
@@ -42,7 +42,7 @@ func TestDetermineTagFormat(t *testing.T) {
 				ID:        "example-library",
 				TagFormat: "per-library-tag-format-from-state",
 			},
-			librarianConfig: &LibrarianConfig{
+			librarianConfig: &OldLibrarianConfig{
 				TagFormat: "from-config",
 				Libraries: []*LibraryConfig{
 					{
@@ -59,7 +59,7 @@ func TestDetermineTagFormat(t *testing.T) {
 				ID:        "example-library",
 				TagFormat: "per-library-tag-format-from-state",
 			},
-			librarianConfig: &LibrarianConfig{
+			librarianConfig: &OldLibrarianConfig{
 				TagFormat: "from-config",
 				Libraries: []*LibraryConfig{
 					{
@@ -75,7 +75,7 @@ func TestDetermineTagFormat(t *testing.T) {
 				ID:        "example-library",
 				TagFormat: "per-library-tag-format-from-state",
 			},
-			librarianConfig: &LibrarianConfig{},
+			librarianConfig: &OldLibrarianConfig{},
 			want:            "per-library-tag-format-from-state",
 		},
 	} {

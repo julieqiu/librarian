@@ -546,7 +546,7 @@ func TestProcessPullRequest(t *testing.T) {
 						},
 					},
 				},
-				librarianConfig: &config.LibrarianConfig{
+				librarianConfig: &config.OldLibrarianConfig{
 					Libraries: []*config.LibraryConfig{
 						{
 							LibraryID:                 "google-cloud-storage",

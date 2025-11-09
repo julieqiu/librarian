@@ -35,7 +35,7 @@ type testGenerateRunner struct {
 	repo                   gitrepo.Repository
 	sourceRepo             gitrepo.Repository
 	state                  *config.LibrarianState
-	librarianConfig        *config.LibrarianConfig
+	librarianConfig        *config.OldLibrarianConfig
 	workRoot               string
 	containerClient        ContainerClient
 	checkUnexpectedChanges bool

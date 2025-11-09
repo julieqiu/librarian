@@ -35,7 +35,7 @@ type stageRunner struct {
 	containerClient ContainerClient
 	ghClient        GitHubClient
 	image           string
-	librarianConfig *config.LibrarianConfig
+	librarianConfig *config.OldLibrarianConfig
 	library         string
 	libraryVersion  string
 	push            bool

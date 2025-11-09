@@ -58,7 +58,7 @@ type mockGitHubClient struct {
 	pullRequest             *github.PullRequest
 	createdRelease          *github.RepositoryRelease
 	librarianState          *config.LibrarianState
-	librarianConfig         *config.LibrarianConfig
+	librarianConfig         *config.OldLibrarianConfig
 }
 
 func (m *mockGitHubClient) GetRawContent(ctx context.Context, path, ref string) ([]byte, error) {

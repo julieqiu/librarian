@@ -39,7 +39,7 @@ type updateImageRunner struct {
 	containerClient        ContainerClient
 	imagesClient           ImageRegistryClient
 	ghClient               GitHubClient
-	librarianConfig        *config.LibrarianConfig
+	librarianConfig        *config.OldLibrarianConfig
 	repo                   gitrepo.Repository
 	sourceRepo             gitrepo.Repository
 	state                  *config.LibrarianState

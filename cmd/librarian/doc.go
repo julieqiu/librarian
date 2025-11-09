@@ -26,324 +26,314 @@ Usage:
 
 The commands are:
 
-# generate
+# init
 
-The generate command is the primary tool for all code generation
-tasks. It handles both the initial setup of a new library (onboarding) and the
-regeneration of existing ones. Librarian works by delegating language-specific
-tasks to a container, which is configured in the .librarian/state.yaml file.
-Librarian is environment aware and will check if the current directory is the
-root of a librarian repository. If you are not executing in such a directory the
-'--repo' flag must be provided.
+Initializes a repository for library management.
 
-# Onboarding a new library
+	librarian init [language]
 
-To configure and generate a new library for the first time, you must specify the
-API to be generated and the library it will belong to. Librarian will invoke the
-'configure' command in the language container to set up the repository, add the
-new library's configuration to the '.librarian/state.yaml' file, and then
-proceed with generation.
-
-Example:
-
-	librarian generate --library=secretmanager --api=google/cloud/secretmanager/v1
-
-# Regenerating existing libraries
-
-You can regenerate a single, existing library by specifying either the library
-ID or the API path. If no specific library or API is provided, Librarian will
-regenerate all libraries listed in '.librarian/state.yaml'. If '--library' or
-'--api' is specified the whole library will be regenerated.
+Creates .librarian.yaml at repository root. If language is provided (go, python,
+rust, dart), adds librarian.language and generate section with defaults. Always
+adds release section with default tag_format.
 
 Examples:
 
-	# Regenerate a single library by its ID
-	librarian generate --library=secretmanager
+	# Release-only repository
+	librarian init
 
-	# Regenerate a single library by its API path
-	librarian generate --api=google/cloud/secretmanager/v1
-
-	# Regenerate all libraries in the repository
-	librarian generate
-
-# Workflow and Options:
-
-The generation process involves delegating to the language container's
-'generate' command. After the code is generated, the tool cleans the destination
-directories and copies the new files into place, according to the configuration
-in '.librarian/state.yaml'.
-
-  - If the '--build' flag is specified, the 'build' command is also executed in
-    the container to compile and validate the generated code.
-  - If the '--push' flag is provided, the changes are committed to a new branch,
-    and a pull request is created on GitHub. Otherwise, the changes are left in
-    your local working directory for inspection. When pushing to a remote branch,
-    you have the option of using HTTPS or SSH. Librarian will automatically determine
-    whether to use HTTPS or SSH based on the remote URI.
-
-Example with build and push:
-
-	LIBRARIAN_GITHUB_TOKEN=xxx librarian generate --push --build
+	# Repository with code generation and releases
+	librarian init python
 
 Usage:
 
-	librarian generate [flags]
+	librarian init [language]
 
 Flags:
 
-	-api string
-	  	Relative path to the API to be configured/generated (e.g., google/cloud/functions/v2).
-	  	Must be specified when generating a new library.
-	-api-source string
-	  	The location of an API specification repository.
-	  	Can be a remote URL or a local file path. (default "https://github.com/googleapis/googleapis")
-	-branch string
-	  	The branch to use with remote code repositories. This is used to specify
-	  	which branch to clone and which branch to use as the base for a pull
-	  	request. (default "main")
-	-build
-	  	If true, Librarian will build each generated library by invoking the
-	  	language-specific container.
-	-generate-unchanged
-	  	If true, librarian generates libraries even if none of their associated APIs
-	  	have changed. This does not override generation being blocked by configuration.
-	-host-mount string
-	  	For use when librarian is running in a container. A mapping of a
-	  	directory from the host to the container, in the format
-	  	<host-mount>:<local-mount>.
-	-image string
-	  	Language specific image used to invoke code generation and releasing.
-	  	If not specified, the image configured in the state.yaml is used.
-	-library string
-	  	The library ID to generate or release (e.g. secretmanager).
-	  	This corresponds to a releasable language unit.
-	-output string
-	  	Working directory root. When this is not specified, a working directory
-	  	will be created in /tmp.
-	-push
-	  	If true, Librarian will create a commit,
-	  	push and create a pull request for the changes.
-	  	A GitHub token with push access must be provided via the
-	  	LIBRARIAN_GITHUB_TOKEN environment variable.
-	-repo string
-	  	Code repository where the generated code will reside. Can be a remote
-	  	in the format of a remote URL such as https://github.com/{owner}/{repo} or a
-	  	local file path like /path/to/repo. Both absolute and relative paths are
-	  	supported. If not specified, will try to detect if the current working directory
-	  	is configured as a language repository.
+	-v	enables verbose logging
+
+# add
+
+Tracks a directory for management.
+
+	librarian add <path> [api...]
+
+Creates <path>/.librarian.yaml. If APIs are provided AND repository has a
+generate section, parses BUILD.bazel files and creates generate section with
+API configurations. If repository has a release section, adds release.version: null.
+
+The --commit flag writes a standard commit message for the change.
+
+Examples:
+
+	# Add handwritten code (no APIs)
+	librarian add packages/my-tool
+
+	# Add generated code (with APIs)
+	librarian add packages/google-cloud-secret-manager secretmanager/v1 secretmanager/v1beta2 --commit
+
+Usage:
+
+	librarian add <path> [api...]
+
+Flags:
+
+	-commit
+	  	create a git commit with the changes
+	-v	enables verbose logging
+
+# edit
+
+Edits artifact configuration.
+
+	librarian edit <path> [flags]
+
+Configure artifact-specific settings like metadata, keep/remove/exclude lists,
+and language-specific metadata. Running edit without flags displays current
+configuration.
+
+Examples:
+
+	# Set metadata fields
+	librarian edit packages/google-cloud-secret-manager \
+	  --metadata name_pretty="Secret Manager" \
+	  --metadata release_level=stable
+
+	# Set language-specific metadata
+	librarian edit packages/my-package --language python:package=my-package
+
+	# Configure file handling
+	librarian edit packages/my-tool --keep README.md --remove temp.txt --exclude tests
+
+Usage:
+
+	librarian edit <path> [flags]
+
+Flags:
+
+	-exclude value
+	  	add file/directory to exclude list (can be repeated)
+	-keep value
+	  	add file/directory to keep list (can be repeated)
+	-language string
+	  	set language-specific metadata (LANG:KEY=VALUE)
+	-metadata value
+	  	set metadata field (KEY=VALUE, can be repeated)
+	-remove value
+	  	add file/directory to remove list (can be repeated)
+	-v	enables verbose logging
+
+# remove
+
+Stops tracking a directory.
+
+	librarian remove <path>
+
+Removes <path>/.librarian.yaml. Source code is not modified.
+
+Example:
+
+	librarian remove packages/my-tool
+
+Usage:
+
+	librarian remove <path>
+
+Flags:
+
+	-v	enables verbose logging
+
+# generate
+
+Generates or regenerates code for tracked directories.
+
+For artifacts with a generate section in their .librarian.yaml:
+
+	librarian generate <path>
+
+Generates or regenerates code using the container and configuration from
+.librarian.yaml. Librarian updates the artifact's .librarian.yaml automatically.
+
+Generate all artifacts that have a generate section:
+
+	librarian generate --all
+
+The --commit flag writes a standard commit message for the change.
+
+Example:
+
+	librarian generate packages/google-cloud-secret-manager --commit
+
+Usage:
+
+	librarian generate <path> | librarian generate --all
+
+Flags:
+
+	-all
+	  	generate all artifacts with a generate section
+	-commit
+	  	create a git commit with the changes
+	-v	enables verbose logging
+
+# prepare
+
+Prepares a release for tracked directories.
+
+For artifacts with a release section in their .librarian.yaml:
+
+	librarian prepare <path>
+
+Determines the next version, updates metadata, and prepares release notes.
+Does not tag or publish.
+
+Prepare all artifacts that have a release section:
+
+	librarian prepare --all
+
+The --commit flag writes a standard commit message for the change.
+
+Example:
+
+	librarian prepare packages/google-cloud-secret-manager --commit
+
+Usage:
+
+	librarian prepare <path> | librarian prepare --all
+
+Flags:
+
+	-all
+	  	prepare all artifacts with a release section
+	-commit
+	  	create a git commit with the changes
 	-v	enables verbose logging
 
 # release
 
-Manages releases of libraries.
+Publishes a prepared release for tracked directories.
+
+For artifacts with a release section and a prepared release:
+
+	librarian release <path>
+
+Tags the prepared version and updates recorded release state. If no prepared
+release exists, the command does nothing.
+
+Release all prepared artifacts:
+
+	librarian release --all
+
+Example:
+
+	librarian release packages/google-cloud-secret-manager
 
 Usage:
 
-	librarian release <command> [arguments]
+	librarian release <path> | librarian release --all
+
+Flags:
+
+	-all
+	  	release all artifacts with a prepared release
+	-v	enables verbose logging
+
+# config
+
+# Config manages repository configuration stored in .librarian.yaml
+
+Usage:
+
+	librarian config <command> [arguments]
 
 Commands:
 
-	stage                      stages a release by creating a release pull request.
-	tag                        tags and creates a GitHub release for a merged pull request.
+	get                        reads a configuration value
+	set                        sets a configuration value
+	update                     updates toolchain versions to latest
 
-# release stage
+# config get
 
-The 'release stage' command is the primary entry point for staging
-a new release. It automates the creation of a release pull request by parsing
-conventional commits, determining the next semantic version for each library,
-and generating a changelog. Librarian is environment aware and will check if the
-current directory is the root of a librarian repository. If you are not
-executing in such a directory the '--repo' flag must be provided.
+Reads a configuration value from .librarian.yaml.
 
-This command scans the git history since the last release, identifies changes
-(feat, fix, BREAKING CHANGE), and calculates the appropriate version bump
-according to semver rules. It then delegates all language-specific file
-modifications, such as updating a CHANGELOG.md or bumping the version in a pom.xml,
-to the configured language-specific container.
+	librarian config get <key>
 
-If a specific library is configured for release via the '--library' flag, a single
-releasable change is needed to automatically calculate a version bump. If there are
-no releasable changes since the last release, the '--version' flag should be included
-to set a new version for the library. The new version must be "SemVer" greater than the
-current version.
+Supported keys include librarian.language, generate.container.image, release.tag_format, etc.
 
-By default, 'release stage' leaves the changes in your local working directory
-for inspection. Use the '--push' flag to automatically commit the changes to
-a new branch and create a pull request on GitHub. The '--commit' flag may be
-used to create a local commit without creating a pull request; this flag is
-ignored if '--push' is also specified. When pushing to a remote branch,
-you have the option of using HTTPS or SSH. Librarian will automatically determine
-whether to use HTTPS or SSH based on the remote URI.
+Example:
 
-Examples:
-
-	# Create a release PR for all libraries with pending changes.
-	librarian release stage --push
-
-	# Create a release PR for a single library.
-	librarian release stage --library=secretmanager --push
-
-	# Manually specify a version for a single library, overriding the calculation.
-	librarian release stage --library=secretmanager --library-version=2.0.0 --push
+	librarian config get generate.container.image
 
 Usage:
 
-	librarian release stage [flags]
+	librarian config get <key>
 
 Flags:
 
-	-branch string
-	  	The branch to use with remote code repositories. This is used to specify
-	  	which branch to clone and which branch to use as the base for a pull
-	  	request. (default "main")
-	-commit
-	  	If true, librarian will create a commit for the change but not create
-	  	a pull request. This flag is ignored if push is set to true.
-	-image string
-	  	Language specific image used to invoke code generation and releasing.
-	  	If not specified, the image configured in the state.yaml is used.
-	-library string
-	  	The library ID to generate or release (e.g. secretmanager).
-	  	This corresponds to a releasable language unit.
-	-library-version string
-	  	Overrides the automatic semantic version calculation and forces a specific
-	  	version for a library. Requires the --library flag to be specified.
-	-output string
-	  	Working directory root. When this is not specified, a working directory
-	  	will be created in /tmp.
-	-push
-	  	If true, Librarian will create a commit,
-	  	push and create a pull request for the changes.
-	  	A GitHub token with push access must be provided via the
-	  	LIBRARIAN_GITHUB_TOKEN environment variable.
-	-repo string
-	  	Code repository where the generated code will reside. Can be a remote
-	  	in the format of a remote URL such as https://github.com/{owner}/{repo} or a
-	  	local file path like /path/to/repo. Both absolute and relative paths are
-	  	supported. If not specified, will try to detect if the current working directory
-	  	is configured as a language repository.
 	-v	enables verbose logging
 
-# release tag
+# config set
 
-The 'tag' command is the final step in the release
-process. It is designed to be run after a release pull request, created by
-'release stage', has been merged.
+Sets a configuration value in .librarian.yaml.
 
-This command's primary responsibilities are to:
+	librarian config set <key> <value>
 
-  - Create a Git tag for each library version included in the merged pull request.
-  - Create a corresponding GitHub Release for each tag, using the release notes
-    from the pull request body.
-  - Update the pull request's label from 'release:pending' to 'release:done' to
-    mark the process as complete.
-
-You can target a specific merged pull request using the '--pr' flag. If no pull
-request is specified, the command will automatically search for and process all
-merged pull requests with the 'release:pending' label from the last 30 days.
+Supported keys include:
+- librarian.language
+- generate.dir
+- generate.container.image
+- generate.container.tag
+- generate.container (syntactic sugar for image:tag)
+- generate.googleapis.repo
+- generate.googleapis.ref
+- generate.discovery.repo
+- generate.discovery.ref
+- release.tag_format
 
 Examples:
 
-	# Tag and create a GitHub release for a specific merged PR.
-	librarian release tag --repo=https://github.com/googleapis/google-cloud-go --pr=https://github.com/googleapis/google-cloud-go/pull/123
+	# Set global generation directory
+	librarian config set generate.dir packages
 
-	# Find and process all pending merged release PRs in a repository.
-	librarian release tag --repo=https://github.com/googleapis/google-cloud-go
+	# Set container image and tag
+	librarian config set generate.container python-gen:v1.2.0
 
 Usage:
 
-	librarian release tag [arguments]
+	librarian config set <key> <value>
 
 Flags:
 
-	-github-api-endpoint string
-	  	The GitHub API endpoint to use for all GitHub API operations.
-	  	This is intended for testing and should not be used in production.
-	-pr string
-	  	The URL of a pull request to operate on.
-	  	It should be in the format of https://github.com/{owner}/{repo}/pull/{number}.
-	  	If not specified, will search for all merged pull requests with the label
-	  	"release:pending" in the last 30 days.
-	-repo string
-	  	Code repository where the generated code will reside. Can be a remote
-	  	in the format of a remote URL such as https://github.com/{owner}/{repo} or a
-	  	local file path like /path/to/repo. Both absolute and relative paths are
-	  	supported. If not specified, will try to detect if the current working directory
-	  	is configured as a language repository.
 	-v	enables verbose logging
 
-# update-image
+# config update
 
-The 'update-image' command is used to update the 'image' SHA
-of the language container for a language repository.
+Updates toolchain versions to latest.
 
-This command's primary responsibilities are to:
+	librarian config update [key]
+	librarian config update --all
 
-  - Update the 'image' field in '.librarian/state.yaml'
-  - Regenerate each library with the new language container using googleapis'
-    proto definitions at the 'last_generated_commit'
+Supported keys:
+- generate.container - Update container image to latest
+- generate.googleapis - Update googleapis to latest commit
+- generate.discovery - Update discovery-artifact-manager to latest commit
 
 Examples:
 
-	# Create a PR that updates the language container to latest image.
-	librarian update-image --commit --push
+	# Update container to latest
+	librarian config update generate.container
 
-	# Create a PR that updates the language container to the specified image.
-	librarian update-image --commit --push --image=<some-image-with-sha>
+	# Update all toolchain versions
+	librarian config update --all
 
 Usage:
 
-	librarian update-image [flags]
+	librarian config update [key] | librarian config update --all
 
 Flags:
 
-	-api-source string
-	  	The location of an API specification repository.
-	  	Can be a remote URL or a local file path. (default "https://github.com/googleapis/googleapis")
-	-branch string
-	  	The branch to use with remote code repositories. This is used to specify
-	  	which branch to clone and which branch to use as the base for a pull
-	  	request. (default "main")
-	-build
-	  	If true, Librarian will build each generated library by invoking the
-	  	language-specific container.
-	-check-unexpected-changes
-	  	Defaults to false. When used with --test, this flag verifies that no
-	  	unexpected files are added, deleted, or modified outside of the changes caused
-	  	by proto updates. You may want to skip this check when testing a container image
-	  	change that is expected to add or delete files.
-	-commit
-	  	If true, librarian will create a commit for the change but not create
-	  	a pull request. This flag is ignored if push is set to true.
-	-host-mount string
-	  	For use when librarian is running in a container. A mapping of a
-	  	directory from the host to the container, in the format
-	  	<host-mount>:<local-mount>.
-	-image string
-	  	Language specific image used to invoke code generation and releasing.
-	  	If not specified, the image configured in the state.yaml is used.
-	-library-to-test string
-	  	When used with --test, this flag specifies the library ID to test
-	  	(e.g. secretmanager). Will test on all configured libraries if omitted.
-	-output string
-	  	Working directory root. When this is not specified, a working directory
-	  	will be created in /tmp.
-	-push
-	  	If true, Librarian will create a commit,
-	  	push and create a pull request for the changes.
-	  	A GitHub token with push access must be provided via the
-	  	LIBRARIAN_GITHUB_TOKEN environment variable.
-	-repo string
-	  	Code repository where the generated code will reside. Can be a remote
-	  	in the format of a remote URL such as https://github.com/{owner}/{repo} or a
-	  	local file path like /path/to/repo. Both absolute and relative paths are
-	  	supported. If not specified, will try to detect if the current working directory
-	  	is configured as a language repository.
-	-test
-	  	If true, run container tests after generation but before committing and pushing.
-	  	These tests verify the interaction between language containers and the Librarian CLI's
-	  	'generate' command. If a test fails, temporary branches and files will be preserved for
-	  	debugging. This flag can be used with 'library-to-test' and 'check-unexpected-changes'.
+	-all
+	  	update all toolchain versions
 	-v	enables verbose logging
 
 # version

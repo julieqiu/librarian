@@ -2113,7 +2113,7 @@ func TestCopyGlobalAllowlist(t *testing.T) {
 	t.Parallel()
 	for _, test := range []struct {
 		name              string
-		cfg               *config.LibrarianConfig
+		cfg               *config.OldLibrarianConfig
 		files             []string
 		copied            []string
 		skipped           []string
@@ -2124,7 +2124,7 @@ func TestCopyGlobalAllowlist(t *testing.T) {
 	}{
 		{
 			name: "copied all global allowlist",
-			cfg: &config.LibrarianConfig{
+			cfg: &config.OldLibrarianConfig{
 				GlobalFilesAllowlist: []*config.GlobalFile{
 					{
 						Path:        "one/path/example.txt",
@@ -2151,7 +2151,7 @@ func TestCopyGlobalAllowlist(t *testing.T) {
 		},
 		{
 			name: "read only file is not copied",
-			cfg: &config.LibrarianConfig{
+			cfg: &config.OldLibrarianConfig{
 				GlobalFilesAllowlist: []*config.GlobalFile{
 					{
 						Path:        "one/path/example.txt",
@@ -2178,7 +2178,7 @@ func TestCopyGlobalAllowlist(t *testing.T) {
 		},
 		{
 			name: "source doesn't have the global file",
-			cfg: &config.LibrarianConfig{
+			cfg: &config.OldLibrarianConfig{
 				GlobalFilesAllowlist: []*config.GlobalFile{
 					{
 						Path:        "one/path/example.txt",
@@ -2194,7 +2194,7 @@ func TestCopyGlobalAllowlist(t *testing.T) {
 		{
 			name:         "copies read-only files",
 			copyReadOnly: true,
-			cfg: &config.LibrarianConfig{
+			cfg: &config.OldLibrarianConfig{
 				GlobalFilesAllowlist: []*config.GlobalFile{
 					{
 						Path:        "one/path/example.txt",

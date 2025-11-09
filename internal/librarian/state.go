@@ -62,7 +62,7 @@ func loadRepoStateFromGitHub(ctx context.Context, ghClient GitHubClient, branch 
 	return state, nil
 }
 
-func loadLibrarianConfig(repo *gitrepo.LocalRepository) (*config.LibrarianConfig, error) {
+func loadLibrarianConfig(repo *gitrepo.LocalRepository) (*config.OldLibrarianConfig, error) {
 	if repo == nil {
 		slog.Info("repo is nil, skipping state loading")
 		return nil, nil
@@ -71,7 +71,7 @@ func loadLibrarianConfig(repo *gitrepo.LocalRepository) (*config.LibrarianConfig
 	return parseLibrarianConfig(path)
 }
 
-func loadLibrarianConfigFromGitHub(ctx context.Context, ghClient GitHubClient, branch string) (*config.LibrarianConfig, error) {
+func loadLibrarianConfigFromGitHub(ctx context.Context, ghClient GitHubClient, branch string) (*config.OldLibrarianConfig, error) {
 	content, err := ghClient.GetRawContent(ctx, path.Join(config.LibrarianDir, config.LibrarianConfigFile), branch)
 	if err != nil {
 		return nil, err
@@ -105,7 +105,7 @@ func loadLibrarianStateFromBytes(data []byte, source string) (*config.LibrarianS
 	return &s, nil
 }
 
-func parseLibrarianConfig(path string) (*config.LibrarianConfig, error) {
+func parseLibrarianConfig(path string) (*config.OldLibrarianConfig, error) {
 	bytes, err := os.ReadFile(path)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
@@ -117,8 +117,8 @@ func parseLibrarianConfig(path string) (*config.LibrarianConfig, error) {
 	return loadLibrarianConfigFromBytes(bytes)
 }
 
-func loadLibrarianConfigFromBytes(data []byte) (*config.LibrarianConfig, error) {
-	var lc config.LibrarianConfig
+func loadLibrarianConfigFromBytes(data []byte) (*config.OldLibrarianConfig, error) {
+	var lc config.OldLibrarianConfig
 	if err := yaml.Unmarshal(data, &lc); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal global config: %w", err)
 	}

@@ -1,120 +1,648 @@
-# Librarian CLI
+# Librarian
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/googleapis/librarian/cmd/librarian.svg)](https://pkg.go.dev/github.com/googleapis/librarian/cmd/librarian)
-[![codecov](https://codecov.io/github/googleapis/librarian/graph/badge.svg?token=33d3L7Y0gN)](https://codecov.io/github/googleapis/librarian)
+Librarian automates the maintenance and release of versioned directories in a
+repository. A directory managed by Librarian may contain either generated code
+(for a client library) or handwritten code (for a tool or service).
 
-This repository contains code for a unified command line tool for
-Google Cloud SDK client library configuration, generation and releasing.
+**Repository model**: Each repository supports a single language (Go,
+Python, Rust, or Dart) and can contain multiple artifacts for that language.
+Repository capabilities are determined by which sections exist in `.librarian/config.yaml`:
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for a guide to contributing to this repository,
-and [the doc/ folder](doc/) for more detailed project documentation.
+- `generate` section present → repository supports code generation
+- `release` section present → repository supports release management
+- Both sections present → repository supports both
 
-The Librarian project supports the Google Cloud SDK ecosystem, and
-we do not *expect* it to be of use to external users. That is not
-intended to discourage anyone from reading the code and documentation;
-it's only to set expectations. (For example, we're unlikely to accept
-feature requests for external use cases.)
+Each artifact can independently have generation and/or release enabled based
+on which sections are present in its `.librarian.yaml` file.
 
-## Installation
+Librarian records generation input, release state, and version history, and
+provides commands to regenerate and release the code in a repeatable way.
 
-Install [Go](https://go.dev/doc/install) and make sure you have you have the
-following in your `PATH`:
+## Overview
 
-```sh
-export PATH="$(go env GOPATH)/bin:$PATH"
+### Librarian
+
+**Core commands**
+
+- [librarian init](#repository-setup): Initialize repository for library management
+- [librarian add](#managing-directories): Track a directory for management
+- [librarian edit](#editing-artifact-configuration): Edit artifact configuration (metadata, keep, remove, exclude)
+- [librarian remove](#removing-a-directory): Stop tracking a directory
+- [librarian generate](#generating-a-client-library): Generate or regenerate code for tracked directories
+- [librarian prepare](#preparing-a-release): Prepare a release with version updates and notes
+- [librarian release](#publishing-a-release): Tag and publish a prepared release
+
+**Configuration commands**
+
+- [librarian config get](#configuration): Read a configuration value
+- [librarian config set](#configuration): Set a configuration value
+- [librarian config update](#configuration): Update toolchain versions to latest
+
+**Inspection commands**
+
+- [librarian list](#inspection): List all tracked directories
+- [librarian status](#inspection): Show generation and release status
+- [librarian history](#inspection): View release history
+
+### Librarianops
+
+**Automation commands**
+
+- [librarianops generate](#automate-code-generation): Automate code generation workflow
+- [librarianops prepare](#automate-release-preparation): Automate release preparation workflow
+- [librarianops release](#automate-release-publishing): Automate release publishing workflow
+
+## Repository Setup
+
+```bash
+librarian init [language]
 ```
 
-Next install the CLI
+Initializes a repository for library management. Repository capabilities are determined by which sections are created.
 
-```sh
-go install github.com/googleapis/librarian/cmd/librarian@latest
+**Languages supported:**
+- `go` - Uses Go generator container
+- `python` - Uses Python generator container
+- `rust` - Uses Rust generator container
+- `dart` - Uses Dart generator container
+
+**Example: Release-only repository**
+
+```bash
+librarian init
 ```
 
-## Running Librarian
+**Example** `.librarian/config.yaml`:
 
-To see the current set of commands available, run:
+```yaml
+librarian:
+  version: v0.5.0
 
-```sh
-librarian -help
+release:
+  tag_format: '{name}-v{version}'
 ```
 
-Use the `-help` or `-h` flag for any individual command to see detailed
-documentation for its purpose and associated flags. For example:
+**What this enables:**
+- `librarian add <path>` - Track handwritten code for release
+- `librarian prepare <path>` - Prepare releases
+- `librarian release <path>` - Publish releases
 
-```sh
-librarian generate -h
+**Example: Repository with code generation and releases**
+
+```bash
+librarian init python
 ```
 
-Alternatively, if you prefer not to have librarian installed you can use the Go
-command to run the latest released version:
+**Example** `.librarian/config.yaml`:
 
-```sh
-go run github.com/googleapis/librarian/cmd/librarian@latest -help
+```yaml
+librarian:
+  version: v0.5.0
+  language: python
+
+generate:
+  container:
+    image: us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-prod/python-librarian-generator
+    tag: latest
+  googleapis:
+    repo: github.com/googleapis/googleapis
+    ref: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0
+  discovery:
+    repo: github.com/googleapis/discovery-artifact-manager
+    ref: f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0
+  dir: packages/
+
+release:
+  tag_format: '{name}-v{version}'
 ```
 
-### Setup and Configuration
-To run librarian, you will need to configure a Github Token and set it to the `LIBRARIAN_GITHUB_TOKEN` environment variable. This will use the Github token as authentication to push to Github and to run Github API commands (e.g. Creating a PR and Adding Labels to a PR).
+**What this enables:**
+- `librarian add <path> <api>` - Generate code from API definitions
+- `librarian generate <path>` - Regenerate code
+- `librarian prepare <path>` - Prepare releases
+- `librarian release <path>` - Publish releases
 
-Unless specifically configured, Librarian will use HTTPS for pushing to remote. See the [SSH](#using-ssh) section for push to remote via SSH.
+**Configuration fields:**
 
-### Github Token
-There are two main options to get a Github token:
-1. Use the [gh cli](https://cli.github.com/) tool to easily authenticate with github. Run the following commands once the tool is installed:
-```shell
-# Follow the instructions from the tool. If using SSH, see the section
-# below regarding additional setup.You still need a Github Token to run
-# Github API commands (e.g. creating a pull request).
-gh auth login 
-# This will output the token to use as the Github Token
-gh auth token
-```
-This will create a token with the `repo` scope.
+- `container.image` - Container registry path (without tag)
+- `container.tag` - Container image tag (e.g., `latest`, `v1.0.0`)
+- `googleapis.repo` - Repository location for googleapis (GitHub path or local directory relative to `.librarian/`)
+- `googleapis.ref` - Git reference (commit SHA, branch name, or tag). Optional; if omitted, uses HEAD of default branch
+- `discovery.repo` - Repository location for discovery-artifact-manager
+- `discovery.ref` - Git reference. Optional; if omitted, uses HEAD of default branch
+- `dir` - Directory where generated code is written (relative to repository root, with trailing `/`)
 
-2. Alternatively, follow the steps listed in the Github [guide](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic) to create a Personal Access Token (PAT). You will need the `repo` scope for your token.
+**Note**: The presence of the `generate` section enables generation commands.
+The presence of the `release` section enables release commands.
 
-Once you have created a token, set the token as the environment variable:
-```shell
-export LIBRARIAN_GITHUB_TOKEN={YOUR_TOKEN_HERE}
-```
+## Managing Directories
 
-### Using SSH
-There are two main ways to configure SSH:
-1. Using the [gh cli](https://cli.github.com/) to upload your SSH public key to Github. When following the steps in the gh cli tool, you will select your public key to be added to Github. Additionally, you will need to add your private key to the [ssh-agent](https://linux.die.net/man/1/ssh-agent).
+### Adding a Directory
 
-Typically, your private keys will be `~/.ssh/id_ed25519` or `~/.ssh/id_rsa` and your public keys will be the same with the `.pub` suffix. You should be able to see this by running `ls ~/.ssh`. If you do not see a public/ private key combination, you can follow this [guide](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent) to generate a new key.
-
-Running the following commands to add your private key to ssh-agent:
-```sh
-# This will start the ssh-agent if it hasn't already been started
-eval "$(ssh-agent -s)"
-
-# This adds your private key to the ssh-agent.
-# Note: The private key will not have the `.pub` suffix.
-ssh-add ~/.ssh/{PRIVATE_KEY_FILE}
-
-# Run this command to verify that your private key is added
-# You should see an output of a SHA with an absolute path to the private key
-# e.g. `256 SHA:{MY_SHA} .../.ssh/id_ed25519`
-ssh-add -l
+```bash
+librarian add <path> [api...]
 ```
 
-2. Follow the steps [here](https://docs.github.com/en/authentication/connecting-to-github-with-ssh). You will need to either create a new SSH key or using an existing one, add it to the ssh-agent, and then upload it to Github.
+Tracks a directory for management. The sections created in `<path>/.librarian.yaml` depend on:
+1. Which sections exist in `.librarian/config.yaml`
+2. Whether APIs are provided
 
-Once everything has been configured, set the `origin` remote to the SSH URI:
-```shell
-git remote set-url origin git@github.com:googleapis/librarian.git
+**In a release-only repository** (no `generate` section in config):
+```bash
+librarian add packages/my-tool
 ```
 
-## Documentation
+**Example** `packages/my-tool/.librarian.yaml`:
+```yaml
+release:
+  version: null
+```
 
-- [CLI Documentation](https://pkg.go.dev/github.com/googleapis/librarian/cmd/librarian)
-- [Language Onboarding Guide](doc/language-onboarding.md)
-- [How We Write Go](doc/howwewritego.md)
-- [State Schema](doc/state-schema.md)
-- [Config Schema](doc/config-schema.md)
-- [Running Tests](doc/testing.md)
-- [sidekick](doc/sidekick.md)
+**In a repository with generation** (has `generate` section in config):
+```bash
+# Add handwritten code (no APIs)
+librarian add packages/my-tool
+```
 
-## License
+**Example** `packages/my-tool/.librarian.yaml`:
+```yaml
+release:
+  version: null
+```
 
-Apache 2.0 - See [LICENSE](LICENSE) for more information.
+```bash
+# Add generated code (with APIs)
+librarian add packages/google-cloud-secret-manager secretmanager/v1 secretmanager/v1beta2
+```
+
+When adding APIs, `librarian add` automatically:
+1. Reads the BUILD.bazel file for each API path
+2. Extracts generation configuration from the language-specific gapic rule (e.g., `py_gapic_library`)
+3. Saves the configuration to `.librarian.yaml` for reproducible generation
+
+**Example** `packages/google-cloud-secret-manager/.librarian.yaml`:
+```yaml
+generate:
+  apis:
+    - path: secretmanager/v1
+      grpc_service_config: secretmanager_grpc_service_config.json
+      service_yaml: secretmanager_v1.yaml
+      transport: grpc+rest
+      rest_numeric_enums: true
+      opt_args:
+        - warehouse-package-name=google-cloud-secret-manager
+    - path: secretmanager/v1beta2
+      grpc_service_config: secretmanager_grpc_service_config.json
+      service_yaml: secretmanager_v1beta2.yaml
+      transport: grpc+rest
+      rest_numeric_enums: true
+      opt_args:
+        - warehouse-package-name=google-cloud-secret-manager
+  commit: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0
+  librarian: v0.5.0
+  container:
+    image: us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-prod/python-librarian-generator
+    tag: latest
+  googleapis:
+    repo: github.com/googleapis/googleapis
+    ref: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0
+  discovery:
+    repo: github.com/googleapis/discovery-artifact-manager
+    ref: f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0
+
+release:
+  version: null
+```
+
+**API configuration fields** (extracted from BUILD.bazel):
+- `grpc_service_config` - Retry configuration file path (relative to API directory)
+- `service_yaml` - Service configuration file path
+- `transport` - Transport protocol (e.g., `grpc+rest`, `grpc`)
+- `rest_numeric_enums` - Whether to use numeric enums in REST
+- `opt_args` - Additional generator options
+
+These fields can be manually edited if you need to override the BUILD.bazel configuration.
+
+**Note**: The `generate` section is only created when APIs are provided
+AND the repository has a `generate` section in its config.
+The `release` section is created if the repository has a `release` section in its config.
+
+`--commit` writes a standard commit message for the change.
+
+### Removing a Directory
+
+```bash
+librarian remove <path>
+```
+
+Removes `<path>/.librarian.yaml`. Source code is not modified.
+
+## Editing Artifact Configuration
+
+```bash
+librarian edit <path> [flags]
+```
+
+Configure artifact-specific settings:
+
+### Set Library Metadata
+
+Library metadata is used to generate documentation and configure the package.
+
+```bash
+# Set metadata fields
+librarian edit <path> \
+  --metadata name_pretty="Secret Manager" \
+  --metadata release_level=stable \
+  --metadata product_documentation="https://cloud.google.com/secret-manager/docs" \
+  --metadata api_description="Store and manage secrets"
+```
+
+**Available metadata fields:**
+- `name_pretty` - Human-readable name (e.g., "Secret Manager")
+- `product_documentation` - URL to product documentation
+- `client_documentation` - URL to client library documentation
+- `issue_tracker` - URL to issue tracker
+- `release_level` - Release level: `stable` or `preview`
+- `library_type` - Library type: `GAPIC_AUTO` or `GAPIC_COMBO`
+- `api_id` - API ID (e.g., `secretmanager.googleapis.com`)
+- `api_shortname` - Short API name (e.g., `secretmanager`)
+- `api_description` - Description of the API
+- `default_version` - Default API version (e.g., `v1`)
+
+**Example** `packages/google-cloud-secret-manager/.librarian.yaml`:
+```yaml
+generate:
+  apis:
+    - path: secretmanager/v1
+  metadata:
+    name_pretty: "Secret Manager"
+    product_documentation: "https://cloud.google.com/secret-manager/docs"
+    release_level: "stable"
+    api_description: "Store and manage secrets"
+```
+
+### Set Language-Specific Metadata
+
+The language metadata should match the repository's language (set via `librarian init`).
+
+```bash
+# For Go repositories
+librarian edit <path> --language go:module=github.com/user/repo
+
+# For Python repositories
+librarian edit <path> --language python:package=my-package
+
+# For Rust repositories
+librarian edit <path> --language rust:crate=my_crate
+
+# For Dart repositories
+librarian edit <path> --language dart:package=my_package
+```
+
+Language-specific metadata is used by generators and tooling for proper
+package/module configuration.
+The format is `--language LANG:KEY=VALUE` where LANG matches your repository's
+language and KEY is the property name (module, package, or crate).
+
+### Keep Files During Generation
+
+```bash
+librarian edit <path> --keep README.md --keep docs
+```
+
+Files and directories in the keep list are not overwritten during code generation.
+
+### Remove Files After Generation
+
+```bash
+librarian edit <path> --remove temp.txt --remove build
+```
+
+Files in the remove list are deleted after code generation completes.
+
+### Exclude Files From Release
+
+```bash
+librarian edit <path> --exclude tests --exclude .gitignore
+```
+
+Files in the exclude list are not included when creating releases.
+
+### View Current Configuration
+
+```bash
+librarian edit <path>
+```
+
+Running `edit` without flags displays the current configuration for the artifact.
+
+## Generating a Client Library
+
+For artifacts with a `generate` section in their `.librarian.yaml`:
+
+```bash
+librarian generate <path>
+```
+
+Generates or regenerates code using the container and configuration from `.librarian/config.yaml`.
+Librarian updates the artifact's `.librarian.yaml` automatically.
+
+### How Generation Works
+
+1. **librarian CLI** (Go binary):
+   - Reads `.librarian/config.yaml` and artifact's `.librarian.yaml`
+   - Clones googleapis at the specified commit SHA
+   - Prepares request files for the container with API configurations from `.librarian.yaml`
+   - Runs the generator container with appropriate mounts
+   - Applies keep/remove/exclude rules to the output
+   - Updates `.librarian.yaml` with generation metadata
+
+2. **Generator container** (language-specific):
+   - Reads request files from mounted directory (includes pre-parsed API configurations)
+   - Executes protoc with language-specific plugins using the provided configurations
+   - Runs post-processors (formatting, templates, etc.)
+   - Runs validation and tests
+   - Writes generated code to output directory
+
+3. **librarian CLI** (continues):
+   - Copies generated code to artifact directory
+   - Preserves files in "keep" list
+   - Removes files in "remove" list
+   - Updates `.librarian.yaml` state
+
+**Note**: BUILD.bazel parsing happens only once during `librarian add`. The extracted configuration is saved to `.librarian.yaml` and reused for all subsequent `librarian generate` commands. This makes generation faster and ensures reproducibility even if BUILD.bazel files change upstream.
+
+`--commit` writes a standard commit message for the change.
+
+### Regenerate All Artifacts
+
+```bash
+librarian generate --all
+```
+
+Regenerates all artifacts that have a `generate` section.
+
+**Note**: This command only works in repositories that have a `generate`
+section in `.librarian/config.yaml`,
+and only affects artifacts that have a `generate` section in their `.librarian.yaml`.
+
+## Releasing
+
+### Preparing a Release
+
+For artifacts with a `release` section in their `.librarian.yaml`:
+
+```bash
+librarian prepare <path>
+```
+
+Determines the next version, updates metadata, and prepares release notes.
+Does not tag or publish.
+
+**Example** `packages/google-cloud-secret-manager/.librarian.yaml`:
+
+```yaml
+release:
+  version: v1.2.0
+  prepared:
+    version: v1.3.0
+    commit: e4d5c6b7a8f9e0d1c2b3a4f5e6d7c8b9a0f1e2d3
+```
+
+Prepare all artifacts that have a `release` section:
+
+```bash
+librarian prepare --all
+```
+
+`--commit` writes a standard commit message for the change.
+
+**Note**: This command only works in repositories that have a `release`
+section in `.librarian/config.yaml`,
+and only affects artifacts that have a `release` section in their `.librarian.yaml`.
+
+### Publishing a Release
+
+For artifacts with a `release` section and a prepared release:
+
+```bash
+librarian release <path>
+```
+
+Tags the prepared version and updates recorded release state. If no prepared
+release exists, the command does nothing.
+
+Release all prepared artifacts:
+
+```bash
+librarian release --all
+```
+
+**Example** `packages/google-cloud-secret-manager/.librarian.yaml` after release:
+
+```yaml
+release:
+  version: v1.3.0
+```
+
+## Configuration
+
+### Update Versions in config.yaml
+
+Update toolchain information to latest:
+
+```bash
+librarian config update [key]
+librarian config update --all
+```
+
+Supported keys:
+
+- `generate.container` - Update container image to latest
+- `generate.googleapis` - Update googleapis to latest commit
+- `generate.discovery` - Update discovery-artifact-manager to latest commit
+
+Set a configuration key explicitly:
+
+```bash
+librarian config set <key> <value>
+```
+
+Supported keys:
+
+- `librarian.language` - Repository language
+- `generate.dir` - Default generation directory (default: "generated")
+- `generate.container.image` - Container image name
+- `generate.container.tag` - Container image tag
+- `generate.container` - Container image and tag (syntactic sugar)
+- `generate.googleapis.repo` - Googleapis repository location
+- `generate.googleapis.ref` - Googleapis git reference
+- `generate.discovery.repo` - Discovery repository location
+- `generate.discovery.ref` - Discovery git reference
+- `release.tag_format` - Release tag format template
+
+**Example: Set global generation directory**
+
+```bash
+librarian config set generate.dir packages
+```
+
+**Example: Update container image and tag**
+
+```bash
+# Set both image and tag at once (syntactic sugar)
+librarian config set generate.container python-gen:v1.2.0
+
+# Or set them independently
+librarian config set generate.container.image python-gen
+librarian config set generate.container.tag v1.2.0
+```
+
+## Inspection
+
+View information about tracked directories and their release history.
+
+List all tracked directories:
+
+```bash
+librarian list
+```
+
+Show the current generation and release status for a directory:
+
+```bash
+librarian status <path>
+```
+
+View the release history for a directory:
+
+```bash
+librarian history <path>
+```
+
+## Automation with librarianops
+
+The `librarianops` command automates common librarian workflows for CI/CD pipelines.
+
+### Configuration
+
+**Flags:**
+
+- `--project` - GCP project ID (default: `cloud-sdk-librarian-prod`)
+- `--dry-run` - Print commands without executing them
+
+```bash
+# Use custom project
+librarianops --project my-project generate
+
+# Dry run to see what would be executed
+librarianops --dry-run generate
+```
+
+### Automate Code Generation
+
+```bash
+librarianops generate
+```
+
+This runs:
+1. `librarian generate --all --commit` - Regenerate all artifacts
+2. `gh pr create --with-token=$(fetch token) --fill` - Create pull request
+
+### Automate Release Preparation
+
+```bash
+librarianops prepare
+```
+
+This runs:
+1. `librarian prepare --all --commit` - Prepare all artifacts
+2. `gh pr create --with-token=$(fetch token) --fill` - Create pull request
+
+### Automate Release Publishing
+
+```bash
+librarianops release
+```
+
+This runs:
+1. `librarian release --all` - Release all prepared artifacts
+2. `gh release create --with-token=$(fetch token) --notes-from-tag` - Create GitHub releases
+
+## Architecture
+
+### Container Boundary
+
+Librarian uses a container-based architecture to isolate language-specific generation logic:
+
+**librarian CLI (Go)** - Runs on host machine:
+- Configuration management (read/write YAML files)
+- Git operations (clone, checkout, commit, tag)
+- BUILD.bazel parsing (during `librarian add` only)
+- Orchestration (prepare directories, run container, apply rules)
+- State management (update `.librarian.yaml` files)
+
+**Generator Container (language-specific)** - Runs in Docker:
+- Execute protoc with language-specific plugins
+- Run post-processors (formatters, templates)
+- Run validation and tests
+- Write generated code to output directory
+
+**Container interface:**
+- Input: Request JSON files with pre-parsed API configurations
+- Mounts: googleapis source, configuration, output directory
+- Output: Generated code in output directory
+
+This separation allows:
+- **Language independence** - CLI doesn't need Python/Rust/etc. installed
+- **Isolation** - Container has all dependencies, no conflicts with host
+- **Reproducibility** - Same container + same inputs = identical output
+- **Flexibility** - Swap container images without changing CLI
+- **Simplicity** - Container doesn't need BUILD.bazel parsing logic
+
+**Why parse BUILD.bazel in the CLI?**
+- Parsing happens once during `librarian add`, not on every generation
+- Configuration is saved in `.librarian.yaml` for transparency and reproducibility
+- Users can manually edit configuration if BUILD.bazel is incorrect
+- Container remains simple - just executes protoc with provided options
+- Go has excellent Bazel parsing libraries (`github.com/bazelbuild/buildtools/build`)
+
+### Local Development
+
+**For library users** (no container/Python knowledge needed):
+```bash
+# Just works - container is pulled automatically
+librarian generate --all
+```
+
+**For librarian developers** (Go development):
+```bash
+# Standard Go development workflow
+go run ./cmd/librarian/main.go generate --all
+
+# Or for faster iteration
+go install ./cmd/librarian
+librarian generate --all
+```
+
+**For container developers** (Python generator logic):
+```bash
+# Build custom container
+docker build -t python-gen:dev -f .generator/Dockerfile .
+
+# Point librarian at custom container
+librarian config set generate.container python-gen:dev
+
+# Test
+librarian generate packages/google-cloud-secret-manager
+```
+
+## Notes
+
+- Librarian does not modify code outside the tracked directories.
+- Librarian records only information required for reproducibility and release
+  automation.
+- The system is designed so that `git log` and `.librarian.yaml` describe the
+  full history of generation inputs and release versions.
+- All configuration lives in YAML files - no hidden state or external databases.

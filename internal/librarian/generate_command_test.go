@@ -191,7 +191,7 @@ func TestRunConfigureCommand(t *testing.T) {
 		api                string
 		repo               gitrepo.Repository
 		state              *config.LibrarianState
-		librarianConfig    *config.LibrarianConfig
+		librarianConfig    *config.OldLibrarianConfig
 		container          *mockContainerClient
 		wantConfigureCalls int
 		wantErr            bool
@@ -296,7 +296,7 @@ func TestRunConfigureCommand(t *testing.T) {
 					},
 				},
 			},
-			librarianConfig: &config.LibrarianConfig{
+			librarianConfig: &config.OldLibrarianConfig{
 				GlobalFilesAllowlist: []*config.GlobalFile{
 					{
 						Path: "a/path/example.txt",
@@ -389,7 +389,7 @@ func TestGenerateScenarios(t *testing.T) {
 		api                      string
 		library                  string
 		state                    *config.LibrarianState
-		librarianConfig          *config.LibrarianConfig
+		librarianConfig          *config.OldLibrarianConfig
 		container                *mockContainerClient
 		ghClient                 GitHubClient
 		build                    bool
@@ -432,7 +432,7 @@ func TestGenerateScenarios(t *testing.T) {
 					"src/a",
 				},
 			},
-			librarianConfig: &config.LibrarianConfig{
+			librarianConfig: &config.OldLibrarianConfig{
 				GlobalFilesAllowlist: []*config.GlobalFile{
 					{
 						Path:        "a/path/example.txt",
@@ -712,7 +712,7 @@ func TestGenerateScenarios(t *testing.T) {
 					},
 				},
 			},
-			librarianConfig: &config.LibrarianConfig{
+			librarianConfig: &config.OldLibrarianConfig{
 				Libraries: []*config.LibraryConfig{
 					{LibraryID: "google.cloud.texttospeech.v1"},
 					{LibraryID: "google.cloud.vision.v1", GenerateBlocked: true},
@@ -742,7 +742,7 @@ func TestGenerateScenarios(t *testing.T) {
 					},
 				},
 			},
-			librarianConfig: &config.LibrarianConfig{
+			librarianConfig: &config.OldLibrarianConfig{
 				Libraries: []*config.LibraryConfig{
 					{LibraryID: "google.cloud.texttospecech.v1"},
 					{LibraryID: "google.cloud.vision.v1", GenerateBlocked: true},
@@ -771,7 +771,7 @@ func TestGenerateScenarios(t *testing.T) {
 					},
 				},
 			},
-			librarianConfig: &config.LibrarianConfig{
+			librarianConfig: &config.OldLibrarianConfig{
 				Libraries: []*config.LibraryConfig{
 					{LibraryID: "google.cloud.texttospeech.v1"},
 					{LibraryID: "google.cloud.vision.v1", GenerateBlocked: true},
@@ -856,7 +856,7 @@ func TestGenerateScenarios(t *testing.T) {
 					},
 				},
 			},
-			librarianConfig: &config.LibrarianConfig{
+			librarianConfig: &config.OldLibrarianConfig{
 				GlobalFilesAllowlist: []*config.GlobalFile{
 					{
 						Path:        "one/global/example.txt",
@@ -1189,7 +1189,7 @@ func TestShouldGenerate(t *testing.T) {
 	t.Parallel()
 	for _, test := range []struct {
 		name              string
-		config            *config.LibrarianConfig
+		config            *config.OldLibrarianConfig
 		state             *config.LibrarianState
 		generateUnchanged bool
 		sourceRepo        gitrepo.Repository
@@ -1201,7 +1201,7 @@ func TestShouldGenerate(t *testing.T) {
 		// (The mock repo will fail if we do get that far.)
 		{
 			name: "generation blocked",
-			config: &config.LibrarianConfig{
+			config: &config.OldLibrarianConfig{
 				Libraries: []*config.LibraryConfig{
 					{
 						LibraryID:       "TestLibrary",
@@ -1313,7 +1313,7 @@ func TestShouldGenerate(t *testing.T) {
 		},
 		{
 			name: "config present but generation not blocked",
-			config: &config.LibrarianConfig{
+			config: &config.OldLibrarianConfig{
 				Libraries: []*config.LibraryConfig{
 					{
 						LibraryID:       "OtherLibrary",

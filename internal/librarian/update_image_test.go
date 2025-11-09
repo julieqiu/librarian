@@ -194,7 +194,7 @@ func TestUpdateImageRunnerRun(t *testing.T) {
 		containerClient            *mockContainerClient
 		ghClient                   *mockGitHubClient
 		state                      *config.LibrarianState
-		librarianConfig            *config.LibrarianConfig
+		librarianConfig            *config.OldLibrarianConfig
 		image                      string
 		build                      bool
 		commit                     bool
@@ -743,7 +743,7 @@ func TestUpdateImageRunnerRun(t *testing.T) {
 				},
 			},
 
-			librarianConfig: &config.LibrarianConfig{
+			librarianConfig: &config.OldLibrarianConfig{
 				Libraries: []*config.LibraryConfig{
 					{
 						LibraryID:       "blocked-lib",
@@ -932,7 +932,7 @@ func TestRunContainerGenerateTest(t *testing.T) {
 				containerClient: &mockContainerClient{noGenerateResponse: true},
 				repo:            &MockRepository{},
 				sourceRepo:      &MockRepository{},
-				librarianConfig: &config.LibrarianConfig{},
+				librarianConfig: &config.OldLibrarianConfig{},
 				state:           &config.LibrarianState{},
 			},
 			wantErrMsg:     "failed to reset temporary commit",
@@ -946,7 +946,7 @@ func TestRunContainerGenerateTest(t *testing.T) {
 			testRunner: &testGenerateRunner{
 				containerClient: &mockContainerClient{noGenerateResponse: true},
 				sourceRepo:      &MockRepository{},
-				librarianConfig: &config.LibrarianConfig{},
+				librarianConfig: &config.OldLibrarianConfig{},
 				repo:            &MockRepository{},
 				state:           &config.LibrarianState{},
 			},
@@ -960,7 +960,7 @@ func TestRunContainerGenerateTest(t *testing.T) {
 			testRunner: &testGenerateRunner{
 				containerClient: &mockContainerClient{noGenerateResponse: true},
 				sourceRepo:      &MockRepository{},
-				librarianConfig: &config.LibrarianConfig{},
+				librarianConfig: &config.OldLibrarianConfig{},
 				repo:            &MockRepository{},
 				state:           &config.LibrarianState{},
 			},

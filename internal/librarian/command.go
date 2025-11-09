@@ -139,7 +139,7 @@ type commandRunner struct {
 	repo            gitrepo.Repository
 	sourceRepo      gitrepo.Repository
 	state           *config.LibrarianState
-	librarianConfig *config.LibrarianConfig
+	librarianConfig *config.OldLibrarianConfig
 	ghClient        GitHubClient
 	containerClient ContainerClient
 	image           string
@@ -485,7 +485,7 @@ func addLabelsToPullRequest(ctx context.Context, ghClient GitHubClient, pullRequ
 }
 
 // copyGlobalAllowlist copies files in the global file allowlist from src to dst.
-func copyGlobalAllowlist(cfg *config.LibrarianConfig, dst, src string, copyReadOnly bool) error {
+func copyGlobalAllowlist(cfg *config.OldLibrarianConfig, dst, src string, copyReadOnly bool) error {
 	if cfg == nil {
 		slog.Info("librarian config is not setup, skip copying global allowlist")
 		return nil

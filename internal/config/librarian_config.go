@@ -24,8 +24,9 @@ const (
 	PermissionReadWrite = "read-write"
 )
 
-// LibrarianConfig defines the contract for the config.yaml file.
-type LibrarianConfig struct {
+// OldLibrarianConfig defines the contract for the old config.yaml file.
+// Deprecated: Use LibrarianConfig from repository.go instead.
+type OldLibrarianConfig struct {
 	GlobalFilesAllowlist []*GlobalFile    `yaml:"global_files_allowlist"`
 	Libraries            []*LibraryConfig `yaml:"libraries"`
 	TagFormat            string           `yaml:"tag_format"`
@@ -54,8 +55,8 @@ var validPermissions = map[string]bool{
 	PermissionReadWrite: true,
 }
 
-// Validate checks that the LibrarianConfig is valid.
-func (g *LibrarianConfig) Validate() error {
+// Validate checks that the OldLibrarianConfig is valid.
+func (g *OldLibrarianConfig) Validate() error {
 	for i, globalFile := range g.GlobalFilesAllowlist {
 		path, permissions := globalFile.Path, globalFile.Permissions
 		if !isValidRelativePath(path) {
@@ -70,7 +71,7 @@ func (g *LibrarianConfig) Validate() error {
 }
 
 // LibraryConfigFor finds the LibraryConfig entry for a given LibraryID.
-func (g *LibrarianConfig) LibraryConfigFor(LibraryID string) *LibraryConfig {
+func (g *OldLibrarianConfig) LibraryConfigFor(LibraryID string) *LibraryConfig {
 	for _, lib := range g.Libraries {
 		if lib.LibraryID == LibraryID {
 			return lib
@@ -80,7 +81,7 @@ func (g *LibrarianConfig) LibraryConfigFor(LibraryID string) *LibraryConfig {
 }
 
 // IsGenerationBlocked returns true if the library is configured to block generation.
-func (g *LibrarianConfig) IsGenerationBlocked(libraryID string) bool {
+func (g *OldLibrarianConfig) IsGenerationBlocked(libraryID string) bool {
 	if g == nil {
 		return false
 	}
@@ -89,7 +90,7 @@ func (g *LibrarianConfig) IsGenerationBlocked(libraryID string) bool {
 }
 
 // GetGlobalFiles returns the global files defined in the librarian config.
-func (g *LibrarianConfig) GetGlobalFiles() []string {
+func (g *OldLibrarianConfig) GetGlobalFiles() []string {
 	var globalFiles []string
 	for _, globalFile := range g.GlobalFilesAllowlist {
 		globalFiles = append(globalFiles, globalFile.Path)

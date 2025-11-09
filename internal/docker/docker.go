@@ -153,7 +153,7 @@ type ReleaseStageRequest struct {
 
 	// LibrarianConfig is a pointer to the [config.LibrarianConfig] struct, holding
 	// global files configuration in a language repository.
-	LibrarianConfig *config.LibrarianConfig
+	LibrarianConfig *config.OldLibrarianConfig
 
 	// LibraryID specifies the ID of the library to release.
 	LibraryID string

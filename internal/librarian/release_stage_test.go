@@ -173,7 +173,7 @@ func TestStageRun(t *testing.T) {
 							},
 						},
 					},
-					librarianConfig: &config.LibrarianConfig{},
+					librarianConfig: &config.OldLibrarianConfig{},
 				}
 			},
 			files: map[string]string{
@@ -250,7 +250,7 @@ func TestStageRun(t *testing.T) {
 						},
 					},
 					repo:            mockRepoWithReleasableUnit,
-					librarianConfig: &config.LibrarianConfig{},
+					librarianConfig: &config.OldLibrarianConfig{},
 				}
 			},
 			files: map[string]string{
@@ -350,7 +350,7 @@ func TestStageRun(t *testing.T) {
 							},
 						},
 					},
-					librarianConfig: &config.LibrarianConfig{
+					librarianConfig: &config.OldLibrarianConfig{
 						GlobalFilesAllowlist: []*config.GlobalFile{
 							{
 								Path:        "one/global/example.txt",
@@ -449,7 +449,7 @@ func TestStageRun(t *testing.T) {
 							},
 						},
 					},
-					librarianConfig: &config.LibrarianConfig{
+					librarianConfig: &config.OldLibrarianConfig{
 						Libraries: []*config.LibraryConfig{
 							{LibraryID: "blocked-example-id", ReleaseBlocked: true},
 							{LibraryID: "example-id"},
@@ -519,7 +519,7 @@ func TestStageRun(t *testing.T) {
 							},
 						},
 					},
-					librarianConfig: &config.LibrarianConfig{
+					librarianConfig: &config.OldLibrarianConfig{
 						Libraries: []*config.LibraryConfig{
 							{LibraryID: "blocked-example-id", ReleaseBlocked: true},
 						},
@@ -560,7 +560,7 @@ func TestStageRun(t *testing.T) {
 					repo: &MockRepository{
 						Dir: t.TempDir(),
 					},
-					librarianConfig: &config.LibrarianConfig{},
+					librarianConfig: &config.OldLibrarianConfig{},
 				}
 			},
 			wantErr:    true,
@@ -658,7 +658,7 @@ func TestStageRun(t *testing.T) {
 						},
 					},
 					repo:            mockRepoWithReleasableUnit,
-					librarianConfig: &config.LibrarianConfig{},
+					librarianConfig: &config.OldLibrarianConfig{},
 				}
 			},
 			wantErr:    true,
@@ -685,7 +685,7 @@ func TestStageRun(t *testing.T) {
 						},
 					},
 					repo:            mockRepoWithReleasableUnit,
-					librarianConfig: &config.LibrarianConfig{},
+					librarianConfig: &config.OldLibrarianConfig{},
 				}
 			},
 			wantErr:    true,
@@ -792,7 +792,7 @@ func TestStageRun(t *testing.T) {
 						},
 					},
 					ghClient:        &mockGitHubClient{},
-					librarianConfig: &config.LibrarianConfig{},
+					librarianConfig: &config.OldLibrarianConfig{},
 				}
 			},
 		},
@@ -841,7 +841,7 @@ func TestStageRun(t *testing.T) {
 						},
 					},
 					ghClient:        &mockGitHubClient{},
-					librarianConfig: &config.LibrarianConfig{},
+					librarianConfig: &config.OldLibrarianConfig{},
 				}
 			},
 			want: &config.LibrarianState{
@@ -912,7 +912,7 @@ func TestStageRun(t *testing.T) {
 						},
 					},
 					ghClient:        &mockGitHubClient{},
-					librarianConfig: &config.LibrarianConfig{},
+					librarianConfig: &config.OldLibrarianConfig{},
 				}
 			},
 			want: &config.LibrarianState{
@@ -976,7 +976,7 @@ func TestStageRun(t *testing.T) {
 						},
 					},
 					ghClient:        &mockGitHubClient{},
-					librarianConfig: &config.LibrarianConfig{},
+					librarianConfig: &config.OldLibrarianConfig{},
 				}
 			},
 			wantErr:    true,
@@ -1018,7 +1018,7 @@ func TestStageRun(t *testing.T) {
 						// then this test should error out
 						AddAllError: errors.New("unable to add all files"),
 					},
-					librarianConfig: &config.LibrarianConfig{},
+					librarianConfig: &config.OldLibrarianConfig{},
 				}
 			},
 			wantErr:    true,
@@ -1045,7 +1045,7 @@ func TestStageRun(t *testing.T) {
 						},
 					},
 					repo:            mockRepoWithReleasableUnit,
-					librarianConfig: &config.LibrarianConfig{},
+					librarianConfig: &config.OldLibrarianConfig{},
 				}
 			},
 			files: map[string]string{
@@ -1158,7 +1158,7 @@ func TestRunStageCommand(t *testing.T) {
 	for _, test := range []struct {
 		name   string
 		state  *config.LibrarianState
-		config *config.LibrarianConfig
+		config *config.OldLibrarianConfig
 		repo   gitrepo.Repository
 		client ContainerClient
 		want   *config.LibrarianState
@@ -1191,7 +1191,7 @@ func TestRunStageCommand(t *testing.T) {
 					},
 				},
 			},
-			config: &config.LibrarianConfig{
+			config: &config.OldLibrarianConfig{
 				GlobalFilesAllowlist: []*config.GlobalFile{
 					{
 						Path:        "one/global/example.txt",
@@ -1796,7 +1796,7 @@ func TestDetermineNextVersion(t *testing.T) {
 		currentVersion  string
 		libraryID       string
 		config          *config.Config
-		librarianConfig *config.LibrarianConfig
+		librarianConfig *config.OldLibrarianConfig
 		wantVersion     string
 		wantErr         bool
 		wantErrMsg      string
@@ -1810,7 +1810,7 @@ func TestDetermineNextVersion(t *testing.T) {
 				Library: "some-library",
 			},
 			libraryID: "some-library",
-			librarianConfig: &config.LibrarianConfig{
+			librarianConfig: &config.OldLibrarianConfig{
 				Libraries: []*config.LibraryConfig{},
 			},
 			currentVersion: "1.0.0",
@@ -1826,7 +1826,7 @@ func TestDetermineNextVersion(t *testing.T) {
 				Library: "some-library",
 			},
 			libraryID: "some-library",
-			librarianConfig: &config.LibrarianConfig{
+			librarianConfig: &config.OldLibrarianConfig{
 				Libraries: []*config.LibraryConfig{
 					&config.LibraryConfig{
 						LibraryID:   "some-library",
@@ -1847,7 +1847,7 @@ func TestDetermineNextVersion(t *testing.T) {
 				Library: "some-library",
 			},
 			libraryID: "some-library",
-			librarianConfig: &config.LibrarianConfig{
+			librarianConfig: &config.OldLibrarianConfig{
 				Libraries: []*config.LibraryConfig{
 					&config.LibraryConfig{
 						LibraryID:   "some-library",

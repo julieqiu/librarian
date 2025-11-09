@@ -15,139 +15,171 @@
 package librarian
 
 const (
-	librarianLongHelp = "Librarian manages client libraries for Google APIs."
+	librarianLongHelp = `Librarian automates the generation and release of client libraries.`
 
 	versionLongHelp = "Version prints version information for the librarian binary."
 
-	releaseLongHelp = "Manages releases of libraries."
+	configLongHelp = "Config manages repository configuration stored in .librarian.yaml"
 
-	generateLongHelp = `The generate command is the primary tool for all code generation
-tasks. It handles both the initial setup of a new library (onboarding) and the
-regeneration of existing ones. Librarian works by delegating language-specific
-tasks to a container, which is configured in the .librarian/state.yaml file.
-Librarian is environment aware and will check if the current directory is the
-root of a librarian repository. If you are not executing in such a directory the
-'--repo' flag must be provided.
+	generateLongHelp = `Generates or regenerates code for tracked directories.
 
-# Onboarding a new library
+For artifacts with a generate section in their .librarian.yaml:
 
-To configure and generate a new library for the first time, you must specify the
-API to be generated and the library it will belong to. Librarian will invoke the
-'configure' command in the language container to set up the repository, add the
-new library's configuration to the '.librarian/state.yaml' file, and then
-proceed with generation.
+  librarian generate <path>
+
+Generates or regenerates code using the container and configuration from
+.librarian.yaml. Librarian updates the artifact's .librarian.yaml automatically.
+
+Generate all artifacts that have a generate section:
+
+  librarian generate --all
+
+The --commit flag writes a standard commit message for the change.
 
 Example:
-  librarian generate --library=secretmanager --api=google/cloud/secretmanager/v1
+  librarian generate packages/google-cloud-secret-manager --commit`
 
-# Regenerating existing libraries
+	prepareLongHelp = `Prepares a release for tracked directories.
 
-You can regenerate a single, existing library by specifying either the library
-ID or the API path. If no specific library or API is provided, Librarian will
-regenerate all libraries listed in '.librarian/state.yaml'. If '--library' or
-'--api' is specified the whole library will be regenerated.
+For artifacts with a release section in their .librarian.yaml:
 
-Examples:
-  # Regenerate a single library by its ID
-  librarian generate --library=secretmanager
+  librarian prepare <path>
 
-  # Regenerate a single library by its API path
-  librarian generate --api=google/cloud/secretmanager/v1
+Determines the next version, updates metadata, and prepares release notes.
+Does not tag or publish.
 
-  # Regenerate all libraries in the repository
-  librarian generate
+Prepare all artifacts that have a release section:
 
-# Workflow and Options:
+  librarian prepare --all
 
-The generation process involves delegating to the language container's
-'generate' command. After the code is generated, the tool cleans the destination
-directories and copies the new files into place, according to the configuration
-in '.librarian/state.yaml'.
+The --commit flag writes a standard commit message for the change.
 
-- If the '--build' flag is specified, the 'build' command is also executed in
-  the container to compile and validate the generated code.
-- If the '--push' flag is provided, the changes are committed to a new branch,
-  and a pull request is created on GitHub. Otherwise, the changes are left in
-  your local working directory for inspection. When pushing to a remote branch,
-  you have the option of using HTTPS or SSH. Librarian will automatically determine
-  whether to use HTTPS or SSH based on the remote URI.
+Example:
+  librarian prepare packages/google-cloud-secret-manager --commit`
 
-Example with build and push:
-  LIBRARIAN_GITHUB_TOKEN=xxx librarian generate --push --build`
+	releaseLongHelp = `Publishes a prepared release for tracked directories.
 
-	releaseStageLongHelp = `The 'release stage' command is the primary entry point for staging
-a new release. It automates the creation of a release pull request by parsing
-conventional commits, determining the next semantic version for each library,
-and generating a changelog. Librarian is environment aware and will check if the
-current directory is the root of a librarian repository. If you are not
-executing in such a directory the '--repo' flag must be provided.
+For artifacts with a release section and a prepared release:
 
-This command scans the git history since the last release, identifies changes
-(feat, fix, BREAKING CHANGE), and calculates the appropriate version bump
-according to semver rules. It then delegates all language-specific file
-modifications, such as updating a CHANGELOG.md or bumping the version in a pom.xml,
-to the configured language-specific container.
+  librarian release <path>
 
-If a specific library is configured for release via the '--library' flag, a single
-releasable change is needed to automatically calculate a version bump. If there are
-no releasable changes since the last release, the '--version' flag should be included
-to set a new version for the library. The new version must be "SemVer" greater than the
-current version.
+Tags the prepared version and updates recorded release state. If no prepared
+release exists, the command does nothing.
 
-By default, 'release stage' leaves the changes in your local working directory
-for inspection. Use the '--push' flag to automatically commit the changes to
-a new branch and create a pull request on GitHub. The '--commit' flag may be
-used to create a local commit without creating a pull request; this flag is
-ignored if '--push' is also specified. When pushing to a remote branch,
-you have the option of using HTTPS or SSH. Librarian will automatically determine
-whether to use HTTPS or SSH based on the remote URI.
+Release all prepared artifacts:
+
+  librarian release --all
+
+Example:
+  librarian release packages/google-cloud-secret-manager`
+
+	initLongHelp = `Initializes a repository for library management.
+
+  librarian init [language]
+
+Creates .librarian.yaml at repository root. If language is provided (go, python,
+rust, dart), adds librarian.language and generate section with defaults. Always
+adds release section with default tag_format.
 
 Examples:
-  # Create a release PR for all libraries with pending changes.
-  librarian release stage --push
+  # Release-only repository
+  librarian init
 
-  # Create a release PR for a single library.
-  librarian release stage --library=secretmanager --push
+  # Repository with code generation and releases
+  librarian init python`
 
-  # Manually specify a version for a single library, overriding the calculation.
-  librarian release stage --library=secretmanager --library-version=2.0.0 --push`
+	addLongHelp = `Tracks a directory for management.
 
-	tagLongHelp = `The 'tag' command is the final step in the release
-process. It is designed to be run after a release pull request, created by
-'release stage', has been merged.
+  librarian add <path> [api...]
 
-This command's primary responsibilities are to:
+Creates <path>/.librarian.yaml. If APIs are provided AND repository has a
+generate section, parses BUILD.bazel files and creates generate section with
+API configurations. If repository has a release section, adds release.version: null.
 
-- Create a Git tag for each library version included in the merged pull request.
-- Create a corresponding GitHub Release for each tag, using the release notes
-  from the pull request body.
-- Update the pull request's label from 'release:pending' to 'release:done' to
-  mark the process as complete.
-
-You can target a specific merged pull request using the '--pr' flag. If no pull
-request is specified, the command will automatically search for and process all
-merged pull requests with the 'release:pending' label from the last 30 days.
+The --commit flag writes a standard commit message for the change.
 
 Examples:
-  # Tag and create a GitHub release for a specific merged PR.
-  librarian release tag --repo=https://github.com/googleapis/google-cloud-go --pr=https://github.com/googleapis/google-cloud-go/pull/123
+  # Add handwritten code (no APIs)
+  librarian add packages/my-tool
 
-  # Find and process all pending merged release PRs in a repository.
-  librarian release tag --repo=https://github.com/googleapis/google-cloud-go`
+  # Add generated code (with APIs)
+  librarian add packages/google-cloud-secret-manager secretmanager/v1 secretmanager/v1beta2 --commit`
 
-	updateImageLongHelp = `The 'update-image' command is used to update the 'image' SHA
-of the language container for a language repository.
+	editLongHelp = `Edits artifact configuration.
 
-This command's primary responsibilities are to:
+  librarian edit <path> [flags]
 
-- Update the 'image' field in '.librarian/state.yaml'
-- Regenerate each library with the new language container using googleapis'
-  proto definitions at the 'last_generated_commit'
-  
+Configure artifact-specific settings like metadata, keep/remove/exclude lists,
+and language-specific metadata. Running edit without flags displays current
+configuration.
+
 Examples:
-  # Create a PR that updates the language container to latest image.
-  librarian update-image --commit --push
+  # Set metadata fields
+  librarian edit packages/google-cloud-secret-manager \
+    --metadata name_pretty="Secret Manager" \
+    --metadata release_level=stable
 
-  # Create a PR that updates the language container to the specified image.
-  librarian update-image --commit --push --image=<some-image-with-sha>`
+  # Set language-specific metadata
+  librarian edit packages/my-package --language python:package=my-package
+
+  # Configure file handling
+  librarian edit packages/my-tool --keep README.md --remove temp.txt --exclude tests`
+
+	removeLongHelp = `Stops tracking a directory.
+
+  librarian remove <path>
+
+Removes <path>/.librarian.yaml. Source code is not modified.
+
+Example:
+  librarian remove packages/my-tool`
+
+	configGetLongHelp = `Reads a configuration value from .librarian.yaml.
+
+  librarian config get <key>
+
+Supported keys include librarian.language, generate.container.image, release.tag_format, etc.
+
+Example:
+  librarian config get generate.container.image`
+
+	configSetLongHelp = `Sets a configuration value in .librarian.yaml.
+
+  librarian config set <key> <value>
+
+Supported keys include:
+- librarian.language
+- generate.dir
+- generate.container.image
+- generate.container.tag
+- generate.container (syntactic sugar for image:tag)
+- generate.googleapis.repo
+- generate.googleapis.ref
+- generate.discovery.repo
+- generate.discovery.ref
+- release.tag_format
+
+Examples:
+  # Set global generation directory
+  librarian config set generate.dir packages
+
+  # Set container image and tag
+  librarian config set generate.container python-gen:v1.2.0`
+
+	configUpdateLongHelp = `Updates toolchain versions to latest.
+
+  librarian config update [key]
+  librarian config update --all
+
+Supported keys:
+- generate.container - Update container image to latest
+- generate.googleapis - Update googleapis to latest commit
+- generate.discovery - Update discovery-artifact-manager to latest commit
+
+Examples:
+  # Update container to latest
+  librarian config update generate.container
+
+  # Update all toolchain versions
+  librarian config update --all`
 )

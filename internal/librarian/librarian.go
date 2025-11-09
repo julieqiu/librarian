@@ -52,25 +52,31 @@ func newLibrarianCommand() *cli.Command {
 	}
 	cmdVersion.Init()
 
-	cmdRelease := &cli.Command{
-		Short:     "release manages releases of libraries.",
-		UsageLine: "librarian release <command> [arguments]",
-		Long:      releaseLongHelp,
+	cmdConfig := &cli.Command{
+		Short:     "config manages repository configuration",
+		UsageLine: "librarian config <command> [arguments]",
+		Long:      configLongHelp,
 		Commands: []*cli.Command{
-			newCmdStage(),
-			newCmdTag(),
+			newCmdConfigGet(),
+			newCmdConfigSet(),
+			newCmdConfigUpdate(),
 		},
 	}
-	cmdRelease.Init()
+	cmdConfig.Init()
 
 	cmd := &cli.Command{
-		Short:     "librarian manages client libraries for Google APIs",
+		Short:     "librarian automates the maintenance and release of versioned directories",
 		UsageLine: "librarian <command> [arguments]",
 		Long:      librarianLongHelp,
 		Commands: []*cli.Command{
+			newCmdInit(),
+			newCmdAdd(),
+			newCmdEdit(),
+			newCmdRemove(),
 			newCmdGenerate(),
-			cmdRelease,
-			newCmdUpdateImage(),
+			newCmdPrepare(),
+			newCmdRelease(),
+			cmdConfig,
 			cmdVersion,
 		},
 	}
@@ -80,142 +86,211 @@ func newLibrarianCommand() *cli.Command {
 
 func newCmdGenerate() *cli.Command {
 	var verbose bool
+	var all bool
+	var commit bool
 	cmdGenerate := &cli.Command{
-		Short:     "generate onboards and generates client library code",
-		UsageLine: "librarian generate [flags]",
+		Short:     "generate generates or regenerates code for tracked directories",
+		UsageLine: "librarian generate <path> | librarian generate --all",
 		Long:      generateLongHelp,
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			setupLogger(verbose)
 			slog.Debug("generate command verbose logging")
-			if err := cmd.Config.SetDefaults(); err != nil {
-				return fmt.Errorf("failed to initialize config: %w", err)
-			}
-			if _, err := cmd.Config.IsValid(); err != nil {
-				return fmt.Errorf("failed to validate config: %s", err)
-			}
-			runner, err := newGenerateRunner(cmd.Config)
-			if err != nil {
-				return err
-			}
-			return runner.run(ctx)
+			return fmt.Errorf("generate command not yet implemented")
 		},
 	}
 	cmdGenerate.Init()
-	addFlagAPI(cmdGenerate.Flags, cmdGenerate.Config)
-	addFlagAPISource(cmdGenerate.Flags, cmdGenerate.Config)
-	addFlagBuild(cmdGenerate.Flags, cmdGenerate.Config)
-	addFlagGenerateUnchanged(cmdGenerate.Flags, cmdGenerate.Config)
-	addFlagHostMount(cmdGenerate.Flags, cmdGenerate.Config)
-	addFlagImage(cmdGenerate.Flags, cmdGenerate.Config)
-	addFlagLibrary(cmdGenerate.Flags, cmdGenerate.Config)
-	addFlagRepo(cmdGenerate.Flags, cmdGenerate.Config)
-	addFlagBranch(cmdGenerate.Flags, cmdGenerate.Config)
-	addFlagWorkRoot(cmdGenerate.Flags, cmdGenerate.Config)
-	addFlagPush(cmdGenerate.Flags, cmdGenerate.Config)
+	cmdGenerate.Flags.BoolVar(&all, "all", false, "generate all artifacts with a generate section")
+	cmdGenerate.Flags.BoolVar(&commit, "commit", false, "create a git commit with the changes")
 	addFlagVerbose(cmdGenerate.Flags, &verbose)
 	return cmdGenerate
 }
 
-func newCmdTag() *cli.Command {
+func newCmdRelease() *cli.Command {
 	var verbose bool
-	cmdTag := &cli.Command{
-		Short:     "tag tags and creates a GitHub release for a merged pull request.",
-		UsageLine: "librarian release tag [arguments]",
-		Long:      tagLongHelp,
+	var all bool
+	cmdRelease := &cli.Command{
+		Short:     "release tags the prepared version and updates recorded release state",
+		UsageLine: "librarian release <path> | librarian release --all",
+		Long:      releaseLongHelp,
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			setupLogger(verbose)
-			slog.Debug("tag command verbose logging")
-			if err := cmd.Config.SetDefaults(); err != nil {
-				return fmt.Errorf("failed to initialize config: %w", err)
-			}
-			if _, err := cmd.Config.IsValid(); err != nil {
-				return fmt.Errorf("failed to validate config: %s", err)
-			}
-			runner, err := newTagRunner(cmd.Config)
-			if err != nil {
-				return err
-			}
-			return runner.run(ctx)
+			slog.Debug("release command verbose logging")
+			return fmt.Errorf("release command not yet implemented")
 		},
 	}
-	cmdTag.Init()
-	addFlagRepo(cmdTag.Flags, cmdTag.Config)
-	addFlagPR(cmdTag.Flags, cmdTag.Config)
-	addFlagGitHubAPIEndpoint(cmdTag.Flags, cmdTag.Config)
-	addFlagVerbose(cmdTag.Flags, &verbose)
-	return cmdTag
+	cmdRelease.Init()
+	cmdRelease.Flags.BoolVar(&all, "all", false, "release all artifacts with a prepared release")
+	addFlagVerbose(cmdRelease.Flags, &verbose)
+	return cmdRelease
 }
 
-func newCmdStage() *cli.Command {
+func newCmdPrepare() *cli.Command {
 	var verbose bool
-	cmdStage := &cli.Command{
-		Short:     "stage stages a release by creating a release pull request.",
-		UsageLine: "librarian release stage [flags]",
-		Long:      releaseStageLongHelp,
+	var all bool
+	var commit bool
+	cmdPrepare := &cli.Command{
+		Short:     "prepare determines next version, updates metadata, and prepares release notes",
+		UsageLine: "librarian prepare <path> | librarian prepare --all",
+		Long:      prepareLongHelp,
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			setupLogger(verbose)
-			slog.Debug("stage command verbose logging")
-			if err := cmd.Config.SetDefaults(); err != nil {
-				return fmt.Errorf("failed to initialize config: %w", err)
-			}
-			if _, err := cmd.Config.IsValid(); err != nil {
-				return fmt.Errorf("failed to validate config: %s", err)
-			}
-			runner, err := newStageRunner(cmd.Config)
-			if err != nil {
-				return err
-			}
-			return runner.run(ctx)
+			slog.Debug("prepare command verbose logging")
+			return fmt.Errorf("prepare command not yet implemented")
 		},
 	}
-	cmdStage.Init()
-	addFlagCommit(cmdStage.Flags, cmdStage.Config)
-	addFlagPush(cmdStage.Flags, cmdStage.Config)
-	addFlagImage(cmdStage.Flags, cmdStage.Config)
-	addFlagLibrary(cmdStage.Flags, cmdStage.Config)
-	addFlagLibraryVersion(cmdStage.Flags, cmdStage.Config)
-	addFlagRepo(cmdStage.Flags, cmdStage.Config)
-	addFlagBranch(cmdStage.Flags, cmdStage.Config)
-	addFlagWorkRoot(cmdStage.Flags, cmdStage.Config)
-	addFlagVerbose(cmdStage.Flags, &verbose)
-	return cmdStage
+	cmdPrepare.Init()
+	cmdPrepare.Flags.BoolVar(&all, "all", false, "prepare all artifacts with a release section")
+	cmdPrepare.Flags.BoolVar(&commit, "commit", false, "create a git commit with the changes")
+	addFlagVerbose(cmdPrepare.Flags, &verbose)
+	return cmdPrepare
 }
 
-func newCmdUpdateImage() *cli.Command {
+func newCmdInit() *cli.Command {
 	var verbose bool
-	cmdUpdateImage := &cli.Command{
-		Short:     "update-image updates configured language image container",
-		UsageLine: "librarian update-image [flags]",
-		Long:      updateImageLongHelp,
+	cmdInit := &cli.Command{
+		Short:     "init initializes a repository for library management",
+		UsageLine: "librarian init [language]",
+		Long:      initLongHelp,
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			setupLogger(verbose)
-			slog.Debug("update image command verbose logging")
-			if err := cmd.Config.SetDefaults(); err != nil {
-				return fmt.Errorf("failed to initialize config: %w", err)
-			}
-			if _, err := cmd.Config.IsValid(); err != nil {
-				return fmt.Errorf("failed to validate config: %s", err)
-			}
-			runner, err := newUpdateImageRunner(cmd.Config)
-			if err != nil {
-				return err
-			}
-			return runner.run(ctx)
+			slog.Debug("init command verbose logging")
+			return fmt.Errorf("init command not yet implemented")
 		},
 	}
-	cmdUpdateImage.Init()
-	addFlagAPISource(cmdUpdateImage.Flags, cmdUpdateImage.Config)
-	addFlagBuild(cmdUpdateImage.Flags, cmdUpdateImage.Config)
-	addFlagCommit(cmdUpdateImage.Flags, cmdUpdateImage.Config)
-	addFlagHostMount(cmdUpdateImage.Flags, cmdUpdateImage.Config)
-	addFlagImage(cmdUpdateImage.Flags, cmdUpdateImage.Config)
-	addFlagRepo(cmdUpdateImage.Flags, cmdUpdateImage.Config)
-	addFlagBranch(cmdUpdateImage.Flags, cmdUpdateImage.Config)
-	addFlagWorkRoot(cmdUpdateImage.Flags, cmdUpdateImage.Config)
-	addFlagPush(cmdUpdateImage.Flags, cmdUpdateImage.Config)
-	addFlagTest(cmdUpdateImage.Flags, cmdUpdateImage.Config)
-	addFlagLibraryToTest(cmdUpdateImage.Flags, cmdUpdateImage.Config)
-	addFlagCheckUnexpectedChanges(cmdUpdateImage.Flags, cmdUpdateImage.Config)
-	addFlagVerbose(cmdUpdateImage.Flags, &verbose)
-	return cmdUpdateImage
+	cmdInit.Init()
+	addFlagVerbose(cmdInit.Flags, &verbose)
+	return cmdInit
+}
+
+func newCmdAdd() *cli.Command {
+	var verbose bool
+	var commit bool
+	cmdAdd := &cli.Command{
+		Short:     "add tracks a directory for management",
+		UsageLine: "librarian add <path> [api...]",
+		Long:      addLongHelp,
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			setupLogger(verbose)
+			slog.Debug("add command verbose logging")
+			return fmt.Errorf("add command not yet implemented")
+		},
+	}
+	cmdAdd.Init()
+	cmdAdd.Flags.BoolVar(&commit, "commit", false, "create a git commit with the changes")
+	addFlagVerbose(cmdAdd.Flags, &verbose)
+	return cmdAdd
+}
+
+func newCmdEdit() *cli.Command {
+	var verbose bool
+	var metadata []string
+	var language string
+	var keep []string
+	var remove []string
+	var exclude []string
+	cmdEdit := &cli.Command{
+		Short:     "edit edits artifact configuration",
+		UsageLine: "librarian edit <path> [flags]",
+		Long:      editLongHelp,
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			setupLogger(verbose)
+			slog.Debug("edit command verbose logging")
+			return fmt.Errorf("edit command not yet implemented")
+		},
+	}
+	cmdEdit.Init()
+	cmdEdit.Flags.Var((*stringSliceFlag)(&metadata), "metadata", "set metadata field (KEY=VALUE, can be repeated)")
+	cmdEdit.Flags.StringVar(&language, "language", "", "set language-specific metadata (LANG:KEY=VALUE)")
+	cmdEdit.Flags.Var((*stringSliceFlag)(&keep), "keep", "add file/directory to keep list (can be repeated)")
+	cmdEdit.Flags.Var((*stringSliceFlag)(&remove), "remove", "add file/directory to remove list (can be repeated)")
+	cmdEdit.Flags.Var((*stringSliceFlag)(&exclude), "exclude", "add file/directory to exclude list (can be repeated)")
+	addFlagVerbose(cmdEdit.Flags, &verbose)
+	return cmdEdit
+}
+
+func newCmdRemove() *cli.Command {
+	var verbose bool
+	cmdRemove := &cli.Command{
+		Short:     "remove stops tracking a directory",
+		UsageLine: "librarian remove <path>",
+		Long:      removeLongHelp,
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			setupLogger(verbose)
+			slog.Debug("remove command verbose logging")
+			return fmt.Errorf("remove command not yet implemented")
+		},
+	}
+	cmdRemove.Init()
+	addFlagVerbose(cmdRemove.Flags, &verbose)
+	return cmdRemove
+}
+
+func newCmdConfigGet() *cli.Command {
+	var verbose bool
+	cmdConfigGet := &cli.Command{
+		Short:     "get reads a configuration value",
+		UsageLine: "librarian config get <key>",
+		Long:      configGetLongHelp,
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			setupLogger(verbose)
+			slog.Debug("config get command verbose logging")
+			return fmt.Errorf("config get command not yet implemented")
+		},
+	}
+	cmdConfigGet.Init()
+	addFlagVerbose(cmdConfigGet.Flags, &verbose)
+	return cmdConfigGet
+}
+
+func newCmdConfigSet() *cli.Command {
+	var verbose bool
+	cmdConfigSet := &cli.Command{
+		Short:     "set sets a configuration value",
+		UsageLine: "librarian config set <key> <value>",
+		Long:      configSetLongHelp,
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			setupLogger(verbose)
+			slog.Debug("config set command verbose logging")
+			return fmt.Errorf("config set command not yet implemented")
+		},
+	}
+	cmdConfigSet.Init()
+	addFlagVerbose(cmdConfigSet.Flags, &verbose)
+	return cmdConfigSet
+}
+
+func newCmdConfigUpdate() *cli.Command {
+	var verbose bool
+	var all bool
+	cmdConfigUpdate := &cli.Command{
+		Short:     "update updates toolchain versions to latest",
+		UsageLine: "librarian config update [key] | librarian config update --all",
+		Long:      configUpdateLongHelp,
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			setupLogger(verbose)
+			slog.Debug("config update command verbose logging")
+			return fmt.Errorf("config update command not yet implemented")
+		},
+	}
+	cmdConfigUpdate.Init()
+	cmdConfigUpdate.Flags.BoolVar(&all, "all", false, "update all toolchain versions")
+	addFlagVerbose(cmdConfigUpdate.Flags, &verbose)
+	return cmdConfigUpdate
+}
+
+// stringSliceFlag implements flag.Value for string slices.
+type stringSliceFlag []string
+
+// String returns a string representation of the stringSliceFlag.
+func (s *stringSliceFlag) String() string {
+	if s == nil {
+		return ""
+	}
+	return fmt.Sprintf("%v", *s)
+}
+
+// Set appends a value to the stringSliceFlag.
+func (s *stringSliceFlag) Set(value string) error {
+	*s = append(*s, value)
+	return nil
 }

@@ -161,14 +161,14 @@ func TestParseGlobalConfig(t *testing.T) {
 	for _, test := range []struct {
 		name       string
 		filename   string
-		want       *config.LibrarianConfig
+		want       *config.OldLibrarianConfig
 		wantErr    bool
 		wantErrMsg string
 	}{
 		{
 			name:     "valid global config",
 			filename: "successful-parsing-config.yaml",
-			want: &config.LibrarianConfig{
+			want: &config.OldLibrarianConfig{
 				GlobalFilesAllowlist: []*config.GlobalFile{
 					{
 						Path:        "a/path",

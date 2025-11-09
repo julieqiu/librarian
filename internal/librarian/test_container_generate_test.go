@@ -414,7 +414,7 @@ func TestTestGenerateRunnerRun(t *testing.T) {
 	for _, test := range []struct {
 		name                   string
 		state                  *config.LibrarianState
-		librarianConfig        *config.LibrarianConfig
+		librarianConfig        *config.OldLibrarianConfig
 		libraryID              string
 		prepareErr             error
 		generateErr            error
@@ -440,7 +440,7 @@ func TestTestGenerateRunnerRun(t *testing.T) {
 					},
 				},
 			},
-			librarianConfig: &config.LibrarianConfig{
+			librarianConfig: &config.OldLibrarianConfig{
 				Libraries: []*config.LibraryConfig{
 					{
 						LibraryID:       "blocked-lib",
@@ -550,7 +550,7 @@ func TestTestGenerateRunnerRun(t *testing.T) {
 					},
 				},
 			},
-			librarianConfig: &config.LibrarianConfig{
+			librarianConfig: &config.OldLibrarianConfig{
 				Libraries: []*config.LibraryConfig{
 					{
 						LibraryID:       "lib2",
