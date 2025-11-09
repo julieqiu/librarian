@@ -154,7 +154,22 @@ func newCmdInit() *cli.Command {
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			setupLogger(verbose)
 			slog.Debug("init command verbose logging")
-			return fmt.Errorf("init command not yet implemented")
+
+			// Get optional language argument
+			args := cmd.Flags.Args()
+			var language string
+			if len(args) > 0 {
+				language = args[0]
+			}
+			if len(args) > 1 {
+				return fmt.Errorf("too many arguments, expected: librarian init [language]")
+			}
+
+			runner, err := newInitRunner(args, language)
+			if err != nil {
+				return err
+			}
+			return runner.run(ctx)
 		},
 	}
 	cmdInit.Init()
