@@ -32,11 +32,6 @@ const (
 	// BuildResponse is a JSON file that describes which library to change after
 	// built/test.
 	BuildResponse = "build-response.json"
-	// ConfigureRequest is a JSON file that describes which library to configure.
-	ConfigureRequest = "configure-request.json"
-	// ConfigureResponse is a JSON file that describes which library to change
-	// after initial configuration.
-	ConfigureResponse = "configure-response.json"
 	// GeneratorInputDir is the default directory to store files that generator
 	// needs to regenerate libraries from an empty directory.
 	GeneratorInputDir = ".librarian/generator-input"

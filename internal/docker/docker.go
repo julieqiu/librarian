@@ -39,8 +39,6 @@ type Command string
 const (
 	// CommandBuild builds a library.
 	CommandBuild Command = "build"
-	// CommandConfigure configures a new API as a library.
-	CommandConfigure Command = "configure"
 	// CommandGenerate performs generation for a configured library.
 	CommandGenerate Command = "generate"
 	// CommandReleaseStage performs release for a library.
@@ -75,37 +73,6 @@ type BuildRequest struct {
 
 	// RepoDir is the local root directory of the language repository.
 	RepoDir string
-
-	// State is a pointer to the [config.LibrarianState] struct, representing
-	// the overall state of the generation and release pipeline.
-	State *config.LibrarianState
-
-	// Image is the name of the docker image to use when running. If not
-	// specified, uses the default image configured for the client.
-	Image string
-}
-
-// ConfigureRequest contains all the information required for a language
-// container to run the configure command.
-type ConfigureRequest struct {
-	// GoogleapisDir specifies the root directory of the googleapis repository.
-	GoogleapisDir string
-
-	// libraryID specifies the ID of the library to configure.
-	LibraryID string
-
-	// Output specifies the empty output directory into which the command should
-	// generate code
-	Output string
-
-	// RepoDir is the local root directory of the language repository.
-	RepoDir string
-
-	// ExistingSourceRoots are existing source roots in the language repository.
-	ExistingSourceRoots []string
-
-	// GlobalFiles are global files of the language repository.
-	GlobalFiles []string
 
 	// State is a pointer to the [config.LibrarianState] struct, representing
 	// the overall state of the generation and release pipeline.
@@ -275,53 +242,6 @@ func (c *Docker) Build(ctx context.Context, request *BuildRequest) error {
 
 	image := c.resolveImage(request.Image)
 	return c.runDocker(ctx, image, CommandBuild, mounts, commandArgs)
-}
-
-// Configure configures an API within a repository, either adding it to an
-// existing library or creating a new library.
-//
-// Returns the configured library id if the command succeeds.
-func (c *Docker) Configure(ctx context.Context, request *ConfigureRequest) (string, error) {
-	reqFilePath := filepath.Join(request.RepoDir, config.LibrarianDir, config.ConfigureRequest)
-	if err := writeLibrarianState(request.State, reqFilePath); err != nil {
-		return "", err
-	}
-	defer func() {
-		if b, err := os.ReadFile(reqFilePath); err == nil {
-			slog.Debug("configure request", "content", string(b))
-		}
-		err := os.Remove(reqFilePath)
-		if err != nil {
-			slog.Warn("fail to remove file", slog.String("name", reqFilePath), slog.Any("err", err))
-		}
-	}()
-	commandArgs := []string{
-		"--request=/request",
-		"--output=/output",
-		"--repo=/repo",
-		"--source=/source",
-	}
-	librarianDir := filepath.Join(request.RepoDir, config.LibrarianDir)
-	mounts := []string{
-		fmt.Sprintf("%s:/request", librarianDir),
-		fmt.Sprintf("%s:/output", request.Output),
-		fmt.Sprintf("%s:/source:ro", request.GoogleapisDir), // readonly volume
-	}
-	// Mount existing source roots as a readonly volume.
-	for _, sourceRoot := range request.ExistingSourceRoots {
-		mounts = append(mounts, fmt.Sprintf("%s/%s:/repo/%s:ro", request.RepoDir, sourceRoot, sourceRoot))
-	}
-	// Mount global files as a readonly volume.
-	for _, globalFile := range request.GlobalFiles {
-		mounts = append(mounts, fmt.Sprintf("%s/%s:/repo/%s:ro", request.RepoDir, globalFile, globalFile))
-	}
-
-	image := c.resolveImage(request.Image)
-	if err := c.runDocker(ctx, image, CommandConfigure, mounts, commandArgs); err != nil {
-		return "", err
-	}
-
-	return request.LibraryID, nil
 }
 
 // ReleaseStage stages a release for a given language repository.
