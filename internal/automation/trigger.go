@@ -35,7 +35,6 @@ var triggerNameByCommandName = map[string]string{
 	"generate":        "generate",
 	"stage-release":   "stage-release",
 	"publish-release": "publish-release",
-	"update-image":    "update-image",
 }
 
 const region = "global"
@@ -135,7 +134,7 @@ func runCommandWithConfig(ctx context.Context, client CloudBuildClient, ghClient
 			} else {
 				substitutions["_PR"] = fmt.Sprintf("%v", prs[0].GetHTMLURL())
 			}
-		} else if command == "generate" || command == "update-image" {
+		} else if command == "generate" {
 			substitutions["_BUILD"] = fmt.Sprintf("%v", build)
 		}
 		err = runCloudBuildTriggerByName(ctx, client, projectId, region, triggerName, substitutions)

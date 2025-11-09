@@ -148,8 +148,7 @@ type Config struct {
 	// GitHubToken is the access token to use for all operations involving
 	// GitHub.
 	//
-	// GitHubToken is used by to configure, update-apis and update-image-tag commands,
-	// when Push is true.
+	// GitHubToken is used by commands when Push is true.
 	//
 	// GitHubToken is not specified by a flag, as flags are logged and the
 	// access token is sensitive information. Instead, it is fetched from the
