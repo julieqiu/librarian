@@ -118,7 +118,7 @@ func (r *initRunner) run(ctx context.Context) error {
 				Tag:   containerInfo.tag,
 			},
 			Googleapis: config.RepositoryRef{
-				Repo: "github.com/googleapis/googleapis",
+				Path: "github.com/googleapis/googleapis",
 				// Ref is intentionally omitted - will be set during first 'add' command
 			},
 			Dir: defaultGenerateDir,
@@ -127,7 +127,7 @@ func (r *initRunner) run(ctx context.Context) error {
 		// Add Discovery for Python and Go
 		if r.language == "python" || r.language == "go" {
 			librarianConfig.Generate.Discovery = &config.RepositoryRef{
-				Repo: "github.com/googleapis/discovery-artifact-manager",
+				Path: "github.com/googleapis/discovery-artifact-manager",
 				// Ref is intentionally omitted
 			}
 		}

@@ -25,10 +25,10 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/googleapis/librarian/internal/cli"
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/docker"
-	"github.com/googleapis/librarian/internal/gitrepo"
+	sidekickconfig "github.com/googleapis/librarian/internal/sidekick/config"
+	"github.com/googleapis/librarian/internal/sidekick/sidekick"
 )
 
 type generateNewRunner struct {
@@ -82,6 +82,7 @@ func newGenerateNewRunner(args []string, all, commit bool) (*generateNewRunner, 
 }
 
 func (r *generateNewRunner) run(ctx context.Context) error {
+	_ = ctx
 	if r.all {
 		return r.generateAll(ctx)
 	}
@@ -107,20 +108,13 @@ func (r *generateNewRunner) generateSingle(ctx context.Context, artifactPath str
 	fmt.Printf("Generating code for %s...\n", artifactPath)
 	fmt.Printf("  APIs: %d\n", len(artifactState.Generate.APIs))
 	fmt.Printf("  Container: %s:%s\n", artifactState.Generate.Container.Image, artifactState.Generate.Container.Tag)
-	fmt.Printf("  Googleapis: %s @ %s\n", artifactState.Generate.Googleapis.Repo, artifactState.Generate.Googleapis.Ref)
+	fmt.Printf("  Googleapis: %s\n", r.repoConfig.Generate.Googleapis.Path)
 
 	// 1. Clone or update googleapis repository
-	googleapisRepo, err := r.ensureGoogleapisRepo(artifactState.Generate.Googleapis)
+	googleapisDir, err := r.ensureGoogleapisRepo(artifactState.Generate.Googleapis)
 	if err != nil {
 		return fmt.Errorf("failed to ensure googleapis repository: %w", err)
 	}
-
-	// Get the commit hash from googleapis
-	commitHash, err := googleapisRepo.HeadHash()
-	if err != nil {
-		return fmt.Errorf("failed to get googleapis commit hash: %w", err)
-	}
-	slog.Info("using googleapis commit", "hash", commitHash)
 
 	// 2. Prepare working directories
 	outputDir, err := os.MkdirTemp("", "librarian-generate-*")
@@ -145,7 +139,7 @@ func (r *generateNewRunner) generateSingle(ctx context.Context, artifactPath str
 	}
 
 	if err := dockerClient.Generate(ctx, &docker.GenerateRequest{
-		GoogleapisDir: googleapisRepo.GetDir(),
+		GoogleapisDir: googleapisDir,
 		Output:        outputDir,
 		RepoDir:       fullPath,
 		State:         r.convertToLibrarianState(artifactState, artifactPath),
@@ -159,13 +153,7 @@ func (r *generateNewRunner) generateSingle(ctx context.Context, artifactPath str
 		return fmt.Errorf("failed to apply file rules and copy: %w", err)
 	}
 
-	// 6. Update artifact state with generation metadata
-	artifactState.Generate.Commit = commitHash
-	artifactState.Generate.Librarian = cli.Version()
-
-	if err := config.WriteArtifactState(fullPath, artifactState); err != nil {
-		return fmt.Errorf("failed to write artifact state: %w", err)
-	}
+	// 6. No artifact state updates needed - googleapis path/SHA256 is in repository config
 
 	slog.Info("updated artifact state", "path", artifactPath)
 	fmt.Printf("✓ Generated code for %s\n", artifactPath)
@@ -262,31 +250,20 @@ func (r *generateNewRunner) findGeneratableArtifacts() ([]string, error) {
 }
 
 // ensureGoogleapisRepo clones or opens the googleapis repository at the specified ref.
-func (r *generateNewRunner) ensureGoogleapisRepo(googleapis config.RepositoryRef) (gitrepo.Repository, error) {
-	// Determine googleapis directory (use a cache directory)
-	googleapisDir := filepath.Join(r.repoRoot, ".librarian-cache", "googleapis")
-
-	// Clone or open the repository
-	repo, err := gitrepo.NewRepository(&gitrepo.RepositoryOptions{
-		Dir:          googleapisDir,
-		MaybeClone:   true,
-		RemoteURL:    googleapis.Repo,
-		RemoteBranch: "master", // Default branch
-		Depth:        1,        // Shallow clone for speed
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to clone/open googleapis: %w", err)
+func (r *generateNewRunner) ensureGoogleapisRepo(googleapis config.RepositoryRef) (string, error) {
+	// Convert to sidekick config format
+	sidekickConfig := &sidekickconfig.Config{
+		Source: map[string]string{
+			"googleapis-root":   googleapis.Path,
+			"googleapis-sha256": googleapis.Ref,
+		},
 	}
 
-	// Checkout the specified ref if provided
-	if googleapis.Ref != "" {
-		slog.Info("checking out googleapis ref", "ref", googleapis.Ref)
-		if err := repo.Checkout(googleapis.Ref); err != nil {
-			return nil, fmt.Errorf("failed to checkout ref %s: %w", googleapis.Ref, err)
-		}
-	}
-
-	return repo, nil
+	// Use sidekick's MakeSourceRoot which handles:
+	// - Local directory detection
+	// - Download and cache by SHA256
+	// - Tarball extraction
+	return sidekick.MakeSourceRoot(sidekickConfig, "googleapis")
 }
 
 // prepareGeneratorInput prepares the generator input directory with API configuration files.

@@ -105,11 +105,11 @@ generate:
     image: us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-prod/python-librarian-generator
     tag: latest
   googleapis:
-    repo: github.com/googleapis/googleapis
-    ref: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0
+    path: https://github.com/googleapis/googleapis/archive/a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0.tar.gz
+    sha256: 81e6057ffd85154af5268c2c3c8f2408745ca0f7fa03d43c68f4847f31eb5f98
   discovery:
-    repo: github.com/googleapis/discovery-artifact-manager
-    ref: f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0
+    path: https://github.com/googleapis/discovery-artifact-manager/archive/f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0.tar.gz
+    sha256: 867048ec8f0850a4d77ad836319e4c0a0c624928611af8a900cd77e676164e8e
   dir: packages/
 
 release:
@@ -126,11 +126,15 @@ release:
 
 - `container.image` - Container registry path (without tag)
 - `container.tag` - Container image tag (e.g., `latest`, `v1.0.0`)
-- `googleapis.repo` - Repository location for googleapis (GitHub path or local directory relative to `.librarian/`)
-- `googleapis.ref` - Git reference (commit SHA, branch name, or tag). Optional; if omitted, uses HEAD of default branch
-- `discovery.repo` - Repository location for discovery-artifact-manager
-- `discovery.ref` - Git reference. Optional; if omitted, uses HEAD of default branch
+- `googleapis.path` - Local directory path OR tarball URL (e.g., `/Users/name/googleapis` or `https://github.com/googleapis/googleapis/archive/{commit}.tar.gz`)
+- `googleapis.sha256` - SHA256 hash for integrity verification (required when `path` is a URL, ignored for local directories)
+- `discovery.path` - Local directory path OR tarball URL for discovery-artifact-manager
+- `discovery.sha256` - SHA256 hash (required when `path` is a URL)
 - `dir` - Directory where generated code is written (relative to repository root, with trailing `/`)
+
+**Local development support**: Set `googleapis.path` to a local directory (e.g., `/Users/name/code/googleapis/googleapis`) to use your local clone instead of downloading. This is useful for testing googleapis changes locally. The `sha256` field is ignored for local directories.
+
+**Production/CI**: Use tarball URLs with SHA256 verification for reproducible builds. Downloads are cached by SHA256 in `~/Library/Caches/librarian/downloads/` to avoid repeated downloads.
 
 **Note**: The presence of the `generate` section enables generation commands.
 The presence of the `release` section enables release commands.
@@ -198,17 +202,6 @@ generate:
       rest_numeric_enums: true
       opt_args:
         - warehouse-package-name=google-cloud-secret-manager
-  commit: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0
-  librarian: v0.5.0
-  container:
-    image: us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-prod/python-librarian-generator
-    tag: latest
-  googleapis:
-    repo: github.com/googleapis/googleapis
-    ref: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0
-  discovery:
-    repo: github.com/googleapis/discovery-artifact-manager
-    ref: f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0
 
 release:
   version: null
@@ -222,6 +215,8 @@ release:
 - `opt_args` - Additional generator options
 
 These fields can be manually edited if you need to override the BUILD.bazel configuration.
+
+**Note**: The artifact's `.librarian.yaml` contains only the API configuration. The googleapis URL and SHA256 are stored in the repository-level `.librarian.yaml` to ensure all artifacts use the same googleapis version. This prevents race conditions and ensures reproducible builds across all artifacts.
 
 **Note**: The `generate` section is only created when APIs are provided
 AND the repository has a `generate` section in its config.
@@ -352,11 +347,12 @@ Librarian updates the artifact's `.librarian.yaml` automatically.
 
 1. **librarian CLI** (Go binary):
    - Reads `.librarian/config.yaml` and artifact's `.librarian.yaml`
-   - Clones googleapis at the specified commit SHA
+   - Ensures googleapis is available:
+     - If `googleapis.path` is a local directory → uses it directly
+     - If `googleapis.path` is a URL → downloads tarball, verifies SHA256, caches in `~/Library/Caches/librarian/downloads/{sha256}/`
    - Prepares request files for the container with API configurations from `.librarian.yaml`
    - Runs the generator container with appropriate mounts
    - Applies keep/remove/exclude rules to the output
-   - Updates `.librarian.yaml` with generation metadata
 
 2. **Generator container** (language-specific):
    - Reads request files from mounted directory (includes pre-parsed API configurations)
@@ -369,9 +365,12 @@ Librarian updates the artifact's `.librarian.yaml` automatically.
    - Copies generated code to artifact directory
    - Preserves files in "keep" list
    - Removes files in "remove" list
-   - Updates `.librarian.yaml` state
 
 **Note**: BUILD.bazel parsing happens only once during `librarian add`. The extracted configuration is saved to `.librarian.yaml` and reused for all subsequent `librarian generate` commands. This makes generation faster and ensures reproducibility even if BUILD.bazel files change upstream.
+
+**Caching**: When using tarball URLs, librarian caches downloads by SHA256 hash. The cache key is the SHA256 itself, ensuring content-addressable storage. This means the same googleapis version is downloaded once and reused across all artifacts and repositories on your machine.
+
+**Design rationale**: Using immutable tarballs with SHA256 verification (instead of git clones) prevents race conditions when multiple PRs run generation concurrently. Each generation verifies the exact same tarball, eliminating the possibility of different commits being used. For local development, you can point directly to your local googleapis clone to test changes without downloading.
 
 `--commit` writes a standard commit message for the change.
 
@@ -460,7 +459,7 @@ librarian config update --all
 Supported keys:
 
 - `generate.container` - Update container image to latest
-- `generate.googleapis` - Update googleapis to latest commit
+- `generate.googleapis` - Update googleapis to latest commit (fetches latest master, downloads tarball, computes SHA256)
 - `generate.discovery` - Update discovery-artifact-manager to latest commit
 
 Set a configuration key explicitly:
@@ -476,10 +475,10 @@ Supported keys:
 - `generate.container.image` - Container image name
 - `generate.container.tag` - Container image tag
 - `generate.container` - Container image and tag (syntactic sugar)
-- `generate.googleapis.repo` - Googleapis repository location
-- `generate.googleapis.ref` - Googleapis git reference
-- `generate.discovery.repo` - Discovery repository location
-- `generate.discovery.ref` - Discovery git reference
+- `generate.googleapis.path` - Googleapis local directory or tarball URL
+- `generate.googleapis.sha256` - Googleapis tarball SHA256 hash (required for URLs)
+- `generate.discovery.path` - Discovery local directory or tarball URL
+- `generate.discovery.sha256` - Discovery tarball SHA256 hash (required for URLs)
 - `release.tag_format` - Release tag format template
 
 **Example: Set global generation directory**
@@ -497,6 +496,27 @@ librarian config set generate.container python-gen:v1.2.0
 # Or set them independently
 librarian config set generate.container.image python-gen
 librarian config set generate.container.tag v1.2.0
+```
+
+**Example: Update googleapis to a specific commit**
+
+```bash
+# Manually set googleapis path and SHA256
+librarian config set generate.googleapis.path https://github.com/googleapis/googleapis/archive/abc123.tar.gz
+librarian config set generate.googleapis.sha256 81e6057ffd85154af5268c2c3c8f2408745ca0f7fa03d43c68f4847f31eb5f98
+
+# Or use the update command to fetch latest master automatically
+librarian config update generate.googleapis
+```
+
+**Example: Use local googleapis for development**
+
+```bash
+# Point to your local clone
+librarian config set generate.googleapis.path /Users/name/code/googleapis/googleapis
+
+# Generate using local googleapis
+librarian generate packages/secret-manager
 ```
 
 ## Inspection

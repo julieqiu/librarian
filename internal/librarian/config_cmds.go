@@ -256,11 +256,11 @@ func getConfigValue(cfg *config.LibrarianConfig, key string) (string, error) {
 			}
 		case "googleapis":
 			if len(parts) == 2 {
-				return cfg.Generate.Googleapis.Repo, nil
+				return cfg.Generate.Googleapis.Path, nil
 			}
 			switch parts[2] {
 			case "repo":
-				return cfg.Generate.Googleapis.Repo, nil
+				return cfg.Generate.Googleapis.Path, nil
 			case "ref":
 				return cfg.Generate.Googleapis.Ref, nil
 			default:
@@ -271,11 +271,11 @@ func getConfigValue(cfg *config.LibrarianConfig, key string) (string, error) {
 				return "", fmt.Errorf("discovery section does not exist")
 			}
 			if len(parts) == 2 {
-				return cfg.Generate.Discovery.Repo, nil
+				return cfg.Generate.Discovery.Path, nil
 			}
 			switch parts[2] {
 			case "repo":
-				return cfg.Generate.Discovery.Repo, nil
+				return cfg.Generate.Discovery.Path, nil
 			case "ref":
 				return cfg.Generate.Discovery.Ref, nil
 			default:
@@ -358,7 +358,7 @@ func setConfigValue(cfg *config.LibrarianConfig, key, value string) error {
 			}
 			switch parts[2] {
 			case "repo":
-				cfg.Generate.Googleapis.Repo = value
+				cfg.Generate.Googleapis.Path = value
 			case "ref":
 				cfg.Generate.Googleapis.Ref = value
 			default:
@@ -373,7 +373,7 @@ func setConfigValue(cfg *config.LibrarianConfig, key, value string) error {
 			}
 			switch parts[2] {
 			case "repo":
-				cfg.Generate.Discovery.Repo = value
+				cfg.Generate.Discovery.Path = value
 			case "ref":
 				cfg.Generate.Discovery.Ref = value
 			default:

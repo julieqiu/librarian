@@ -47,11 +47,11 @@ generate:
     image: us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-prod/python-librarian-generator
     tag: latest
   googleapis:
-    repo: github.com/googleapis/googleapis
-    ref: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0
+    path: https://github.com/googleapis/googleapis/archive/a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0.tar.gz
+    sha256: 81e6057ffd85154af5268c2c3c8f2408745ca0f7fa03d43c68f4847f31eb5f98
   discovery:
-    repo: github.com/googleapis/discovery-artifact-manager
-    ref: f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0
+    path: https://github.com/googleapis/discovery-artifact-manager/archive/f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0.tar.gz
+    sha256: 867048ec8f0850a4d77ad836319e4c0a0c624928611af8a900cd77e676164e8e
   dir: packages/
 
 release:
@@ -77,14 +77,19 @@ When present, enables code generation commands.
 
 - `container.image` - Container registry path (without tag)
 - `container.tag` - Container image tag (e.g., `latest`, `v1.0.0`)
-- `googleapis.repo` - Repository location for googleapis (GitHub path or local directory
-  relative to `.librarian/`)
-- `googleapis.ref` - Git reference (commit SHA, branch name, or tag). Optional; if
-  omitted, uses HEAD of default branch
-- `discovery.repo` - Repository location for discovery-artifact-manager
-- `discovery.ref` - Git reference. Optional; if omitted, uses HEAD of default branch
+- `googleapis.path` - Local directory path OR tarball URL (e.g., `/Users/name/googleapis` or `https://github.com/googleapis/googleapis/archive/{commit}.tar.gz`)
+- `googleapis.sha256` - SHA256 hash for integrity verification (required when `path` is a URL, ignored for local directories)
+- `discovery.path` - Local directory path OR tarball URL for discovery-artifact-manager
+- `discovery.sha256` - SHA256 hash (required when `path` is a URL)
 - `dir` - Directory where generated code is written (relative to repository root,
   with trailing `/`)
+
+**Design rationale**: The `path` field supports both local directories and tarball URLs:
+- **Local development** - Point to your local clone (e.g., `/Users/name/googleapis`) to test changes without downloading
+- **Production/CI** - Use immutable tarballs with SHA256 verification for reproducibility
+- **Caching** - Downloads are cached by SHA256 in `~/Library/Caches/librarian/downloads/` to avoid repeated downloads
+- **No race conditions** - Multiple concurrent generations verify the same immutable tarball
+- **Single source of truth** - All artifacts use the same googleapis version from the repository config
 
 #### `release` section (optional)
 
@@ -139,17 +144,6 @@ generate:
     - temp.txt
   exclude:
     - tests/
-  commit: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0
-  librarian: v0.5.0
-  container:
-    image: us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-prod/python-librarian-generator
-    tag: latest
-  googleapis:
-    repo: github.com/googleapis/googleapis
-    ref: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0
-  discovery:
-    repo: github.com/googleapis/discovery-artifact-manager
-    ref: f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0
 
 release:
   version: null
@@ -219,16 +213,11 @@ language:
 - `remove` - Files/directories deleted after generation (array of regex patterns)
 - `exclude` - Files/directories not included in releases (array of regex patterns)
 
-**Generation state** (populated by `librarian generate`):
-
-- `commit` - Googleapis commit SHA used for generation
-- `librarian` - Librarian version used for generation
-- `container.image` - Container image used (copied from repository config)
-- `container.tag` - Container tag used (copied from repository config)
-- `googleapis.repo` - Googleapis repo location (copied from repository config)
-- `googleapis.ref` - Googleapis ref used (copied from repository config)
-- `discovery.repo` - Discovery repo location (copied from repository config)
-- `discovery.ref` - Discovery ref used (copied from repository config)
+**Note**: The artifact's `.librarian.yaml` does NOT store googleapis URL/SHA256 or generation history. These are stored only in the repository-level `.librarian.yaml` to ensure all artifacts use the same googleapis version. This design:
+- Prevents duplication across hundreds of artifact configs
+- Ensures consistency - all artifacts generated from the same googleapis version
+- Prevents race conditions - no per-artifact googleapis state to get out of sync
+- Simplifies updates - change googleapis version in one place, regenerate all artifacts
 
 #### `release` section (optional)
 
@@ -287,11 +276,14 @@ This:
 
 1. Reads `.librarian/config.yaml` (repository config)
 2. Reads `packages/google-cloud-secret-manager/.librarian.yaml` (artifact config)
-3. Clones googleapis at the specified ref (or updates existing clone)
+3. Ensures googleapis is available:
+   - If `googleapis.path` is a local directory → uses it directly
+   - If `googleapis.path` is a URL → downloads tarball, verifies SHA256, caches by SHA256
 4. Prepares generate-request.json with API configurations from `.librarian.yaml`
 5. Runs generator container with appropriate mounts
 6. Applies keep/remove/exclude rules to the output
-7. Updates `.librarian.yaml` with generation metadata (commit, librarian version)
+
+**No generation state** is written to the artifact's `.librarian.yaml`. The repository config already contains the googleapis path/SHA256, which serves as the single source of truth for what was used.
 
 ## Container Interface
 
@@ -414,18 +406,18 @@ The container does NOT:
 - Container remains simple - just executes protoc with provided options
 - Go has excellent Bazel parsing libraries (`github.com/bazelbuild/buildtools/build`)
 
-### Why copy container/googleapis/discovery settings to artifact config?
+### Why NOT copy container/googleapis/discovery settings to artifact config?
 
-This provides **explicit versioning** - each artifact records exactly which container
-and googleapis version was used for generation. This enables:
+The new design stores googleapis URL/SHA256 **only in the repository config**, not in each artifact's config. This provides:
 
-- **Reproducibility** - Can regenerate with exact same inputs
-- **Transparency** - Users can see what was used by reading `.librarian.yaml`
-- **Per-artifact control** - Different artifacts can use different container versions
-- **History** - Git log shows when container/googleapis versions changed
+- **Single source of truth** - One place to update googleapis version for all artifacts
+- **No duplication** - Don't repeat the same URL/SHA256 across hundreds of artifact configs
+- **Prevents race conditions** - No mutable shared cache or per-artifact googleapis state
+- **Consistent generation** - All artifacts always use the same googleapis version
+- **Simpler updates** - Change googleapis in one file, regenerate all artifacts
+- **Git history still works** - `git log .librarian.yaml` shows when googleapis changed for the entire repository
 
-Without this, we'd need to look at git history to know what was in the repository
-config at generation time.
+This follows the same pattern as sidekick (see `.sidekick.toml` in google-cloud-rust), where the root config contains `googleapis-root` and `googleapis-sha256`, and per-library configs contain only API-specific settings.
 
 ### Why use regex patterns for keep/remove/exclude?
 

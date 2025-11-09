@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -50,9 +51,12 @@ type ContainerConfig struct {
 	Tag   string `yaml:"tag"`
 }
 
-// RepositoryRef specifies a repository location and git reference.
+// RepositoryRef specifies a repository location.
+// Path can be either a local directory path or a tarball URL.
+// When Path is a URL, SHA256 is required for integrity verification.
+// When Path is a local directory, SHA256 is ignored.
 type RepositoryRef struct {
-	Repo string `yaml:"repo"`
+	Path string `yaml:"path"`
 	Ref  string `yaml:"ref,omitempty"`
 }
 
@@ -105,8 +109,20 @@ func (c *LibrarianConfig) Validate() error {
 		if c.Generate.Container.Tag == "" {
 			return fmt.Errorf("generate.container.tag is required when generate section is present")
 		}
-		if c.Generate.Googleapis.Repo == "" {
-			return fmt.Errorf("generate.googleapis.repo is required when generate section is present")
+		if c.Generate.Googleapis.Path == "" {
+			return fmt.Errorf("generate.googleapis.path is required when generate section is present")
+		}
+		// Validate that SHA256 is provided when path is a URL
+		if isURL(c.Generate.Googleapis.Path) && c.Generate.Googleapis.Ref == "" {
+			return fmt.Errorf("generate.googleapis.sha256 is required when googleapis.path is a URL")
+		}
+		if c.Generate.Discovery != nil {
+			if c.Generate.Discovery.Path == "" {
+				return fmt.Errorf("generate.discovery.path is required when discovery section is present")
+			}
+			if isURL(c.Generate.Discovery.Path) && c.Generate.Discovery.Ref == "" {
+				return fmt.Errorf("generate.discovery.sha256 is required when discovery.path is a URL")
+			}
 		}
 	}
 
@@ -117,6 +133,10 @@ func (c *LibrarianConfig) Validate() error {
 	}
 
 	return nil
+}
+
+func isURL(path string) bool {
+	return strings.HasPrefix(path, "https://") || strings.HasPrefix(path, "http://")
 }
 
 // HasGenerate returns true if the repository supports code generation.

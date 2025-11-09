@@ -114,7 +114,7 @@ func TestInitRunner(t *testing.T) {
 				if librarianConfig.Generate.Container.Tag == "" {
 					t.Error("generate.container.tag should be set")
 				}
-				if librarianConfig.Generate.Googleapis.Repo == "" {
+				if librarianConfig.Generate.Googleapis.Path == "" {
 					t.Error("generate.googleapis.repo should be set")
 				}
 				if librarianConfig.Generate.Dir == "" {
@@ -125,7 +125,7 @@ func TestInitRunner(t *testing.T) {
 				if test.language == "python" || test.language == "go" {
 					if librarianConfig.Generate.Discovery == nil {
 						t.Error("generate.discovery should exist for python and go")
-					} else if librarianConfig.Generate.Discovery.Repo == "" {
+					} else if librarianConfig.Generate.Discovery.Path == "" {
 						t.Error("generate.discovery.repo should be set")
 					}
 				} else {
