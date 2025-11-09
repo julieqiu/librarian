@@ -128,13 +128,13 @@ release:
 
 **Configuration fields:**
 
-- `container.image` - Container registry path (without tag)
-- `container.tag` - Container image tag (e.g., `latest`, `v1.0.0`)
-- `googleapis.path` - Local directory path OR tarball URL (e.g., `/Users/name/googleapis` or `https://github.com/googleapis/googleapis/archive/{commit}.tar.gz`)
-- `googleapis.sha256` - SHA256 hash for integrity verification (required when `path` is a URL, ignored for local directories)
-- `discovery.path` - Local directory path OR tarball URL for discovery-artifact-manager
-- `discovery.sha256` - SHA256 hash (required when `path` is a URL)
-- `dir` - Directory where generated code is written (relative to repository root, with trailing `/`)
+- `generate.container.image` - Container registry path (without tag)
+- `generate.container.tag` - Container image tag (e.g., `latest`, `v1.0.0`)
+- `generate.googleapis.path` - Local directory path OR tarball URL (e.g., `/Users/name/googleapis` or `https://github.com/googleapis/googleapis/archive/{commit}.tar.gz`)
+- `generate.googleapis.sha256` - SHA256 hash for integrity verification (required when `path` is a URL, ignored for local directories)
+- `generate.discovery.path` - Local directory path OR tarball URL for discovery-artifact-manager
+- `generate.discovery.sha256` - SHA256 hash (required when `path` is a URL)
+- `generate.dir` - Directory where generated code is written (relative to repository root, with trailing `/`)
 
 **Local development support**: Set `googleapis.path` to a local directory (e.g., `/Users/name/code/googleapis/googleapis`) to use your local clone instead of downloading. This is useful for testing googleapis changes locally. The `sha256` field is ignored for local directories.
 
