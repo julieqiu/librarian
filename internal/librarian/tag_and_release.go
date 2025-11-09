@@ -120,6 +120,7 @@ func parseRemote(repo string) (*github.Repository, error) {
 }
 
 func (r *tagRunner) run(ctx context.Context) error {
+	_ = ctx
 	slog.Info("running tag command")
 	prs, err := r.determinePullRequestsToProcess(ctx)
 	if err != nil {

@@ -63,6 +63,7 @@ func newAddRunner(args []string, commit bool) (*addRunner, error) {
 }
 
 func (r *addRunner) run(ctx context.Context) error {
+	_ = ctx
 	artifactPath := filepath.Join(r.repoRoot, r.path)
 
 	// Check if directory exists
@@ -133,6 +134,7 @@ func (r *addRunner) run(ctx context.Context) error {
 }
 
 func (r *addRunner) addGenerateState(ctx context.Context, artifactState *config.ArtifactState) error {
+	_ = ctx // TODO(https://github.com/googleapis/librarian/issues/XXX): use ctx for future async operations
 	if r.repoConfig.Librarian.Language == "" {
 		return fmt.Errorf("repository language not set in .librarian.yaml (required for API generation)")
 	}

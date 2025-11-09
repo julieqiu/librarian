@@ -50,6 +50,7 @@ func newConfigGetRunner(args []string) (*configGetRunner, error) {
 }
 
 func (r *configGetRunner) run(ctx context.Context) error {
+	_ = ctx
 	// Read repository config
 	librarianConfig, err := config.ReadLibrarianConfig(r.repoRoot)
 	if err != nil {
@@ -94,6 +95,7 @@ func newConfigSetRunner(args []string) (*configSetRunner, error) {
 }
 
 func (r *configSetRunner) run(ctx context.Context) error {
+	_ = ctx
 	// Read repository config
 	librarianConfig, err := config.ReadLibrarianConfig(r.repoRoot)
 	if err != nil {
@@ -151,6 +153,7 @@ func newConfigUpdateRunner(args []string, all bool) (*configUpdateRunner, error)
 }
 
 func (r *configUpdateRunner) run(ctx context.Context) error {
+	_ = ctx
 	// Read repository config
 	librarianConfig, err := config.ReadLibrarianConfig(r.repoRoot)
 	if err != nil {
@@ -210,7 +213,7 @@ func (r *configUpdateRunner) run(ctx context.Context) error {
 	return nil
 }
 
-// getConfigValue retrieves a configuration value by key path
+// getConfigValue retrieves a configuration value by key path.
 func getConfigValue(cfg *config.LibrarianConfig, key string) (string, error) {
 	parts := strings.Split(key, ".")
 
@@ -301,7 +304,7 @@ func getConfigValue(cfg *config.LibrarianConfig, key string) (string, error) {
 	}
 }
 
-// setConfigValue sets a configuration value by key path
+// setConfigValue sets a configuration value by key path.
 func setConfigValue(cfg *config.LibrarianConfig, key, value string) error {
 	parts := strings.Split(key, ".")
 

@@ -68,6 +68,7 @@ func newStageRunner(cfg *config.Config) (*stageRunner, error) {
 }
 
 func (r *stageRunner) run(ctx context.Context) error {
+	_ = ctx
 	outputDir := filepath.Join(r.workRoot, "output")
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
 		return fmt.Errorf("failed to create output dir: %s", outputDir)

@@ -30,7 +30,7 @@ const (
 	defaultTagFormat   = "{name}-v{version}"
 )
 
-// Default container images for each language
+// Default container images for each language.
 var defaultContainerImages = map[string]struct{ image, tag string }{
 	"go": {
 		image: "us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-prod/go-librarian-generator",
@@ -56,6 +56,7 @@ type initRunner struct {
 }
 
 func newInitRunner(args []string, language string) (*initRunner, error) {
+	_ = args
 	// Get current working directory as repo root
 	repoRoot, err := os.Getwd()
 	if err != nil {
@@ -84,6 +85,7 @@ func newInitRunner(args []string, language string) (*initRunner, error) {
 }
 
 func (r *initRunner) run(ctx context.Context) error {
+	_ = ctx
 	configPath := filepath.Join(r.repoRoot, ".librarian.yaml")
 
 	// Check if .librarian.yaml already exists

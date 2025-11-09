@@ -83,6 +83,7 @@ func newUpdateImageRunner(cfg *config.Config) (*updateImageRunner, error) {
 }
 
 func (r *updateImageRunner) run(ctx context.Context) error {
+	_ = ctx
 	imagesClient := r.imagesClient
 	if imagesClient == nil {
 		slog.Info("no imagesClient provided, defaulting to ArtifactRegistry implementation")

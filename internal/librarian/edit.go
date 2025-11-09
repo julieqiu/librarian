@@ -64,6 +64,7 @@ func newEditRunner(args []string, metadata []string, language string, keep, remo
 }
 
 func (r *editRunner) run(ctx context.Context) error {
+	_ = ctx
 	artifactPath := filepath.Join(r.repoRoot, r.path)
 	configPath := filepath.Join(artifactPath, ".librarian.yaml")
 

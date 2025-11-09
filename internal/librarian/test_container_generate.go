@@ -43,6 +43,7 @@ type testGenerateRunner struct {
 }
 
 func (r *testGenerateRunner) run(ctx context.Context) error {
+	_ = ctx
 	sourceRepoHead, err := r.sourceRepo.HeadHash()
 	if err != nil {
 		return fmt.Errorf("failed to get source repo head: %w", err)

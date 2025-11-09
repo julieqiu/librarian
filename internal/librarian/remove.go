@@ -50,6 +50,7 @@ func newRemoveRunner(args []string) (*removeRunner, error) {
 }
 
 func (r *removeRunner) run(ctx context.Context) error {
+	_ = ctx
 	artifactPath := filepath.Join(r.repoRoot, r.path)
 	configPath := filepath.Join(artifactPath, ".librarian.yaml")
 
