@@ -36,7 +36,6 @@ type mockContainerClient struct {
 	stageCalls     int
 	generateErr    error
 	buildErr       error
-	configureErr   error
 	stageErr       error
 	// Set this value if you want an error when
 	// generate a library with a specific id.
@@ -49,14 +48,12 @@ type mockContainerClient struct {
 	failBuildForID string
 	// Set this value if you want an error when
 	// build a library with a specific id.
-	buildErrForID       error
-	requestLibraryID    string
-	noBuildResponse     bool
-	noConfigureResponse bool
-	noGenerateResponse  bool
-	noReleaseResponse   bool
-	noInitVersion       bool
-	wantErrorMsg        bool
+	buildErrForID      error
+	requestLibraryID   string
+	noBuildResponse    bool
+	noGenerateResponse bool
+	noReleaseResponse  bool
+	wantErrorMsg       bool
 	// Set this value if you want library files
 	// to be generated in source roots.
 	wantLibraryGen bool
@@ -401,18 +398,6 @@ func (m *MockRepository) ResetHard() error {
 func (m *MockRepository) DeleteLocalBranches(names []string) error {
 	m.DeleteLocalBranchesCalls++
 	return m.DeleteLocalBranchesError
-}
-
-// mockImagesClient is a mock implementation of the ImageRegistryClient interface for testing.
-type mockImagesClient struct {
-	latestImage     string
-	err             error
-	findLatestCalls int
-}
-
-func (m *mockImagesClient) FindLatest(ctx context.Context, imageName string) (string, error) {
-	m.findLatestCalls++
-	return m.latestImage, m.err
 }
 
 func (m *MockRepository) GetHashForPath(commitHash, path string) (string, error) {

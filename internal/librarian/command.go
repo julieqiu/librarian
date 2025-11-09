@@ -33,7 +33,6 @@ import (
 
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/docker"
-	"github.com/googleapis/librarian/internal/github"
 	"github.com/googleapis/librarian/internal/gitrepo"
 )
 
@@ -172,11 +171,6 @@ func findLibraryIDByAPIPath(state *config.LibrarianState, apiPath string) string
 		}
 	}
 	return ""
-}
-
-func formatTimestamp(t time.Time) string {
-	const yyyyMMddHHmmss = "20060102T150405Z" // Expected format by time library
-	return t.Format(yyyyMMddHHmmss)
 }
 
 // cleanAndCopyLibrary cleans the files of the given library in repoDir and copies

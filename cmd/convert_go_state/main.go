@@ -23,13 +23,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// StateYAML represents the structure of state.yaml
+// StateYAML represents the structure of state.yaml.
 type StateYAML struct {
 	Image     string    `yaml:"image"`
 	Libraries []Library `yaml:"libraries"`
 }
 
-// Library represents a library entry in state.yaml
+// Library represents a library entry in state.yaml.
 type Library struct {
 	ID                  string   `yaml:"id"`
 	Version             string   `yaml:"version"`
@@ -38,33 +38,33 @@ type Library struct {
 	ReleaseExcludePaths []string `yaml:"release_exclude_paths"`
 }
 
-// API represents an API configuration
+// API represents an API configuration.
 type API struct {
 	Path          string `yaml:"path"`
 	ServiceConfig string `yaml:"service_config"`
 }
 
-// LibrarianYAML represents the structure of .librarian.yaml
+// LibrarianYAML represents the structure of .librarian.yaml.
 type LibrarianYAML struct {
 	Generate Generate `yaml:"generate"`
 	Metadata Metadata `yaml:"metadata"`
 	Go       GoConfig `yaml:"go"`
 }
 
-// Generate represents the generate section
+// Generate represents the generate section.
 type Generate struct {
 	SpecificationFormat string `yaml:"specification_format"`
 	SpecificationSource string `yaml:"specification_source"`
 	ServiceConfig       string `yaml:"service_config"`
 }
 
-// Metadata represents the metadata section
+// Metadata represents the metadata section.
 type Metadata struct {
 	Name    string `yaml:"name"`
 	Version string `yaml:"version"`
 }
 
-// GoConfig represents the go section
+// GoConfig represents the go section.
 type GoConfig struct {
 	APIs    []API    `yaml:"apis,omitempty"`
 	Remove  []string `yaml:"remove,omitempty"`

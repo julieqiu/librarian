@@ -24,7 +24,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Python state.yaml structures
+// PythonAPI represents Python state.yaml API configuration.
 type PythonAPI struct {
 	Path              string `yaml:"path"`
 	ServiceConfig     string `yaml:"service_config"`
@@ -32,15 +32,15 @@ type PythonAPI struct {
 }
 
 type PythonLibrary struct {
-	ID                    string      `yaml:"id"`
-	Version               string      `yaml:"version"`
-	LastGeneratedCommit   string      `yaml:"last_generated_commit"`
-	APIs                  []PythonAPI `yaml:"apis"`
-	SourceRoots           []string    `yaml:"source_roots"`
-	PreserveRegex         []string    `yaml:"preserve_regex"`
-	RemoveRegex           []string    `yaml:"remove_regex"`
-	ReleaseExcludePaths   []string    `yaml:"release_exclude_paths"`
-	TagFormat             string      `yaml:"tag_format"`
+	ID                  string      `yaml:"id"`
+	Version             string      `yaml:"version"`
+	LastGeneratedCommit string      `yaml:"last_generated_commit"`
+	APIs                []PythonAPI `yaml:"apis"`
+	SourceRoots         []string    `yaml:"source_roots"`
+	PreserveRegex       []string    `yaml:"preserve_regex"`
+	RemoveRegex         []string    `yaml:"remove_regex"`
+	ReleaseExcludePaths []string    `yaml:"release_exclude_paths"`
+	TagFormat           string      `yaml:"tag_format"`
 }
 
 type PythonState struct {
@@ -48,25 +48,25 @@ type PythonState struct {
 	Libraries []PythonLibrary `yaml:"libraries"`
 }
 
-// Python .repo-metadata.json structure
+// RepoMetadata represents Python .repo-metadata.json structure.
 type RepoMetadata struct {
-	Name                  string `json:"name"`
-	NamePretty            string `json:"name_pretty"`
-	ProductDocumentation  string `json:"product_documentation"`
-	ClientDocumentation   string `json:"client_documentation"`
-	IssueTracker          string `json:"issue_tracker"`
-	ReleaseLevel          string `json:"release_level"`
-	Language              string `json:"language"`
-	LibraryType           string `json:"library_type"`
-	Repo                  string `json:"repo"`
-	DistributionName      string `json:"distribution_name"`
-	APIID                 string `json:"api_id"`
-	APIShortname          string `json:"api_shortname"`
-	DefaultVersion        string `json:"default_version"`
-	APIDescription        string `json:"api_description"`
+	Name                 string `json:"name"`
+	NamePretty           string `json:"name_pretty"`
+	ProductDocumentation string `json:"product_documentation"`
+	ClientDocumentation  string `json:"client_documentation"`
+	IssueTracker         string `json:"issue_tracker"`
+	ReleaseLevel         string `json:"release_level"`
+	Language             string `json:"language"`
+	LibraryType          string `json:"library_type"`
+	Repo                 string `json:"repo"`
+	DistributionName     string `json:"distribution_name"`
+	APIID                string `json:"api_id"`
+	APIShortname         string `json:"api_shortname"`
+	DefaultVersion       string `json:"default_version"`
+	APIDescription       string `json:"api_description"`
 }
 
-// Librarian YAML structures
+// LibrarianGenerate represents Librarian YAML generation configuration.
 type LibrarianGenerate struct {
 	SpecificationFormat string `yaml:"specification_format,omitempty"`
 	APIs                []API  `yaml:"apis,omitempty"`
@@ -78,10 +78,10 @@ type API struct {
 }
 
 type PythonConfig struct {
-	Keep     []string        `yaml:"keep,omitempty"`
-	Remove   []string        `yaml:"remove,omitempty"`
-	Exclude  []string        `yaml:"exclude,omitempty"`
-	Metadata PythonMetadata  `yaml:"metadata,omitempty"`
+	Keep     []string       `yaml:"keep,omitempty"`
+	Remove   []string       `yaml:"remove,omitempty"`
+	Exclude  []string       `yaml:"exclude,omitempty"`
+	Metadata PythonMetadata `yaml:"metadata,omitempty"`
 }
 
 type PythonMetadata struct {
@@ -105,7 +105,7 @@ type Librarian struct {
 	Python   *PythonConfig     `yaml:"python,omitempty"`
 }
 
-func convertPythonLibrary(lib PythonLibrary, metadataPath string) (*Librarian, error) {
+func convertPythonLibrary(lib PythonLibrary, metadataPath string) *Librarian {
 	librarian := &Librarian{
 		Name:    lib.ID,
 		Version: lib.Version,
@@ -155,7 +155,7 @@ func convertPythonLibrary(lib PythonLibrary, metadataPath string) (*Librarian, e
 
 	librarian.Python = python
 
-	return librarian, nil
+	return librarian
 }
 
 func main() {
@@ -188,11 +188,7 @@ func main() {
 			metadataPath = "" // Doesn't exist
 		}
 
-		librarian, err := convertPythonLibrary(lib, metadataPath)
-		if err != nil {
-			fmt.Printf("✗ %s: %v\n", lib.ID, err)
-			continue
-		}
+		librarian := convertPythonLibrary(lib, metadataPath)
 
 		// Create output directory
 		outputDir := filepath.Join(testdataDir, lib.ID)

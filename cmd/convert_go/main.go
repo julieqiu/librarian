@@ -1,3 +1,17 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package main
 
 import (
@@ -17,20 +31,20 @@ const (
 )
 
 type State struct {
-	Image     string       `yaml:"image"`
+	Image     string      `yaml:"image"`
 	Libraries []GoLibrary `yaml:"libraries"`
 }
 
 type GoLibrary struct {
-	ID                   string   `yaml:"id"`
-	Version              string   `yaml:"version"`
-	LastGeneratedCommit  string   `yaml:"last_generated_commit"`
-	APIs                 []API    `yaml:"apis"`
-	SourceRoots          []string `yaml:"source_roots"`
-	PreserveRegex        []string `yaml:"preserve_regex"`
-	RemoveRegex          []string `yaml:"remove_regex"`
-	ReleaseExcludePaths  []string `yaml:"release_exclude_paths"`
-	TagFormat            string   `yaml:"tag_format"`
+	ID                  string   `yaml:"id"`
+	Version             string   `yaml:"version"`
+	LastGeneratedCommit string   `yaml:"last_generated_commit"`
+	APIs                []API    `yaml:"apis"`
+	SourceRoots         []string `yaml:"source_roots"`
+	PreserveRegex       []string `yaml:"preserve_regex"`
+	RemoveRegex         []string `yaml:"remove_regex"`
+	ReleaseExcludePaths []string `yaml:"release_exclude_paths"`
+	TagFormat           string   `yaml:"tag_format"`
 }
 
 type API struct {
@@ -46,27 +60,27 @@ type Librarian struct {
 }
 
 type LibrarianGenerate struct {
-	SpecificationFormat string `yaml:"specification_format,omitempty"`
-	APIs                []LibrarianAPI  `yaml:"apis,omitempty"`
+	SpecificationFormat string         `yaml:"specification_format,omitempty"`
+	APIs                []LibrarianAPI `yaml:"apis,omitempty"`
 }
 
 type LibrarianAPI struct {
-	Path             string   `yaml:"path"`
-	ServiceConfig    string   `yaml:"service_config,omitempty"`
-	ClientDirectory  string   `yaml:"client_directory,omitempty"`
-	DisableGapic     bool     `yaml:"disable_gapic,omitempty"`
-	NestedProtos     []string `yaml:"nested_protos,omitempty"`
-	ProtoPackage     string   `yaml:"proto_package,omitempty"`
+	Path            string   `yaml:"path"`
+	ServiceConfig   string   `yaml:"service_config,omitempty"`
+	ClientDirectory string   `yaml:"client_directory,omitempty"`
+	DisableGapic    bool     `yaml:"disable_gapic,omitempty"`
+	NestedProtos    []string `yaml:"nested_protos,omitempty"`
+	ProtoPackage    string   `yaml:"proto_package,omitempty"`
 }
 
 type GoConfig struct {
-	SourceRoots                  []string `yaml:"source_roots,omitempty"`
-	PreserveRegex                []string `yaml:"preserve_regex,omitempty"`
-	RemoveRegex                  []string `yaml:"remove_regex,omitempty"`
-	ReleaseExcludePaths          []string `yaml:"release_exclude_paths,omitempty"`
-	TagFormat                    string   `yaml:"tag_format,omitempty"`
-	ModulePathVersion            string   `yaml:"module_path_version,omitempty"`
-	DeleteGenerationOutputPaths  []string `yaml:"delete_generation_output_paths,omitempty"`
+	SourceRoots                 []string `yaml:"source_roots,omitempty"`
+	PreserveRegex               []string `yaml:"preserve_regex,omitempty"`
+	RemoveRegex                 []string `yaml:"remove_regex,omitempty"`
+	ReleaseExcludePaths         []string `yaml:"release_exclude_paths,omitempty"`
+	TagFormat                   string   `yaml:"tag_format,omitempty"`
+	ModulePathVersion           string   `yaml:"module_path_version,omitempty"`
+	DeleteGenerationOutputPaths []string `yaml:"delete_generation_output_paths,omitempty"`
 }
 
 type RepoConfig struct {
@@ -74,10 +88,10 @@ type RepoConfig struct {
 }
 
 type RepoModule struct {
-	Name                        string             `yaml:"name"`
-	APIs                        []RepoAPI          `yaml:"apis"`
-	ModulePathVersion           string             `yaml:"module_path_version,omitempty"`
-	DeleteGenerationOutputPaths []string           `yaml:"delete_generation_output_paths,omitempty"`
+	Name                        string    `yaml:"name"`
+	APIs                        []RepoAPI `yaml:"apis"`
+	ModulePathVersion           string    `yaml:"module_path_version,omitempty"`
+	DeleteGenerationOutputPaths []string  `yaml:"delete_generation_output_paths,omitempty"`
 }
 
 type RepoAPI struct {

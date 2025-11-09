@@ -25,7 +25,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Sidekick TOML structures
+// SidekickGeneral represents Sidekick TOML general configuration.
 type SidekickGeneral struct {
 	SpecificationFormat string `toml:"specification-format"`
 	SpecificationSource string `toml:"specification-source"`
@@ -84,7 +84,7 @@ type Sidekick struct {
 	Extra map[string]interface{} `toml:",inline"`
 }
 
-// Librarian YAML structures
+// LibrarianGenerate represents Librarian YAML generation configuration.
 type LibrarianGenerate struct {
 	SpecificationFormat string `yaml:"specification_format,omitempty"`
 	APIs                []API  `yaml:"apis,omitempty"`
@@ -381,11 +381,7 @@ func convertSidekick(sidekickPath string) (*Librarian, error) {
 	// Documentation overrides
 	if len(sidekick.DocumentationOverride) > 0 {
 		for _, override := range sidekick.DocumentationOverride {
-			rust.DocumentationOverride = append(rust.DocumentationOverride, RustDocumentationOverride{
-				Id:      override.Id,
-				Match:   override.Match,
-				Replace: override.Replace,
-			})
+			rust.DocumentationOverride = append(rust.DocumentationOverride, RustDocumentationOverride(override))
 		}
 		hasRust = true
 	}
@@ -396,10 +392,7 @@ func convertSidekick(sidekickPath string) (*Librarian, error) {
 			OperationId: sidekick.Discovery.OperationId,
 		}
 		for _, poller := range sidekick.Discovery.Pollers {
-			discovery.Pollers = append(discovery.Pollers, RustDiscoveryPoller{
-				Prefix:   poller.Prefix,
-				MethodId: poller.MethodId,
-			})
+			discovery.Pollers = append(discovery.Pollers, RustDiscoveryPoller(poller))
 		}
 		rust.Discovery = discovery
 		hasRust = true
@@ -408,10 +401,7 @@ func convertSidekick(sidekickPath string) (*Librarian, error) {
 	// Pagination overrides
 	if len(sidekick.PaginationOverrides) > 0 {
 		for _, override := range sidekick.PaginationOverrides {
-			rust.PaginationOverrides = append(rust.PaginationOverrides, RustPaginationOverride{
-				Id:        override.Id,
-				ItemField: override.ItemField,
-			})
+			rust.PaginationOverrides = append(rust.PaginationOverrides, RustPaginationOverride(override))
 		}
 		hasRust = true
 	}

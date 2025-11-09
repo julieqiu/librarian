@@ -16,13 +16,11 @@ package librarian
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
 	"os"
-	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -49,7 +47,6 @@ func loadRepoState(repo *gitrepo.LocalRepository, source string) (*config.Librar
 	path := filepath.Join(repo.Dir, config.LibrarianDir, librarianStateFile)
 	return parseLibrarianState(path, source)
 }
-
 
 func parseLibrarianState(path, source string) (*config.LibrarianState, error) {
 	bytes, err := os.ReadFile(path)

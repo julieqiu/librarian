@@ -16,7 +16,6 @@ package librarian
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log/slog"
 	"os"
@@ -55,8 +54,7 @@ func (r *testGenerateRunner) run(ctx context.Context) error {
 
 // runTests executes the generation test for one or all libraries.
 //
-// If a single library is specified, it runs the test for that library. If the
-// test is skipped (due to errGenerateBlocked), it logs and exits successfully.
+// If a single library is specified, it runs the test for that library.
 // On failure, it returns an error, preserving the generated files for
 // debugging. On success, it cleans up the temporary work directory.
 //
@@ -68,10 +66,6 @@ func (r *testGenerateRunner) runTests(ctx context.Context, sourceRepoHead string
 	outputDir := filepath.Join(r.workRoot, "output")
 	if r.library != "" {
 		err := r.testSingleLibrary(ctx, r.library, sourceRepoHead, outputDir)
-		if errors.Is(err, errGenerateBlocked) {
-			slog.Info("test skipped for library due to generate_blocked", "library", r.library)
-			return nil
-		}
 		if err != nil {
 			return fmt.Errorf("test failed for library %s, keeping changes for debugging: %w", r.library, err)
 		}
@@ -87,11 +81,6 @@ func (r *testGenerateRunner) runTests(ctx context.Context, sourceRepoHead string
 	var skippedCount int
 	for _, library := range r.state.Libraries {
 		err := r.testSingleLibrary(ctx, library.ID, sourceRepoHead, outputDir)
-		if errors.Is(err, errGenerateBlocked) {
-			slog.Info("test skipped for library due to generate_blocked", "library", library.ID)
-			skippedCount++
-			continue
-		}
 		if err != nil {
 			slog.Error("test failed for library", "library", library.ID, "error", err)
 			failed = append(failed, library.ID)

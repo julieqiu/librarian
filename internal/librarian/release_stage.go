@@ -218,7 +218,7 @@ func (r *stageRunner) updateLibrary(library *config.LibraryState, commits []*git
 		}
 	} else {
 		var err error
-		nextVersion, err = r.determineNextVersion(commits, library.Version, library.ID)
+		nextVersion, err = r.determineNextVersion(commits, library.Version)
 		if err != nil {
 			return err
 		}
@@ -245,7 +245,7 @@ func (r *stageRunner) updateLibrary(library *config.LibraryState, commits []*git
 }
 
 // determineNextVersion determines the next valid SemVer version from the commits.
-func (r *stageRunner) determineNextVersion(commits []*gitrepo.ConventionalCommit, currentVersion string, libraryID string) (string, error) {
+func (r *stageRunner) determineNextVersion(commits []*gitrepo.ConventionalCommit, currentVersion string) (string, error) {
 	nextVersionFromCommits, err := NextVersion(commits, currentVersion)
 	if err != nil {
 		return "", err

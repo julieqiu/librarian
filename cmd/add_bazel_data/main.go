@@ -1,3 +1,17 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package main
 
 import (
@@ -50,17 +64,17 @@ type Python struct {
 }
 
 type PythonMetadata struct {
-	NamePretty         string `yaml:"name_pretty,omitempty"`
-	Description        string `yaml:"description,omitempty"`
-	DistributionName   string `yaml:"distribution_name,omitempty"`
-	APIID              string `yaml:"api_id,omitempty"`
-	DefaultVersion     string `yaml:"default_version,omitempty"`
+	NamePretty           string `yaml:"name_pretty,omitempty"`
+	Description          string `yaml:"description,omitempty"`
+	DistributionName     string `yaml:"distribution_name,omitempty"`
+	APIID                string `yaml:"api_id,omitempty"`
+	DefaultVersion       string `yaml:"default_version,omitempty"`
 	ProductDocumentation string `yaml:"product_documentation,omitempty"`
 	ClientDocumentation  string `yaml:"client_documentation,omitempty"`
-	IssueTracker       string `yaml:"issue_tracker,omitempty"`
-	ReleaseLevel       string `yaml:"release_level,omitempty"`
-	LibraryType        string `yaml:"library_type,omitempty"`
-	Repo               string `yaml:"repo,omitempty"`
+	IssueTracker         string `yaml:"issue_tracker,omitempty"`
+	ReleaseLevel         string `yaml:"release_level,omitempty"`
+	LibraryType          string `yaml:"library_type,omitempty"`
+	Repo                 string `yaml:"repo,omitempty"`
 }
 
 func main() {
@@ -140,13 +154,6 @@ func processLibrarian(librarianPath string) error {
 	return nil
 }
 
-func isEmpty(b *PyGapicLibrary) bool {
-	return b.GRPCServiceConfig == "" &&
-		b.RestNumericEnums == nil &&
-		b.Transport == "" &&
-		len(b.OptArgs) == 0
-}
-
 // parseBuildBazel parses a BUILD.bazel file and extracts py_gapic_library configuration.
 // For now, this is a simplified parser that looks for specific patterns.
 // In production, we should use a proper Starlark parser.
@@ -174,7 +181,7 @@ func parseBuildBazel(buildPath string) (*PyGapicLibrary, error) {
 
 		// Start of py_gapic_library block
 		if strings.HasPrefix(trimmed, "py_gapic_library(") ||
-		   (strings.Contains(trimmed, "_py_gapic") && strings.Contains(trimmed, "=") && !strings.Contains(trimmed, "py_gapic_assembly_pkg")) {
+			(strings.Contains(trimmed, "_py_gapic") && strings.Contains(trimmed, "=") && !strings.Contains(trimmed, "py_gapic_assembly_pkg")) {
 			inPyGapic = true
 			continue
 		}
@@ -240,7 +247,7 @@ func parseBuildBazel(buildPath string) (*PyGapicLibrary, error) {
 	return &pyGapic, nil
 }
 
-// extractValue extracts the string value from a line like 'key = "value",' or 'key = value,'
+// extractValue extracts the string value from a line like 'key = "value",' or 'key = value,'.
 func extractValue(line string) string {
 	// Remove leading/trailing whitespace
 	line = strings.TrimSpace(line)

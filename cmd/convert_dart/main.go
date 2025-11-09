@@ -30,7 +30,7 @@ const (
 	testdataDir = "internal/container/dart/testdata"
 )
 
-// Sidekick TOML structures
+// SidekickGeneral represents Sidekick TOML general configuration.
 type SidekickGeneral struct {
 	SpecificationFormat string `toml:"specification-format"`
 	SpecificationSource string `toml:"specification-source"`
@@ -43,12 +43,12 @@ type SidekickSource struct {
 }
 
 type SidekickCodec struct {
-	CopyrightYear                 string `toml:"copyright-year"`
-	RepositoryURL                 string `toml:"repository-url"`
-	ApiKeysEnvironmentVariables   string `toml:"api-keys-environment-variables"`
-	DevDependencies               string `toml:"dev-dependencies"`
-	ReadmeAfterTitleText          string `toml:"readme-after-title-text"`
-	ReadmeQuickstartText          string `toml:"readme-quickstart-text"`
+	CopyrightYear                  string `toml:"copyright-year"`
+	RepositoryURL                  string `toml:"repository-url"`
+	ApiKeysEnvironmentVariables    string `toml:"api-keys-environment-variables"`
+	DevDependencies                string `toml:"dev-dependencies"`
+	ReadmeAfterTitleText           string `toml:"readme-after-title-text"`
+	ReadmeQuickstartText           string `toml:"readme-quickstart-text"`
 	ReadmeCustomServiceExplanation string `toml:"readme-custom-service-explanation"`
 }
 
@@ -58,7 +58,7 @@ type Sidekick struct {
 	Codec   SidekickCodec   `toml:"codec"`
 }
 
-// Librarian YAML structures
+// LibrarianGenerate represents Librarian YAML generation configuration.
 type LibrarianGenerate struct {
 	SpecificationFormat string `yaml:"specification_format,omitempty"`
 	APIs                []API  `yaml:"apis,omitempty"`
