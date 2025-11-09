@@ -1,0 +1,29 @@
+name: google-cloud-data-fusion
+version: 1.14.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/datafusion/v1
+          service_config: datafusion_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-data-fusion/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-data-fusion/
+    metadata:
+        name_pretty: Cloud Data Fusion
+        description: is a fully managed, cloud-native, enterprise data integration service for quickly building and managing data pipelines.
+        distribution_name: google-cloud-data-fusion
+        api_id: datafusion.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/data-fusion
+        client_documentation: https://cloud.google.com/python/docs/reference/datafusion/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

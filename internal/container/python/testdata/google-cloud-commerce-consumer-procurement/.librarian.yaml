@@ -1,0 +1,32 @@
+name: google-cloud-commerce-consumer-procurement
+version: 0.3.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/commerce/consumer/procurement/v1
+          service_config: cloudcommerceconsumerprocurement_v1.yaml
+        - path: google/cloud/commerce/consumer/procurement/v1alpha1
+          service_config: cloudcommerceconsumerprocurement_v1alpha1.yaml
+python:
+    keep:
+        - packages/google-cloud-commerce-consumer-procurement/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-commerce-consumer-procurement/
+    metadata:
+        name_pretty: Cloud Commerce Consumer Procurement API
+        description: Cloud Commerce Consumer Procurement API
+        distribution_name: google-cloud-commerce-consumer-procurement
+        api_id: cloudcommerceconsumerprocurement.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/marketplace/docs/
+        client_documentation: https://cloud.google.com/python/docs/reference/procurement/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1396141
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

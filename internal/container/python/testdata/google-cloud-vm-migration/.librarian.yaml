@@ -1,0 +1,29 @@
+name: google-cloud-vm-migration
+version: 1.13.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/vmmigration/v1
+          service_config: vmmigration_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-vm-migration/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-vm-migration/
+    metadata:
+        name_pretty: Cloud VM Migration
+        description: ' for Compute Engine migrates VMs from your on-premises data center into Compute Engine.'
+        distribution_name: google-cloud-vm-migration
+        api_id: vmmigration.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/migrate/compute-engine/docs
+        client_documentation: https://cloud.google.com/python/docs/reference/vmmigration/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,30 @@
+name: google-maps-addressvalidation
+version: 0.4.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/maps/addressvalidation/v1
+          service_config: addressvalidation_v1.yaml
+python:
+    keep:
+        - packages/google-maps-addressvalidation/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-maps-addressvalidation
+    metadata:
+        name_pretty: Address Validation API
+        description: Address Validation lets you validate and correct address inputs with Places data powered by Google Maps Platform.
+        distribution_name: google-maps-addressvalidation
+        api_id: addressvalidation.googleapis.com
+        default_version: v1
+        product_documentation: https://mapsplatform.google.com/maps-products/address-validation/
+        client_documentation: https://googleapis.dev/python/addressvalidation/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

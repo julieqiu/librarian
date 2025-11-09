@@ -1,0 +1,18 @@
+name: google-cloud-gkerecommender
+version: 0.1.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/gkerecommender/v1
+          service_config: gkerecommender_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-gkerecommender/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-gkerecommender

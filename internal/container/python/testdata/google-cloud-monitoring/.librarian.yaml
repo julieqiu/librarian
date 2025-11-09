@@ -1,0 +1,35 @@
+name: google-cloud-monitoring
+version: 2.28.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/monitoring/v3
+          service_config: monitoring.yaml
+python:
+    keep:
+        - packages/google-cloud-monitoring/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - docs/query.rst
+        - packages/google-cloud-monitoring/google/cloud/monitoring_v3/_dataframe.py
+        - packages/google-cloud-monitoring/google/cloud/monitoring_v3/query.py
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+        - tests/unit/test__dataframe.py
+        - tests/unit/test_query.py
+    remove:
+        - packages/google-cloud-monitoring
+    metadata:
+        name_pretty: Stackdriver Monitoring
+        description: collects metrics, events, and metadata from Google Cloud, Amazon Web Services (AWS), hosted uptime probes, and application instrumentation. Using the BindPlane service, you can also collect this data from over 150 common application components, on-premise systems, and hybrid cloud systems. Stackdriver ingests that data and generates insights via dashboards, charts, and alerts. BindPlane is included with your Google Cloud project at no additional cost.
+        distribution_name: google-cloud-monitoring
+        api_id: monitoring.googleapis.com
+        default_version: v3
+        product_documentation: https://cloud.google.com/monitoring/docs
+        client_documentation: https://cloud.google.com/python/docs/reference/monitoring/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/559785
+        release_level: stable
+        library_type: GAPIC_COMBO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,29 @@
+name: google-cloud-dataflow-client
+version: 0.10.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/dataflow/v1beta3
+          service_config: dataflow_v1beta3.yaml
+python:
+    keep:
+        - packages/google-cloud-dataflow-client/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-dataflow-client/
+    metadata:
+        name_pretty: Dataflow
+        description: Unified stream and batch data processing that's serverless, fast, and cost-effective.
+        distribution_name: google-cloud-dataflow-client
+        api_id: dataflow.googleapis.com
+        default_version: v1beta3
+        product_documentation: https://cloud.google.com/dataflow/
+        client_documentation: https://cloud.google.com/python/docs/reference/dataflow/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,34 @@
+name: google-cloud-language
+version: 2.18.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/language/v1
+          service_config: language_v1.yaml
+        - path: google/cloud/language/v1beta2
+          service_config: language_v1beta2.yaml
+        - path: google/cloud/language/v2
+          service_config: language_v2.yaml
+python:
+    keep:
+        - packages/google-cloud-language/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-language/
+    metadata:
+        name_pretty: Natural Language
+        description: provides natural language understanding technologies to developers, including sentiment analysis, entity analysis, entity sentiment analysis, content classification, and syntax analysis. This API is part of the larger Cloud Machine Learning API family.
+        distribution_name: google-cloud-language
+        api_id: language.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/natural-language/docs/
+        client_documentation: https://cloud.google.com/python/docs/reference/language/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/559753
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

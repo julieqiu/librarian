@@ -1,0 +1,30 @@
+name: google-maps-areainsights
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/maps/areainsights/v1
+          service_config: areainsights_v1.yaml
+python:
+    keep:
+        - packages/google-maps-areainsights/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-maps-areainsights
+    metadata:
+        name_pretty: Places Insights API
+        description: 'Places Insights API. '
+        distribution_name: google-maps-areainsights
+        api_id: areainsights.googleapis.com
+        default_version: v1
+        product_documentation: https://developers.google.com/maps/documentation/places-insights
+        client_documentation: https://googleapis.dev/python/google-maps-areainsights/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1624013&template=2026178
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

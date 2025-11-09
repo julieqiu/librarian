@@ -1,0 +1,31 @@
+name: google-apps-card
+version: 0.3.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/apps/card/v1
+          service_config: ""
+python:
+    keep:
+        - packages/google-apps-card/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+        - tests/unit/gapic/card_v1/test_card.py
+    remove:
+        - packages/google-apps-card/
+    metadata:
+        name_pretty: Google Apps Card Protos
+        description: Google Apps Card Protos
+        distribution_name: google-apps-card
+        api_id: card.googleapis.com
+        default_version: v1
+        product_documentation: https://developers.google.com/chat
+        client_documentation: https://googleapis.dev/python/google-apps-card/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

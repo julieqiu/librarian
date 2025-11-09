@@ -1,0 +1,29 @@
+name: google-cloud-video-transcoder
+version: 1.18.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/video/transcoder/v1
+          service_config: transcoder_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-video-transcoder/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-video-transcoder/
+    metadata:
+        name_pretty: Transcoder
+        description: allows you to transcode videos into a variety of formats. The Transcoder API benefits broadcasters, production companies, businesses, and individuals looking to transform their video content for use across a variety of user devices.
+        distribution_name: google-cloud-video-transcoder
+        api_id: transcoder.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/transcoder
+        client_documentation: https://cloud.google.com/python/docs/reference/transcoder/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

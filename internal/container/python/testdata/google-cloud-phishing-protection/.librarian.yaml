@@ -1,0 +1,29 @@
+name: google-cloud-phishing-protection
+version: 1.15.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/phishingprotection/v1beta1
+          service_config: phishingprotection_v1beta1.yaml
+python:
+    keep:
+        - packages/google-cloud-phishing-protection/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-phishing-protection/
+    metadata:
+        name_pretty: Phishing Protection
+        description: helps prevent users from accessing phishing sites by identifying various signals associated with malicious content, including the use of your brand assets, classifying malicious content that uses your brand and reporting the unsafe URLs to Google Safe Browsing. Once a site is propagated to Safe Browsing, users will see warnings across more than 4 billion devices.
+        distribution_name: google-cloud-phishing-protection
+        api_id: phishingprotection.googleapis.com
+        default_version: v1beta1
+        product_documentation: https://cloud.google.com/phishing-protection/docs/
+        client_documentation: https://cloud.google.com/python/docs/reference/phishingprotection/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

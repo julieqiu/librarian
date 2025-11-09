@@ -1,0 +1,32 @@
+name: google-cloud-functions
+version: 1.21.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/functions/v2
+          service_config: cloudfunctions_v2.yaml
+        - path: google/cloud/functions/v1
+          service_config: cloudfunctions_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-functions/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-functions/
+    metadata:
+        name_pretty: Cloud Functions
+        description: is a scalable pay as you go Functions-as-a-Service (FaaS) to run your code with zero server management.
+        distribution_name: google-cloud-functions
+        api_id: cloudfunctions.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/functions/
+        client_documentation: https://cloud.google.com/python/docs/reference/cloudfunctions/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/559729
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

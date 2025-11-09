@@ -1,0 +1,40 @@
+name: google-cloud-iam
+version: 2.20.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/iam/v3
+          service_config: iam_v3.yaml
+        - path: google/iam/v3beta
+          service_config: iam_v3beta.yaml
+        - path: google/iam/admin/v1
+          service_config: iam.yaml
+        - path: google/iam/v2
+          service_config: iam_v2.yaml
+        - path: google/iam/credentials/v1
+          service_config: iamcredentials_v1.yaml
+        - path: google/iam/v2beta
+          service_config: iam_v2beta.yaml
+python:
+    keep:
+        - packages/google-cloud-iam/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-iam
+    metadata:
+        name_pretty: Cloud Identity and Access Management
+        description: Manages identity and access control for Google Cloud Platform resources, including the creation of service accounts, which you can use to authenticate to Google and make API calls.
+        distribution_name: google-cloud-iam
+        api_id: iam.googleapis.com
+        default_version: v2
+        product_documentation: https://cloud.google.com/iam/docs/
+        client_documentation: https://cloud.google.com/python/docs/reference/iam/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/559761
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

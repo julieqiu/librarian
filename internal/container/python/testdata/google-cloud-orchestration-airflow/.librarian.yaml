@@ -1,0 +1,31 @@
+name: google-cloud-orchestration-airflow
+version: 1.18.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/orchestration/airflow/service/v1
+          service_config: composer_v1.yaml
+        - path: google/cloud/orchestration/airflow/service/v1beta1
+          service_config: composer_v1beta1.yaml
+python:
+    keep:
+        - packages/google-cloud-orchestration-airflow/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-orchestration-airflow/
+    metadata:
+        name_pretty: Cloud Composer
+        description: is a managed Apache Airflow service that helps you create, schedule, monitor and manage workflows. Cloud Composer automation helps you create Airflow environments quickly and use Airflow-native tools, such as the powerful Airflow web interface and command line tools, so you can focus on your workflows and not your infrastructure.
+        distribution_name: google-cloud-orchestration-airflow
+        api_id: composer.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/composer/
+        client_documentation: https://cloud.google.com/python/docs/reference/composer/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

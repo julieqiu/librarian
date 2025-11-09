@@ -1,0 +1,35 @@
+name: google-cloud-bigquery-datapolicies
+version: 0.7.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/bigquery/datapolicies/v2beta1
+          service_config: bigquerydatapolicy_v2beta1.yaml
+        - path: google/cloud/bigquery/datapolicies/v2
+          service_config: bigquerydatapolicy_v2.yaml
+        - path: google/cloud/bigquery/datapolicies/v1beta1
+          service_config: bigquerydatapolicy_v1beta1.yaml
+        - path: google/cloud/bigquery/datapolicies/v1
+          service_config: bigquerydatapolicy_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-bigquery-datapolicies/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-bigquery-datapolicies/
+    metadata:
+        name_pretty: BigQuery Data Policy
+        description: Allows users to manage BigQuery data policies.
+        distribution_name: google-cloud-bigquery-datapolicies
+        api_id: bigquerydatapolicy.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/bigquery/docs/reference/bigquerydatapolicy/rest
+        client_documentation: https://cloud.google.com/python/docs/reference/bigquerydatapolicy/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

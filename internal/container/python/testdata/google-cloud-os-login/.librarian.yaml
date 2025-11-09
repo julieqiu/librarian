@@ -1,0 +1,31 @@
+name: google-cloud-os-login
+version: 2.18.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/oslogin/v1
+          service_config: oslogin_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-os-login/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+        - google/cloud/oslogin_v1/common
+        - docs/oslogin_v1/common/types.rst
+    remove:
+        - packages/google-cloud-os-login
+    metadata:
+        name_pretty: Google Cloud OS Login
+        distribution_name: google-cloud-os-login
+        api_id: oslogin.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/compute/docs/oslogin/
+        client_documentation: https://cloud.google.com/python/docs/reference/oslogin/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/559755
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

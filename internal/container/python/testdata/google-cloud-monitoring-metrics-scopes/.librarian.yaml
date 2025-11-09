@@ -1,0 +1,30 @@
+name: google-cloud-monitoring-metrics-scopes
+version: 1.10.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/monitoring/metricsscope/v1
+          service_config: monitoring.yaml
+python:
+    keep:
+        - packages/google-cloud-monitoring-metrics-scopes/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-monitoring-metrics-scopes/
+    metadata:
+        name_pretty: Metrics Scopes
+        description: Manages your Cloud Monitoring data and configurations.
+        distribution_name: google-cloud-monitoring-metrics-scopes
+        api_id: monitoring.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/monitoring/docs
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-monitoring-metrics-scopes/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/559785
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

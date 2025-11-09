@@ -1,0 +1,30 @@
+name: google-maps-routing
+version: 0.7.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/maps/routing/v2
+          service_config: routes_v2.yaml
+python:
+    keep:
+        - packages/google-maps-routing/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-maps-routing
+    metadata:
+        name_pretty: Google Maps Routing
+        description: Help your users find the ideal way to get from A to Z with comprehensive data and real-time traffic.
+        distribution_name: google-maps-routing
+        api_id: routing.googleapis.com
+        default_version: v2
+        product_documentation: https://mapsplatform.google.com/maps-products/#routes-section
+        client_documentation: https://googleapis.dev/python/routing/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

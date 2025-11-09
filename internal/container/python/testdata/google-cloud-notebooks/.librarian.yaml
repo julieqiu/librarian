@@ -1,0 +1,33 @@
+name: google-cloud-notebooks
+version: 1.14.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/notebooks/v1beta1
+          service_config: notebooks_v1beta1.yaml
+        - path: google/cloud/notebooks/v1
+          service_config: notebooks_v1.yaml
+        - path: google/cloud/notebooks/v2
+          service_config: notebooks_v2.yaml
+python:
+    keep:
+        - packages/google-cloud-notebooks/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-notebooks/
+    metadata:
+        name_pretty: AI Platform Notebooks
+        description: is a managed service that offers an integrated and secure JupyterLab environment for data scientists and machine learning developers to experiment, develop, and deploy models into production. Users can create instances running JupyterLab that come pre-installed with the latest data science and machine learning frameworks in a single click.
+        distribution_name: google-cloud-notebooks
+        api_id: notebooks.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/ai-platform/notebooks/
+        client_documentation: https://cloud.google.com/python/docs/reference/notebooks/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

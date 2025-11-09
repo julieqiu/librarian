@@ -1,0 +1,32 @@
+name: grafeas
+version: 1.16.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: grafeas/v1
+          service_config: grafeas_v1.yaml
+python:
+    keep:
+        - packages/grafeas/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+        - grafeas/grafeas.py
+        - grafeas/grafeas/__init__.py
+        - grafeas/grafeas/grafeas_v1/types.py
+    remove:
+        - packages/grafeas
+    metadata:
+        name_pretty: Grafeas
+        description: An implementation of the Grafeas API, which stores, and enables querying and retrieval of critical metadata about all of your software artifacts.
+        distribution_name: grafeas
+        api_id: containeranalysis.googleapis.com
+        default_version: v1
+        product_documentation: https://grafeas.io
+        client_documentation: https://googleapis.dev/python/grafeas/latest
+        release_level: stable
+        library_type: GAPIC_COMBO
+        repo: googleapis/google-cloud-python

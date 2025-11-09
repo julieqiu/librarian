@@ -1,0 +1,41 @@
+name: google-cloud-vision
+version: 3.11.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/vision/v1p3beta1
+          service_config: vision_v1p3beta1.yaml
+        - path: google/cloud/vision/v1
+          service_config: vision_v1.yaml
+        - path: google/cloud/vision/v1p1beta1
+          service_config: vision_v1p1beta1.yaml
+        - path: google/cloud/vision/v1p2beta1
+          service_config: vision_v1p2beta1.yaml
+        - path: google/cloud/vision/v1p4beta1
+          service_config: vision_v1p4beta1.yaml
+python:
+    keep:
+        - packages/google-cloud-vision/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - google/cloud/vision_helpers
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+        - tests/unit/test_decorators.py
+        - tests/unit/test_helpers.py
+    remove:
+        - packages/google-cloud-vision/
+    metadata:
+        name_pretty: Cloud Vision
+        description: allows developers to easily integrate vision detection features within applications, including image labeling, face and landmark detection, optical character recognition (OCR), and tagging of explicit content.
+        distribution_name: google-cloud-vision
+        api_id: vision.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/vision/docs/
+        client_documentation: https://cloud.google.com/python/docs/reference/vision/latest
+        issue_tracker: https://issuetracker.google.com/issues?q=status:open%20componentid:187174
+        release_level: stable
+        library_type: GAPIC_COMBO
+        repo: googleapis/google-cloud-python

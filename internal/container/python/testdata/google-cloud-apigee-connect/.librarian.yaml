@@ -1,0 +1,29 @@
+name: google-cloud-apigee-connect
+version: 1.13.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/apigeeconnect/v1
+          service_config: apigeeconnect_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-apigee-connect/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-apigee-connect/
+    metadata:
+        name_pretty: Apigee Connect
+        description: allows the Apigee hybrid management plane to connect securely to the MART service in the runtime plane without requiring you to expose the MART endpoint on the internet.
+        distribution_name: google-cloud-apigee-connect
+        api_id: apigeeconnect.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/apigee/docs/hybrid/v1.4/apigee-connect
+        client_documentation: https://cloud.google.com/python/docs/reference/apigeeconnect/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

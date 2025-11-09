@@ -1,0 +1,30 @@
+name: google-cloud-lustre
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/lustre/v1
+          service_config: lustre_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-lustre/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-lustre/
+    metadata:
+        name_pretty: Google Cloud Managed Lustre API
+        description: 'null '
+        distribution_name: google-cloud-lustre
+        api_id: lustre.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/managed-lustre/docs
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-lustre/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1625664
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

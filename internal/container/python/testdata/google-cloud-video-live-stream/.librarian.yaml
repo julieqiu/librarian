@@ -1,0 +1,29 @@
+name: google-cloud-video-live-stream
+version: 1.14.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/video/livestream/v1
+          service_config: livestream_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-video-live-stream/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-video-live-stream/
+    metadata:
+        name_pretty: Live Stream
+        description: transcodes mezzanine live signals into direct-to-consumer streaming formats, including Dynamic Adaptive Streaming over HTTP (DASH/MPEG-DASH), and HTTP Live Streaming (HLS), for multiple device platforms.
+        distribution_name: google-cloud-video-live-stream
+        api_id: livestream.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/livestream/docs
+        client_documentation: https://cloud.google.com/python/docs/reference/livestream/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

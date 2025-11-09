@@ -1,0 +1,29 @@
+name: google-cloud-dataplex
+version: 2.14.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/dataplex/v1
+          service_config: dataplex_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-dataplex/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-dataplex/
+    metadata:
+        name_pretty: Cloud Dataplex
+        description: provides intelligent data fabric that enables organizations to centrally manage, monitor, and govern their data across data lakes, data warehouses, and data marts with consistent controls, providing access to trusted data and powering analytics at scale.
+        distribution_name: google-cloud-dataplex
+        api_id: dataplex.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/dataplex
+        client_documentation: https://cloud.google.com/python/docs/reference/dataplex/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

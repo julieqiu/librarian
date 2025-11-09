@@ -1,0 +1,29 @@
+name: google-cloud-apigee-registry
+version: 0.7.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/apigeeregistry/v1
+          service_config: apigeeregistry_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-apigee-registry/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-apigee-registry/
+    metadata:
+        name_pretty: Apigee Registry API
+        description: allows teams to upload and share machine-readable descriptions of APIs that are in use and in development.
+        distribution_name: google-cloud-apigee-registry
+        api_id: apigeeregistry.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/apigee/docs/api-hub/get-started-registry-api
+        client_documentation: https://cloud.google.com/python/docs/reference/apigeeregistry/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,32 @@
+name: google-apps-meet
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/apps/meet/v2beta
+          service_config: meet_v2beta.yaml
+        - path: google/apps/meet/v2
+          service_config: meet_v2.yaml
+python:
+    keep:
+        - packages/google-apps-meet/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-apps-meet/
+    metadata:
+        name_pretty: Google Meet API
+        description: Create and manage meetings in Google Meet.
+        distribution_name: google-apps-meet
+        api_id: meet.googleapis.com
+        default_version: v2
+        product_documentation: https://developers.google.com/meet/api/guides/overview
+        client_documentation: https://googleapis.dev/python/google-apps-meet/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1216362&template=1766418
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

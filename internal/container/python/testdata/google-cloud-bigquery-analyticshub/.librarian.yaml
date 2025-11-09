@@ -1,0 +1,29 @@
+name: google-cloud-bigquery-analyticshub
+version: 0.5.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/bigquery/analyticshub/v1
+          service_config: analyticshub_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-bigquery-analyticshub/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-bigquery-analyticshub/
+    metadata:
+        name_pretty: BigQuery Analytics Hub
+        description: Analytics Hub is a data exchange that allows you to efficiently and securely exchange data assets across organizations to address challenges of data reliability and cost. Curate a library of internal and external assets, including unique datasets like Google Trends, backed by the power of BigQuery.
+        distribution_name: google-cloud-bigquery-analyticshub
+        api_id: analyticshub.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/analytics-hub
+        client_documentation: https://cloud.google.com/python/docs/reference/analyticshub/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,35 @@
+name: google-cloud-gke-hub
+version: 1.19.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/gkehub/v1
+          service_config: gkehub_v1.yaml
+        - path: google/cloud/gkehub/v1beta1
+          service_config: gkehub_v1beta1.yaml
+python:
+    keep:
+        - packages/google-cloud-gke-hub/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+        - docs/gkehub_v1/configmanagement_v1
+        - docs/gkehub_v1/multiclusteringress_v1
+        - google/cloud/gkehub_v1/configmanagement_v1
+        - google/cloud/gkehub_v1/multiclusteringress_v1
+    remove:
+        - packages/google-cloud-gke-hub
+    metadata:
+        name_pretty: GKE Hub
+        description: provides a unified way to work with Kubernetes clusters as part of Anthos, extending GKE to work in multiple environments. You have consistent, unified, and secure infrastructure, cluster, and container management, whether you're using Anthos on Google Cloud (with traditional GKE), hybrid cloud, or multiple public clouds.
+        distribution_name: google-cloud-gke-hub
+        api_id: gkehub.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/anthos/gke/docs/
+        client_documentation: https://cloud.google.com/python/docs/reference/gkehub/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

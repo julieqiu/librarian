@@ -1,0 +1,32 @@
+name: google-cloud-monitoring-dashboards
+version: 2.19.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/monitoring/dashboard/v1
+          service_config: monitoring.yaml
+python:
+    keep:
+        - packages/google-cloud-monitoring-dashboards/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+        - packages/google-cloud-monitoring-dashboards/google/monitoring
+        - tests/unit/gapic/dashboard_v1
+    remove:
+        - packages/google-cloud-monitoring-dashboards
+    metadata:
+        name_pretty: Monitoring Dashboards
+        description: are one way for you to view and analyze metric data. The Cloud Console provides predefined dashboards that require no setup or configuration. You can also define custom dashboards. With custom dashboards, you have complete control over the charts that are displayed and their configuration.
+        distribution_name: google-cloud-monitoring-dashboards
+        api_id: monitoring.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/monitoring/dashboards/
+        client_documentation: https://cloud.google.com/python/docs/reference/monitoring-dashboards/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/559785
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,33 @@
+name: google-cloud-secret-manager
+version: 2.25.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/secretmanager/v1
+          service_config: secretmanager_v1.yaml
+        - path: google/cloud/secretmanager/v1beta2
+          service_config: secretmanager_v1beta2.yaml
+        - path: google/cloud/secrets/v1beta1
+          service_config: secretmanager_v1beta1.yaml
+python:
+    keep:
+        - packages/google-cloud-secret-manager/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-secret-manager
+    metadata:
+        name_pretty: Secret Manager
+        description: Stores, manages, and secures access to application secrets.
+        distribution_name: google-cloud-secret-manager
+        api_id: secretmanager.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/secret-manager/
+        client_documentation: https://cloud.google.com/python/docs/reference/secretmanager/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,31 @@
+name: google-cloud-service-control
+version: 1.17.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/api/servicecontrol/v2
+          service_config: servicecontrol.yaml
+        - path: google/api/servicecontrol/v1
+          service_config: servicecontrol.yaml
+python:
+    keep:
+        - packages/google-cloud-service-control/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-service-control/
+    metadata:
+        name_pretty: Service Control
+        description: ' is a foundational platform for creating, managing, securing, and consuming APIs and services across organizations. It is used by Google APIs, Cloud APIs, Cloud Endpoints, and API Gateway.'
+        distribution_name: google-cloud-service-control
+        api_id: servicecontrol.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/service-infrastructure/docs/overview/
+        client_documentation: https://cloud.google.com/python/docs/reference/servicecontrol/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

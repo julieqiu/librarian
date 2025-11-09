@@ -1,0 +1,21 @@
+name: grpc-google-iam-v1
+version: 0.14.2
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/iam/v1
+          service_config: iam_meta_api.yaml
+python:
+    remove:
+        - ^packages/grpc-google-iam-v1/google/.*/.*_pb2\.(?:py|pyi)$/
+    metadata:
+        name_pretty: Cloud Identity and Access Management
+        distribution_name: grpc-google-iam-v1
+        api_id: iam.googleapis.com
+        default_version: apiVersion
+        product_documentation: https://cloud.google.com/iam/docs/
+        client_documentation: https://cloud.google.com/python/docs/reference/grpc-iam/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/559761
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

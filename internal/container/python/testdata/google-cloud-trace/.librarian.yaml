@@ -1,0 +1,32 @@
+name: google-cloud-trace
+version: 1.17.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/devtools/cloudtrace/v2
+          service_config: cloudtrace_v2.yaml
+        - path: google/devtools/cloudtrace/v1
+          service_config: cloudtrace_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-trace/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-trace/
+    metadata:
+        name_pretty: Cloud Trace
+        description: is a distributed tracing system that collects latency data from your applications and displays it in the Google Cloud Platform Console. You can track how requests propagate through your application and receive detailed near real-time performance insights.
+        distribution_name: google-cloud-trace
+        api_id: cloudtrace.googleapis.com
+        default_version: v2
+        product_documentation: https://cloud.google.com/trace/docs
+        client_documentation: https://cloud.google.com/python/docs/reference/cloudtrace/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/559776
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

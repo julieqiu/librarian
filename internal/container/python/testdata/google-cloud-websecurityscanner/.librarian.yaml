@@ -1,0 +1,34 @@
+name: google-cloud-websecurityscanner
+version: 1.18.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/websecurityscanner/v1alpha
+          service_config: websecurityscanner_v1alpha.yaml
+        - path: google/cloud/websecurityscanner/v1beta
+          service_config: websecurityscanner_v1beta.yaml
+        - path: google/cloud/websecurityscanner/v1
+          service_config: websecurityscanner_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-websecurityscanner/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-websecurityscanner/
+    metadata:
+        name_pretty: Cloud Security Scanner
+        description: identifies security vulnerabilities in your App Engine, Compute Engine, and Google Kubernetes Engine web applications. It crawls your application, following all links within the scope of your starting URLs, and attempts to exercise as many user inputs and event handlers as possible.
+        distribution_name: google-cloud-websecurityscanner
+        api_id: securitycenter.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/security-scanner/docs/
+        client_documentation: https://cloud.google.com/python/docs/reference/websecurityscanner/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/559748
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

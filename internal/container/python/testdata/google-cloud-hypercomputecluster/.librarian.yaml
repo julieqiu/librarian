@@ -1,0 +1,18 @@
+name: google-cloud-hypercomputecluster
+version: 0.0.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/hypercomputecluster/v1beta
+          service_config: hypercomputecluster_v1beta.yaml
+python:
+    keep:
+        - packages/google-cloud-hypercomputecluster/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-hypercomputecluster

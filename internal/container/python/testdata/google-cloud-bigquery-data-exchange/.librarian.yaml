@@ -1,0 +1,29 @@
+name: google-cloud-bigquery-data-exchange
+version: 0.6.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/bigquery/dataexchange/v1beta1
+          service_config: analyticshub_v1beta1.yaml
+python:
+    keep:
+        - packages/google-cloud-bigquery-data-exchange/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-bigquery-data-exchange/
+    metadata:
+        name_pretty: BigQuery Analytics Hub
+        description: is a data exchange that allows you to efficiently and securely exchange data assets across organizations to address challenges of data reliability and cost.
+        distribution_name: google-cloud-bigquery-data-exchange
+        api_id: analyticshub.googleapis.com
+        default_version: v1beta1
+        product_documentation: https://cloud.google.com/bigquery/docs/analytics-hub-introduction
+        client_documentation: https://cloud.google.com/python/docs/reference/analyticshub/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

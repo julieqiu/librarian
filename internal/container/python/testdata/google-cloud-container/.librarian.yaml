@@ -1,0 +1,32 @@
+name: google-cloud-container
+version: 2.61.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/container/v1
+          service_config: container_v1.yaml
+        - path: google/container/v1beta1
+          service_config: container_v1beta1.yaml
+python:
+    keep:
+        - packages/google-cloud-container/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-container/
+    metadata:
+        name_pretty: Kubernetes Engine
+        description: The Google Kubernetes Engine API is used for building and managing container based applications, powered by the open source Kubernetes technology.
+        distribution_name: google-cloud-container
+        api_id: container.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/kubernetes-engine/
+        client_documentation: https://cloud.google.com/python/docs/reference/container/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/559746
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

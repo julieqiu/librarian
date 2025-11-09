@@ -1,0 +1,29 @@
+name: google-cloud-data-qna
+version: 0.11.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/dataqna/v1alpha
+          service_config: dataqna_v1alpha.yaml
+python:
+    keep:
+        - packages/google-cloud-data-qna/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-data-qna/
+    metadata:
+        name_pretty: Data QnA
+        description: Data QnA is a natural language question and answer service for BigQuery data.
+        distribution_name: google-cloud-data-qna
+        api_id: dataqna.googleapis.com
+        default_version: v1alpha
+        product_documentation: https://cloud.google.com/bigquery/docs/dataqna
+        client_documentation: https://cloud.google.com/python/docs/reference/dataqna/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

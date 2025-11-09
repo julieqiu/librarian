@@ -1,0 +1,29 @@
+name: google-cloud-recommendations-ai
+version: 0.11.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/recommendationengine/v1beta1
+          service_config: recommendationengine_v1beta1.yaml
+python:
+    keep:
+        - packages/google-cloud-recommendations-ai/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-recommendations-ai/
+    metadata:
+        name_pretty: Recommendations AI
+        description: delivers highly personalized product recommendations at scale.
+        distribution_name: google-cloud-recommendations-ai
+        api_id: recommendationengine.googleapis.com
+        default_version: v1beta1
+        product_documentation: https://cloud.google.com/recommendations-ai/
+        client_documentation: https://cloud.google.com/python/docs/reference/recommendationengine/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

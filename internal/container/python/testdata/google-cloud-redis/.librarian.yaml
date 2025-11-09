@@ -1,0 +1,32 @@
+name: google-cloud-redis
+version: 2.19.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/redis/v1
+          service_config: redis_v1.yaml
+        - path: google/cloud/redis/v1beta1
+          service_config: redis_v1beta1.yaml
+python:
+    keep:
+        - packages/google-cloud-redis/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-redis/
+    metadata:
+        name_pretty: Cloud Redis
+        description: is a fully managed Redis service for the Google Cloud. Applications running on Google Cloud can achieve extreme performance by leveraging the highly scalable, available, secure Redis service without the burden of managing complex Redis deployments.
+        distribution_name: google-cloud-redis
+        api_id: redis.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/memorystore/docs/redis/
+        client_documentation: https://cloud.google.com/python/docs/reference/redis/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/5169231
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,18 @@
+name: google-cloud-capacityplanner
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/capacityplanner/v1beta
+          service_config: capacityplanner_v1beta.yaml
+python:
+    keep:
+        - packages/google-cloud-capacityplanner/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-capacityplanner/

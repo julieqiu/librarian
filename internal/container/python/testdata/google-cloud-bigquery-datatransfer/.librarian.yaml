@@ -1,0 +1,30 @@
+name: google-cloud-bigquery-datatransfer
+version: 3.20.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/bigquery/datatransfer/v1
+          service_config: bigquerydatatransfer_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-bigquery-datatransfer/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-bigquery-datatransfer/
+    metadata:
+        name_pretty: BigQuery Data Transfer
+        description: allows users to transfer data from partner SaaS applications to Google BigQuery on a scheduled, managed basis.
+        distribution_name: google-cloud-bigquery-datatransfer
+        api_id: bigquerydatatransfer.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/bigquery/transfer/
+        client_documentation: https://cloud.google.com/python/docs/reference/bigquerydatatransfer/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/559654
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

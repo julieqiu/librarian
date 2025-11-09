@@ -1,0 +1,30 @@
+name: google-cloud-config
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/config/v1
+          service_config: config_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-config/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-config/
+    metadata:
+        name_pretty: Infrastructure Manager API
+        description: Infrastructure Manager API
+        distribution_name: google-cloud-config
+        api_id: config.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/infrastructure-manager/docs/overview
+        client_documentation: https://cloud.google.com/python/docs/reference/config/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=536700
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

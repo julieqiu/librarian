@@ -1,0 +1,30 @@
+name: google-cloud-advisorynotifications
+version: 0.4.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/advisorynotifications/v1
+          service_config: advisorynotifications_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-advisorynotifications/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-advisorynotifications/
+    metadata:
+        name_pretty: Advisory Notifications
+        description: Advisory Notifications provides well-targeted, timely, and compliant communications about critical security and privacy events in the Google Cloud console and allows you to securely investigate the event, take action, and get support.
+        distribution_name: google-cloud-advisorynotifications
+        api_id: advisorynotifications.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/advisory-notifications/
+        client_documentation: https://cloud.google.com/python/docs/reference/advisorynotifications/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

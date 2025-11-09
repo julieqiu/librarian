@@ -1,0 +1,30 @@
+name: google-cloud-storageinsights
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/storageinsights/v1
+          service_config: storageinsights_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-storageinsights/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-storageinsights/
+    metadata:
+        name_pretty: Storage Insights API
+        description: The Storage Insights inventory report feature helps you manage your object storage at scale.
+        distribution_name: google-cloud-storageinsights
+        api_id: storageinsights.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/storage/docs/insights/storage-insights
+        client_documentation: https://cloud.google.com/python/docs/reference/storageinsights/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1156610
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

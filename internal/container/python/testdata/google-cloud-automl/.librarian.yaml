@@ -1,0 +1,37 @@
+name: google-cloud-automl
+version: 2.17.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/automl/v1beta1
+          service_config: automl_v1beta1.yaml
+        - path: google/cloud/automl/v1
+          service_config: automl_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-automl/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+        - docs/automl_v1beta1/tables.rst
+        - google/cloud/automl_v1beta1/services/tables
+        - samples/README
+        - tests/unit/test_gcs_client_v1beta1.py
+        - tests/unit/test_tables_client_v1beta1.py
+    remove:
+        - packages/google-cloud-automl/
+    metadata:
+        name_pretty: Cloud AutoML
+        description: '**AutoML API Python Client is now available in Vertex AI. Please visit** `Vertex SDK for Python <https://github.com/googleapis/python-aiplatform>`_ **for the new Python Vertex AI client.** Vertex AI is our next generation AI Platform, with many new features that are unavailable in the current platform. `Migrate your resources to Vertex AI <https://cloud.google.com/vertex-ai/docs/start/migrating-to-vertex-ai>`_ to get the latest machine learning features, simplify end-to-end journeys, and productionize models with MLOps. The `Cloud AutoML API <https://cloud.google.com/automl>`_ is a suite of machine learning products that enables developers with limited machine learning expertise to train high-quality models specific to their business needs, by leveraging Google''s state-of-the-art transfer learning, and Neural Architecture Search technology.'
+        distribution_name: google-cloud-automl
+        api_id: automl.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/automl/docs/
+        client_documentation: https://cloud.google.com/python/docs/reference/automl/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/559744
+        release_level: stable
+        library_type: GAPIC_COMBO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,29 @@
+name: google-cloud-managed-identities
+version: 1.13.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/managedidentities/v1
+          service_config: managedidentities_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-managed-identities/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-managed-identities/
+    metadata:
+        name_pretty: Managed Service for Microsoft Active Directory
+        description: is a highly available, hardened Google Cloud service running actual Microsoft AD that enables you to manage authentication and authorization for your AD-dependent workloads, automate AD server maintenance and security configuration, and connect your on-premises AD domain to the cloud.
+        distribution_name: google-cloud-managed-identities
+        api_id: managedidentities.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/managed-microsoft-ad/
+        client_documentation: https://cloud.google.com/python/docs/reference/managedidentities/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

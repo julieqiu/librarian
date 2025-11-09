@@ -1,0 +1,29 @@
+name: google-cloud-optimization
+version: 1.12.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/optimization/v1
+          service_config: cloudoptimization_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-optimization/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-optimization/
+    metadata:
+        name_pretty: Cloud Optimization
+        description: is a managed routing service that takes your list of orders, vehicles, constraints, and objectives and returns the most efficient plan for your entire fleet in near real-time.
+        distribution_name: google-cloud-optimization
+        api_id: cloudoptimization.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/optimization/docs
+        client_documentation: https://cloud.google.com/python/docs/reference/optimization/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

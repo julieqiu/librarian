@@ -1,0 +1,29 @@
+name: google-cloud-gke-backup
+version: 0.6.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/gkebackup/v1
+          service_config: gkebackup_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-gke-backup/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-gke-backup/
+    metadata:
+        name_pretty: Backup for GKE
+        description: An API for backing up and restoring workloads in GKE.
+        distribution_name: google-cloud-gke-backup
+        api_id: gkebackup.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/kubernetes-engine/docs/add-on/backup-for-gke/concepts/backup-for-gke
+        client_documentation: https://cloud.google.com/python/docs/reference/gkebackup/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

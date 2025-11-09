@@ -1,0 +1,36 @@
+name: google-cloud-translate
+version: 3.22.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/translate/v3beta1
+          service_config: translate_v3beta1.yaml
+        - path: google/cloud/translate/v3
+          service_config: translate_v3.yaml
+python:
+    keep:
+        - packages/google-cloud-translate/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - docs/client.rst
+        - docs/v2.rst
+        - google/cloud/translate_v2
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+        - tests/unit/v2
+    remove:
+        - packages/google-cloud-translate/
+    metadata:
+        name_pretty: Cloud Translation
+        description: can dynamically translate text between thousands of language pairs. Translation lets websites and programs programmatically integrate with the translation service.
+        distribution_name: google-cloud-translate
+        api_id: translate.googleapis.com
+        default_version: v3
+        product_documentation: https://cloud.google.com/translate/docs/
+        client_documentation: https://cloud.google.com/python/docs/reference/translate/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/559749
+        release_level: stable
+        library_type: GAPIC_COMBO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,31 @@
+name: google-cloud-binary-authorization
+version: 1.14.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/binaryauthorization/v1
+          service_config: binaryauthorization_v1.yaml
+        - path: google/cloud/binaryauthorization/v1beta1
+          service_config: binaryauthorization_v1beta1.yaml
+python:
+    keep:
+        - packages/google-cloud-binary-authorization/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-binary-authorization/
+    metadata:
+        name_pretty: Binary Authorization
+        description: ' is a service on Google Cloud that provides centralized software supply-chain security for applications that run on Google Kubernetes Engine (GKE) and Anthos clusters on VMware'
+        distribution_name: google-cloud-binary-authorization
+        api_id: binaryauthorization.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/binary-authorization
+        client_documentation: https://cloud.google.com/python/docs/reference/binaryauthorization/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

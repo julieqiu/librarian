@@ -1,0 +1,30 @@
+name: google-geo-type
+version: 0.4.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/geo/type
+          service_config: type_geo.yaml
+python:
+    keep:
+        - packages/google-geo-type/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+        - tests/unit/gapic/type/test_type.py
+    remove:
+        - packages/google-geo-type
+    metadata:
+        name_pretty: Geo Type Protos
+        distribution_name: google-geo-type
+        api_id: type.googleapis.com
+        default_version: apiVersion
+        product_documentation: https://mapsplatform.google.com/maps-products
+        client_documentation: https://googleapis.dev/python/geotype/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: OTHER
+        repo: googleapis/google-cloud-python

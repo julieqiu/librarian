@@ -1,0 +1,31 @@
+name: google-cloud-gke-connect-gateway
+version: 0.11.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/gkeconnect/gateway/v1beta1
+          service_config: connectgateway_v1beta1.yaml
+        - path: google/cloud/gkeconnect/gateway/v1
+          service_config: connectgateway_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-gke-connect-gateway/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-gke-connect-gateway/
+    metadata:
+        name_pretty: GKE Connect Gateway
+        description: builds on the power of fleets to let Anthos users connect to and run commands against registered Anthos clusters in a simple, consistent, and secured way, whether the clusters are on Google Cloud, other public clouds, or on premises, and makes it easier to automate DevOps processes across all your clusters.
+        distribution_name: google-cloud-gke-connect-gateway
+        api_id: connectgateway.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/anthos/multicluster-management/gateway
+        client_documentation: https://cloud.google.com/python/docs/reference/connectgateway/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

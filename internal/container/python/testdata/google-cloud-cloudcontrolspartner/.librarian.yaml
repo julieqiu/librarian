@@ -1,0 +1,32 @@
+name: google-cloud-cloudcontrolspartner
+version: 0.3.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/cloudcontrolspartner/v1beta
+          service_config: cloudcontrolspartner_v1beta.yaml
+        - path: google/cloud/cloudcontrolspartner/v1
+          service_config: cloudcontrolspartner_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-cloudcontrolspartner/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-cloudcontrolspartner/
+    metadata:
+        name_pretty: Cloud Controls Partner API
+        description: Provides insights about your customers and their Assured Workloads based on your Sovereign Controls by Partners offering.
+        distribution_name: google-cloud-cloudcontrolspartner
+        api_id: cloudcontrolspartner.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/sovereign-controls-by-partners/docs/sovereign-partners/reference/rest
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-cloudcontrolspartner/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

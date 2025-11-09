@@ -1,0 +1,30 @@
+name: google-cloud-oracledatabase
+version: 0.3.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/oracledatabase/v1
+          service_config: oracledatabase_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-oracledatabase/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-oracledatabase/
+    metadata:
+        name_pretty: Oracle Database@Google Cloud API
+        description: The Oracle Database@Google Cloud API provides a set of APIs to manage Oracle database services, such as Exadata and Autonomous Databases.
+        distribution_name: google-cloud-oracledatabase
+        api_id: oracledatabase.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/oracle/database/docs
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-oracledatabase/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1492565
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

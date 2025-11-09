@@ -1,0 +1,31 @@
+name: google-cloud-artifact-registry
+version: 1.17.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/devtools/artifactregistry/v1
+          service_config: artifactregistry_v1.yaml
+        - path: google/devtools/artifactregistry/v1beta2
+          service_config: artifactregistry_v1beta2.yaml
+python:
+    keep:
+        - packages/google-cloud-artifact-registry/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-artifact-registry/
+    metadata:
+        name_pretty: Artifact Registry
+        description: provides a single place for your organization to manage container images and language packages (such as Maven and npm). It is fully integrated with Google Cloud's tooling and runtimes and comes with support for native artifact protocols. This makes it simple to integrate it with your CI/CD tooling to set up automated pipelines.
+        distribution_name: google-cloud-artifact-registry
+        api_id: artifactregistry.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/artifact-registry
+        client_documentation: https://cloud.google.com/python/docs/reference/artifactregistry/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

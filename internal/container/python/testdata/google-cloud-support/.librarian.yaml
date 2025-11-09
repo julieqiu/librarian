@@ -1,0 +1,32 @@
+name: google-cloud-support
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/support/v2beta
+          service_config: cloudsupport_v2beta.yaml
+        - path: google/cloud/support/v2
+          service_config: cloudsupport_v2.yaml
+python:
+    keep:
+        - packages/google-cloud-support/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-support/
+    metadata:
+        name_pretty: Google Cloud Support API
+        description: Manages Google Cloud technical support cases for Customer Care support offerings.
+        distribution_name: google-cloud-support
+        api_id: cloudsupport.googleapis.com
+        default_version: v2
+        product_documentation: https://cloud.google.com/support/docs/reference/support-api
+        client_documentation: https://cloud.google.com/python/docs/reference/support/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

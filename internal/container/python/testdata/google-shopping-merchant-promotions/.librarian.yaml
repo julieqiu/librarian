@@ -1,0 +1,32 @@
+name: google-shopping-merchant-promotions
+version: 1.1.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/shopping/merchant/promotions/v1
+          service_config: merchantapi_v1.yaml
+        - path: google/shopping/merchant/promotions/v1beta
+          service_config: merchantapi_v1beta.yaml
+python:
+    keep:
+        - packages/google-shopping-merchant-promotions/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-shopping-merchant-promotions/
+    metadata:
+        name_pretty: Merchant API
+        description: Programmatically manage your Merchant Center accounts.
+        distribution_name: google-shopping-merchant-promotions
+        api_id: promotions.googleapis.com
+        default_version: v1
+        product_documentation: https://developers.google.com/merchant/api
+        client_documentation: https://googleapis.dev/python/google-shopping-merchant-promotions/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

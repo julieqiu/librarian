@@ -1,0 +1,32 @@
+name: google-shopping-merchant-products
+version: 1.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/shopping/merchant/products/v1
+          service_config: merchantapi_v1.yaml
+        - path: google/shopping/merchant/products/v1beta
+          service_config: merchantapi_v1beta.yaml
+python:
+    keep:
+        - packages/google-shopping-merchant-products/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-shopping-merchant-products/
+    metadata:
+        name_pretty: Merchant API
+        description: Programmatically manage your Merchant Center accounts.
+        distribution_name: google-shopping-merchant-products
+        api_id: products.googleapis.com
+        default_version: v1
+        product_documentation: https://developers.google.com/merchant/api
+        client_documentation: https://googleapis.dev/python/google-shopping-merchant-products/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

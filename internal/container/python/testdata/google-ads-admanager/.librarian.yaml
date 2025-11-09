@@ -1,0 +1,30 @@
+name: google-ads-admanager
+version: 0.6.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/ads/admanager/v1
+          service_config: admanager_v1.yaml
+python:
+    keep:
+        - packages/google-ads-admanager/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-ads-admanager/
+    metadata:
+        name_pretty: Google Ad Manager
+        description: Manage your Ad Manager inventory, run reports and more.
+        distribution_name: google-ads-admanager
+        api_id: admanager.googleapis.com
+        default_version: v1
+        product_documentation: https://developers.google.com/ad-manager/api/beta
+        client_documentation: https://googleapis.dev/python/google-ads-admanager/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1265187&template=1787490
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

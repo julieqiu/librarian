@@ -1,0 +1,29 @@
+name: google-cloud-securitycentermanagement
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/securitycentermanagement/v1
+          service_config: securitycentermanagement_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-securitycentermanagement/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-securitycentermanagement/
+    metadata:
+        name_pretty: Security Center Management API
+        distribution_name: google-cloud-securitycentermanagement
+        api_id: securitycenter.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/securitycentermanagement/docs/overview
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-securitycentermanagement/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

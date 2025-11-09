@@ -1,0 +1,33 @@
+name: google-cloud-retail
+version: 2.7.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/retail/v2
+          service_config: retail_v2.yaml
+        - path: google/cloud/retail/v2alpha
+          service_config: retail_v2alpha.yaml
+        - path: google/cloud/retail/v2beta
+          service_config: retail_v2beta.yaml
+python:
+    keep:
+        - packages/google-cloud-retail/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-retail/
+    metadata:
+        name_pretty: Retail
+        description: Cloud Retail service enables customers to build end-to-end personalized recommendation systems without requiring a high level of expertise in machine learning, recommendation system, or Google Cloud.
+        distribution_name: google-cloud-retail
+        api_id: retail.googleapis.com
+        default_version: v2
+        product_documentation: https://cloud.google.com/retail/docs/
+        client_documentation: https://cloud.google.com/python/docs/reference/retail/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

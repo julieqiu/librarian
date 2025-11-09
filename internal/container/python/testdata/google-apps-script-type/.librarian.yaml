@@ -1,0 +1,48 @@
+name: google-apps-script-type
+version: 0.4.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/apps/script/type
+          service_config: ""
+        - path: google/apps/script/type/gmail
+          service_config: ""
+        - path: google/apps/script/type/docs
+          service_config: ""
+        - path: google/apps/script/type/drive
+          service_config: ""
+        - path: google/apps/script/type/sheets
+          service_config: ""
+        - path: google/apps/script/type/calendar
+          service_config: ""
+        - path: google/apps/script/type/slides
+          service_config: ""
+python:
+    keep:
+        - packages/google-apps-script-type/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+        - tests/unit/gapic/calendar/test_calendar.py
+        - tests/unit/gapic/docs/test_docs.py
+        - tests/unit/gapic/drive/test_drive.py
+        - tests/unit/gapic/gmail/test_gmail.py
+        - tests/unit/gapic/sheets/test_sheets.py
+        - tests/unit/gapic/slides/test_slides.py
+        - tests/unit/gapic/type/test_type.py
+    remove:
+        - packages/google-apps-script-type
+    metadata:
+        name_pretty: Google Apps Script Type Protos
+        distribution_name: google-apps-script-type
+        api_id: type.googleapis.com
+        default_version: apiVersion
+        product_documentation: https://developers.google.com/apps-script/
+        client_documentation: https://googleapis.dev/python/type/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,29 @@
+name: google-cloud-contact-center-insights
+version: 1.24.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/contactcenterinsights/v1
+          service_config: contactcenterinsights_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-contact-center-insights/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-contact-center-insights/
+    metadata:
+        name_pretty: Contact Center AI Insights
+        description: ' helps users detect and visualize patterns in their contact center data.'
+        distribution_name: google-cloud-contact-center-insights
+        api_id: contactcenterinsights.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/contact-center/insights/docs
+        client_documentation: https://cloud.google.com/python/docs/reference/contactcenterinsights/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

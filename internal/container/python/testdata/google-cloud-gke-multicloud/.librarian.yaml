@@ -1,0 +1,29 @@
+name: google-cloud-gke-multicloud
+version: 0.6.22
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/gkemulticloud/v1
+          service_config: gkemulticloud_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-gke-multicloud/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-gke-multicloud
+    metadata:
+        name_pretty: Anthos Multicloud
+        description: An API for provisioning and managing GKE clusters running on AWS and Azure infrastructure through a centralized Google Cloud backed control plane.
+        distribution_name: google-cloud-gke-multicloud
+        api_id: gkemulticloud.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/anthos/clusters/docs/multi-cloud
+        client_documentation: https://cloud.google.com/python/docs/reference/gkemulticloud/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

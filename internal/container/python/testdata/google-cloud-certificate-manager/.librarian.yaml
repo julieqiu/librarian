@@ -1,0 +1,29 @@
+name: google-cloud-certificate-manager
+version: 1.11.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/certificatemanager/v1
+          service_config: certificatemanager_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-certificate-manager/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-certificate-manager/
+    metadata:
+        name_pretty: Certificate Manager
+        description: lets you acquire and manage TLS (SSL) certificates for use with Cloud Load Balancing.
+        distribution_name: google-cloud-certificate-manager
+        api_id: certificatemanager.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/python/docs/reference/certificatemanager/latest
+        client_documentation: https://cloud.google.com/python/docs/reference/certificatemanager/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

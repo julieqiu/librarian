@@ -1,0 +1,30 @@
+name: google-ads-marketingplatform-admin
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/marketingplatform/admin/v1alpha
+          service_config: marketingplatformadmin_v1alpha.yaml
+python:
+    keep:
+        - packages/google-ads-marketingplatform-admin/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-ads-marketingplatform-admin/
+    metadata:
+        name_pretty: Google Marketing Platform Admin API
+        description: The Google Marketing Platform Admin API allows for programmatic access to the Google Marketing Platform configuration data. You can use the Google Marketing Platform Admin API to manage links between your Google Marketing Platform organization and Google Analytics accounts, and to set the service level of your GA4 properties.
+        distribution_name: google-ads-marketingplatform-admin
+        api_id: marketingplatformadmin.googleapis.com
+        default_version: v1alpha
+        product_documentation: https://developers.google.com/analytics/devguides/config/gmp/v1
+        client_documentation: https://googleapis.dev/python/google-ads-marketingplatform-admin/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

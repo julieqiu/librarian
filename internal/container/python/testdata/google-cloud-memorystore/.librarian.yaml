@@ -1,0 +1,32 @@
+name: google-cloud-memorystore
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/memorystore/v1beta
+          service_config: memorystore_v1beta.yaml
+        - path: google/cloud/memorystore/v1
+          service_config: memorystore_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-memorystore/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-memorystore/
+    metadata:
+        name_pretty: Memorystore
+        description: Memorystore for Valkey is a fully managed Valkey Cluster service for Google Cloud. Applications running on Google Cloud can achieve extreme performance by leveraging the highly scalable, available, secure Valkey service without the burden of managing complex Valkey deployments.
+        distribution_name: google-cloud-memorystore
+        api_id: memorystore.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/memorystore/docs/valkey
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-memorystore/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

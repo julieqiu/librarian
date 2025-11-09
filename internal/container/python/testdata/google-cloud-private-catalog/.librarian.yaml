@@ -1,0 +1,29 @@
+name: google-cloud-private-catalog
+version: 0.10.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/privatecatalog/v1beta1
+          service_config: cloudprivatecatalog_v1beta1.yaml
+python:
+    keep:
+        - packages/google-cloud-private-catalog/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-private-catalog/
+    metadata:
+        name_pretty: Private Catalog
+        description: allows developers and cloud admins to make their solutions discoverable to their internal enterprise users. Cloud admins can manage their solutions and ensure their users are always launching the latest versions.
+        distribution_name: google-cloud-private-catalog
+        api_id: cloudprivatecatalog.googleapis.com
+        default_version: v1beta1
+        product_documentation: https://cloud.google.com/private-catalog/
+        client_documentation: https://cloud.google.com/python/docs/reference/cloudprivatecatalog/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

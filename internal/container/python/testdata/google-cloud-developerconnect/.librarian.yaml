@@ -1,0 +1,30 @@
+name: google-cloud-developerconnect
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/developerconnect/v1
+          service_config: developerconnect_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-developerconnect/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-developerconnect/
+    metadata:
+        name_pretty: Developer Connect API
+        description: Developer Connect streamlines integration with third-party source code management platforms by simplifying authentication, authorization, and networking configuration.
+        distribution_name: google-cloud-developerconnect
+        api_id: developerconnect.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/developer-connect/docs/overview
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-developerconnect/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1446966&template=1822025
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

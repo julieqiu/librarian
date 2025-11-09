@@ -1,0 +1,31 @@
+name: google-cloud-network-connectivity
+version: 2.11.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/networkconnectivity/v1
+          service_config: networkconnectivity_v1.yaml
+        - path: google/cloud/networkconnectivity/v1alpha1
+          service_config: networkconnectivity_v1alpha1.yaml
+python:
+    keep:
+        - packages/google-cloud-network-connectivity/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-network-connectivity/
+    metadata:
+        name_pretty: Network Connectivity Center
+        description: The Network Connectivity API will be home to various services which provide information pertaining to network connectivity.  This includes information like interconnects, VPNs, VPCs, routing information, ip address details, etc. This information will help customers verify their network configurations and helps them to discover misconfigurations, inconsistencies, etc.
+        distribution_name: google-cloud-network-connectivity
+        api_id: networkconnectivity.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/network-connectivity/
+        client_documentation: https://cloud.google.com/python/docs/reference/networkconnectivity/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

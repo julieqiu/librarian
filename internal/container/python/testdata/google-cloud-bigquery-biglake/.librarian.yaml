@@ -1,0 +1,32 @@
+name: google-cloud-bigquery-biglake
+version: 0.5.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/bigquery/biglake/v1alpha1
+          service_config: biglake_v1alpha1.yaml
+        - path: google/cloud/bigquery/biglake/v1
+          service_config: biglake_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-bigquery-biglake/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-bigquery-biglake/
+    metadata:
+        name_pretty: BigLake API
+        description: BigLake API
+        distribution_name: google-cloud-bigquery-biglake
+        api_id: biglake.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/bigquery/docs/iceberg-tables#create-using-biglake-metastore
+        client_documentation: https://cloud.google.com/python/docs/reference/biglake/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=187149&template=1019829
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

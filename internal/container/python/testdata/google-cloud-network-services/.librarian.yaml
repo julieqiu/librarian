@@ -1,0 +1,28 @@
+name: google-cloud-network-services
+version: 0.6.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/networkservices/v1
+          service_config: networkservices_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-network-services/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-network-services/
+    metadata:
+        name_pretty: Network Services
+        distribution_name: google-cloud-network-services
+        api_id: networkservices.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com
+        client_documentation: https://cloud.google.com/python/docs/reference/networkservices/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

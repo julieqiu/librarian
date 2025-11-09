@@ -1,0 +1,30 @@
+name: google-cloud-parametermanager
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/parametermanager/v1
+          service_config: parametermanager_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-parametermanager/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-parametermanager/
+    metadata:
+        name_pretty: Parameter Manager API
+        description: '(Public Preview) Parameter Manager is a single source of truth to store, access and manage the lifecycle of your workload parameters. Parameter Manager aims to make management of sensitive application parameters effortless for customers without diminishing focus on security. '
+        distribution_name: google-cloud-parametermanager
+        api_id: parametermanager.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/secret-manager/parameter-manager/docs/overview
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-parametermanager/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1442085&template=2002674
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

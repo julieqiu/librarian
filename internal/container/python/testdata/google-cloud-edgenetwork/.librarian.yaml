@@ -1,0 +1,30 @@
+name: google-cloud-edgenetwork
+version: 0.3.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/edgenetwork/v1
+          service_config: edgenetwork_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-edgenetwork/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-edgenetwork/
+    metadata:
+        name_pretty: Distributed Cloud Edge Network API
+        description: Network management API for Distributed Cloud Edge
+        distribution_name: google-cloud-edgenetwork
+        api_id: edgenetwork.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/distributed-cloud/edge/latest/docs/overview
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-edgenetwork/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=187192&template=1162689
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

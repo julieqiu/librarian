@@ -1,0 +1,22 @@
+name: google-cloud-access-context-manager
+version: 0.3.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/identity/accesscontextmanager/v1
+          service_config: accesscontextmanager_v1.yaml
+        - path: google/identity/accesscontextmanager/type
+          service_config: ""
+python:
+    remove:
+        - ^packages/google-cloud-access-context-manager/google/.*/.*_pb2\.(?:py|pyi)$/
+    metadata:
+        name_pretty: Access Context Manager
+        distribution_name: google-cloud-access-context-manager
+        default_version: apiVersion
+        product_documentation: https://cloud.google.com/access-context-manager/docs/overview
+        client_documentation: https://github.com/googleapis/google-cloud-python/tree/main/packages/google-cloud-access-context-manager
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

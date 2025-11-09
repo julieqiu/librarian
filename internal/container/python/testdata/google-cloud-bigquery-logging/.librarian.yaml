@@ -1,0 +1,29 @@
+name: google-cloud-bigquery-logging
+version: 1.7.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/bigquery/logging/v1
+          service_config: ""
+python:
+    keep:
+        - packages/google-cloud-bigquery-logging/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+        - tests/unit/gapic/bigquery_logging_v1/test_bigquery_logging_v1.py
+    remove:
+        - packages/google-cloud-bigquery-logging/
+    metadata:
+        name_pretty: BigQuery Logging Protos
+        distribution_name: google-cloud-bigquery-logging
+        default_version: v1
+        product_documentation: https://cloud.google.com/bigquery/docs/reference/auditlogs
+        client_documentation: https://cloud.google.com/python/docs/reference/bigquerylogging/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: stable
+        library_type: OTHER
+        repo: googleapis/google-cloud-python

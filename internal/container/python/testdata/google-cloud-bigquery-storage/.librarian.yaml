@@ -1,0 +1,54 @@
+name: google-cloud-bigquery-storage
+version: 2.34.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/bigquery/storage/v1beta2
+          service_config: bigquerystorage_v1beta2.yaml
+        - path: google/cloud/bigquery/storage/v1alpha
+          service_config: bigquerystorage_v1alpha.yaml
+        - path: google/cloud/bigquery/storage/v1beta
+          service_config: bigquerystorage_v1beta.yaml
+        - path: google/cloud/bigquery/storage/v1
+          service_config: bigquerystorage_v1.yaml
+python:
+    keep:
+        - docs/.*/library.rst
+        - docs/samples
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - google/cloud/bigquery_storage_v1/client.py
+        - google/cloud/bigquery_storage_v1/exceptions.py
+        - google/cloud/bigquery_storage_v1/gapic_types.py
+        - google/cloud/bigquery_storage_v1/reader.py
+        - google/cloud/bigquery_storage_v1/writer.py
+        - google/cloud/bigquery_storage_v1beta2/client.py
+        - google/cloud/bigquery_storage_v1beta2/exceptions.py
+        - google/cloud/bigquery_storage_v1beta2/writer.py
+        - packages/google-cloud-bigquery-storage/CHANGELOG.md
+        - packages/google-cloud-bigquery-storage/CONTRIBUTING
+        - samples/__init__.py
+        - samples/README.txt
+        - samples/conftest.py
+        - samples/pyarrow
+        - samples/quickstart
+        - samples/snippets
+        - samples/to_dataframe
+        - scripts/client-post-processing
+        - scripts/readme-gen
+        - testing/.gitignore
+        - tests/system
+        - tests/unit/.*.py
+    remove:
+        - packages/google-cloud-bigquery-storage
+    metadata:
+        name_pretty: Google BigQuery Storage
+        distribution_name: google-cloud-bigquery-storage
+        api_id: bigquerystorage.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/bigquery/docs/reference/storage/
+        client_documentation: https://cloud.google.com/python/docs/reference/bigquerystorage/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/559654
+        release_level: stable
+        library_type: GAPIC_COMBO
+        repo: googleapis/google-cloud-python

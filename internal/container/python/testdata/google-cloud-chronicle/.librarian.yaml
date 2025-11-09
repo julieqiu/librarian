@@ -1,0 +1,30 @@
+name: google-cloud-chronicle
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/chronicle/v1
+          service_config: chronicle_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-chronicle/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-chronicle/
+    metadata:
+        name_pretty: Chronicle API
+        description: The Google Cloud Security Operations API, popularly known as the Chronicle API, serves endpoints that enable security analysts to analyze and mitigate a security threat throughout its lifecycle
+        distribution_name: google-cloud-chronicle
+        api_id: chronicle.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/chronicle/docs/secops/secops-overview
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-chronicle/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1387895
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

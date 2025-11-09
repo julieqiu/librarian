@@ -1,0 +1,30 @@
+name: google-cloud-maintenance-api
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/maintenance/api/v1beta
+          service_config: maintenance_v1beta.yaml
+python:
+    keep:
+        - packages/google-cloud-maintenance-api/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-maintenance-api/
+    metadata:
+        name_pretty: Maintenance API
+        description: The Maintenance API provides a centralized view of planned disruptive maintenance events across supported Google Cloud products. It offers users visibility into upcoming, ongoing, and completed maintenance, along with controls to manage certain maintenance activities, such as mainteance windows, rescheduling, and on-demand updates.
+        distribution_name: google-cloud-maintenance-api
+        api_id: api.googleapis.com
+        default_version: v1beta
+        product_documentation: https://cloud.google.com/unified-maintenance/docs/overview
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-maintenance-api/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1673988&template=1161103
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

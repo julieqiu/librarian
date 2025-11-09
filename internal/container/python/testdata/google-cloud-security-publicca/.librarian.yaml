@@ -1,0 +1,31 @@
+name: google-cloud-security-publicca
+version: 0.4.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/security/publicca/v1
+          service_config: publicca_v1.yaml
+        - path: google/cloud/security/publicca/v1beta1
+          service_config: publicca_v1beta1.yaml
+python:
+    keep:
+        - packages/google-cloud-security-publicca/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-security-publicca/
+    metadata:
+        name_pretty: Public Certificate Authority
+        description: simplifies the deployment and management of public CAs without managing infrastructure.
+        distribution_name: google-cloud-security-publicca
+        api_id: publicca.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/certificate-manager/docs/public-ca
+        client_documentation: https://cloud.google.com/python/docs/reference/publicca/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,29 @@
+name: google-cloud-shell
+version: 1.13.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/shell/v1
+          service_config: cloudshell_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-shell/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-shell/
+    metadata:
+        name_pretty: Cloud Shell
+        description: is an interactive shell environment for Google Cloud that makes it easy for you to learn and experiment with Google Cloud and manage your projects and resources from your web browser.
+        distribution_name: google-cloud-shell
+        api_id: cloudshell.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/shell/
+        client_documentation: https://cloud.google.com/python/docs/reference/cloudshell/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

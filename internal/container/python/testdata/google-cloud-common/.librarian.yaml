@@ -1,0 +1,29 @@
+name: google-cloud-common
+version: 1.7.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/common
+          service_config: common.yaml
+python:
+    keep:
+        - packages/google-cloud-common/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+        - tests/unit/gapic/common/test_common.py
+    remove:
+        - packages/google-cloud-common/
+    metadata:
+        name_pretty: Google Cloud Common
+        description: This package contains generated Python types for google.cloud.common
+        distribution_name: google-cloud-common
+        default_version: apiVersion
+        product_documentation: https://cloud.google.com
+        client_documentation: https://cloud.google.com/python/docs/reference/common/latest
+        release_level: stable
+        library_type: CORE
+        repo: googleapis/google-cloud-python

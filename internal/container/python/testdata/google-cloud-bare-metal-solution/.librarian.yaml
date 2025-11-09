@@ -1,0 +1,29 @@
+name: google-cloud-bare-metal-solution
+version: 1.11.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/baremetalsolution/v2
+          service_config: baremetalsolution_v2.yaml
+python:
+    keep:
+        - packages/google-cloud-bare-metal-solution/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-bare-metal-solution/
+    metadata:
+        name_pretty: Bare Metal Solution
+        description: Bring your Oracle workloads to Google Cloud with Bare Metal Solution and jumpstart your cloud journey with minimal risk.
+        distribution_name: google-cloud-bare-metal-solution
+        api_id: baremetalsolution.googleapis.com
+        default_version: v2
+        product_documentation: https://cloud.google.com/bare-metal/docs
+        client_documentation: https://cloud.google.com/python/docs/reference/baremetalsolution/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

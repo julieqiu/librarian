@@ -1,0 +1,29 @@
+name: google-cloud-video-stitcher
+version: 0.9.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/video/stitcher/v1
+          service_config: videostitcher_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-video-stitcher/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-video-stitcher/
+    metadata:
+        name_pretty: Video Stitcher
+        description: The Video Stitcher API helps you generate dynamic content for delivery to client devices. You can call the Video Stitcher API from your servers to dynamically insert ads into video-on-demand and livestreams for your users.
+        distribution_name: google-cloud-video-stitcher
+        api_id: videostitcher.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/video-stitcher
+        client_documentation: https://cloud.google.com/python/docs/reference/videostitcher/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

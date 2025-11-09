@@ -1,0 +1,29 @@
+name: google-cloud-enterpriseknowledgegraph
+version: 0.4.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/enterpriseknowledgegraph/v1
+          service_config: enterpriseknowledgegraph_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-enterpriseknowledgegraph/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-enterpriseknowledgegraph/
+    metadata:
+        name_pretty: Enterprise Knowledge Graph
+        distribution_name: google-cloud-enterpriseknowledgegraph
+        api_id: enterpriseknowledgegraph.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/enterprise-knowledge-graph/
+        client_documentation: https://cloud.google.com/python/docs/reference/enterpriseknowledgegraph/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,29 @@
+name: google-cloud-gsuiteaddons
+version: 0.3.18
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/gsuiteaddons/v1
+          service_config: gsuiteaddons_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-gsuiteaddons/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-gsuiteaddons
+    metadata:
+        name_pretty: Google Workspace Add-ons API
+        description: Add-ons are customized applications that integrate with Google Workspace applications.
+        distribution_name: google-cloud-gsuiteaddons
+        api_id: gsuiteaddons.googleapis.com
+        default_version: v1
+        product_documentation: https://developers.google.com/workspace/add-ons/overview
+        client_documentation: https://cloud.google.com/python/docs/reference/gsuiteaddons/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,30 @@
+name: google-cloud-apphub
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/apphub/v1
+          service_config: apphub_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-apphub/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-apphub/
+    metadata:
+        name_pretty: App Hub API
+        description: 'null '
+        distribution_name: google-cloud-apphub
+        api_id: apphub.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/app-hub/docs/overview
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-apphub/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1509913
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

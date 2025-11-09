@@ -1,0 +1,31 @@
+name: google-cloud-assured-workloads
+version: 2.1.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/assuredworkloads/v1
+          service_config: assuredworkloads_v1.yaml
+        - path: google/cloud/assuredworkloads/v1beta1
+          service_config: assuredworkloads_v1beta1.yaml
+python:
+    keep:
+        - packages/google-cloud-assured-workloads/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-assured-workloads/
+    metadata:
+        name_pretty: Assured Workloads for Government
+        description: allows you to secure your government workloads and accelerate your path to running compliant workloads on Google Cloud with Assured Workloads for Government.
+        distribution_name: google-cloud-assured-workloads
+        api_id: assuredworkloads.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/assured-workloads/
+        client_documentation: https://cloud.google.com/python/docs/reference/assuredworkloads/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

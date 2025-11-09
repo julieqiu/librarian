@@ -1,0 +1,31 @@
+name: google-cloud-domains
+version: 1.11.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/domains/v1beta1
+          service_config: domains_v1beta1.yaml
+        - path: google/cloud/domains/v1
+          service_config: domains_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-domains/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-domains/
+    metadata:
+        name_pretty: Cloud Domains
+        description: allows you to register and manage domains by using Cloud Domains.
+        distribution_name: google-cloud-domains
+        api_id: domains.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/domains
+        client_documentation: https://cloud.google.com/python/docs/reference/domains/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,36 @@
+name: google-cloud-securitycenter
+version: 1.41.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/securitycenter/v2
+          service_config: securitycenter_v2.yaml
+        - path: google/cloud/securitycenter/v1p1beta1
+          service_config: securitycenter_v1p1beta1.yaml
+        - path: google/cloud/securitycenter/v1beta1
+          service_config: securitycenter_v1beta1.yaml
+        - path: google/cloud/securitycenter/v1
+          service_config: securitycenter_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-securitycenter/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-securitycenter/
+    metadata:
+        name_pretty: Google Cloud Security Command Center
+        description: makes it easier for you to prevent, detect, and respond to threats. Identify security misconfigurations in virtual machines, networks, applications, and storage buckets from a centralized dashboard. Take action on them before they can potentially result in business damage or loss. Built-in capabilities can quickly surface suspicious activity in your Stackdriver security logs or indicate compromised virtual machines. Respond to threats by following actionable recommendations or exporting logs to your SIEM for further investigation.
+        distribution_name: google-cloud-securitycenter
+        api_id: securitycenter.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/security-command-center
+        client_documentation: https://cloud.google.com/python/docs/reference/securitycenter/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/559748
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

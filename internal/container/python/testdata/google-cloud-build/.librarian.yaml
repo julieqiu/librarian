@@ -1,0 +1,32 @@
+name: google-cloud-build
+version: 3.33.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/devtools/cloudbuild/v1
+          service_config: cloudbuild_v1.yaml
+        - path: google/devtools/cloudbuild/v2
+          service_config: cloudbuild_v2.yaml
+python:
+    keep:
+        - packages/google-cloud-build/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-build/
+    metadata:
+        name_pretty: Cloud Build
+        description: lets you build software quickly across all languages. Get complete control over defining custom workflows for building, testing, and deploying across multiple environments such as VMs, serverless, Kubernetes, or Firebase.
+        distribution_name: google-cloud-build
+        api_id: cloudbuild.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/cloud-build/docs/
+        client_documentation: https://cloud.google.com/python/docs/reference/cloudbuild/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/5226584
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

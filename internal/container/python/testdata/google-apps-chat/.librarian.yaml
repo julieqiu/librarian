@@ -1,0 +1,29 @@
+name: google-apps-chat
+version: 0.4.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/chat/v1
+          service_config: chat_v1.yaml
+python:
+    keep:
+        - packages/google-apps-chat/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-apps-chat/
+    metadata:
+        name_pretty: Chat API
+        distribution_name: google-apps-chat
+        api_id: chat.googleapis.com
+        default_version: v1
+        product_documentation: https://developers.google.com/chat/
+        client_documentation: https://googleapis.dev/python/google-apps-chat/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

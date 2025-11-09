@@ -1,0 +1,29 @@
+name: google-cloud-dms
+version: 1.13.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/clouddms/v1
+          service_config: datamigration_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-dms/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-dms/
+    metadata:
+        name_pretty: Cloud Database Migration Service
+        description: makes it easier for you to migrate your data to Google Cloud. This service helps you lift and shift your MySQL and PostgreSQL workloads into Cloud SQL.
+        distribution_name: google-cloud-dms
+        api_id: datamigration.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/database-migration/
+        client_documentation: https://cloud.google.com/python/docs/reference/datamigration/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

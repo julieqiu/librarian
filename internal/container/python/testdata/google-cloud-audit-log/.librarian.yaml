@@ -1,0 +1,19 @@
+name: google-cloud-audit-log
+version: 0.4.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/audit
+          service_config: cloudaudit.yaml
+python:
+    remove:
+        - ^packages/google-cloud-audit-log/google/.*/.*_pb2\.(?:py|pyi)$/
+    metadata:
+        name_pretty: Audit Log API
+        distribution_name: google-cloud-audit-log
+        default_version: apiVersion
+        product_documentation: https://cloud.google.com/logging/docs/audit
+        client_documentation: https://github.com/googleapis/google-cloud-python/tree/main/packages/google-cloud-audit-log
+        release_level: preview
+        library_type: OTHER
+        repo: googleapis/google-cloud-python

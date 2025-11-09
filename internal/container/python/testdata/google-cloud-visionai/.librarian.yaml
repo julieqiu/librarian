@@ -1,0 +1,32 @@
+name: google-cloud-visionai
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/visionai/v1alpha1
+          service_config: visionai_v1alpha1.yaml
+        - path: google/cloud/visionai/v1
+          service_config: visionai_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-visionai/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-visionai/
+    metadata:
+        name_pretty: Vision AI API
+        description: Easily build and deploy Vertex AI Vision applications using a single platform.
+        distribution_name: google-cloud-visionai
+        api_id: visionai.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/vision-ai/docs
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-visionai/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=187174&pli=1&template=1161261
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

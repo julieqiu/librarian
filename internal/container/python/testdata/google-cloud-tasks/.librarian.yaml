@@ -1,0 +1,35 @@
+name: google-cloud-tasks
+version: 2.20.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/tasks/v2beta2
+          service_config: cloudtasks_v2beta2.yaml
+        - path: google/cloud/tasks/v2beta3
+          service_config: cloudtasks_v2beta3.yaml
+        - path: google/cloud/tasks/v2
+          service_config: cloudtasks_v2.yaml
+python:
+    keep:
+        - packages/google-cloud-tasks/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - snippets/README.md
+        - tests/system
+    remove:
+        - packages/google-cloud-tasks/
+    metadata:
+        name_pretty: Cloud Tasks
+        description: a fully managed service that allows you to manage the execution, dispatch and delivery of a large number of distributed tasks. You can asynchronously perform work outside of a user request. Your tasks can be executed on App Engine or any arbitrary HTTP endpoint.
+        distribution_name: google-cloud-tasks
+        api_id: cloudtasks.googleapis.com
+        default_version: v2
+        product_documentation: https://cloud.google.com/tasks/docs/
+        client_documentation: https://cloud.google.com/python/docs/reference/cloudtasks/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/5433985
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

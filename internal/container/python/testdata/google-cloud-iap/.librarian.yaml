@@ -1,0 +1,29 @@
+name: google-cloud-iap
+version: 1.18.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/iap/v1
+          service_config: iap_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-iap/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-iap/
+    metadata:
+        name_pretty: Identity-Aware Proxy
+        description: Identity-Aware Proxy includes a number of features that can be used to protect access to Google Cloud hosted resources and applications hosted on Google Cloud.
+        distribution_name: google-cloud-iap
+        api_id: iap.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/iap
+        client_documentation: https://cloud.google.com/python/docs/reference/iap/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

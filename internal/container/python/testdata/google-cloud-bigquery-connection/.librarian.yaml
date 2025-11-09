@@ -1,0 +1,29 @@
+name: google-cloud-bigquery-connection
+version: 1.19.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/bigquery/connection/v1
+          service_config: bigqueryconnection_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-bigquery-connection/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-bigquery-connection/
+    metadata:
+        name_pretty: BigQuery Connection
+        description: Manage BigQuery connections to external data sources.
+        distribution_name: google-cloud-bigquery-connection
+        api_id: bigqueryconnection.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/bigquery/docs/reference/bigqueryconnection
+        client_documentation: https://cloud.google.com/python/docs/reference/bigqueryconnection/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

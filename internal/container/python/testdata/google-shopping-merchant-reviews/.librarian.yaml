@@ -1,0 +1,30 @@
+name: google-shopping-merchant-reviews
+version: 0.3.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/shopping/merchant/reviews/v1beta
+          service_config: merchantapi_v1beta.yaml
+python:
+    keep:
+        - packages/google-shopping-merchant-reviews/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-shopping-merchant-reviews/
+    metadata:
+        name_pretty: Merchant Reviews API
+        description: Programmatically manage your Merchant Center Accounts
+        distribution_name: google-shopping-merchant-reviews
+        api_id: reviews.googleapis.com
+        default_version: v1beta
+        product_documentation: https://developers.google.com/merchant/api
+        client_documentation: https://googleapis.dev/python/google-shopping-merchant-reviews/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,29 @@
+name: google-area120-tables
+version: 0.12.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/area120/tables/v1alpha1
+          service_config: area120tables_v1alpha1.yaml
+python:
+    keep:
+        - packages/google-area120-tables/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-area120-tables/
+    metadata:
+        name_pretty: Area 120 Tables
+        description: provides programmatic methods to the Area 120 Tables API.
+        distribution_name: google-area120-tables
+        api_id: area120tables.googleapis.com
+        default_version: v1alpha1
+        product_documentation: https://area120.google.com
+        client_documentation: https://googleapis.dev/python/area120tables/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

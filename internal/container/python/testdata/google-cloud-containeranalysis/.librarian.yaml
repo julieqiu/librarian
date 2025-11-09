@@ -1,0 +1,31 @@
+name: google-cloud-containeranalysis
+version: 2.19.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/devtools/containeranalysis/v1
+          service_config: containeranalysis_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-containeranalysis/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+        - tests/unit/test_get_grafeas_client.py
+    remove:
+        - packages/google-cloud-containeranalysis/
+    metadata:
+        name_pretty: Container Analysis
+        description: is a service that provides vulnerability scanning and metadata storage for software artifacts. The service performs vulnerability scans on built software artifacts, such as the images in Container Registry, then stores the resulting metadata and makes it available for consumption through an API. The metadata may come from several sources, including vulnerability scanning, other Cloud services, and third-party providers.
+        distribution_name: google-cloud-containeranalysis
+        api_id: containeranalysis.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/container-registry/docs/container-analysis
+        client_documentation: https://cloud.google.com/python/docs/reference/containeranalysis/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/559777
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

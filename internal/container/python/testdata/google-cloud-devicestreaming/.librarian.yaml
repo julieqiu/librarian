@@ -1,0 +1,30 @@
+name: google-cloud-devicestreaming
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/devicestreaming/v1
+          service_config: devicestreaming_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-devicestreaming/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-devicestreaming/
+    metadata:
+        name_pretty: Device Streaming API
+        description: The Cloud API for device streaming usage.
+        distribution_name: google-cloud-devicestreaming
+        api_id: devicestreaming.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/device-streaming/docs
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-devicestreaming/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1767292&template=2112325
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

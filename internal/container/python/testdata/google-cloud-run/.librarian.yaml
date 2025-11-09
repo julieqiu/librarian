@@ -1,0 +1,29 @@
+name: google-cloud-run
+version: 0.12.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/run/v2
+          service_config: run_v2.yaml
+python:
+    keep:
+        - packages/google-cloud-run/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-run/
+    metadata:
+        name_pretty: Cloud Run
+        description: is a managed compute platform that enables you to run containers that are invocable via requests or events.
+        distribution_name: google-cloud-run
+        api_id: run.googleapis.com
+        default_version: v2
+        product_documentation: https://cloud.google.com/run/docs
+        client_documentation: https://cloud.google.com/python/docs/reference/run/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

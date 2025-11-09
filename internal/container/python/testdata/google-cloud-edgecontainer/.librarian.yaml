@@ -1,0 +1,29 @@
+name: google-cloud-edgecontainer
+version: 0.6.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/edgecontainer/v1
+          service_config: edgecontainer_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-edgecontainer/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-edgecontainer/
+    metadata:
+        name_pretty: Distributed Cloud Edge Container
+        description: Google Distributed Cloud Edge allows you to run Kubernetes clusters on dedicated hardware provided and maintained by Google that is separate from the Google Cloud data center.
+        distribution_name: google-cloud-edgecontainer
+        api_id: edgecontainer.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/distributed-cloud/edge
+        client_documentation: https://cloud.google.com/python/docs/reference/edgecontainer/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

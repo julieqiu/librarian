@@ -1,0 +1,31 @@
+name: google-cloud-documentai
+version: 3.7.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/documentai/v1beta3
+          service_config: documentai_v1beta3.yaml
+        - path: google/cloud/documentai/v1
+          service_config: documentai_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-documentai/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-documentai/
+    metadata:
+        name_pretty: Document AI
+        description: Service to parse structured information from unstructured or semi-structured documents using state-of-the-art Google AI such as natural language, computer vision, translation, and AutoML.
+        distribution_name: google-cloud-documentai
+        api_id: documentai.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/document-ai/docs
+        client_documentation: https://cloud.google.com/python/docs/reference/documentai/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

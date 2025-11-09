@@ -1,0 +1,31 @@
+name: google-cloud-datastream
+version: 1.16.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/datastream/v1
+          service_config: datastream_v1.yaml
+        - path: google/cloud/datastream/v1alpha1
+          service_config: datastream_v1alpha1.yaml
+python:
+    keep:
+        - packages/google-cloud-datastream/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-datastream/
+    metadata:
+        name_pretty: Datastream
+        description: is a serverless and easy-to-use change data capture (CDC) and replication service. It allows you to synchronize data across heterogeneous databases and applications reliably, and with minimal latency and downtime.
+        distribution_name: google-cloud-datastream
+        api_id: datastream.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/datastream/
+        client_documentation: https://cloud.google.com/python/docs/reference/datastream/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

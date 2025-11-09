@@ -1,0 +1,32 @@
+name: google-cloud-modelarmor
+version: 0.3.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/modelarmor/v1beta
+          service_config: modelarmor_v1beta.yaml
+        - path: google/cloud/modelarmor/v1
+          service_config: modelarmor_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-modelarmor/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-modelarmor/
+    metadata:
+        name_pretty: Model Armor API
+        description: Model Armor helps you protect against risks like prompt injection, harmful content, and data leakage in generative AI applications by letting you define policies that filter user prompts and model responses.
+        distribution_name: google-cloud-modelarmor
+        api_id: securitycenter.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/security-command-center/docs/model-armor-overview
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-modelarmor/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1514910&template=0
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,30 @@
+name: google-cloud-apihub
+version: 0.4.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/apihub/v1
+          service_config: apihub_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-apihub/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-apihub/
+    metadata:
+        name_pretty: API Hub API
+        description: API hub lets you consolidate and organize information about all of the APIs of interest to your organization. API hub lets you capture critical information about APIs that allows developers to discover and evaluate them easily and leverage the work of other teams wherever possible. API platform teams can use API hub to have visibility into and manage their portfolio of APIs.
+        distribution_name: google-cloud-apihub
+        api_id: apihub.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/apigee/docs/apihub/what-is-api-hub
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-apihub/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1447560
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

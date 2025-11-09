@@ -1,0 +1,30 @@
+name: google-cloud-locationfinder
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/locationfinder/v1
+          service_config: cloudlocationfinder_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-locationfinder/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-locationfinder/
+    metadata:
+        name_pretty: Cloud Location Finder API
+        description: Cloud Location Finder lets you identify and filter cloud locations in regions and zones across Google Cloud, Google Distributed Cloud, Microsoft Azure, Amazon Web Services, and Oracle Cloud Infrastructure based on proximity, geographic location, and carbon footprint.
+        distribution_name: google-cloud-locationfinder
+        api_id: locationfinder.googleapis.com
+        default_version: v1
+        product_documentation: https://issuetracker.google.com/issues/new?component=1569265&template=1988535
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-locationfinder/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1569265&template=1988535
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

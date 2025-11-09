@@ -1,0 +1,29 @@
+name: google-cloud-contentwarehouse
+version: 0.8.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/contentwarehouse/v1
+          service_config: contentwarehouse_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-contentwarehouse/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-contentwarehouse/
+    metadata:
+        name_pretty: Document AI Warehouse
+        distribution_name: google-cloud-contentwarehouse
+        api_id: contentwarehouse.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/document-warehouse/
+        client_documentation: https://cloud.google.com/python/docs/reference/contentwarehouse/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

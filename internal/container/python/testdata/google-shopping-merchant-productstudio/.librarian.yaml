@@ -1,0 +1,30 @@
+name: google-shopping-merchant-productstudio
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/shopping/merchant/productstudio/v1alpha
+          service_config: merchantapi_v1alpha.yaml
+python:
+    keep:
+        - packages/google-shopping-merchant-productstudio/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-shopping-merchant-productstudio/
+    metadata:
+        name_pretty: Merchant ProductStudio API
+        description: Programmatically manage your Merchant Center accounts.
+        distribution_name: google-shopping-merchant-productstudio
+        api_id: productstudio.googleapis.com
+        default_version: v1alpha
+        product_documentation: https://developers.google.com/merchant/api
+        client_documentation: https://googleapis.dev/python/google-shopping-merchant-productstudio/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

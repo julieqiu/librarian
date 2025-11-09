@@ -1,0 +1,29 @@
+name: google-cloud-media-translation
+version: 0.12.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/mediatranslation/v1beta1
+          service_config: mediatranslation_v1beta1.yaml
+python:
+    keep:
+        - packages/google-cloud-media-translation/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-media-translation/
+    metadata:
+        name_pretty: Media Translation
+        description: provides enterprise quality translation from/to various media types.
+        distribution_name: google-cloud-media-translation
+        api_id: mediatranslation.googleapis.com
+        default_version: v1beta1
+        product_documentation: https://cloud.google.com/media-translation
+        client_documentation: https://cloud.google.com/python/docs/reference/mediatranslation/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

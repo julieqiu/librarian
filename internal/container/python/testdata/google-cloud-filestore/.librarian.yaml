@@ -1,0 +1,29 @@
+name: google-cloud-filestore
+version: 1.14.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/filestore/v1
+          service_config: file_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-filestore/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-filestore/
+    metadata:
+        name_pretty: Filestore
+        description: Filestore instances are fully managed NFS file servers on Google Cloud for use with applications running on Compute Engine virtual machines (VMs) instances or Google Kubernetes Engine clusters.
+        distribution_name: google-cloud-filestore
+        api_id: file.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/filestore/
+        client_documentation: https://cloud.google.com/python/docs/reference/file/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

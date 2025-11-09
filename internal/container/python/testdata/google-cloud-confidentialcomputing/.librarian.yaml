@@ -1,0 +1,30 @@
+name: google-cloud-confidentialcomputing
+version: 0.6.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/confidentialcomputing/v1
+          service_config: confidentialcomputing_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-confidentialcomputing/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-confidentialcomputing/
+    metadata:
+        name_pretty: Confidential Computing API
+        description: Protect data in-use with Confidential VMs, Confidential GKE, Confidential Dataproc, and Confidential Space.
+        distribution_name: google-cloud-confidentialcomputing
+        api_id: confidentialcomputing.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/confidential-computing
+        client_documentation: https://cloud.google.com/python/docs/reference/confidentialcomputing/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1166820
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,29 @@
+name: google-cloud-vmwareengine
+version: 1.9.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/vmwareengine/v1
+          service_config: vmwareengine_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-vmwareengine/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-vmwareengine/
+    metadata:
+        name_pretty: Google Cloud VMware Engine
+        distribution_name: google-cloud-vmwareengine
+        api_id: vmwareengine.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/vmware-engine/
+        client_documentation: https://cloud.google.com/python/docs/reference/vmwareengine/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

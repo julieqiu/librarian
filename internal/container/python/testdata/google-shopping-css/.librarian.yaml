@@ -1,0 +1,30 @@
+name: google-shopping-css
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/shopping/css/v1
+          service_config: css_v1.yaml
+python:
+    keep:
+        - packages/google-shopping-css/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-shopping-css/
+    metadata:
+        name_pretty: CSS API
+        description: Programmatically manage your Comparison Shopping Service (CSS) account data at scale.
+        distribution_name: google-shopping-css
+        api_id: css.googleapis.com
+        default_version: v1
+        product_documentation: https://developers.google.com/comparison-shopping-services/api
+        client_documentation: https://googleapis.dev/python/google-shopping-css/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=826068&template=1564577
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

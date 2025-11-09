@@ -1,0 +1,32 @@
+name: google-cloud-redis-cluster
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/redis/cluster/v1
+          service_config: redis_v1.yaml
+        - path: google/cloud/redis/cluster/v1beta1
+          service_config: redis_v1beta1.yaml
+python:
+    keep:
+        - packages/google-cloud-redis-cluster/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-redis-cluster/
+    metadata:
+        name_pretty: Google Cloud Memorystore for Redis API
+        description: Creates and manages Redis instances on the Google Cloud Platform.
+        distribution_name: google-cloud-redis-cluster
+        api_id: cluster.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/redis/docs
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-redis-cluster/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1288776&template=1161103
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

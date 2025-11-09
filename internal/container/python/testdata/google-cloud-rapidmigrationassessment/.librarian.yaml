@@ -1,0 +1,30 @@
+name: google-cloud-rapidmigrationassessment
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/rapidmigrationassessment/v1
+          service_config: rapidmigrationassessment_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-rapidmigrationassessment/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-rapidmigrationassessment/
+    metadata:
+        name_pretty: Rapid Migration Assessment API
+        description: The Rapid Migration Assessment service is our first-party migration assessment and planning tool.
+        distribution_name: google-cloud-rapidmigrationassessment
+        api_id: rapidmigrationassessment.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/migration-center/docs
+        client_documentation: https://cloud.google.com/python/docs/reference/rapidmigrationassessment/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

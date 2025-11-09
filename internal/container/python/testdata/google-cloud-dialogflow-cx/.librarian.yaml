@@ -1,0 +1,31 @@
+name: google-cloud-dialogflow-cx
+version: 2.0.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/dialogflow/cx/v3
+          service_config: dialogflow_v3.yaml
+        - path: google/cloud/dialogflow/cx/v3beta1
+          service_config: dialogflow_v3beta1.yaml
+python:
+    keep:
+        - packages/google-cloud-dialogflow-cx/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-dialogflow-cx
+    metadata:
+        name_pretty: Dialogflow CX
+        distribution_name: google-cloud-dialogflow-cx
+        api_id: dialogflow.googleapis.com
+        default_version: v3
+        product_documentation: https://cloud.google.com/dialogflow/cx/docs
+        client_documentation: https://cloud.google.com/python/docs/reference/dialogflow-cx/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/5300385
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,28 @@
+name: google-cloud-api-keys
+version: 0.6.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/api/apikeys/v2
+          service_config: apikeys_v2.yaml
+python:
+    keep:
+        - packages/google-cloud-api-keys/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-api-keys/
+    metadata:
+        name_pretty: API Keys
+        distribution_name: google-cloud-api-keys
+        api_id: apikeys.googleapis.com
+        default_version: v2
+        product_documentation: https://cloud.google.com/api-keys/docs
+        client_documentation: https://cloud.google.com/python/docs/reference/apikeys/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,33 @@
+name: google-cloud-dataproc-metastore
+version: 1.20.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/metastore/v1alpha
+          service_config: metastore_v1alpha.yaml
+        - path: google/cloud/metastore/v1beta
+          service_config: metastore_v1beta.yaml
+        - path: google/cloud/metastore/v1
+          service_config: metastore_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-dataproc-metastore/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-dataproc-metastore/
+    metadata:
+        name_pretty: Dataproc Metastore
+        description: is a fully managed, highly available, autoscaled, autohealing, OSS-native metastore service that greatly simplifies technical metadata management. Dataproc Metastore service is based on Apache Hive metastore and serves as a critical component towards enterprise data lakes.
+        distribution_name: google-cloud-dataproc-metastore
+        api_id: metastore.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/dataproc-metastore/
+        client_documentation: https://cloud.google.com/python/docs/reference/metastore/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

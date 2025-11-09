@@ -1,0 +1,31 @@
+name: google-cloud-memcache
+version: 1.13.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/memcache/v1
+          service_config: memcache_v1.yaml
+        - path: google/cloud/memcache/v1beta2
+          service_config: memcache_v1beta2.yaml
+python:
+    keep:
+        - packages/google-cloud-memcache/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-memcache/
+    metadata:
+        name_pretty: Cloud Memorystore for Memcached
+        description: is a fully-managed in-memory data store service for Memcache.
+        distribution_name: google-cloud-memcache
+        api_id: memcache.googleapis.com
+        default_version: v1
+        product_documentation: cloud.google.com/memorystore/docs/memcached/
+        client_documentation: https://cloud.google.com/python/docs/reference/memcache/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

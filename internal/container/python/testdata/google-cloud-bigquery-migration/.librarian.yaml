@@ -1,0 +1,31 @@
+name: google-cloud-bigquery-migration
+version: 0.12.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/bigquery/migration/v2alpha
+          service_config: bigquerymigration_v2alpha.yaml
+        - path: google/cloud/bigquery/migration/v2
+          service_config: bigquerymigration_v2.yaml
+python:
+    keep:
+        - packages/google-cloud-bigquery-migration/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-bigquery-migration/
+    metadata:
+        name_pretty: Google BigQuery Migration
+        distribution_name: google-cloud-bigquery-migration
+        api_id: bigquerymigration.googleapis.com
+        default_version: v2
+        product_documentation: https://cloud.google.com/bigquery/docs/reference/migration/
+        client_documentation: https://cloud.google.com/python/docs/reference/bigquerymigration/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/559654
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

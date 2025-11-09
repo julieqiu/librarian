@@ -1,0 +1,30 @@
+name: google-cloud-netapp
+version: 0.4.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/netapp/v1
+          service_config: netapp_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-netapp/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-netapp/
+    metadata:
+        name_pretty: NetApp API
+        description: NetApp API
+        distribution_name: google-cloud-netapp
+        api_id: netapp.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/netapp/volumes/docs/discover/overview
+        client_documentation: https://cloud.google.com/python/docs/reference/netapp/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1144971
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

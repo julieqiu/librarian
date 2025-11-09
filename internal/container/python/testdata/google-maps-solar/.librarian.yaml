@@ -1,0 +1,30 @@
+name: google-maps-solar
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/maps/solar/v1
+          service_config: solar_v1.yaml
+python:
+    keep:
+        - packages/google-maps-solar/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-maps-solar
+    metadata:
+        name_pretty: Solar API
+        description: The Google Maps Platform Solar API is a service focused on helping accelerate solar and energy system installations.
+        distribution_name: google-maps-solar
+        api_id: solar.googleapis.com
+        default_version: v1
+        product_documentation: https://developers.google.com/maps/documentation/solar/overview
+        client_documentation: https://googleapis.dev/python/google-maps-solar/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1356349
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

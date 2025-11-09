@@ -1,0 +1,31 @@
+name: google-cloud-os-config
+version: 1.22.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/osconfig/v1alpha
+          service_config: osconfig_v1alpha.yaml
+        - path: google/cloud/osconfig/v1
+          service_config: osconfig_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-os-config/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-os-config/
+    metadata:
+        name_pretty: OS Config
+        description: provides OS management tools that can be used for patch management, patch compliance, and configuration management on VM instances.
+        distribution_name: google-cloud-os-config
+        api_id: osconfig.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/compute/docs/manage-os
+        client_documentation: https://cloud.google.com/python/docs/reference/osconfig/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

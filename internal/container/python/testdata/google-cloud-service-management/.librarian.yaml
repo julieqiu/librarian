@@ -1,0 +1,29 @@
+name: google-cloud-service-management
+version: 1.14.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/api/servicemanagement/v1
+          service_config: servicemanagement_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-service-management/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-service-management/
+    metadata:
+        name_pretty: Service Management
+        description: is a foundational platform for creating, managing, securing, and consuming APIs and services across organizations. It is used by Google APIs, Cloud APIs, Cloud Endpoints, and API Gateway. Service Infrastructure provides a wide range of features to service consumers and service producers, including authentication, authorization, auditing, rate limiting, analytics, billing, logging, and monitoring.
+        distribution_name: google-cloud-service-management
+        api_id: servicemanagement.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/service-infrastructure/docs/overview/
+        client_documentation: https://cloud.google.com/python/docs/reference/servicemanagement/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

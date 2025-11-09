@@ -1,0 +1,33 @@
+name: google-cloud-telcoautomation
+version: 0.3.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/telcoautomation/v1
+          service_config: telcoautomation_v1.yaml
+        - path: google/cloud/telcoautomation/v1alpha1
+          service_config: telcoautomation_v1alpha1.yaml
+python:
+    keep:
+        - packages/google-cloud-telcoautomation/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - snippets/README.md
+        - tests/system
+    remove:
+        - packages/google-cloud-telcoautomation/
+    metadata:
+        name_pretty: Telco Automation API
+        description: APIs to automate 5G deployment and management of cloud infrastructure and network functions.
+        distribution_name: google-cloud-telcoautomation
+        api_id: telcoautomation.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/telecom-network-automation
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-telcoautomation/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=190865&template=1161103
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,29 @@
+name: google-cloud-essential-contacts
+version: 1.11.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/essentialcontacts/v1
+          service_config: essentialcontacts_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-essential-contacts/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-essential-contacts/
+    metadata:
+        name_pretty: Essential Contacts
+        description: helps you customize who receives notifications by providing your own list of contacts in many Google Cloud services.
+        distribution_name: google-cloud-essential-contacts
+        api_id: essentialcontacts.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/resource-manager/docs/managing-notification-contacts/
+        client_documentation: https://cloud.google.com/python/docs/reference/essentialcontacts/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

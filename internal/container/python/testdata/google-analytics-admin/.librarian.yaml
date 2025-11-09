@@ -1,0 +1,32 @@
+name: google-analytics-admin
+version: 0.26.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/analytics/admin/v1beta
+          service_config: analyticsadmin_v1beta.yaml
+        - path: google/analytics/admin/v1alpha
+          service_config: analyticsadmin_v1alpha.yaml
+python:
+    keep:
+        - packages/google-analytics-admin/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-analytics-admin/
+    metadata:
+        name_pretty: Analytics Admin
+        description: allows you to manage Google Analytics accounts and properties.
+        distribution_name: google-analytics-admin
+        api_id: analyticsadmin.googleapis.com
+        default_version: v1alpha
+        product_documentation: https://developers.google.com/analytics/
+        client_documentation: https://googleapis.dev/python/analyticsadmin/latest
+        issue_tracker: https://issuetracker.google.com/issues?q=componentid:187400
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

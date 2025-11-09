@@ -1,0 +1,29 @@
+name: google-cloud-service-usage
+version: 1.14.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/api/serviceusage/v1
+          service_config: serviceusage_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-service-usage/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-service-usage/
+    metadata:
+        name_pretty: Service Usage
+        description: is an infrastructure service of Google Cloud that lets you list and manage other APIs and services in your Cloud projects.
+        distribution_name: google-cloud-service-usage
+        api_id: serviceusage.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/service-usage
+        client_documentation: https://cloud.google.com/python/docs/reference/serviceusage/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

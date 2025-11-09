@@ -1,0 +1,30 @@
+name: google-cloud-resource-manager
+version: 1.15.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/resourcemanager/v3
+          service_config: cloudresourcemanager_v3.yaml
+python:
+    keep:
+        - packages/google-cloud-resource-manager/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-resource-manager/
+    metadata:
+        name_pretty: Resource Manager
+        description: provides methods that you can use to programmatically manage your projects in the Google Cloud Platform.
+        distribution_name: google-cloud-resource-manager
+        api_id: cloudresourcemanager.googleapis.com
+        default_version: v3
+        product_documentation: https://cloud.google.com/resource-manager
+        client_documentation: https://cloud.google.com/python/docs/reference/cloudresourcemanager/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/559757
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,30 @@
+name: google-cloud-managedkafka-schemaregistry
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/managedkafka/schemaregistry/v1
+          service_config: managedkafka_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-managedkafka-schemaregistry/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-managedkafka-schemaregistry/
+    metadata:
+        name_pretty: Managed Service for Apache Kafka API
+        description: 'Manage Apache Kafka clusters and resources. '
+        distribution_name: google-cloud-managedkafka-schemaregistry
+        api_id: schemaregistry.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/managed-service-for-apache-kafka/docs
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-managedkafka-schemaregistry/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=1376234
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

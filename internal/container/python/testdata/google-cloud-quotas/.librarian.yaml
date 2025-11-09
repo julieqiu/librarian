@@ -1,0 +1,32 @@
+name: google-cloud-quotas
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/api/cloudquotas/v1
+          service_config: cloudquotas_v1.yaml
+        - path: google/api/cloudquotas/v1beta
+          service_config: cloudquotas_v1beta.yaml
+python:
+    keep:
+        - packages/google-cloud-quotas/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-quotas/
+    metadata:
+        name_pretty: Cloud Quotas API
+        description: Cloud Quotas API provides Google Cloud service consumers with management and observability for resource usage, quotas, and restrictions of the services they consume.
+        distribution_name: google-cloud-quotas
+        api_id: cloudquotas.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/docs/quota/api-overview
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-cloudquotas/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=445904
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

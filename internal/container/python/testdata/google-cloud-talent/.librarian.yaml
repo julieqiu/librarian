@@ -1,0 +1,32 @@
+name: google-cloud-talent
+version: 2.18.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/talent/v4beta1
+          service_config: jobs_v4beta1.yaml
+        - path: google/cloud/talent/v4
+          service_config: jobs_v4.yaml
+python:
+    keep:
+        - packages/google-cloud-talent/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-talent/
+    metadata:
+        name_pretty: Talent Solution
+        description: Cloud Talent Solution provides the capability to create, read, update, and delete job postings, as well as search jobs based on keywords and filters.
+        distribution_name: google-cloud-talent
+        api_id: jobs.googleapis.com
+        default_version: v4
+        product_documentation: https://cloud.google.com/solutions/talent-solution/
+        client_documentation: https://cloud.google.com/python/docs/reference/talent/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/559664
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

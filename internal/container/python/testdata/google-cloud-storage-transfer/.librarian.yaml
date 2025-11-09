@@ -1,0 +1,29 @@
+name: google-cloud-storage-transfer
+version: 1.18.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/storagetransfer/v1
+          service_config: storagetransfer_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-storage-transfer/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-storage-transfer/
+    metadata:
+        name_pretty: Storage Transfer Service
+        description: Secure, low-cost services for transferring data from cloud or on-premises sources.
+        distribution_name: google-cloud-storage-transfer
+        api_id: storagetransfer.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/storage-transfer/
+        client_documentation: https://cloud.google.com/python/docs/reference/storagetransfer/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

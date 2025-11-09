@@ -1,0 +1,32 @@
+name: google-analytics-data
+version: 0.19.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/analytics/data/v1alpha
+          service_config: analyticsdata_v1alpha.yaml
+        - path: google/analytics/data/v1beta
+          service_config: analyticsdata_v1beta.yaml
+python:
+    keep:
+        - packages/google-analytics-data/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-analytics-data/
+    metadata:
+        name_pretty: Analytics Data
+        description: provides programmatic methods to access report data in Google Analytics App+Web properties.
+        distribution_name: google-analytics-data
+        api_id: analyticsdata.googleapis.com
+        default_version: v1beta
+        product_documentation: https://developers.google.com/analytics/
+        client_documentation: https://googleapis.dev/python/analyticsdata/latest
+        issue_tracker: https://issuetracker.google.com/issues?q=componentid:187400%2B%20
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

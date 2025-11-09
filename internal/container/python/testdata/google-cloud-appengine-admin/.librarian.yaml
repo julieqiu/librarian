@@ -1,0 +1,29 @@
+name: google-cloud-appengine-admin
+version: 1.15.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/appengine/v1
+          service_config: appengine_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-appengine-admin/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-appengine-admin/
+    metadata:
+        name_pretty: App Engine Admin
+        description: allows you to manage your App Engine applications.
+        distribution_name: google-cloud-appengine-admin
+        api_id: appengine.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/appengine/docs/admin-api/
+        client_documentation: https://cloud.google.com/python/docs/reference/appengine/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

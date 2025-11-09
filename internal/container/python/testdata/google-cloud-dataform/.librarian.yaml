@@ -1,0 +1,30 @@
+name: google-cloud-dataform
+version: 0.7.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/dataform/v1beta1
+          service_config: dataform_v1beta1.yaml
+        - path: google/cloud/dataform/v1
+          service_config: dataform_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-dataform/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-dataform/
+    metadata:
+        name_pretty: Cloud Dataform
+        distribution_name: google-cloud-dataform
+        api_id: dataform.googleapis.com
+        default_version: v1beta1
+        product_documentation: https://cloud.google.com
+        client_documentation: https://cloud.google.com/python/docs/reference/dataform/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

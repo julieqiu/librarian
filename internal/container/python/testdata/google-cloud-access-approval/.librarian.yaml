@@ -1,0 +1,29 @@
+name: google-cloud-access-approval
+version: 1.17.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/accessapproval/v1
+          service_config: accessapproval_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-access-approval/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-access-approval/
+    metadata:
+        name_pretty: Access Approval
+        description: enables controlling access to your organization's data by Google personnel.
+        distribution_name: google-cloud-access-approval
+        api_id: accessapproval.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/access-approval
+        client_documentation: https://cloud.google.com/python/docs/reference/accessapproval/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

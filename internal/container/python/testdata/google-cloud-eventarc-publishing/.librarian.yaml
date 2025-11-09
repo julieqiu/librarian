@@ -1,0 +1,29 @@
+name: google-cloud-eventarc-publishing
+version: 0.8.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/eventarc/publishing/v1
+          service_config: eventarcpublishing_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-eventarc-publishing/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-eventarc-publishing/
+    metadata:
+        name_pretty: Eventarc Publishing
+        description: lets you asynchronously deliver events from Google services, SaaS, and your own apps using loosely coupled services that react to state changes.
+        distribution_name: google-cloud-eventarc-publishing
+        api_id: eventarcpublishing.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/eventarc/docs
+        client_documentation: https://cloud.google.com/python/docs/reference/eventarcpublishing/latest
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

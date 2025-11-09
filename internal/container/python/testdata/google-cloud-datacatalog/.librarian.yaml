@@ -1,0 +1,31 @@
+name: google-cloud-datacatalog
+version: 3.28.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/datacatalog/v1
+          service_config: datacatalog_v1.yaml
+        - path: google/cloud/datacatalog/v1beta1
+          service_config: datacatalog_v1beta1.yaml
+python:
+    keep:
+        - packages/google-cloud-datacatalog/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-datacatalog/
+    metadata:
+        name_pretty: Google Cloud Data Catalog
+        description: is a fully managed and highly scalable data discovery and metadata management service.
+        distribution_name: google-cloud-datacatalog
+        api_id: datacatalog.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/data-catalog
+        client_documentation: https://cloud.google.com/python/docs/reference/datacatalog/latest
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

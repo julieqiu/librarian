@@ -1,0 +1,30 @@
+name: google-shopping-type
+version: 1.1.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/shopping/type
+          service_config: ""
+python:
+    keep:
+        - packages/google-shopping-type/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+        - tests/unit/gapic/type/test_type.py
+    remove:
+        - packages/google-shopping-type/
+    metadata:
+        name_pretty: Shopping Type Protos
+        distribution_name: google-shopping-type
+        api_id: type.googleapis.com
+        default_version: apiVersion
+        product_documentation: https://developers.google.com/merchant/api
+        client_documentation: https://googleapis.dev/python/google-shopping-type/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

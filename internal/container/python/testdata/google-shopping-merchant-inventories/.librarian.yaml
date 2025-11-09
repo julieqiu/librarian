@@ -1,0 +1,32 @@
+name: google-shopping-merchant-inventories
+version: 1.1.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/shopping/merchant/inventories/v1beta
+          service_config: merchantapi_v1beta.yaml
+        - path: google/shopping/merchant/inventories/v1
+          service_config: merchantapi_v1.yaml
+python:
+    keep:
+        - packages/google-shopping-merchant-inventories/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-shopping-merchant-inventories/
+    metadata:
+        name_pretty: Merchant Inventories API
+        description: Programmatically manage your Merchant Center accounts.
+        distribution_name: google-shopping-merchant-inventories
+        api_id: inventories.googleapis.com
+        default_version: v1
+        product_documentation: https://developers.google.com/merchant/api
+        client_documentation: https://googleapis.dev/python/google-shopping-merchant-inventories/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=171084&template=555201
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

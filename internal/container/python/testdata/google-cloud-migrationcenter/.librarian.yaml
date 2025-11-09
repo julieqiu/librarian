@@ -1,0 +1,30 @@
+name: google-cloud-migrationcenter
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/migrationcenter/v1
+          service_config: migrationcenter_v1.yaml
+python:
+    keep:
+        - packages/google-cloud-migrationcenter/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-migrationcenter/
+    metadata:
+        name_pretty: Migration Center API
+        description: A unified platform that helps you accelerate your end-to-end cloud journey from your current on-premises or cloud environments to Google Cloud.
+        distribution_name: google-cloud-migrationcenter
+        api_id: migrationcenter.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/migration-center/docs/migration-center-overview
+        client_documentation: https://cloud.google.com/python/docs/reference/migrationcenter/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,30 @@
+name: google-maps-places
+version: 0.5.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/maps/places/v1
+          service_config: places_v1.yaml
+python:
+    keep:
+        - packages/google-maps-places/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-maps-places
+    metadata:
+        name_pretty: Places API
+        description: The Places API allows developers to access a variety of search and retrieval endpoints for a Place.
+        distribution_name: google-maps-places
+        api_id: places.googleapis.com
+        default_version: v1
+        product_documentation: https://developers.google.com/maps/documentation/places/web-service/
+        client_documentation: https://googleapis.dev/python/places/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

@@ -1,0 +1,33 @@
+name: google-cloud-discoveryengine
+version: 0.15.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/discoveryengine/v1
+          service_config: discoveryengine_v1.yaml
+        - path: google/cloud/discoveryengine/v1beta
+          service_config: discoveryengine_v1beta.yaml
+        - path: google/cloud/discoveryengine/v1alpha
+          service_config: discoveryengine_v1alpha.yaml
+python:
+    keep:
+        - packages/google-cloud-discoveryengine/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-discoveryengine/
+    metadata:
+        name_pretty: Discovery Engine API
+        distribution_name: google-cloud-discoveryengine
+        api_id: discoveryengine.googleapis.com
+        default_version: v1beta
+        product_documentation: https://cloud.google.com/discovery-engine/
+        client_documentation: https://cloud.google.com/python/docs/reference/discoveryengine/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

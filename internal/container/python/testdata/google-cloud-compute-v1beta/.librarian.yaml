@@ -1,0 +1,30 @@
+name: google-cloud-compute-v1beta
+version: 0.3.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/compute/v1beta
+          service_config: compute_v1beta.yaml
+python:
+    keep:
+        - packages/google-cloud-compute-v1beta/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-compute-v1beta/
+    metadata:
+        name_pretty: Compute Engine
+        description: delivers virtual machines running in Google's innovative data centers and worldwide fiber network. Compute Engine's tooling and workflow support enable scaling from single instances to global, load-balanced cloud computing. Compute Engine's VMs boot quickly, come with persistent disk storage, deliver consistent performance and are available in many configurations.
+        distribution_name: google-cloud-compute-v1beta
+        api_id: compute.googleapis.com
+        default_version: v1beta
+        product_documentation: https://cloud.google.com/compute/
+        client_documentation: https://cloud.google.com/python/docs/reference/google-cloud-compute-v1beta/latest
+        issue_tracker: https://issuetracker.google.com/issues/new?component=187134&template=0
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

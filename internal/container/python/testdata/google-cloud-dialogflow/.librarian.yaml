@@ -1,0 +1,32 @@
+name: google-cloud-dialogflow
+version: 2.43.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/dialogflow/v2beta1
+          service_config: dialogflow_v2beta1.yaml
+        - path: google/cloud/dialogflow/v2
+          service_config: dialogflow_v2.yaml
+python:
+    keep:
+        - packages/google-cloud-dialogflow/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-dialogflow/
+    metadata:
+        name_pretty: Dialogflow
+        description: is an end-to-end, build-once deploy-everywhere development suite for creating conversational interfaces for websites, mobile applications, popular messaging platforms, and IoT devices. You can use it to build interfaces (such as chatbots and conversational IVR) that enable natural and rich interactions between your users and your business. Dialogflow Enterprise Edition users have access to Google Cloud Support and a service level agreement (SLA) for production deployments.
+        distribution_name: google-cloud-dialogflow
+        api_id: dialogflow.googleapis.com
+        default_version: v2
+        product_documentation: https://www.dialogflow.com/
+        client_documentation: https://cloud.google.com/python/docs/reference/dialogflow/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/5300385
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

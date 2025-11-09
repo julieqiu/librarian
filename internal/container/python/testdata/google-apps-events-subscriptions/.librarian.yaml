@@ -1,0 +1,32 @@
+name: google-apps-events-subscriptions
+version: 0.3.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/apps/events/subscriptions/v1
+          service_config: workspaceevents_v1.yaml
+        - path: google/apps/events/subscriptions/v1beta
+          service_config: workspaceevents_v1beta.yaml
+python:
+    keep:
+        - packages/google-apps-events-subscriptions/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-apps-events-subscriptions/
+    metadata:
+        name_pretty: Google Workspace Events API
+        description: The Google Workspace Events API lets you subscribe to events and manage change notifications across Google Workspace applications.
+        distribution_name: google-apps-events-subscriptions
+        api_id: subscriptions.googleapis.com
+        default_version: v1
+        product_documentation: https://developers.google.com/workspace/events
+        client_documentation: https://googleapis.dev/python/google-apps-events-subscriptions/latest
+        issue_tracker: https://github.com/googleapis/google-cloud-python/issues
+        release_level: preview
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python

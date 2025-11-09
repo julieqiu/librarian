@@ -1,0 +1,32 @@
+name: google-cloud-texttospeech
+version: 2.33.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/texttospeech/v1
+          service_config: texttospeech_v1.yaml
+        - path: google/cloud/texttospeech/v1beta1
+          service_config: texttospeech_v1beta1.yaml
+python:
+    keep:
+        - packages/google-cloud-texttospeech/CHANGELOG.md
+        - docs/CHANGELOG.md
+        - docs/README.rst
+        - samples/README.txt
+        - scripts/client-post-processing
+        - samples/snippets/README.rst
+        - tests/system
+    remove:
+        - packages/google-cloud-texttospeech/
+    metadata:
+        name_pretty: Google Cloud Text-to-Speech
+        description: enables easy integration of Google text recognition technologies into developer applications. Send text and receive synthesized audio output from the Cloud Text-to-Speech API service.
+        distribution_name: google-cloud-texttospeech
+        api_id: texttospeech.googleapis.com
+        default_version: v1
+        product_documentation: https://cloud.google.com/text-to-speech
+        client_documentation: https://cloud.google.com/python/docs/reference/texttospeech/latest
+        issue_tracker: https://issuetracker.google.com/savedsearches/5235428
+        release_level: stable
+        library_type: GAPIC_AUTO
+        repo: googleapis/google-cloud-python
