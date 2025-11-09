@@ -7,7 +7,10 @@ generate:
           service_config: cloudaudit.yaml
 python:
     remove:
-        - ^packages/google-cloud-audit-log/google/.*/.*_pb2\.(?:py|pyi)$/
+        - packages/google-cloud-audit-log/google/cloud/audit/audit_log_pb2.py
+        - packages/google-cloud-audit-log/google/cloud/audit/audit_log_pb2.pyi
+        - packages/google-cloud-audit-log/google/cloud/audit/bigquery_audit_metadata_pb2.py
+        - packages/google-cloud-audit-log/google/cloud/audit/bigquery_audit_metadata_pb2.pyi
     metadata:
         name_pretty: Audit Log API
         distribution_name: google-cloud-audit-log

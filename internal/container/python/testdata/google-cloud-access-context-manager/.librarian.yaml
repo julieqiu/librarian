@@ -9,7 +9,18 @@ generate:
           service_config: ""
 python:
     remove:
-        - ^packages/google-cloud-access-context-manager/google/.*/.*_pb2\.(?:py|pyi)$/
+        - packages/google-cloud-access-context-manager/google/identity/accesscontextmanager/v1/access_context_manager_pb2.py
+        - packages/google-cloud-access-context-manager/google/identity/accesscontextmanager/v1/access_context_manager_pb2.pyi
+        - packages/google-cloud-access-context-manager/google/identity/accesscontextmanager/v1/access_level_pb2.py
+        - packages/google-cloud-access-context-manager/google/identity/accesscontextmanager/v1/access_level_pb2.pyi
+        - packages/google-cloud-access-context-manager/google/identity/accesscontextmanager/v1/access_policy_pb2.py
+        - packages/google-cloud-access-context-manager/google/identity/accesscontextmanager/v1/access_policy_pb2.pyi
+        - packages/google-cloud-access-context-manager/google/identity/accesscontextmanager/v1/gcp_user_access_binding_pb2.py
+        - packages/google-cloud-access-context-manager/google/identity/accesscontextmanager/v1/gcp_user_access_binding_pb2.pyi
+        - packages/google-cloud-access-context-manager/google/identity/accesscontextmanager/v1/service_perimeter_pb2.py
+        - packages/google-cloud-access-context-manager/google/identity/accesscontextmanager/v1/service_perimeter_pb2.pyi
+        - packages/google-cloud-access-context-manager/google/identity/accesscontextmanager/type/device_resources_pb2.py
+        - packages/google-cloud-access-context-manager/google/identity/accesscontextmanager/type/device_resources_pb2.pyi
     metadata:
         name_pretty: Access Context Manager
         distribution_name: google-cloud-access-context-manager
