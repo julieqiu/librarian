@@ -1,0 +1,15 @@
+librarian:
+    version: not available
+    language: rust
+generate:
+    container:
+        image: us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-prod/rust-librarian-generator
+        tag: latest
+    googleapis:
+        path: https://github.com/googleapis/googleapis/archive/1b5f8632487bce889ce05366647addc6ef5ee36d.tar.gz
+        sha256: c89603d5d3aa894629679da01f89ab055a7182f16bc0e503ae35eb8fd4d607a8
+    discovery:
+        path: https://github.com/googleapis/discovery-artifact-manager/archive/fe5877ef501ff84cfdae133f5fb8faefd9b85511.tar.gz
+        sha256: e3a74af73565cd2b7059b26b9930a21630118d772c57fb1b50a066f3e54f0208
+release:
+    tag_format: '{name}-v{version}'
