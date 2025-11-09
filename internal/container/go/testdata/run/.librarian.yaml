@@ -14,8 +14,8 @@ go:
     source_roots:
         - run
         - internal/generated/snippets/run
-    preserve_regex:
-        - ^run/apiv2/locations_client\.go$
+    keep:
+        - run/apiv2/locations_client.go
     remove_regex:
         - ^internal/generated/snippets/run/
         - ^run/apiv2/[^/]*_client\.go$

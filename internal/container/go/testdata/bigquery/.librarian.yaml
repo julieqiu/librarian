@@ -140,8 +140,45 @@ go:
     source_roots:
         - bigquery
         - internal/generated/snippets/bigquery
-    preserve_regex:
-        - ^internal/generated/snippets/bigquery/v2/
+    keep:
+        - internal/generated/snippets/bigquery/v2/apiv2/DatasetClient/DeleteDataset/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/DatasetClient/GetDataset/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/DatasetClient/InsertDataset/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/DatasetClient/ListDatasets/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/DatasetClient/PatchDataset/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/DatasetClient/UndeleteDataset/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/DatasetClient/UpdateDataset/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/JobClient/CancelJob/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/JobClient/DeleteJob/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/JobClient/GetJob/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/JobClient/GetQueryResults/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/JobClient/InsertJob/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/JobClient/ListJobs/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/JobClient/Query/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/ModelClient/DeleteModel/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/ModelClient/GetModel/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/ModelClient/ListModels/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/ModelClient/PatchModel/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/ProjectClient/GetServiceAccount/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/RoutineClient/DeleteRoutine/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/RoutineClient/GetRoutine/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/RoutineClient/InsertRoutine/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/RoutineClient/ListRoutines/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/RoutineClient/PatchRoutine/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/RoutineClient/UpdateRoutine/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/RowAccessPolicyClient/BatchDeleteRowAccessPolicies/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/RowAccessPolicyClient/CreateRowAccessPolicy/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/RowAccessPolicyClient/DeleteRowAccessPolicy/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/RowAccessPolicyClient/GetRowAccessPolicy/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/RowAccessPolicyClient/ListRowAccessPolicies/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/RowAccessPolicyClient/UpdateRowAccessPolicy/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/TableClient/DeleteTable/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/TableClient/GetTable/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/TableClient/InsertTable/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/TableClient/ListTables/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/TableClient/PatchTable/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/TableClient/UpdateTable/main.go
+        - internal/generated/snippets/bigquery/v2/apiv2/snippet_metadata.google.cloud.bigquery.v2.json
     remove_regex:
         - ^internal/generated/snippets/bigquery/
         - ^bigquery/analyticshub/apiv1/[^/]*_client\.go$

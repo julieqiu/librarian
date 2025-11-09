@@ -28,8 +28,8 @@ go:
     source_roots:
         - datacatalog
         - internal/generated/snippets/datacatalog
-    preserve_regex:
-        - ^datacatalog/apiv1/iam_policy_client\.go$
+    keep:
+        - datacatalog/apiv1/iam_policy_client.go
     remove_regex:
         - ^internal/generated/snippets/datacatalog/
         - ^datacatalog/apiv1/[^/]*_client\.go$

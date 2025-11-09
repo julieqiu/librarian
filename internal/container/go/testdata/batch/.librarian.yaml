@@ -14,8 +14,8 @@ go:
     source_roots:
         - batch
         - internal/generated/snippets/batch
-    preserve_regex:
-        - ^batch/apiv1/iam_policy_client\.go$
+    keep:
+        - batch/apiv1/iam_policy_client.go
     remove_regex:
         - ^internal/generated/snippets/batch/
         - ^batch/apiv1/[^/]*_client\.go$

@@ -21,8 +21,8 @@ go:
     source_roots:
         - datastream
         - internal/generated/snippets/datastream
-    preserve_regex:
-        - ^datastream/apiv1/iam_policy_client\.go$
+    keep:
+        - datastream/apiv1/iam_policy_client.go
     remove_regex:
         - ^internal/generated/snippets/datastream/
         - ^datastream/apiv1/[^/]*_client\.go$

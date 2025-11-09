@@ -14,8 +14,8 @@ go:
     source_roots:
         - vmmigration
         - internal/generated/snippets/vmmigration
-    preserve_regex:
-        - ^vmmigration/apiv1/iam_policy_client\.go$
+    keep:
+        - vmmigration/apiv1/iam_policy_client.go
     remove_regex:
         - ^internal/generated/snippets/vmmigration/
         - ^vmmigration/apiv1/[^/]*_client\.go$
