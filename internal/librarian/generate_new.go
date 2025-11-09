@@ -110,7 +110,7 @@ func (r *generateNewRunner) generateSingle(ctx context.Context, artifactPath str
 	fmt.Printf("  Googleapis: %s @ %s\n", artifactState.Generate.Googleapis.Repo, artifactState.Generate.Googleapis.Ref)
 
 	// 1. Clone or update googleapis repository
-	googleapisRepo, err := r.ensureGoogleapisRepo(ctx, artifactState.Generate.Googleapis)
+	googleapisRepo, err := r.ensureGoogleapisRepo(artifactState.Generate.Googleapis)
 	if err != nil {
 		return fmt.Errorf("failed to ensure googleapis repository: %w", err)
 	}
@@ -261,8 +261,8 @@ func (r *generateNewRunner) findGeneratableArtifacts() ([]string, error) {
 	return artifacts, nil
 }
 
-// ensureGoogleapisRepo clones or opens the googleapis repository at the specified ref
-func (r *generateNewRunner) ensureGoogleapisRepo(ctx context.Context, googleapis config.RepositoryRef) (gitrepo.Repository, error) {
+// ensureGoogleapisRepo clones or opens the googleapis repository at the specified ref.
+func (r *generateNewRunner) ensureGoogleapisRepo(googleapis config.RepositoryRef) (gitrepo.Repository, error) {
 	// Determine googleapis directory (use a cache directory)
 	googleapisDir := filepath.Join(r.repoRoot, ".librarian-cache", "googleapis")
 
@@ -289,7 +289,7 @@ func (r *generateNewRunner) ensureGoogleapisRepo(ctx context.Context, googleapis
 	return repo, nil
 }
 
-// prepareGeneratorInput prepares the generator input directory with API configuration files
+// prepareGeneratorInput prepares the generator input directory with API configuration files.
 func (r *generateNewRunner) prepareGeneratorInput(artifactPath string, artifactState *config.ArtifactState) error {
 	generatorInputDir := filepath.Join(artifactPath, config.GeneratorInputDir)
 
@@ -320,7 +320,7 @@ func (r *generateNewRunner) prepareGeneratorInput(artifactPath string, artifactS
 }
 
 // convertToLibrarianState converts ArtifactState to the old LibrarianState format
-// needed by the docker container interface
+// needed by the docker container interface.
 func (r *generateNewRunner) convertToLibrarianState(artifactState *config.ArtifactState, artifactPath string) *config.LibrarianState {
 	// For now, use the artifact path as the source root
 	// TODO(https://github.com/googleapis/librarian/issues/<number>): Extract from metadata or configuration
@@ -346,7 +346,7 @@ func (r *generateNewRunner) convertToLibrarianState(artifactState *config.Artifa
 	}
 }
 
-// applyFilesRulesAndCopy applies keep/remove/exclude rules and copies generated files
+// applyFilesRulesAndCopy applies keep/remove/exclude rules and copies generated files.
 func (r *generateNewRunner) applyFilesRulesAndCopy(artifactState *config.ArtifactState, artifactPath, outputDir string) error {
 	// Get file patterns from artifact state
 	keepPatterns := artifactState.Generate.Keep
@@ -368,7 +368,7 @@ func (r *generateNewRunner) applyFilesRulesAndCopy(artifactState *config.Artifac
 	return nil
 }
 
-// removeFiles removes files from the artifact directory based on remove patterns, preserving keep patterns
+// removeFiles removes files from the artifact directory based on remove patterns, preserving keep patterns.
 func (r *generateNewRunner) removeFiles(artifactPath string, removePatterns, keepPatterns []string) error {
 	if len(removePatterns) == 0 {
 		return nil
@@ -437,7 +437,7 @@ func (r *generateNewRunner) removeFiles(artifactPath string, removePatterns, kee
 	})
 }
 
-// copyGeneratedFiles copies files from output directory to artifact directory, excluding files matching exclude patterns
+// copyGeneratedFiles copies files from output directory to artifact directory, excluding files matching exclude patterns.
 func (r *generateNewRunner) copyGeneratedFiles(outputDir, artifactPath string, excludePatterns []string) error {
 	// Compile exclude patterns
 	var excludeRegexes []*regexp.Regexp
@@ -498,7 +498,7 @@ func (r *generateNewRunner) copyGeneratedFiles(outputDir, artifactPath string, e
 	})
 }
 
-// copyFile copies a file from src to dst
+// copyFile copies a file from src to dst.
 func (r *generateNewRunner) copyFile(src, dst string) error {
 	// Open source file
 	srcFile, err := os.Open(src)

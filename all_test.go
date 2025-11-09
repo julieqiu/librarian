@@ -57,6 +57,7 @@ var ignoredExts = map[string]bool{
 }
 
 var ignoredDirs = []string{
+	".claude",
 	".git",
 	".idea",
 	".vscode",
