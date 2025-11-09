@@ -16,13 +16,19 @@ package librarian
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 
 	"github.com/googleapis/librarian/internal/cli"
 	"github.com/googleapis/librarian/internal/config"
+	"github.com/googleapis/librarian/internal/docker"
+	"github.com/googleapis/librarian/internal/gitrepo"
 )
 
 type generateNewRunner struct {
@@ -98,30 +104,71 @@ func (r *generateNewRunner) generateSingle(ctx context.Context, artifactPath str
 
 	slog.Info("generating code for artifact", "path", artifactPath)
 
-	// TODO: Implement actual generation
-	// This would involve:
-	// 1. Clone googleapis at the specified ref (if not already cloned)
-	// 2. Prepare request files for the container with API configurations
-	// 3. Run the generator container with appropriate mounts
-	// 4. Apply keep/remove/exclude rules to the output
-	// 5. Update .librarian.yaml with generation metadata (commit, librarian version)
-
 	fmt.Printf("Generating code for %s...\n", artifactPath)
 	fmt.Printf("  APIs: %d\n", len(artifactState.Generate.APIs))
 	fmt.Printf("  Container: %s:%s\n", artifactState.Generate.Container.Image, artifactState.Generate.Container.Tag)
 	fmt.Printf("  Googleapis: %s @ %s\n", artifactState.Generate.Googleapis.Repo, artifactState.Generate.Googleapis.Ref)
 
-	// Update artifact state with generation metadata
-	artifactState.Generate.Commit = "TODO: actual commit SHA after generation"
+	// 1. Clone or update googleapis repository
+	googleapisRepo, err := r.ensureGoogleapisRepo(ctx, artifactState.Generate.Googleapis)
+	if err != nil {
+		return fmt.Errorf("failed to ensure googleapis repository: %w", err)
+	}
+
+	// Get the commit hash from googleapis
+	commitHash, err := googleapisRepo.HeadHash()
+	if err != nil {
+		return fmt.Errorf("failed to get googleapis commit hash: %w", err)
+	}
+	slog.Info("using googleapis commit", "hash", commitHash)
+
+	// 2. Prepare working directories
+	outputDir, err := os.MkdirTemp("", "librarian-generate-*")
+	if err != nil {
+		return fmt.Errorf("failed to create temp output directory: %w", err)
+	}
+	defer os.RemoveAll(outputDir)
+
+	// 3. Prepare request files for container
+	if err := r.prepareGeneratorInput(fullPath, artifactState); err != nil {
+		return fmt.Errorf("failed to prepare generator input: %w", err)
+	}
+
+	// 4. Run generator container
+	containerImage := fmt.Sprintf("%s:%s", artifactState.Generate.Container.Image, artifactState.Generate.Container.Tag)
+	dockerClient, err := docker.New(r.repoRoot, containerImage, &docker.DockerOptions{
+		UserUID: os.Getenv("UID"),
+		UserGID: os.Getenv("GID"),
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create docker client: %w", err)
+	}
+
+	if err := dockerClient.Generate(ctx, &docker.GenerateRequest{
+		GoogleapisDir: googleapisRepo.GetDir(),
+		Output:        outputDir,
+		RepoDir:       fullPath,
+		State:         r.convertToLibrarianState(artifactState, artifactPath),
+		LibraryID:     artifactPath,
+	}); err != nil {
+		return fmt.Errorf("failed to run generator container: %w", err)
+	}
+
+	// 5. Apply keep/remove/exclude rules and copy files
+	if err := r.applyFilesRulesAndCopy(artifactState, fullPath, outputDir); err != nil {
+		return fmt.Errorf("failed to apply file rules and copy: %w", err)
+	}
+
+	// 6. Update artifact state with generation metadata
+	artifactState.Generate.Commit = commitHash
 	artifactState.Generate.Librarian = cli.Version()
 
-	// Write back
 	if err := config.WriteArtifactState(fullPath, artifactState); err != nil {
 		return fmt.Errorf("failed to write artifact state: %w", err)
 	}
 
 	slog.Info("updated artifact state", "path", artifactPath)
-	fmt.Printf("✓ Generated code for %s (placeholder - full implementation pending)\n", artifactPath)
+	fmt.Printf("✓ Generated code for %s\n", artifactPath)
 
 	if r.commit {
 		slog.Warn("--commit flag not yet implemented")
@@ -212,4 +259,271 @@ func (r *generateNewRunner) findGeneratableArtifacts() ([]string, error) {
 	}
 
 	return artifacts, nil
+}
+
+// ensureGoogleapisRepo clones or opens the googleapis repository at the specified ref
+func (r *generateNewRunner) ensureGoogleapisRepo(ctx context.Context, googleapis config.RepositoryRef) (gitrepo.Repository, error) {
+	// Determine googleapis directory (use a cache directory)
+	googleapisDir := filepath.Join(r.repoRoot, ".librarian-cache", "googleapis")
+
+	// Clone or open the repository
+	repo, err := gitrepo.NewRepository(&gitrepo.RepositoryOptions{
+		Dir:          googleapisDir,
+		MaybeClone:   true,
+		RemoteURL:    googleapis.Repo,
+		RemoteBranch: "master", // Default branch
+		Depth:        1,        // Shallow clone for speed
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to clone/open googleapis: %w", err)
+	}
+
+	// Checkout the specified ref if provided
+	if googleapis.Ref != "" {
+		slog.Info("checking out googleapis ref", "ref", googleapis.Ref)
+		if err := repo.Checkout(googleapis.Ref); err != nil {
+			return nil, fmt.Errorf("failed to checkout ref %s: %w", googleapis.Ref, err)
+		}
+	}
+
+	return repo, nil
+}
+
+// prepareGeneratorInput prepares the generator input directory with API configuration files
+func (r *generateNewRunner) prepareGeneratorInput(artifactPath string, artifactState *config.ArtifactState) error {
+	generatorInputDir := filepath.Join(artifactPath, config.GeneratorInputDir)
+
+	// Create generator input directory
+	if err := os.MkdirAll(generatorInputDir, 0755); err != nil {
+		return fmt.Errorf("failed to create generator input directory: %w", err)
+	}
+
+	// Write API configuration files for each API
+	for _, api := range artifactState.Generate.APIs {
+		apiFile := filepath.Join(generatorInputDir, strings.ReplaceAll(api.Path, "/", "_")+".json")
+		apiConfig := map[string]interface{}{
+			"api": api.Path,
+		}
+
+		data, err := json.MarshalIndent(apiConfig, "", "  ")
+		if err != nil {
+			return fmt.Errorf("failed to marshal API config: %w", err)
+		}
+
+		if err := os.WriteFile(apiFile, data, 0644); err != nil {
+			return fmt.Errorf("failed to write API config file: %w", err)
+		}
+		slog.Debug("created API config file", "api", api, "file", apiFile)
+	}
+
+	return nil
+}
+
+// convertToLibrarianState converts ArtifactState to the old LibrarianState format
+// needed by the docker container interface
+func (r *generateNewRunner) convertToLibrarianState(artifactState *config.ArtifactState, artifactPath string) *config.LibrarianState {
+	// For now, use the artifact path as the source root
+	// TODO(https://github.com/googleapis/librarian/issues/<number>): Extract from metadata or configuration
+	sourceRoots := []string{artifactPath}
+
+	// Convert APIConfig to API format expected by docker
+	var apis []*config.API
+	for _, apiConfig := range artifactState.Generate.APIs {
+		apis = append(apis, &config.API{
+			Path:          apiConfig.Path,
+			ServiceConfig: apiConfig.GRPCServiceConfig,
+		})
+	}
+
+	libraryState := &config.LibraryState{
+		ID:          artifactPath,
+		APIs:        apis,
+		SourceRoots: sourceRoots,
+	}
+
+	return &config.LibrarianState{
+		Libraries: []*config.LibraryState{libraryState},
+	}
+}
+
+// applyFilesRulesAndCopy applies keep/remove/exclude rules and copies generated files
+func (r *generateNewRunner) applyFilesRulesAndCopy(artifactState *config.ArtifactState, artifactPath, outputDir string) error {
+	// Get file patterns from artifact state
+	keepPatterns := artifactState.Generate.Keep
+	removePatterns := artifactState.Generate.Remove
+	excludePatterns := artifactState.Generate.Exclude
+
+	slog.Info("applying file rules", "keep", len(keepPatterns), "remove", len(removePatterns), "exclude", len(excludePatterns))
+
+	// 1. First, remove files matching remove patterns from the artifact directory
+	if err := r.removeFiles(artifactPath, removePatterns, keepPatterns); err != nil {
+		return fmt.Errorf("failed to remove files: %w", err)
+	}
+
+	// 2. Copy generated files from output directory to artifact directory, excluding files that match exclude patterns
+	if err := r.copyGeneratedFiles(outputDir, artifactPath, excludePatterns); err != nil {
+		return fmt.Errorf("failed to copy generated files: %w", err)
+	}
+
+	return nil
+}
+
+// removeFiles removes files from the artifact directory based on remove patterns, preserving keep patterns
+func (r *generateNewRunner) removeFiles(artifactPath string, removePatterns, keepPatterns []string) error {
+	if len(removePatterns) == 0 {
+		return nil
+	}
+
+	// Compile patterns
+	var removeRegexes []*regexp.Regexp
+	for _, pattern := range removePatterns {
+		re, err := regexp.Compile(pattern)
+		if err != nil {
+			return fmt.Errorf("invalid remove pattern %q: %w", pattern, err)
+		}
+		removeRegexes = append(removeRegexes, re)
+	}
+
+	var keepRegexes []*regexp.Regexp
+	for _, pattern := range keepPatterns {
+		re, err := regexp.Compile(pattern)
+		if err != nil {
+			return fmt.Errorf("invalid keep pattern %q: %w", pattern, err)
+		}
+		keepRegexes = append(keepRegexes, re)
+	}
+
+	// Walk the artifact directory and remove matching files
+	return filepath.Walk(artifactPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Skip the artifact directory itself
+		if path == artifactPath {
+			return nil
+		}
+
+		// Get relative path
+		relPath, err := filepath.Rel(artifactPath, path)
+		if err != nil {
+			return err
+		}
+
+		// Check if file should be kept
+		for _, keepRe := range keepRegexes {
+			if keepRe.MatchString(relPath) {
+				slog.Debug("keeping file (matches keep pattern)", "file", relPath)
+				return nil
+			}
+		}
+
+		// Check if file should be removed
+		for _, removeRe := range removeRegexes {
+			if removeRe.MatchString(relPath) {
+				slog.Debug("removing file", "file", relPath)
+				if err := os.RemoveAll(path); err != nil {
+					return fmt.Errorf("failed to remove %s: %w", path, err)
+				}
+				// If we removed a directory, skip walking into it
+				if info.IsDir() {
+					return filepath.SkipDir
+				}
+				return nil
+			}
+		}
+
+		return nil
+	})
+}
+
+// copyGeneratedFiles copies files from output directory to artifact directory, excluding files matching exclude patterns
+func (r *generateNewRunner) copyGeneratedFiles(outputDir, artifactPath string, excludePatterns []string) error {
+	// Compile exclude patterns
+	var excludeRegexes []*regexp.Regexp
+	for _, pattern := range excludePatterns {
+		re, err := regexp.Compile(pattern)
+		if err != nil {
+			return fmt.Errorf("invalid exclude pattern %q: %w", pattern, err)
+		}
+		excludeRegexes = append(excludeRegexes, re)
+	}
+
+	// Walk the output directory and copy files
+	return filepath.Walk(outputDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Skip the output directory itself
+		if path == outputDir {
+			return nil
+		}
+
+		// Get relative path
+		relPath, err := filepath.Rel(outputDir, path)
+		if err != nil {
+			return err
+		}
+
+		// Check if file should be excluded
+		for _, excludeRe := range excludeRegexes {
+			if excludeRe.MatchString(relPath) {
+				slog.Debug("excluding file from copy", "file", relPath)
+				if info.IsDir() {
+					return filepath.SkipDir
+				}
+				return nil
+			}
+		}
+
+		// Determine destination path
+		destPath := filepath.Join(artifactPath, relPath)
+
+		if info.IsDir() {
+			// Create directory
+			if err := os.MkdirAll(destPath, info.Mode()); err != nil {
+				return fmt.Errorf("failed to create directory %s: %w", destPath, err)
+			}
+			slog.Debug("created directory", "dir", relPath)
+		} else {
+			// Copy file
+			if err := r.copyFile(path, destPath); err != nil {
+				return fmt.Errorf("failed to copy file %s: %w", relPath, err)
+			}
+			slog.Debug("copied file", "file", relPath)
+		}
+
+		return nil
+	})
+}
+
+// copyFile copies a file from src to dst
+func (r *generateNewRunner) copyFile(src, dst string) error {
+	// Open source file
+	srcFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer srcFile.Close()
+
+	// Get source file info for permissions
+	srcInfo, err := srcFile.Stat()
+	if err != nil {
+		return err
+	}
+
+	// Create destination file
+	dstFile, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, srcInfo.Mode())
+	if err != nil {
+		return err
+	}
+	defer dstFile.Close()
+
+	// Copy contents
+	if _, err := io.Copy(dstFile, srcFile); err != nil {
+		return err
+	}
+
+	return nil
 }

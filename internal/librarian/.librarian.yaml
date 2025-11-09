@@ -1,0 +1,4 @@
+librarian:
+    version: not available
+release:
+    tag_format: '{name}-v{version}'

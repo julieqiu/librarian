@@ -82,25 +82,23 @@ func TestDockerRun(t *testing.T) {
 			},
 			runCommand: func(ctx context.Context, d *Docker) error {
 				generateRequest := &GenerateRequest{
-					State:     state,
-					RepoDir:   repoDir,
-					ApiRoot:   testAPIRoot,
-					Output:    testOutput,
-					LibraryID: testLibraryID,
+					State:         state,
+					RepoDir:       repoDir,
+					GoogleapisDir: testAPIRoot,
+					Output:        testOutput,
+					LibraryID:     testLibraryID,
 				}
 
 				return d.Generate(ctx, generateRequest)
 			},
 			want: []string{
 				"run", "--rm",
-				"-v", fmt.Sprintf("%s/.librarian:/librarian", repoDir),
-				"-v", fmt.Sprintf("%s/.librarian/generator-input:/input", repoDir),
+				"-v", fmt.Sprintf("%s/.librarian:/request", repoDir),
 				"-v", fmt.Sprintf("%s:/output", testOutput),
 				"-v", fmt.Sprintf("%s:/source:ro", testAPIRoot),
 				testImage,
 				string(CommandGenerate),
-				"--librarian=/librarian",
-				"--input=/input",
+				"--request=/request",
 				"--output=/output",
 				"--source=/source",
 			},
@@ -112,11 +110,11 @@ func TestDockerRun(t *testing.T) {
 			},
 			runCommand: func(ctx context.Context, d *Docker) error {
 				generateRequest := &GenerateRequest{
-					State:     state,
-					RepoDir:   "/non-existed-dir",
-					ApiRoot:   testAPIRoot,
-					Output:    testOutput,
-					LibraryID: testLibraryID,
+					State:         state,
+					RepoDir:       "/non-existed-dir",
+					GoogleapisDir: testAPIRoot,
+					Output:        testOutput,
+					LibraryID:     testLibraryID,
 				}
 				return d.Generate(ctx, generateRequest)
 			},
@@ -131,11 +129,11 @@ func TestDockerRun(t *testing.T) {
 			},
 			runCommand: func(ctx context.Context, d *Docker) error {
 				generateRequest := &GenerateRequest{
-					State:     state,
-					RepoDir:   repoDir,
-					ApiRoot:   testAPIRoot,
-					Output:    testOutput,
-					LibraryID: testLibraryID,
+					State:         state,
+					RepoDir:       repoDir,
+					GoogleapisDir: testAPIRoot,
+					Output:        testOutput,
+					LibraryID:     testLibraryID,
 				}
 
 				return d.Generate(ctx, generateRequest)
@@ -152,26 +150,24 @@ func TestDockerRun(t *testing.T) {
 			},
 			runCommand: func(ctx context.Context, d *Docker) error {
 				generateRequest := &GenerateRequest{
-					State:     state,
-					RepoDir:   repoDir,
-					ApiRoot:   testAPIRoot,
-					Output:    "hostDir",
-					LibraryID: testLibraryID,
-					Image:     "custom-image:abcd123",
+					State:         state,
+					RepoDir:       repoDir,
+					GoogleapisDir: testAPIRoot,
+					Output:        "hostDir",
+					LibraryID:     testLibraryID,
+					Image:         "custom-image:abcd123",
 				}
 
 				return d.Generate(ctx, generateRequest)
 			},
 			want: []string{
 				"run", "--rm",
-				"-v", fmt.Sprintf("%s/.librarian:/librarian", repoDir),
-				"-v", fmt.Sprintf("%s/.librarian/generator-input:/input", repoDir),
+				"-v", fmt.Sprintf("%s/.librarian:/request", repoDir),
 				"-v", "localDir:/output",
 				"-v", fmt.Sprintf("%s:/source:ro", testAPIRoot),
 				"custom-image:abcd123",
 				string(CommandGenerate),
-				"--librarian=/librarian",
-				"--input=/input",
+				"--request=/request",
 				"--output=/output",
 				"--source=/source",
 			},
@@ -184,25 +180,23 @@ func TestDockerRun(t *testing.T) {
 			},
 			runCommand: func(ctx context.Context, d *Docker) error {
 				generateRequest := &GenerateRequest{
-					State:     state,
-					RepoDir:   repoDir,
-					ApiRoot:   testAPIRoot,
-					Output:    "hostDir",
-					LibraryID: testLibraryID,
+					State:         state,
+					RepoDir:       repoDir,
+					GoogleapisDir: testAPIRoot,
+					Output:        "hostDir",
+					LibraryID:     testLibraryID,
 				}
 
 				return d.Generate(ctx, generateRequest)
 			},
 			want: []string{
 				"run", "--rm",
-				"-v", fmt.Sprintf("%s/.librarian:/librarian", repoDir),
-				"-v", fmt.Sprintf("%s/.librarian/generator-input:/input", repoDir),
+				"-v", fmt.Sprintf("%s/.librarian:/request", repoDir),
 				"-v", "localDir:/output",
 				"-v", fmt.Sprintf("%s:/source:ro", testAPIRoot),
 				testImage,
 				string(CommandGenerate),
-				"--librarian=/librarian",
-				"--input=/input",
+				"--request=/request",
 				"--output=/output",
 				"--source=/source",
 			},
@@ -223,11 +217,11 @@ func TestDockerRun(t *testing.T) {
 			},
 			want: []string{
 				"run", "--rm",
-				"-v", fmt.Sprintf("%s/.librarian:/librarian", repoDir),
+				"-v", fmt.Sprintf("%s/.librarian:/request", repoDir),
 				"-v", fmt.Sprintf("%s:/repo", repoDir),
 				testImage,
 				string(CommandBuild),
-				"--librarian=/librarian",
+				"--request=/request",
 				"--repo=/repo",
 			},
 		},
@@ -249,11 +243,11 @@ func TestDockerRun(t *testing.T) {
 			},
 			want: []string{
 				"run", "--rm",
-				"-v", fmt.Sprintf("%s/.librarian:/librarian", repoDir),
+				"-v", fmt.Sprintf("%s/.librarian:/request", repoDir),
 				"-v", fmt.Sprintf("%s:/repo", repoDir),
 				"custom-image:abcd123",
 				string(CommandBuild),
-				"--librarian=/librarian",
+				"--request=/request",
 				"--repo=/repo",
 			},
 		},
@@ -299,11 +293,11 @@ func TestDockerRun(t *testing.T) {
 			},
 			runCommand: func(ctx context.Context, d *Docker) error {
 				configureRequest := &ConfigureRequest{
-					State:     state,
-					LibraryID: testLibraryID,
-					RepoDir:   repoDir,
-					ApiRoot:   testAPIRoot,
-					Output:    testOutput,
+					State:         state,
+					LibraryID:     testLibraryID,
+					RepoDir:       repoDir,
+					GoogleapisDir: testAPIRoot,
+					Output:        testOutput,
 					GlobalFiles: []string{
 						"a/b/go.mod",
 						"go.mod",
@@ -316,16 +310,14 @@ func TestDockerRun(t *testing.T) {
 			},
 			want: []string{
 				"run", "--rm",
-				"-v", fmt.Sprintf("%s/.librarian:/librarian", repoDir),
-				"-v", fmt.Sprintf("%s/.librarian/generator-input:/input", repoDir),
+				"-v", fmt.Sprintf("%s/.librarian:/request", repoDir),
 				"-v", fmt.Sprintf("%s:/output", testOutput),
 				"-v", fmt.Sprintf("%s:/source:ro", testAPIRoot),
 				"-v", fmt.Sprintf("%s/a/b/go.mod:/repo/a/b/go.mod:ro", repoDir),
 				"-v", fmt.Sprintf("%s/go.mod:/repo/go.mod:ro", repoDir),
 				testImage,
 				string(CommandConfigure),
-				"--librarian=/librarian",
-				"--input=/input",
+				"--request=/request",
 				"--output=/output",
 				"--repo=/repo",
 				"--source=/source",
@@ -338,11 +330,11 @@ func TestDockerRun(t *testing.T) {
 			},
 			runCommand: func(ctx context.Context, d *Docker) error {
 				configureRequest := &ConfigureRequest{
-					State:     state,
-					LibraryID: testLibraryID,
-					RepoDir:   repoDir,
-					ApiRoot:   testAPIRoot,
-					Output:    testOutput,
+					State:         state,
+					LibraryID:     testLibraryID,
+					RepoDir:       repoDir,
+					GoogleapisDir: testAPIRoot,
+					Output:        testOutput,
 					GlobalFiles: []string{
 						"a/b/go.mod",
 						"go.mod",
@@ -356,16 +348,14 @@ func TestDockerRun(t *testing.T) {
 			},
 			want: []string{
 				"run", "--rm",
-				"-v", fmt.Sprintf("%s/.librarian:/librarian", repoDir),
-				"-v", fmt.Sprintf("%s/.librarian/generator-input:/input", repoDir),
+				"-v", fmt.Sprintf("%s/.librarian:/request", repoDir),
 				"-v", fmt.Sprintf("%s:/output", testOutput),
 				"-v", fmt.Sprintf("%s:/source:ro", testAPIRoot),
 				"-v", fmt.Sprintf("%s/a/b/go.mod:/repo/a/b/go.mod:ro", repoDir),
 				"-v", fmt.Sprintf("%s/go.mod:/repo/go.mod:ro", repoDir),
 				"custom-image:abcd123",
 				string(CommandConfigure),
-				"--librarian=/librarian",
-				"--input=/input",
+				"--request=/request",
 				"--output=/output",
 				"--repo=/repo",
 				"--source=/source",
@@ -378,12 +368,12 @@ func TestDockerRun(t *testing.T) {
 			},
 			runCommand: func(ctx context.Context, d *Docker) error {
 				configureRequest := &ConfigureRequest{
-					State:       state,
-					LibraryID:   testLibraryID,
-					RepoDir:     repoDir,
-					ApiRoot:     testAPIRoot,
-					Output:      testOutput,
-					GlobalFiles: nil,
+					State:         state,
+					LibraryID:     testLibraryID,
+					RepoDir:       repoDir,
+					GoogleapisDir: testAPIRoot,
+					Output:        testOutput,
+					GlobalFiles:   nil,
 				}
 
 				_, err := d.Configure(ctx, configureRequest)
@@ -392,14 +382,12 @@ func TestDockerRun(t *testing.T) {
 			},
 			want: []string{
 				"run", "--rm",
-				"-v", fmt.Sprintf("%s/.librarian:/librarian", repoDir),
-				"-v", fmt.Sprintf("%s/.librarian/generator-input:/input", repoDir),
+				"-v", fmt.Sprintf("%s/.librarian:/request", repoDir),
 				"-v", fmt.Sprintf("%s:/output", testOutput),
 				"-v", fmt.Sprintf("%s:/source:ro", testAPIRoot),
 				testImage,
 				string(CommandConfigure),
-				"--librarian=/librarian",
-				"--input=/input",
+				"--request=/request",
 				"--output=/output",
 				"--repo=/repo",
 				"--source=/source",
@@ -412,11 +400,11 @@ func TestDockerRun(t *testing.T) {
 			},
 			runCommand: func(ctx context.Context, d *Docker) error {
 				configureRequest := &ConfigureRequest{
-					State:     state,
-					LibraryID: testLibraryID,
-					RepoDir:   repoDir,
-					ApiRoot:   testAPIRoot,
-					Output:    testOutput,
+					State:         state,
+					LibraryID:     testLibraryID,
+					RepoDir:       repoDir,
+					GoogleapisDir: testAPIRoot,
+					Output:        testOutput,
 					ExistingSourceRoots: []string{
 						"a/path",
 						"b/path",
@@ -429,16 +417,14 @@ func TestDockerRun(t *testing.T) {
 			},
 			want: []string{
 				"run", "--rm",
-				"-v", fmt.Sprintf("%s/.librarian:/librarian", repoDir),
-				"-v", fmt.Sprintf("%s/.librarian/generator-input:/input", repoDir),
+				"-v", fmt.Sprintf("%s/.librarian:/request", repoDir),
 				"-v", fmt.Sprintf("%s:/output", testOutput),
 				"-v", fmt.Sprintf("%s:/source:ro", testAPIRoot),
 				"-v", fmt.Sprintf("%s/a/path:/repo/a/path:ro", repoDir),
 				"-v", fmt.Sprintf("%s/b/path:/repo/b/path:ro", repoDir),
 				testImage,
 				string(CommandConfigure),
-				"--librarian=/librarian",
-				"--input=/input",
+				"--request=/request",
 				"--output=/output",
 				"--repo=/repo",
 				"--source=/source",
@@ -454,7 +440,7 @@ func TestDockerRun(t *testing.T) {
 					State:               state,
 					LibraryID:           testLibraryID,
 					RepoDir:             repoDir,
-					ApiRoot:             testAPIRoot,
+					GoogleapisDir:       testAPIRoot,
 					Output:              testOutput,
 					ExistingSourceRoots: nil,
 				}
@@ -465,14 +451,12 @@ func TestDockerRun(t *testing.T) {
 			},
 			want: []string{
 				"run", "--rm",
-				"-v", fmt.Sprintf("%s/.librarian:/librarian", repoDir),
-				"-v", fmt.Sprintf("%s/.librarian/generator-input:/input", repoDir),
+				"-v", fmt.Sprintf("%s/.librarian:/request", repoDir),
 				"-v", fmt.Sprintf("%s:/output", testOutput),
 				"-v", fmt.Sprintf("%s:/source:ro", testAPIRoot),
 				testImage,
 				string(CommandConfigure),
-				"--librarian=/librarian",
-				"--input=/input",
+				"--request=/request",
 				"--output=/output",
 				"--repo=/repo",
 				"--source=/source",
@@ -510,11 +494,11 @@ func TestDockerRun(t *testing.T) {
 					},
 				}
 				configureRequest := &ConfigureRequest{
-					State:     curState,
-					LibraryID: testLibraryID,
-					RepoDir:   repoDir,
-					ApiRoot:   testAPIRoot,
-					Output:    testOutput,
+					State:         curState,
+					LibraryID:     testLibraryID,
+					RepoDir:       repoDir,
+					GoogleapisDir: testAPIRoot,
+					Output:        testOutput,
 					GlobalFiles: []string{
 						"a/b/go.mod",
 						"go.mod",
@@ -530,16 +514,14 @@ func TestDockerRun(t *testing.T) {
 			},
 			want: []string{
 				"run", "--rm",
-				"-v", fmt.Sprintf("%s/.librarian:/librarian", repoDir),
-				"-v", fmt.Sprintf("%s/.librarian/generator-input:/input", repoDir),
+				"-v", fmt.Sprintf("%s/.librarian:/request", repoDir),
 				"-v", fmt.Sprintf("%s:/output", testOutput),
 				"-v", fmt.Sprintf("%s:/source:ro", testAPIRoot),
 				"-v", fmt.Sprintf("%s/a/b/go.mod:/repo/a/b/go.mod:ro", repoDir),
 				"-v", fmt.Sprintf("%s/go.mod:/repo/go.mod:ro", repoDir),
 				testImage,
 				string(CommandConfigure),
-				"--librarian=/librarian",
-				"--input=/input",
+				"--request=/request",
 				"--output=/output",
 				"--repo=/repo",
 				"--source=/source",
@@ -552,10 +534,10 @@ func TestDockerRun(t *testing.T) {
 			},
 			runCommand: func(ctx context.Context, d *Docker) error {
 				configureRequest := &ConfigureRequest{
-					State:     state,
-					LibraryID: testLibraryID,
-					RepoDir:   "/non-exist-dir",
-					ApiRoot:   testAPIRoot,
+					State:         state,
+					LibraryID:     testLibraryID,
+					RepoDir:       "/non-exist-dir",
+					GoogleapisDir: testAPIRoot,
 				}
 				_, err := d.Configure(ctx, configureRequest)
 				return err
@@ -571,10 +553,10 @@ func TestDockerRun(t *testing.T) {
 			},
 			runCommand: func(ctx context.Context, d *Docker) error {
 				configureRequest := &ConfigureRequest{
-					State:     state,
-					LibraryID: testLibraryID,
-					RepoDir:   repoDir,
-					ApiRoot:   testAPIRoot,
+					State:         state,
+					LibraryID:     testLibraryID,
+					RepoDir:       repoDir,
+					GoogleapisDir: testAPIRoot,
 				}
 
 				_, err := d.Configure(ctx, configureRequest)
@@ -609,12 +591,12 @@ func TestDockerRun(t *testing.T) {
 			},
 			want: []string{
 				"run", "--rm",
-				"-v", fmt.Sprintf("%s/.librarian:/librarian", filepath.Join(repoDir, "release-stage-all-libraries")),
+				"-v", fmt.Sprintf("%s/.librarian:/request", filepath.Join(repoDir, "release-stage-all-libraries")),
 				"-v", fmt.Sprintf("%s:/repo:ro", filepath.Join(repoDir, "release-stage-all-libraries")),
 				"-v", fmt.Sprintf("%s:/output", testOutput),
 				testImage,
 				string(CommandReleaseStage),
-				"--librarian=/librarian",
+				"--request=/request",
 				"--repo=/repo",
 				"--output=/output",
 			},
@@ -644,12 +626,12 @@ func TestDockerRun(t *testing.T) {
 			},
 			want: []string{
 				"run", "--rm",
-				"-v", fmt.Sprintf("%s/.librarian:/librarian", filepath.Join(repoDir, "release-stage-all-libraries")),
+				"-v", fmt.Sprintf("%s/.librarian:/request", filepath.Join(repoDir, "release-stage-all-libraries")),
 				"-v", fmt.Sprintf("%s:/repo:ro", filepath.Join(repoDir, "release-stage-all-libraries")),
 				"-v", fmt.Sprintf("%s:/output", testOutput),
 				"custom-image:abcd123",
 				string(CommandReleaseStage),
-				"--librarian=/librarian",
+				"--request=/request",
 				"--repo=/repo",
 				"--output=/output",
 			},
@@ -718,12 +700,12 @@ func TestDockerRun(t *testing.T) {
 			},
 			want: []string{
 				"run", "--rm",
-				"-v", fmt.Sprintf("%s/.librarian:/librarian", filepath.Join(repoDir, "release-init-one-library")),
+				"-v", fmt.Sprintf("%s/.librarian:/request", filepath.Join(repoDir, "release-init-one-library")),
 				"-v", fmt.Sprintf("%s:/repo:ro", filepath.Join(repoDir, "release-init-one-library")),
 				"-v", fmt.Sprintf("%s:/output", testOutput),
 				testImage,
 				string(CommandReleaseStage),
-				"--librarian=/librarian",
+				"--request=/request",
 				"--repo=/repo",
 				"--output=/output",
 			},
@@ -753,12 +735,12 @@ func TestDockerRun(t *testing.T) {
 			},
 			want: []string{
 				"run", "--rm",
-				"-v", fmt.Sprintf("%s/.librarian:/librarian", filepath.Join(repoDir, "release-init-one-library-with-version")),
+				"-v", fmt.Sprintf("%s/.librarian:/request", filepath.Join(repoDir, "release-init-one-library-with-version")),
 				"-v", fmt.Sprintf("%s:/repo:ro", filepath.Join(repoDir, "release-init-one-library-with-version")),
 				"-v", fmt.Sprintf("%s:/output", testOutput),
 				testImage,
 				string(CommandReleaseStage),
-				"--librarian=/librarian",
+				"--request=/request",
 				"--repo=/repo",
 				"--output=/output",
 			},
@@ -1119,14 +1101,14 @@ func TestReleaseStageRequestContent(t *testing.T) {
 		for i, arg := range args {
 			if arg == "-v" && i+1 < len(args) {
 				parts := strings.Split(args[i+1], ":")
-				if len(parts) == 2 && parts[1] == "/librarian" {
+				if len(parts) == 2 && parts[1] == "/request" {
 					librarianDir = parts[0]
 					break
 				}
 			}
 		}
 		if librarianDir == "" {
-			return errors.New("could not find librarian directory mount")
+			return errors.New("could not find request directory mount")
 		}
 
 		jsonPath := filepath.Join(librarianDir, "release-stage-request.json")

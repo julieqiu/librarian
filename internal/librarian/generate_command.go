@@ -341,7 +341,7 @@ func (r *generateRunner) runConfigureCommand(ctx context.Context, outputDir stri
 	}
 
 	configureRequest := &docker.ConfigureRequest{
-		ApiRoot:             apiRoot,
+		GoogleapisDir:       apiRoot,
 		LibraryID:           r.library,
 		Output:              outputDir,
 		RepoDir:             r.repo.GetDir(),

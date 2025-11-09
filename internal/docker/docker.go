@@ -88,8 +88,8 @@ type BuildRequest struct {
 // ConfigureRequest contains all the information required for a language
 // container to run the configure command.
 type ConfigureRequest struct {
-	// ApiRoot specifies the root directory of the API specification repo.
-	ApiRoot string
+	// GoogleapisDir specifies the root directory of the googleapis repository.
+	GoogleapisDir string
 
 	// libraryID specifies the ID of the library to configure.
 	LibraryID string
@@ -119,8 +119,8 @@ type ConfigureRequest struct {
 // GenerateRequest contains all the information required for a language
 // container to run the generate command.
 type GenerateRequest struct {
-	// ApiRoot specifies the root directory of the API specification repo.
-	ApiRoot string
+	// GoogleapisDir specifies the root directory of the googleapis repository.
+	GoogleapisDir string
 
 	// LibraryID specifies the ID of the library to generate.
 	LibraryID string
@@ -234,19 +234,16 @@ func (c *Docker) Generate(ctx context.Context, request *GenerateRequest) error {
 	}()
 
 	commandArgs := []string{
-		"--librarian=/librarian",
-		"--input=/input",
+		"--request=/request",
 		"--output=/output",
 		"--source=/source",
 	}
 
-	generatorInput := filepath.Join(request.RepoDir, config.GeneratorInputDir)
 	librarianDir := filepath.Join(request.RepoDir, config.LibrarianDir)
 	mounts := []string{
-		fmt.Sprintf("%s:/librarian", librarianDir),
-		fmt.Sprintf("%s:/input", generatorInput),
+		fmt.Sprintf("%s:/request", librarianDir),
 		fmt.Sprintf("%s:/output", request.Output),
-		fmt.Sprintf("%s:/source:ro", request.ApiRoot), // readonly volume
+		fmt.Sprintf("%s:/source:ro", request.GoogleapisDir), // readonly volume
 	}
 
 	image := c.resolveImage(request.Image)
@@ -272,11 +269,11 @@ func (c *Docker) Build(ctx context.Context, request *BuildRequest) error {
 
 	librarianDir := filepath.Join(request.RepoDir, config.LibrarianDir)
 	mounts := []string{
-		fmt.Sprintf("%s:/librarian", librarianDir),
+		fmt.Sprintf("%s:/request", librarianDir),
 		fmt.Sprintf("%s:/repo", request.RepoDir),
 	}
 	commandArgs := []string{
-		"--librarian=/librarian",
+		"--request=/request",
 		"--repo=/repo",
 	}
 
@@ -303,19 +300,16 @@ func (c *Docker) Configure(ctx context.Context, request *ConfigureRequest) (stri
 		}
 	}()
 	commandArgs := []string{
-		"--librarian=/librarian",
-		"--input=/input",
+		"--request=/request",
 		"--output=/output",
 		"--repo=/repo",
 		"--source=/source",
 	}
-	generatorInput := filepath.Join(request.RepoDir, config.GeneratorInputDir)
 	librarianDir := filepath.Join(request.RepoDir, config.LibrarianDir)
 	mounts := []string{
-		fmt.Sprintf("%s:/librarian", librarianDir),
-		fmt.Sprintf("%s:/input", generatorInput),
+		fmt.Sprintf("%s:/request", librarianDir),
 		fmt.Sprintf("%s:/output", request.Output),
-		fmt.Sprintf("%s:/source:ro", request.ApiRoot), // readonly volume
+		fmt.Sprintf("%s:/source:ro", request.GoogleapisDir), // readonly volume
 	}
 	// Mount existing source roots as a readonly volume.
 	for _, sourceRoot := range request.ExistingSourceRoots {
@@ -350,14 +344,14 @@ func (c *Docker) ReleaseStage(ctx context.Context, request *ReleaseStageRequest)
 		}
 	}()
 	commandArgs := []string{
-		"--librarian=/librarian",
+		"--request=/request",
 		"--repo=/repo",
 		"--output=/output",
 	}
 
 	librarianDir := filepath.Join(request.RepoDir, config.LibrarianDir)
 	mounts := []string{
-		fmt.Sprintf("%s:/librarian", librarianDir),
+		fmt.Sprintf("%s:/request", librarianDir),
 		fmt.Sprintf("%s:/repo:ro", request.RepoDir), // readonly volume
 		fmt.Sprintf("%s:/output", request.Output),
 	}

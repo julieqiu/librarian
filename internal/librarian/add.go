@@ -26,11 +26,11 @@ import (
 )
 
 type addRunner struct {
-	path         string
-	apis         []string
-	commit       bool
-	repoRoot     string
-	repoConfig   *config.LibrarianConfig
+	path       string
+	apis       []string
+	commit     bool
+	repoRoot   string
+	repoConfig *config.LibrarianConfig
 }
 
 func newAddRunner(args []string, commit bool) (*addRunner, error) {

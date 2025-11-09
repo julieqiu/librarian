@@ -37,18 +37,18 @@ func generateSingleLibrary(ctx context.Context, containerClient ContainerClient,
 		return fmt.Errorf("error making output directory %w", err)
 	}
 
-	apiRoot, err := filepath.Abs(sourceRepo.GetDir())
+	googleapisDir, err := filepath.Abs(sourceRepo.GetDir())
 	if err != nil {
 		return err
 	}
 
 	generateRequest := &docker.GenerateRequest{
-		ApiRoot:   apiRoot,
-		LibraryID: libraryState.ID,
-		Output:    libraryOutputDir,
-		RepoDir:   repo.GetDir(),
-		State:     state,
-		Image:     state.Image,
+		GoogleapisDir: googleapisDir,
+		LibraryID:     libraryState.ID,
+		Output:        libraryOutputDir,
+		RepoDir:       repo.GetDir(),
+		State:         state,
+		Image:         state.Image,
 	}
 	slog.Info("performing generation for library", "id", libraryState.ID, "outputDir", libraryOutputDir)
 	if err := containerClient.Generate(ctx, generateRequest); err != nil {
