@@ -267,7 +267,13 @@ func newCmdConfigGet() *cli.Command {
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			setupLogger(verbose)
 			slog.Debug("config get command verbose logging")
-			return fmt.Errorf("config get command not yet implemented")
+
+			args := cmd.Flags.Args()
+			runner, err := newConfigGetRunner(args)
+			if err != nil {
+				return err
+			}
+			return runner.run(ctx)
 		},
 	}
 	cmdConfigGet.Init()
@@ -284,7 +290,13 @@ func newCmdConfigSet() *cli.Command {
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			setupLogger(verbose)
 			slog.Debug("config set command verbose logging")
-			return fmt.Errorf("config set command not yet implemented")
+
+			args := cmd.Flags.Args()
+			runner, err := newConfigSetRunner(args)
+			if err != nil {
+				return err
+			}
+			return runner.run(ctx)
 		},
 	}
 	cmdConfigSet.Init()
@@ -302,7 +314,13 @@ func newCmdConfigUpdate() *cli.Command {
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			setupLogger(verbose)
 			slog.Debug("config update command verbose logging")
-			return fmt.Errorf("config update command not yet implemented")
+
+			args := cmd.Flags.Args()
+			runner, err := newConfigUpdateRunner(args, all)
+			if err != nil {
+				return err
+			}
+			return runner.run(ctx)
 		},
 	}
 	cmdConfigUpdate.Init()
