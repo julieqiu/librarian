@@ -1,0 +1,13 @@
+name: google_cloud_protobuf
+version: 0.0.0
+generate:
+    apis:
+        - path: google/protobuf
+dart:
+    source:
+        description_override: Core Protobuf types used by most services.
+        title_override: Core Protobuf Types
+    codec:
+        copyright_year: "2025"
+        repository_url: https://github.com/googleapis/google-cloud-dart/tree/main/generated/google_cloud_protobuf
+        dev_dependencies: test

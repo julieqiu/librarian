@@ -386,7 +386,103 @@ This suggests the Rust generator either:
 
 ## Dart Configuration
 
-**Status:** Not yet implemented
+### Data Source
+
+Dart configurations are converted from Sidekick `.sidekick.toml` files using `cmd/convert_dart/main.go`.
+
+**Statistics:**
+- Total Dart libraries: 13
+- Libraries with service_config: 12
+- Libraries without service_config: 1
+- All libraries use protobuf specification format
+
+### Example Configuration (Basic)
+
+```yaml
+name: google_cloud_secretmanager_v1
+version: 0.0.0
+generate:
+    apis:
+        - path: google/cloud/secretmanager/v1
+          service_config: google/cloud/secretmanager/v1/secretmanager_v1.yaml
+dart:
+    codec:
+        copyright_year: "2025"
+        repository_url: https://github.com/googleapis/google-cloud-dart/tree/main/generated/google_cloud_secretmanager_v1
+```
+
+### Example Configuration (With README customization)
+
+```yaml
+name: google_cloud_ai_generativelanguage_v1beta
+version: 0.0.0
+generate:
+    apis:
+        - path: google/ai/generativelanguage/v1beta
+          service_config: google/ai/generativelanguage/v1beta/generativelanguage_v1beta.yaml
+dart:
+    codec:
+        copyright_year: "2025"
+        repository_url: https://github.com/googleapis/google-cloud-dart/tree/main/generated/google_cloud_ai_generativelanguage_v1beta
+        api_keys_environment_variables: GOOGLE_API_KEY,GEMINI_API_KEY
+        dev_dependencies: googleapis_auth,test,test_utils
+        readme_after_title_text: |
+            > [!TIP]
+            > Flutter applications should use Firebase AI Logic.
+        readme_quickstart_text: |
+            ## Quickstart
+            [Full quickstart documentation...]
+```
+
+### Example Configuration (With description override)
+
+```yaml
+name: google_cloud_common
+version: 0.0.0
+generate:
+    apis:
+        - path: google/cloud/common
+          service_config: google/cloud/common/common.yaml
+dart:
+    source:
+        description_override: Additional metadata for operations.
+    codec:
+        copyright_year: "2025"
+        repository_url: https://github.com/googleapis/google-cloud-dart/tree/main/generated/google_cloud_common
+```
+
+### Dart-Specific Fields
+
+**Source configuration (`dart.source`):**
+- `description_override` - Override package description (1 library uses this)
+- `title_override` - Override package title
+
+**Codec configuration (`dart.codec`):**
+- `copyright_year` - Copyright year (all 13 libraries have this set to "2025")
+- `repository_url` - GitHub repository URL (all 13 libraries have this)
+- `api_keys_environment_variables` - Environment variables for API keys (comma-separated)
+- `dev_dependencies` - Development dependencies (comma-separated)
+- `readme_after_title_text` - Additional text to insert after README title
+- `readme_quickstart_text` - Custom quickstart section for README
+- `readme_custom_service_explanation` - Custom service explanation for README
+
+### File Filtering
+
+**No file filtering patterns:** Like Rust, Dart configurations do not use `keep`, `remove`, or regex patterns for file filtering. All 13 libraries have no file filtering configuration.
+
+This suggests the Dart generator either:
+1. Has built-in knowledge of which files to keep/remove
+2. Generates a clean output directory without needing filtering
+3. Handles file management differently than Python/Go containers
+
+### Regex Usage Statistics
+
+- Libraries using `keep`: 0
+- Libraries using `remove`: 0
+- Libraries using `keep_regex`: 0
+- Libraries using `remove_regex`: 0
+
+**Rationale:** The Dart container manages file generation internally without requiring explicit file filtering rules in the configuration.
 
 ## Summary
 
@@ -395,7 +491,7 @@ This suggests the Rust generator either:
 | Python   | 231            | 21               | 224                 |
 | Go       | 183            | 172              | 175                 |
 | Rust     | 200            | 0 (N/A)          | 155                 |
-| Dart     | -              | -                | -                   |
+| Dart     | 13             | 0 (N/A)          | 12                  |
 
 ### Key Findings
 
@@ -403,11 +499,14 @@ This suggests the Rust generator either:
 2. **Go keep:** Only 6 libraries need to preserve specific files (44 total files)
 3. **Go remove_regex:** All 175 libraries follow identical pattern structure - should be moved to generator logic
 4. **Rust:** No file filtering needed - generator handles file management internally; does not use BUILD.bazel (converted from Sidekick)
-5. **BUILD.bazel coverage:**
+5. **Dart:** No file filtering needed - generator handles file management internally; does not use BUILD.bazel (converted from Sidekick)
+6. **BUILD.bazel coverage:**
    - Python: 21/231 (9%) have `py_gapic_library` rules
    - Go: 172/183 (94%) have `go_gapic_library` rules
    - Rust: N/A (does not use BUILD.bazel)
-6. **service_config coverage:**
+   - Dart: N/A (does not use BUILD.bazel)
+7. **service_config coverage:**
    - Python: 224/231 (97%) - includes state.yaml data for all API libraries
    - Go: 175/183 (96%)
    - Rust: 155/200 (78%) - includes proto-only packages
+   - Dart: 12/13 (92%)

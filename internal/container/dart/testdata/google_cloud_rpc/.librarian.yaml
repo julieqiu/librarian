@@ -1,0 +1,11 @@
+name: google_cloud_rpc
+version: 0.0.0
+generate:
+    apis:
+        - path: google/rpc
+          service_config: google/rpc/rpc_publish.yaml
+dart:
+    codec:
+        copyright_year: "2025"
+        repository_url: https://github.com/googleapis/google-cloud-dart/tree/main/generated/google_cloud_rpc
+        dev_dependencies: test

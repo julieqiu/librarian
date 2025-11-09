@@ -1,0 +1,107 @@
+name: google_cloud_aiplatform_v1beta1
+version: 0.0.0
+generate:
+    apis:
+        - path: google/cloud/aiplatform/v1beta1
+          service_config: google/cloud/aiplatform/v1beta1/aiplatform_v1beta1.yaml
+dart:
+    codec:
+        copyright_year: "2025"
+        repository_url: https://github.com/googleapis/google-cloud-dart/tree/main/generated/google_cloud_aiplatform_v1beta1
+        api_keys_environment_variables: GOOGLE_API_KEY
+        dev_dependencies: googleapis_auth
+        readme_after_title_text: |-
+            > [!TIP]
+            > Flutter applications should use
+            > [Firebase AI Logic](https://firebase.google.com/products/firebase-ai-logic).
+            >
+            > The Vertex AI API is meant for Dart command-line, cloud, and server applications.
+            > For mobile and web applications, see instead
+            > [Firebase AI Logic](https://firebase.google.com/products/firebase-ai-logic), which provides
+            > client-side access to both the Gemini Developer API and Vertex AI.
+        readme_quickstart_text: |-
+            ## Quickstart
+
+            This quickstart shows you how to install the package and make your first
+            Vertex API request.
+
+            ### Before you begin
+
+            You must create and configure a Google Cloud project before using the Vertex
+            AI API.
+
+            You can find complete details in this
+            [before you begin](https://cloud.google.com/vertex-ai/docs/start/client-libraries#before_you_begin)
+            guide.
+
+            ### Installing the package into your application
+
+            > [!TIP]
+            > You can create a skeleton application by running the terminal command: `dart create myapp`
+
+            Run the terminal command:
+
+            ```sh
+            dart pub add google_cloud_aiplatform_v1beta1
+            ```
+
+            ### Make your first request
+
+            Here is an example that uses the generateContent method to send a request to
+            the Vertex API using the Gemini 2.5 Flash model.
+
+            Before running the example, you must login with the
+            [gcloud CLI](https://cloud.google.com/sdk/gcloud):
+
+            ```shell
+            $ gcloud auth application-default login
+            ```
+
+            > [!NOTE]
+            >
+            > Model names must be in the form
+            > `"projects/{projectId}/locations/{location}/publishers/{publisher}/models/{model}"`.
+            >
+            > For example, if the Google Cloud project id were `"happycat"`, then this would
+            > be a valid model:
+            > `"projects/happycat/locations/global/publishers/google/models/gemini-2.5-flash"`.
+
+            ```dart
+            import 'package:google_cloud_aiplatform_v1beta1/aiplatform.dart';
+            import 'package:googleapis_auth/auth_io.dart' as auth;
+
+            void main() async {
+              const projectId = ''; // Enter your projectId here.
+              if (projectId.isEmpty) {
+                print('Please provide a project ID in the `projectId` constant.');
+                return;
+              }
+
+              final client = await auth.clientViaApplicationDefaultCredentials(
+                scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+              );
+              final service = PredictionService(client: client);
+
+              final request = GenerateContentRequest(
+                model:
+                    'projects/$projectId/locations/global/'
+                    'publishers/google/models/gemini-2.5-flash',
+                contents: [
+                  Content(
+                    parts: [Part(text: "Explain how AI works in a few words")],
+                    role: "user",
+                  ),
+                ],
+              );
+
+              final result = await service.generateContent(request);
+              final parts = result.candidates.firstOrNull?.content?.parts;
+              if (parts == null) {
+                print('<No textual response>');
+              } else {
+                print(parts.map((p) => p.text!).join(''));
+              }
+
+              service.close();
+            }
+            ```
