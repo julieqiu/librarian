@@ -1,0 +1,38 @@
+name: artifactregistry
+version: 1.17.2
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/devtools/artifactregistry/v1
+          service_config: artifactregistry_v1.yaml
+        - path: google/devtools/artifactregistry/v1beta2
+          service_config: artifactregistry_v1beta2.yaml
+go:
+    source_roots:
+        - artifactregistry
+        - internal/generated/snippets/artifactregistry
+    remove_regex:
+        - ^internal/generated/snippets/artifactregistry/
+        - ^artifactregistry/apiv1/[^/]*_client\.go$
+        - ^artifactregistry/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^artifactregistry/apiv1/[^/]*_client_example_test\.go$
+        - ^artifactregistry/apiv1/auxiliary\.go$
+        - ^artifactregistry/apiv1/auxiliary_go123\.go$
+        - ^artifactregistry/apiv1/doc\.go$
+        - ^artifactregistry/apiv1/gapic_metadata\.json$
+        - ^artifactregistry/apiv1/helpers\.go$
+        - ^artifactregistry/apiv1/artifactregistrypb/.*$
+        - ^artifactregistry/apiv1/\.repo-metadata\.json$
+        - ^artifactregistry/apiv1beta2/[^/]*_client\.go$
+        - ^artifactregistry/apiv1beta2/[^/]*_client_example_go123_test\.go$
+        - ^artifactregistry/apiv1beta2/[^/]*_client_example_test\.go$
+        - ^artifactregistry/apiv1beta2/auxiliary\.go$
+        - ^artifactregistry/apiv1beta2/auxiliary_go123\.go$
+        - ^artifactregistry/apiv1beta2/doc\.go$
+        - ^artifactregistry/apiv1beta2/gapic_metadata\.json$
+        - ^artifactregistry/apiv1beta2/helpers\.go$
+        - ^artifactregistry/apiv1beta2/artifactregistrypb/.*$
+        - ^artifactregistry/apiv1beta2/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/artifactregistry/
+    tag_format: '{id}/v{version}'

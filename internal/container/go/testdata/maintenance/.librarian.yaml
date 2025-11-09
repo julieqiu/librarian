@@ -1,0 +1,26 @@
+name: maintenance
+version: 0.1.2
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/maintenance/api/v1beta
+          service_config: maintenance_v1beta.yaml
+go:
+    source_roots:
+        - maintenance
+        - internal/generated/snippets/maintenance
+    remove_regex:
+        - ^internal/generated/snippets/maintenance/
+        - ^maintenance/api/apiv1beta/[^/]*_client\.go$
+        - ^maintenance/api/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^maintenance/api/apiv1beta/[^/]*_client_example_test\.go$
+        - ^maintenance/api/apiv1beta/auxiliary\.go$
+        - ^maintenance/api/apiv1beta/auxiliary_go123\.go$
+        - ^maintenance/api/apiv1beta/doc\.go$
+        - ^maintenance/api/apiv1beta/gapic_metadata\.json$
+        - ^maintenance/api/apiv1beta/helpers\.go$
+        - ^maintenance/api/apiv1beta/apipb/.*$
+        - ^maintenance/api/apiv1beta/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/maintenance/
+    tag_format: '{id}/v{version}'

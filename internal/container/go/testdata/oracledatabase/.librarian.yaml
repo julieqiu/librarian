@@ -1,0 +1,26 @@
+name: oracledatabase
+version: 0.6.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/oracledatabase/v1
+          service_config: oracledatabase_v1.yaml
+go:
+    source_roots:
+        - oracledatabase
+        - internal/generated/snippets/oracledatabase
+    remove_regex:
+        - ^internal/generated/snippets/oracledatabase/
+        - ^oracledatabase/apiv1/[^/]*_client\.go$
+        - ^oracledatabase/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^oracledatabase/apiv1/[^/]*_client_example_test\.go$
+        - ^oracledatabase/apiv1/auxiliary\.go$
+        - ^oracledatabase/apiv1/auxiliary_go123\.go$
+        - ^oracledatabase/apiv1/doc\.go$
+        - ^oracledatabase/apiv1/gapic_metadata\.json$
+        - ^oracledatabase/apiv1/helpers\.go$
+        - ^oracledatabase/apiv1/oracledatabasepb/.*$
+        - ^oracledatabase/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/oracledatabase/
+    tag_format: '{id}/v{version}'

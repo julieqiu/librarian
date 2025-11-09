@@ -1,0 +1,62 @@
+name: ai
+version: 0.14.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/ai/generativelanguage/v1
+          service_config: generativelanguage_v1.yaml
+        - path: google/ai/generativelanguage/v1alpha
+          service_config: generativelanguage_v1alpha.yaml
+        - path: google/ai/generativelanguage/v1beta
+          service_config: generativelanguage_v1beta.yaml
+        - path: google/ai/generativelanguage/v1beta2
+          service_config: generativelanguage_v1beta2.yaml
+go:
+    source_roots:
+        - ai
+        - internal/generated/snippets/ai
+    remove_regex:
+        - ^internal/generated/snippets/ai/
+        - ^ai/generativelanguage/apiv1/[^/]*_client\.go$
+        - ^ai/generativelanguage/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^ai/generativelanguage/apiv1/[^/]*_client_example_test\.go$
+        - ^ai/generativelanguage/apiv1/auxiliary\.go$
+        - ^ai/generativelanguage/apiv1/auxiliary_go123\.go$
+        - ^ai/generativelanguage/apiv1/doc\.go$
+        - ^ai/generativelanguage/apiv1/gapic_metadata\.json$
+        - ^ai/generativelanguage/apiv1/helpers\.go$
+        - ^ai/generativelanguage/apiv1/generativelanguagepb/.*$
+        - ^ai/generativelanguage/apiv1/\.repo-metadata\.json$
+        - ^ai/generativelanguage/apiv1alpha/[^/]*_client\.go$
+        - ^ai/generativelanguage/apiv1alpha/[^/]*_client_example_go123_test\.go$
+        - ^ai/generativelanguage/apiv1alpha/[^/]*_client_example_test\.go$
+        - ^ai/generativelanguage/apiv1alpha/auxiliary\.go$
+        - ^ai/generativelanguage/apiv1alpha/auxiliary_go123\.go$
+        - ^ai/generativelanguage/apiv1alpha/doc\.go$
+        - ^ai/generativelanguage/apiv1alpha/gapic_metadata\.json$
+        - ^ai/generativelanguage/apiv1alpha/helpers\.go$
+        - ^ai/generativelanguage/apiv1alpha/generativelanguagepb/.*$
+        - ^ai/generativelanguage/apiv1alpha/\.repo-metadata\.json$
+        - ^ai/generativelanguage/apiv1beta/[^/]*_client\.go$
+        - ^ai/generativelanguage/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^ai/generativelanguage/apiv1beta/[^/]*_client_example_test\.go$
+        - ^ai/generativelanguage/apiv1beta/auxiliary\.go$
+        - ^ai/generativelanguage/apiv1beta/auxiliary_go123\.go$
+        - ^ai/generativelanguage/apiv1beta/doc\.go$
+        - ^ai/generativelanguage/apiv1beta/gapic_metadata\.json$
+        - ^ai/generativelanguage/apiv1beta/helpers\.go$
+        - ^ai/generativelanguage/apiv1beta/generativelanguagepb/.*$
+        - ^ai/generativelanguage/apiv1beta/\.repo-metadata\.json$
+        - ^ai/generativelanguage/apiv1beta2/[^/]*_client\.go$
+        - ^ai/generativelanguage/apiv1beta2/[^/]*_client_example_go123_test\.go$
+        - ^ai/generativelanguage/apiv1beta2/[^/]*_client_example_test\.go$
+        - ^ai/generativelanguage/apiv1beta2/auxiliary\.go$
+        - ^ai/generativelanguage/apiv1beta2/auxiliary_go123\.go$
+        - ^ai/generativelanguage/apiv1beta2/doc\.go$
+        - ^ai/generativelanguage/apiv1beta2/gapic_metadata\.json$
+        - ^ai/generativelanguage/apiv1beta2/helpers\.go$
+        - ^ai/generativelanguage/apiv1beta2/generativelanguagepb/.*$
+        - ^ai/generativelanguage/apiv1beta2/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/ai/
+    tag_format: '{id}/v{version}'

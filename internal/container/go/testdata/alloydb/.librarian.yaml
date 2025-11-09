@@ -1,0 +1,86 @@
+name: alloydb
+version: 1.19.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/alloydb/v1
+          service_config: alloydb_v1.yaml
+        - path: google/cloud/alloydb/v1alpha
+          service_config: alloydb_v1alpha.yaml
+        - path: google/cloud/alloydb/v1beta
+          service_config: alloydb_v1beta.yaml
+        - path: google/cloud/alloydb/connectors/v1
+          service_config: connectors_v1.yaml
+        - path: google/cloud/alloydb/connectors/v1alpha
+          service_config: connectors_v1alpha.yaml
+        - path: google/cloud/alloydb/connectors/v1beta
+          service_config: connectors_v1beta.yaml
+go:
+    source_roots:
+        - alloydb
+        - internal/generated/snippets/alloydb
+    remove_regex:
+        - ^internal/generated/snippets/alloydb/
+        - ^alloydb/apiv1/[^/]*_client\.go$
+        - ^alloydb/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^alloydb/apiv1/[^/]*_client_example_test\.go$
+        - ^alloydb/apiv1/auxiliary\.go$
+        - ^alloydb/apiv1/auxiliary_go123\.go$
+        - ^alloydb/apiv1/doc\.go$
+        - ^alloydb/apiv1/gapic_metadata\.json$
+        - ^alloydb/apiv1/helpers\.go$
+        - ^alloydb/apiv1/alloydbpb/.*$
+        - ^alloydb/apiv1/\.repo-metadata\.json$
+        - ^alloydb/apiv1alpha/[^/]*_client\.go$
+        - ^alloydb/apiv1alpha/[^/]*_client_example_go123_test\.go$
+        - ^alloydb/apiv1alpha/[^/]*_client_example_test\.go$
+        - ^alloydb/apiv1alpha/auxiliary\.go$
+        - ^alloydb/apiv1alpha/auxiliary_go123\.go$
+        - ^alloydb/apiv1alpha/doc\.go$
+        - ^alloydb/apiv1alpha/gapic_metadata\.json$
+        - ^alloydb/apiv1alpha/helpers\.go$
+        - ^alloydb/apiv1alpha/alloydbpb/.*$
+        - ^alloydb/apiv1alpha/\.repo-metadata\.json$
+        - ^alloydb/apiv1beta/[^/]*_client\.go$
+        - ^alloydb/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^alloydb/apiv1beta/[^/]*_client_example_test\.go$
+        - ^alloydb/apiv1beta/auxiliary\.go$
+        - ^alloydb/apiv1beta/auxiliary_go123\.go$
+        - ^alloydb/apiv1beta/doc\.go$
+        - ^alloydb/apiv1beta/gapic_metadata\.json$
+        - ^alloydb/apiv1beta/helpers\.go$
+        - ^alloydb/apiv1beta/alloydbpb/.*$
+        - ^alloydb/apiv1beta/\.repo-metadata\.json$
+        - ^alloydb/connectors/apiv1/[^/]*_client\.go$
+        - ^alloydb/connectors/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^alloydb/connectors/apiv1/[^/]*_client_example_test\.go$
+        - ^alloydb/connectors/apiv1/auxiliary\.go$
+        - ^alloydb/connectors/apiv1/auxiliary_go123\.go$
+        - ^alloydb/connectors/apiv1/doc\.go$
+        - ^alloydb/connectors/apiv1/gapic_metadata\.json$
+        - ^alloydb/connectors/apiv1/helpers\.go$
+        - ^alloydb/connectors/apiv1/connectorspb/.*$
+        - ^alloydb/connectors/apiv1/\.repo-metadata\.json$
+        - ^alloydb/connectors/apiv1alpha/[^/]*_client\.go$
+        - ^alloydb/connectors/apiv1alpha/[^/]*_client_example_go123_test\.go$
+        - ^alloydb/connectors/apiv1alpha/[^/]*_client_example_test\.go$
+        - ^alloydb/connectors/apiv1alpha/auxiliary\.go$
+        - ^alloydb/connectors/apiv1alpha/auxiliary_go123\.go$
+        - ^alloydb/connectors/apiv1alpha/doc\.go$
+        - ^alloydb/connectors/apiv1alpha/gapic_metadata\.json$
+        - ^alloydb/connectors/apiv1alpha/helpers\.go$
+        - ^alloydb/connectors/apiv1alpha/connectorspb/.*$
+        - ^alloydb/connectors/apiv1alpha/\.repo-metadata\.json$
+        - ^alloydb/connectors/apiv1beta/[^/]*_client\.go$
+        - ^alloydb/connectors/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^alloydb/connectors/apiv1beta/[^/]*_client_example_test\.go$
+        - ^alloydb/connectors/apiv1beta/auxiliary\.go$
+        - ^alloydb/connectors/apiv1beta/auxiliary_go123\.go$
+        - ^alloydb/connectors/apiv1beta/doc\.go$
+        - ^alloydb/connectors/apiv1beta/gapic_metadata\.json$
+        - ^alloydb/connectors/apiv1beta/helpers\.go$
+        - ^alloydb/connectors/apiv1beta/connectorspb/.*$
+        - ^alloydb/connectors/apiv1beta/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/alloydb/
+    tag_format: '{id}/v{version}'

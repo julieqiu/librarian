@@ -1,0 +1,26 @@
+name: netapp
+version: 1.10.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/netapp/v1
+          service_config: netapp_v1.yaml
+go:
+    source_roots:
+        - netapp
+        - internal/generated/snippets/netapp
+    remove_regex:
+        - ^internal/generated/snippets/netapp/
+        - ^netapp/apiv1/[^/]*_client\.go$
+        - ^netapp/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^netapp/apiv1/[^/]*_client_example_test\.go$
+        - ^netapp/apiv1/auxiliary\.go$
+        - ^netapp/apiv1/auxiliary_go123\.go$
+        - ^netapp/apiv1/doc\.go$
+        - ^netapp/apiv1/gapic_metadata\.json$
+        - ^netapp/apiv1/helpers\.go$
+        - ^netapp/apiv1/netapppb/.*$
+        - ^netapp/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/netapp/
+    tag_format: '{id}/v{version}'

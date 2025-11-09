@@ -1,0 +1,24 @@
+name: pubsub
+version: 1.50.1
+generate:
+    specification_format: protobuf
+go:
+    source_roots:
+        - pubsub
+        - internal/generated/snippets/pubsub
+    remove_regex:
+        - ^internal/generated/snippets/pubsub/
+        - ^pubsub/apiv1/[^/]*_client\.go$
+        - ^pubsub/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^pubsub/apiv1/[^/]*_client_example_test\.go$
+        - ^pubsub/apiv1/auxiliary\.go$
+        - ^pubsub/apiv1/auxiliary_go123\.go$
+        - ^pubsub/apiv1/doc\.go$
+        - ^pubsub/apiv1/gapic_metadata\.json$
+        - ^pubsub/apiv1/helpers\.go$
+        - ^pubsub/apiv1/pubsubpb/.*$
+        - ^pubsub/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - pubsub/v2
+        - internal/generated/snippets/pubsub/
+    tag_format: '{id}/v{version}'

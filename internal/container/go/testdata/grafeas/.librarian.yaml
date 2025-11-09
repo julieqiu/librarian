@@ -1,0 +1,19 @@
+name: grafeas
+version: 0.3.17
+generate:
+    specification_format: protobuf
+go:
+    source_roots:
+        - grafeas
+    remove_regex:
+        - ^grafeas/apiv1/[^/]*_client\.go$
+        - ^grafeas/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^grafeas/apiv1/[^/]*_client_example_test\.go$
+        - ^grafeas/apiv1/auxiliary\.go$
+        - ^grafeas/apiv1/auxiliary_go123\.go$
+        - ^grafeas/apiv1/doc\.go$
+        - ^grafeas/apiv1/gapic_metadata\.json$
+        - ^grafeas/apiv1/helpers\.go$
+        - ^grafeas/apiv1/grafeaspb/.*$
+        - ^grafeas/apiv1/\.repo-metadata\.json$
+    tag_format: '{id}/v{version}'

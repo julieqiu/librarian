@@ -1,0 +1,74 @@
+name: osconfig
+version: 1.15.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/osconfig/agentendpoint/v1
+          service_config: osconfig_v1.yaml
+        - path: google/cloud/osconfig/agentendpoint/v1beta
+          service_config: osconfig_v1beta.yaml
+        - path: google/cloud/osconfig/v1
+          service_config: osconfig_v1.yaml
+        - path: google/cloud/osconfig/v1alpha
+          service_config: osconfig_v1alpha.yaml
+        - path: google/cloud/osconfig/v1beta
+          service_config: osconfig_v1beta.yaml
+go:
+    source_roots:
+        - osconfig
+        - internal/generated/snippets/osconfig
+    remove_regex:
+        - ^internal/generated/snippets/osconfig/
+        - ^osconfig/agentendpoint/apiv1/[^/]*_client\.go$
+        - ^osconfig/agentendpoint/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^osconfig/agentendpoint/apiv1/[^/]*_client_example_test\.go$
+        - ^osconfig/agentendpoint/apiv1/auxiliary\.go$
+        - ^osconfig/agentendpoint/apiv1/auxiliary_go123\.go$
+        - ^osconfig/agentendpoint/apiv1/doc\.go$
+        - ^osconfig/agentendpoint/apiv1/gapic_metadata\.json$
+        - ^osconfig/agentendpoint/apiv1/helpers\.go$
+        - ^osconfig/agentendpoint/apiv1/agentendpointpb/.*$
+        - ^osconfig/agentendpoint/apiv1/\.repo-metadata\.json$
+        - ^osconfig/agentendpoint/apiv1beta/[^/]*_client\.go$
+        - ^osconfig/agentendpoint/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^osconfig/agentendpoint/apiv1beta/[^/]*_client_example_test\.go$
+        - ^osconfig/agentendpoint/apiv1beta/auxiliary\.go$
+        - ^osconfig/agentendpoint/apiv1beta/auxiliary_go123\.go$
+        - ^osconfig/agentendpoint/apiv1beta/doc\.go$
+        - ^osconfig/agentendpoint/apiv1beta/gapic_metadata\.json$
+        - ^osconfig/agentendpoint/apiv1beta/helpers\.go$
+        - ^osconfig/agentendpoint/apiv1beta/agentendpointpb/.*$
+        - ^osconfig/agentendpoint/apiv1beta/\.repo-metadata\.json$
+        - ^osconfig/apiv1/[^/]*_client\.go$
+        - ^osconfig/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^osconfig/apiv1/[^/]*_client_example_test\.go$
+        - ^osconfig/apiv1/auxiliary\.go$
+        - ^osconfig/apiv1/auxiliary_go123\.go$
+        - ^osconfig/apiv1/doc\.go$
+        - ^osconfig/apiv1/gapic_metadata\.json$
+        - ^osconfig/apiv1/helpers\.go$
+        - ^osconfig/apiv1/osconfigpb/.*$
+        - ^osconfig/apiv1/\.repo-metadata\.json$
+        - ^osconfig/apiv1alpha/[^/]*_client\.go$
+        - ^osconfig/apiv1alpha/[^/]*_client_example_go123_test\.go$
+        - ^osconfig/apiv1alpha/[^/]*_client_example_test\.go$
+        - ^osconfig/apiv1alpha/auxiliary\.go$
+        - ^osconfig/apiv1alpha/auxiliary_go123\.go$
+        - ^osconfig/apiv1alpha/doc\.go$
+        - ^osconfig/apiv1alpha/gapic_metadata\.json$
+        - ^osconfig/apiv1alpha/helpers\.go$
+        - ^osconfig/apiv1alpha/osconfigpb/.*$
+        - ^osconfig/apiv1alpha/\.repo-metadata\.json$
+        - ^osconfig/apiv1beta/[^/]*_client\.go$
+        - ^osconfig/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^osconfig/apiv1beta/[^/]*_client_example_test\.go$
+        - ^osconfig/apiv1beta/auxiliary\.go$
+        - ^osconfig/apiv1beta/auxiliary_go123\.go$
+        - ^osconfig/apiv1beta/doc\.go$
+        - ^osconfig/apiv1beta/gapic_metadata\.json$
+        - ^osconfig/apiv1beta/helpers\.go$
+        - ^osconfig/apiv1beta/osconfigpb/.*$
+        - ^osconfig/apiv1beta/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/osconfig/
+    tag_format: '{id}/v{version}'

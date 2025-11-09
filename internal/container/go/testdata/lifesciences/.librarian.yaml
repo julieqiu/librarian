@@ -1,0 +1,26 @@
+name: lifesciences
+version: 0.10.7
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/lifesciences/v2beta
+          service_config: lifesciences_v2beta.yaml
+go:
+    source_roots:
+        - lifesciences
+        - internal/generated/snippets/lifesciences
+    remove_regex:
+        - ^internal/generated/snippets/lifesciences/
+        - ^lifesciences/apiv2beta/[^/]*_client\.go$
+        - ^lifesciences/apiv2beta/[^/]*_client_example_go123_test\.go$
+        - ^lifesciences/apiv2beta/[^/]*_client_example_test\.go$
+        - ^lifesciences/apiv2beta/auxiliary\.go$
+        - ^lifesciences/apiv2beta/auxiliary_go123\.go$
+        - ^lifesciences/apiv2beta/doc\.go$
+        - ^lifesciences/apiv2beta/gapic_metadata\.json$
+        - ^lifesciences/apiv2beta/helpers\.go$
+        - ^lifesciences/apiv2beta/lifesciencespb/.*$
+        - ^lifesciences/apiv2beta/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/lifesciences/
+    tag_format: '{id}/v{version}'

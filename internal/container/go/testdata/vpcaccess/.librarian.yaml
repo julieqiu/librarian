@@ -1,0 +1,26 @@
+name: vpcaccess
+version: 1.8.7
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/vpcaccess/v1
+          service_config: vpcaccess_v1.yaml
+go:
+    source_roots:
+        - vpcaccess
+        - internal/generated/snippets/vpcaccess
+    remove_regex:
+        - ^internal/generated/snippets/vpcaccess/
+        - ^vpcaccess/apiv1/[^/]*_client\.go$
+        - ^vpcaccess/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^vpcaccess/apiv1/[^/]*_client_example_test\.go$
+        - ^vpcaccess/apiv1/auxiliary\.go$
+        - ^vpcaccess/apiv1/auxiliary_go123\.go$
+        - ^vpcaccess/apiv1/doc\.go$
+        - ^vpcaccess/apiv1/gapic_metadata\.json$
+        - ^vpcaccess/apiv1/helpers\.go$
+        - ^vpcaccess/apiv1/vpcaccesspb/.*$
+        - ^vpcaccess/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/vpcaccess/
+    tag_format: '{id}/v{version}'

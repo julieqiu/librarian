@@ -1,0 +1,26 @@
+name: dataplex
+version: 1.27.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/dataplex/v1
+          service_config: dataplex_v1.yaml
+go:
+    source_roots:
+        - dataplex
+        - internal/generated/snippets/dataplex
+    remove_regex:
+        - ^internal/generated/snippets/dataplex/
+        - ^dataplex/apiv1/[^/]*_client\.go$
+        - ^dataplex/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^dataplex/apiv1/[^/]*_client_example_test\.go$
+        - ^dataplex/apiv1/auxiliary\.go$
+        - ^dataplex/apiv1/auxiliary_go123\.go$
+        - ^dataplex/apiv1/doc\.go$
+        - ^dataplex/apiv1/gapic_metadata\.json$
+        - ^dataplex/apiv1/helpers\.go$
+        - ^dataplex/apiv1/dataplexpb/.*$
+        - ^dataplex/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/dataplex/
+    tag_format: '{id}/v{version}'

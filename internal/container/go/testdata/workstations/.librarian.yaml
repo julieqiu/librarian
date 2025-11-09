@@ -1,0 +1,38 @@
+name: workstations
+version: 1.1.6
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/workstations/v1beta
+          service_config: workstations_v1beta.yaml
+        - path: google/cloud/workstations/v1
+          service_config: workstations_v1.yaml
+go:
+    source_roots:
+        - workstations
+        - internal/generated/snippets/workstations
+    remove_regex:
+        - ^internal/generated/snippets/workstations/
+        - ^workstations/apiv1/[^/]*_client\.go$
+        - ^workstations/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^workstations/apiv1/[^/]*_client_example_test\.go$
+        - ^workstations/apiv1/auxiliary\.go$
+        - ^workstations/apiv1/auxiliary_go123\.go$
+        - ^workstations/apiv1/doc\.go$
+        - ^workstations/apiv1/gapic_metadata\.json$
+        - ^workstations/apiv1/helpers\.go$
+        - ^workstations/apiv1/workstationspb/.*$
+        - ^workstations/apiv1/\.repo-metadata\.json$
+        - ^workstations/apiv1beta/[^/]*_client\.go$
+        - ^workstations/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^workstations/apiv1beta/[^/]*_client_example_test\.go$
+        - ^workstations/apiv1beta/auxiliary\.go$
+        - ^workstations/apiv1beta/auxiliary_go123\.go$
+        - ^workstations/apiv1beta/doc\.go$
+        - ^workstations/apiv1beta/gapic_metadata\.json$
+        - ^workstations/apiv1beta/helpers\.go$
+        - ^workstations/apiv1beta/workstationspb/.*$
+        - ^workstations/apiv1beta/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/workstations/
+    tag_format: '{id}/v{version}'

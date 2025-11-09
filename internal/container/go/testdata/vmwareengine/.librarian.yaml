@@ -1,0 +1,26 @@
+name: vmwareengine
+version: 1.3.6
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/vmwareengine/v1
+          service_config: vmwareengine_v1.yaml
+go:
+    source_roots:
+        - vmwareengine
+        - internal/generated/snippets/vmwareengine
+    remove_regex:
+        - ^internal/generated/snippets/vmwareengine/
+        - ^vmwareengine/apiv1/[^/]*_client\.go$
+        - ^vmwareengine/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^vmwareengine/apiv1/[^/]*_client_example_test\.go$
+        - ^vmwareengine/apiv1/auxiliary\.go$
+        - ^vmwareengine/apiv1/auxiliary_go123\.go$
+        - ^vmwareengine/apiv1/doc\.go$
+        - ^vmwareengine/apiv1/gapic_metadata\.json$
+        - ^vmwareengine/apiv1/helpers\.go$
+        - ^vmwareengine/apiv1/vmwareenginepb/.*$
+        - ^vmwareengine/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/vmwareengine/
+    tag_format: '{id}/v{version}'

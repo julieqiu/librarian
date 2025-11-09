@@ -1,0 +1,38 @@
+name: resourcemanager
+version: 1.10.7
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/resourcemanager/v2
+          service_config: cloudresourcemanager_v2.yaml
+        - path: google/cloud/resourcemanager/v3
+          service_config: cloudresourcemanager_v3.yaml
+go:
+    source_roots:
+        - resourcemanager
+        - internal/generated/snippets/resourcemanager
+    remove_regex:
+        - ^internal/generated/snippets/resourcemanager/
+        - ^resourcemanager/apiv2/[^/]*_client\.go$
+        - ^resourcemanager/apiv2/[^/]*_client_example_go123_test\.go$
+        - ^resourcemanager/apiv2/[^/]*_client_example_test\.go$
+        - ^resourcemanager/apiv2/auxiliary\.go$
+        - ^resourcemanager/apiv2/auxiliary_go123\.go$
+        - ^resourcemanager/apiv2/doc\.go$
+        - ^resourcemanager/apiv2/gapic_metadata\.json$
+        - ^resourcemanager/apiv2/helpers\.go$
+        - ^resourcemanager/apiv2/resourcemanagerpb/.*$
+        - ^resourcemanager/apiv2/\.repo-metadata\.json$
+        - ^resourcemanager/apiv3/[^/]*_client\.go$
+        - ^resourcemanager/apiv3/[^/]*_client_example_go123_test\.go$
+        - ^resourcemanager/apiv3/[^/]*_client_example_test\.go$
+        - ^resourcemanager/apiv3/auxiliary\.go$
+        - ^resourcemanager/apiv3/auxiliary_go123\.go$
+        - ^resourcemanager/apiv3/doc\.go$
+        - ^resourcemanager/apiv3/gapic_metadata\.json$
+        - ^resourcemanager/apiv3/helpers\.go$
+        - ^resourcemanager/apiv3/resourcemanagerpb/.*$
+        - ^resourcemanager/apiv3/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/resourcemanager/
+    tag_format: '{id}/v{version}'

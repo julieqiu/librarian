@@ -1,0 +1,26 @@
+name: chronicle
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/chronicle/v1
+          service_config: chronicle_v1.yaml
+go:
+    source_roots:
+        - chronicle
+        - internal/generated/snippets/chronicle
+    remove_regex:
+        - ^internal/generated/snippets/chronicle/
+        - ^chronicle/apiv1/[^/]*_client\.go$
+        - ^chronicle/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^chronicle/apiv1/[^/]*_client_example_test\.go$
+        - ^chronicle/apiv1/auxiliary\.go$
+        - ^chronicle/apiv1/auxiliary_go123\.go$
+        - ^chronicle/apiv1/doc\.go$
+        - ^chronicle/apiv1/gapic_metadata\.json$
+        - ^chronicle/apiv1/helpers\.go$
+        - ^chronicle/apiv1/chroniclepb/.*$
+        - ^chronicle/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/chronicle/
+    tag_format: '{id}/v{version}'

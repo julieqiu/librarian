@@ -1,0 +1,38 @@
+name: cloudcontrolspartner
+version: 1.5.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/cloudcontrolspartner/v1
+          service_config: cloudcontrolspartner_v1.yaml
+        - path: google/cloud/cloudcontrolspartner/v1beta
+          service_config: cloudcontrolspartner_v1beta.yaml
+go:
+    source_roots:
+        - cloudcontrolspartner
+        - internal/generated/snippets/cloudcontrolspartner
+    remove_regex:
+        - ^internal/generated/snippets/cloudcontrolspartner/
+        - ^cloudcontrolspartner/apiv1/[^/]*_client\.go$
+        - ^cloudcontrolspartner/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^cloudcontrolspartner/apiv1/[^/]*_client_example_test\.go$
+        - ^cloudcontrolspartner/apiv1/auxiliary\.go$
+        - ^cloudcontrolspartner/apiv1/auxiliary_go123\.go$
+        - ^cloudcontrolspartner/apiv1/doc\.go$
+        - ^cloudcontrolspartner/apiv1/gapic_metadata\.json$
+        - ^cloudcontrolspartner/apiv1/helpers\.go$
+        - ^cloudcontrolspartner/apiv1/cloudcontrolspartnerpb/.*$
+        - ^cloudcontrolspartner/apiv1/\.repo-metadata\.json$
+        - ^cloudcontrolspartner/apiv1beta/[^/]*_client\.go$
+        - ^cloudcontrolspartner/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^cloudcontrolspartner/apiv1beta/[^/]*_client_example_test\.go$
+        - ^cloudcontrolspartner/apiv1beta/auxiliary\.go$
+        - ^cloudcontrolspartner/apiv1beta/auxiliary_go123\.go$
+        - ^cloudcontrolspartner/apiv1beta/doc\.go$
+        - ^cloudcontrolspartner/apiv1beta/gapic_metadata\.json$
+        - ^cloudcontrolspartner/apiv1beta/helpers\.go$
+        - ^cloudcontrolspartner/apiv1beta/cloudcontrolspartnerpb/.*$
+        - ^cloudcontrolspartner/apiv1beta/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/cloudcontrolspartner/
+    tag_format: '{id}/v{version}'

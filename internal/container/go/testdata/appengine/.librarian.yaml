@@ -1,0 +1,26 @@
+name: appengine
+version: 1.9.7
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/appengine/v1
+          service_config: appengine_v1.yaml
+go:
+    source_roots:
+        - appengine
+        - internal/generated/snippets/appengine
+    remove_regex:
+        - ^internal/generated/snippets/appengine/
+        - ^appengine/apiv1/[^/]*_client\.go$
+        - ^appengine/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^appengine/apiv1/[^/]*_client_example_test\.go$
+        - ^appengine/apiv1/auxiliary\.go$
+        - ^appengine/apiv1/auxiliary_go123\.go$
+        - ^appengine/apiv1/doc\.go$
+        - ^appengine/apiv1/gapic_metadata\.json$
+        - ^appengine/apiv1/helpers\.go$
+        - ^appengine/apiv1/appenginepb/.*$
+        - ^appengine/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/appengine/
+    tag_format: '{id}/v{version}'

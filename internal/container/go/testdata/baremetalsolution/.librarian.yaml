@@ -1,0 +1,26 @@
+name: baremetalsolution
+version: 1.4.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/baremetalsolution/v2
+          service_config: baremetalsolution_v2.yaml
+go:
+    source_roots:
+        - baremetalsolution
+        - internal/generated/snippets/baremetalsolution
+    remove_regex:
+        - ^internal/generated/snippets/baremetalsolution/
+        - ^baremetalsolution/apiv2/[^/]*_client\.go$
+        - ^baremetalsolution/apiv2/[^/]*_client_example_go123_test\.go$
+        - ^baremetalsolution/apiv2/[^/]*_client_example_test\.go$
+        - ^baremetalsolution/apiv2/auxiliary\.go$
+        - ^baremetalsolution/apiv2/auxiliary_go123\.go$
+        - ^baremetalsolution/apiv2/doc\.go$
+        - ^baremetalsolution/apiv2/gapic_metadata\.json$
+        - ^baremetalsolution/apiv2/helpers\.go$
+        - ^baremetalsolution/apiv2/baremetalsolutionpb/.*$
+        - ^baremetalsolution/apiv2/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/baremetalsolution/
+    tag_format: '{id}/v{version}'

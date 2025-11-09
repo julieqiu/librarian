@@ -1,0 +1,26 @@
+name: geminidataanalytics
+version: 0.2.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/geminidataanalytics/v1beta
+          service_config: geminidataanalytics_v1beta.yaml
+go:
+    source_roots:
+        - geminidataanalytics
+        - internal/generated/snippets/geminidataanalytics
+    remove_regex:
+        - ^internal/generated/snippets/geminidataanalytics/
+        - ^geminidataanalytics/apiv1beta/[^/]*_client\.go$
+        - ^geminidataanalytics/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^geminidataanalytics/apiv1beta/[^/]*_client_example_test\.go$
+        - ^geminidataanalytics/apiv1beta/auxiliary\.go$
+        - ^geminidataanalytics/apiv1beta/auxiliary_go123\.go$
+        - ^geminidataanalytics/apiv1beta/doc\.go$
+        - ^geminidataanalytics/apiv1beta/gapic_metadata\.json$
+        - ^geminidataanalytics/apiv1beta/helpers\.go$
+        - ^geminidataanalytics/apiv1beta/geminidataanalyticspb/.*$
+        - ^geminidataanalytics/apiv1beta/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/geminidataanalytics/
+    tag_format: '{id}/v{version}'

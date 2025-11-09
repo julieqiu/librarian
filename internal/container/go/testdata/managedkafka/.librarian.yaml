@@ -1,0 +1,38 @@
+name: managedkafka
+version: 0.8.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/managedkafka/v1
+          service_config: managedkafka_v1.yaml
+        - path: google/cloud/managedkafka/schemaregistry/v1
+          service_config: managedkafka_v1.yaml
+go:
+    source_roots:
+        - managedkafka
+        - internal/generated/snippets/managedkafka
+    remove_regex:
+        - ^internal/generated/snippets/managedkafka/
+        - ^managedkafka/apiv1/[^/]*_client\.go$
+        - ^managedkafka/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^managedkafka/apiv1/[^/]*_client_example_test\.go$
+        - ^managedkafka/apiv1/auxiliary\.go$
+        - ^managedkafka/apiv1/auxiliary_go123\.go$
+        - ^managedkafka/apiv1/doc\.go$
+        - ^managedkafka/apiv1/gapic_metadata\.json$
+        - ^managedkafka/apiv1/helpers\.go$
+        - ^managedkafka/apiv1/managedkafkapb/.*$
+        - ^managedkafka/apiv1/\.repo-metadata\.json$
+        - ^managedkafka/schemaregistry/apiv1/[^/]*_client\.go$
+        - ^managedkafka/schemaregistry/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^managedkafka/schemaregistry/apiv1/[^/]*_client_example_test\.go$
+        - ^managedkafka/schemaregistry/apiv1/auxiliary\.go$
+        - ^managedkafka/schemaregistry/apiv1/auxiliary_go123\.go$
+        - ^managedkafka/schemaregistry/apiv1/doc\.go$
+        - ^managedkafka/schemaregistry/apiv1/gapic_metadata\.json$
+        - ^managedkafka/schemaregistry/apiv1/helpers\.go$
+        - ^managedkafka/schemaregistry/apiv1/schemaregistrypb/.*$
+        - ^managedkafka/schemaregistry/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/managedkafka/
+    tag_format: '{id}/v{version}'

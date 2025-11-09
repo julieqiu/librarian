@@ -1,0 +1,26 @@
+name: clouddms
+version: 1.8.8
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/clouddms/v1
+          service_config: datamigration_v1.yaml
+go:
+    source_roots:
+        - clouddms
+        - internal/generated/snippets/clouddms
+    remove_regex:
+        - ^internal/generated/snippets/clouddms/
+        - ^clouddms/apiv1/[^/]*_client\.go$
+        - ^clouddms/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^clouddms/apiv1/[^/]*_client_example_test\.go$
+        - ^clouddms/apiv1/auxiliary\.go$
+        - ^clouddms/apiv1/auxiliary_go123\.go$
+        - ^clouddms/apiv1/doc\.go$
+        - ^clouddms/apiv1/gapic_metadata\.json$
+        - ^clouddms/apiv1/helpers\.go$
+        - ^clouddms/apiv1/clouddmspb/.*$
+        - ^clouddms/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/clouddms/
+    tag_format: '{id}/v{version}'

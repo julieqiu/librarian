@@ -1,0 +1,26 @@
+name: rapidmigrationassessment
+version: 1.1.8
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/rapidmigrationassessment/v1
+          service_config: rapidmigrationassessment_v1.yaml
+go:
+    source_roots:
+        - rapidmigrationassessment
+        - internal/generated/snippets/rapidmigrationassessment
+    remove_regex:
+        - ^internal/generated/snippets/rapidmigrationassessment/
+        - ^rapidmigrationassessment/apiv1/[^/]*_client\.go$
+        - ^rapidmigrationassessment/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^rapidmigrationassessment/apiv1/[^/]*_client_example_test\.go$
+        - ^rapidmigrationassessment/apiv1/auxiliary\.go$
+        - ^rapidmigrationassessment/apiv1/auxiliary_go123\.go$
+        - ^rapidmigrationassessment/apiv1/doc\.go$
+        - ^rapidmigrationassessment/apiv1/gapic_metadata\.json$
+        - ^rapidmigrationassessment/apiv1/helpers\.go$
+        - ^rapidmigrationassessment/apiv1/rapidmigrationassessmentpb/.*$
+        - ^rapidmigrationassessment/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/rapidmigrationassessment/
+    tag_format: '{id}/v{version}'

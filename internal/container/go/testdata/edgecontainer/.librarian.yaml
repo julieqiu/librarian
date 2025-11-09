@@ -1,0 +1,26 @@
+name: edgecontainer
+version: 1.4.4
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/edgecontainer/v1
+          service_config: edgecontainer_v1.yaml
+go:
+    source_roots:
+        - edgecontainer
+        - internal/generated/snippets/edgecontainer
+    remove_regex:
+        - ^internal/generated/snippets/edgecontainer/
+        - ^edgecontainer/apiv1/[^/]*_client\.go$
+        - ^edgecontainer/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^edgecontainer/apiv1/[^/]*_client_example_test\.go$
+        - ^edgecontainer/apiv1/auxiliary\.go$
+        - ^edgecontainer/apiv1/auxiliary_go123\.go$
+        - ^edgecontainer/apiv1/doc\.go$
+        - ^edgecontainer/apiv1/gapic_metadata\.json$
+        - ^edgecontainer/apiv1/helpers\.go$
+        - ^edgecontainer/apiv1/edgecontainerpb/.*$
+        - ^edgecontainer/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/edgecontainer/
+    tag_format: '{id}/v{version}'

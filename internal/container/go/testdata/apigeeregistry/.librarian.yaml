@@ -1,0 +1,26 @@
+name: apigeeregistry
+version: 0.10.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/apigeeregistry/v1
+          service_config: apigeeregistry_v1.yaml
+go:
+    source_roots:
+        - apigeeregistry
+        - internal/generated/snippets/apigeeregistry
+    remove_regex:
+        - ^internal/generated/snippets/apigeeregistry/
+        - ^apigeeregistry/apiv1/[^/]*_client\.go$
+        - ^apigeeregistry/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^apigeeregistry/apiv1/[^/]*_client_example_test\.go$
+        - ^apigeeregistry/apiv1/auxiliary\.go$
+        - ^apigeeregistry/apiv1/auxiliary_go123\.go$
+        - ^apigeeregistry/apiv1/doc\.go$
+        - ^apigeeregistry/apiv1/gapic_metadata\.json$
+        - ^apigeeregistry/apiv1/helpers\.go$
+        - ^apigeeregistry/apiv1/apigeeregistrypb/.*$
+        - ^apigeeregistry/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/apigeeregistry/
+    tag_format: '{id}/v{version}'

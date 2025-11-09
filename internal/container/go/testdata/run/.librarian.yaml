@@ -1,0 +1,28 @@
+name: run
+version: 1.12.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/run/v2
+          service_config: run_v2.yaml
+go:
+    source_roots:
+        - run
+        - internal/generated/snippets/run
+    preserve_regex:
+        - ^run/apiv2/locations_client\.go$
+    remove_regex:
+        - ^internal/generated/snippets/run/
+        - ^run/apiv2/[^/]*_client\.go$
+        - ^run/apiv2/[^/]*_client_example_go123_test\.go$
+        - ^run/apiv2/[^/]*_client_example_test\.go$
+        - ^run/apiv2/auxiliary\.go$
+        - ^run/apiv2/auxiliary_go123\.go$
+        - ^run/apiv2/doc\.go$
+        - ^run/apiv2/gapic_metadata\.json$
+        - ^run/apiv2/helpers\.go$
+        - ^run/apiv2/runpb/.*$
+        - ^run/apiv2/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/run/
+    tag_format: '{id}/v{version}'

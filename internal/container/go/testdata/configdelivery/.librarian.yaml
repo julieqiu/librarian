@@ -1,0 +1,38 @@
+name: configdelivery
+version: 0.1.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/configdelivery/v1
+          service_config: configdelivery_v1.yaml
+        - path: google/cloud/configdelivery/v1beta
+          service_config: configdelivery_v1beta.yaml
+go:
+    source_roots:
+        - configdelivery
+        - internal/generated/snippets/configdelivery
+    remove_regex:
+        - ^internal/generated/snippets/configdelivery/
+        - ^configdelivery/apiv1/[^/]*_client\.go$
+        - ^configdelivery/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^configdelivery/apiv1/[^/]*_client_example_test\.go$
+        - ^configdelivery/apiv1/auxiliary\.go$
+        - ^configdelivery/apiv1/auxiliary_go123\.go$
+        - ^configdelivery/apiv1/doc\.go$
+        - ^configdelivery/apiv1/gapic_metadata\.json$
+        - ^configdelivery/apiv1/helpers\.go$
+        - ^configdelivery/apiv1/configdeliverypb/.*$
+        - ^configdelivery/apiv1/\.repo-metadata\.json$
+        - ^configdelivery/apiv1beta/[^/]*_client\.go$
+        - ^configdelivery/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^configdelivery/apiv1beta/[^/]*_client_example_test\.go$
+        - ^configdelivery/apiv1beta/auxiliary\.go$
+        - ^configdelivery/apiv1beta/auxiliary_go123\.go$
+        - ^configdelivery/apiv1beta/doc\.go$
+        - ^configdelivery/apiv1beta/gapic_metadata\.json$
+        - ^configdelivery/apiv1beta/helpers\.go$
+        - ^configdelivery/apiv1beta/configdeliverypb/.*$
+        - ^configdelivery/apiv1beta/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/configdelivery/
+    tag_format: '{id}/v{version}'

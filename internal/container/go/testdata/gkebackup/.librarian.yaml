@@ -1,0 +1,26 @@
+name: gkebackup
+version: 1.8.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/gkebackup/v1
+          service_config: gkebackup_v1.yaml
+go:
+    source_roots:
+        - gkebackup
+        - internal/generated/snippets/gkebackup
+    remove_regex:
+        - ^internal/generated/snippets/gkebackup/
+        - ^gkebackup/apiv1/[^/]*_client\.go$
+        - ^gkebackup/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^gkebackup/apiv1/[^/]*_client_example_test\.go$
+        - ^gkebackup/apiv1/auxiliary\.go$
+        - ^gkebackup/apiv1/auxiliary_go123\.go$
+        - ^gkebackup/apiv1/doc\.go$
+        - ^gkebackup/apiv1/gapic_metadata\.json$
+        - ^gkebackup/apiv1/helpers\.go$
+        - ^gkebackup/apiv1/gkebackuppb/.*$
+        - ^gkebackup/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/gkebackup/
+    tag_format: '{id}/v{version}'

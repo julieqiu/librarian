@@ -1,0 +1,26 @@
+name: gkemulticloud
+version: 1.5.4
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/gkemulticloud/v1
+          service_config: gkemulticloud_v1.yaml
+go:
+    source_roots:
+        - gkemulticloud
+        - internal/generated/snippets/gkemulticloud
+    remove_regex:
+        - ^internal/generated/snippets/gkemulticloud/
+        - ^gkemulticloud/apiv1/[^/]*_client\.go$
+        - ^gkemulticloud/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^gkemulticloud/apiv1/[^/]*_client_example_test\.go$
+        - ^gkemulticloud/apiv1/auxiliary\.go$
+        - ^gkemulticloud/apiv1/auxiliary_go123\.go$
+        - ^gkemulticloud/apiv1/doc\.go$
+        - ^gkemulticloud/apiv1/gapic_metadata\.json$
+        - ^gkemulticloud/apiv1/helpers\.go$
+        - ^gkemulticloud/apiv1/gkemulticloudpb/.*$
+        - ^gkemulticloud/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/gkemulticloud/
+    tag_format: '{id}/v{version}'

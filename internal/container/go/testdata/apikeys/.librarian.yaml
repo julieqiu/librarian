@@ -1,0 +1,26 @@
+name: apikeys
+version: 1.2.7
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/api/apikeys/v2
+          service_config: apikeys_v2.yaml
+go:
+    source_roots:
+        - apikeys
+        - internal/generated/snippets/apikeys
+    remove_regex:
+        - ^internal/generated/snippets/apikeys/
+        - ^apikeys/apiv2/[^/]*_client\.go$
+        - ^apikeys/apiv2/[^/]*_client_example_go123_test\.go$
+        - ^apikeys/apiv2/[^/]*_client_example_test\.go$
+        - ^apikeys/apiv2/auxiliary\.go$
+        - ^apikeys/apiv2/auxiliary_go123\.go$
+        - ^apikeys/apiv2/doc\.go$
+        - ^apikeys/apiv2/gapic_metadata\.json$
+        - ^apikeys/apiv2/helpers\.go$
+        - ^apikeys/apiv2/apikeyspb/.*$
+        - ^apikeys/apiv2/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/apikeys/
+    tag_format: '{id}/v{version}'

@@ -1,0 +1,50 @@
+name: cloudtasks
+version: 1.13.7
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/tasks/v2
+          service_config: cloudtasks_v2.yaml
+        - path: google/cloud/tasks/v2beta2
+          service_config: cloudtasks_v2beta2.yaml
+        - path: google/cloud/tasks/v2beta3
+          service_config: cloudtasks_v2beta3.yaml
+go:
+    source_roots:
+        - cloudtasks
+        - internal/generated/snippets/cloudtasks
+    remove_regex:
+        - ^internal/generated/snippets/cloudtasks/
+        - ^cloudtasks/apiv2/[^/]*_client\.go$
+        - ^cloudtasks/apiv2/[^/]*_client_example_go123_test\.go$
+        - ^cloudtasks/apiv2/[^/]*_client_example_test\.go$
+        - ^cloudtasks/apiv2/auxiliary\.go$
+        - ^cloudtasks/apiv2/auxiliary_go123\.go$
+        - ^cloudtasks/apiv2/doc\.go$
+        - ^cloudtasks/apiv2/gapic_metadata\.json$
+        - ^cloudtasks/apiv2/helpers\.go$
+        - ^cloudtasks/apiv2/cloudtaskspb/.*$
+        - ^cloudtasks/apiv2/\.repo-metadata\.json$
+        - ^cloudtasks/apiv2beta2/[^/]*_client\.go$
+        - ^cloudtasks/apiv2beta2/[^/]*_client_example_go123_test\.go$
+        - ^cloudtasks/apiv2beta2/[^/]*_client_example_test\.go$
+        - ^cloudtasks/apiv2beta2/auxiliary\.go$
+        - ^cloudtasks/apiv2beta2/auxiliary_go123\.go$
+        - ^cloudtasks/apiv2beta2/doc\.go$
+        - ^cloudtasks/apiv2beta2/gapic_metadata\.json$
+        - ^cloudtasks/apiv2beta2/helpers\.go$
+        - ^cloudtasks/apiv2beta2/cloudtaskspb/.*$
+        - ^cloudtasks/apiv2beta2/\.repo-metadata\.json$
+        - ^cloudtasks/apiv2beta3/[^/]*_client\.go$
+        - ^cloudtasks/apiv2beta3/[^/]*_client_example_go123_test\.go$
+        - ^cloudtasks/apiv2beta3/[^/]*_client_example_test\.go$
+        - ^cloudtasks/apiv2beta3/auxiliary\.go$
+        - ^cloudtasks/apiv2beta3/auxiliary_go123\.go$
+        - ^cloudtasks/apiv2beta3/doc\.go$
+        - ^cloudtasks/apiv2beta3/gapic_metadata\.json$
+        - ^cloudtasks/apiv2beta3/helpers\.go$
+        - ^cloudtasks/apiv2beta3/cloudtaskspb/.*$
+        - ^cloudtasks/apiv2beta3/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/cloudtasks/
+    tag_format: '{id}/v{version}'

@@ -1,0 +1,50 @@
+name: language
+version: 1.14.6
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/language/v1
+          service_config: language_v1.yaml
+        - path: google/cloud/language/v1beta2
+          service_config: language_v1beta2.yaml
+        - path: google/cloud/language/v2
+          service_config: language_v2.yaml
+go:
+    source_roots:
+        - language
+        - internal/generated/snippets/language
+    remove_regex:
+        - ^internal/generated/snippets/language/
+        - ^language/apiv1/[^/]*_client\.go$
+        - ^language/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^language/apiv1/[^/]*_client_example_test\.go$
+        - ^language/apiv1/auxiliary\.go$
+        - ^language/apiv1/auxiliary_go123\.go$
+        - ^language/apiv1/doc\.go$
+        - ^language/apiv1/gapic_metadata\.json$
+        - ^language/apiv1/helpers\.go$
+        - ^language/apiv1/languagepb/.*$
+        - ^language/apiv1/\.repo-metadata\.json$
+        - ^language/apiv1beta2/[^/]*_client\.go$
+        - ^language/apiv1beta2/[^/]*_client_example_go123_test\.go$
+        - ^language/apiv1beta2/[^/]*_client_example_test\.go$
+        - ^language/apiv1beta2/auxiliary\.go$
+        - ^language/apiv1beta2/auxiliary_go123\.go$
+        - ^language/apiv1beta2/doc\.go$
+        - ^language/apiv1beta2/gapic_metadata\.json$
+        - ^language/apiv1beta2/helpers\.go$
+        - ^language/apiv1beta2/languagepb/.*$
+        - ^language/apiv1beta2/\.repo-metadata\.json$
+        - ^language/apiv2/[^/]*_client\.go$
+        - ^language/apiv2/[^/]*_client_example_go123_test\.go$
+        - ^language/apiv2/[^/]*_client_example_test\.go$
+        - ^language/apiv2/auxiliary\.go$
+        - ^language/apiv2/auxiliary_go123\.go$
+        - ^language/apiv2/doc\.go$
+        - ^language/apiv2/gapic_metadata\.json$
+        - ^language/apiv2/helpers\.go$
+        - ^language/apiv2/languagepb/.*$
+        - ^language/apiv2/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/language/
+    tag_format: '{id}/v{version}'

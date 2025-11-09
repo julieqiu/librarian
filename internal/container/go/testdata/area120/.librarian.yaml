@@ -1,0 +1,26 @@
+name: area120
+version: 0.9.7
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/area120/tables/v1alpha1
+          service_config: area120tables_v1alpha1.yaml
+go:
+    source_roots:
+        - area120
+        - internal/generated/snippets/area120
+    remove_regex:
+        - ^internal/generated/snippets/area120/
+        - ^area120/tables/apiv1alpha1/[^/]*_client\.go$
+        - ^area120/tables/apiv1alpha1/[^/]*_client_example_go123_test\.go$
+        - ^area120/tables/apiv1alpha1/[^/]*_client_example_test\.go$
+        - ^area120/tables/apiv1alpha1/auxiliary\.go$
+        - ^area120/tables/apiv1alpha1/auxiliary_go123\.go$
+        - ^area120/tables/apiv1alpha1/doc\.go$
+        - ^area120/tables/apiv1alpha1/gapic_metadata\.json$
+        - ^area120/tables/apiv1alpha1/helpers\.go$
+        - ^area120/tables/apiv1alpha1/tablespb/.*$
+        - ^area120/tables/apiv1alpha1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/area120/
+    tag_format: '{id}/v{version}'

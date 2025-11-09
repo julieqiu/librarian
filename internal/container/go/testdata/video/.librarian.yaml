@@ -1,0 +1,50 @@
+name: video
+version: 1.27.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/video/livestream/v1
+          service_config: livestream_v1.yaml
+        - path: google/cloud/video/transcoder/v1
+          service_config: transcoder_v1.yaml
+        - path: google/cloud/video/stitcher/v1
+          service_config: videostitcher_v1.yaml
+go:
+    source_roots:
+        - video
+        - internal/generated/snippets/video
+    remove_regex:
+        - ^internal/generated/snippets/video/
+        - ^video/livestream/apiv1/[^/]*_client\.go$
+        - ^video/livestream/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^video/livestream/apiv1/[^/]*_client_example_test\.go$
+        - ^video/livestream/apiv1/auxiliary\.go$
+        - ^video/livestream/apiv1/auxiliary_go123\.go$
+        - ^video/livestream/apiv1/doc\.go$
+        - ^video/livestream/apiv1/gapic_metadata\.json$
+        - ^video/livestream/apiv1/helpers\.go$
+        - ^video/livestream/apiv1/livestreampb/.*$
+        - ^video/livestream/apiv1/\.repo-metadata\.json$
+        - ^video/stitcher/apiv1/[^/]*_client\.go$
+        - ^video/stitcher/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^video/stitcher/apiv1/[^/]*_client_example_test\.go$
+        - ^video/stitcher/apiv1/auxiliary\.go$
+        - ^video/stitcher/apiv1/auxiliary_go123\.go$
+        - ^video/stitcher/apiv1/doc\.go$
+        - ^video/stitcher/apiv1/gapic_metadata\.json$
+        - ^video/stitcher/apiv1/helpers\.go$
+        - ^video/stitcher/apiv1/stitcherpb/.*$
+        - ^video/stitcher/apiv1/\.repo-metadata\.json$
+        - ^video/transcoder/apiv1/[^/]*_client\.go$
+        - ^video/transcoder/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^video/transcoder/apiv1/[^/]*_client_example_test\.go$
+        - ^video/transcoder/apiv1/auxiliary\.go$
+        - ^video/transcoder/apiv1/auxiliary_go123\.go$
+        - ^video/transcoder/apiv1/doc\.go$
+        - ^video/transcoder/apiv1/gapic_metadata\.json$
+        - ^video/transcoder/apiv1/helpers\.go$
+        - ^video/transcoder/apiv1/transcoderpb/.*$
+        - ^video/transcoder/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/video/
+    tag_format: '{id}/v{version}'

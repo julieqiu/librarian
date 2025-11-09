@@ -1,0 +1,62 @@
+name: apps
+version: 0.8.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/apps/events/subscriptions/v1
+          service_config: workspaceevents_v1.yaml
+        - path: google/apps/events/subscriptions/v1beta
+          service_config: workspaceevents_v1beta.yaml
+        - path: google/apps/meet/v2
+          service_config: meet_v2.yaml
+        - path: google/apps/meet/v2beta
+          service_config: meet_v2beta.yaml
+go:
+    source_roots:
+        - apps
+        - internal/generated/snippets/apps
+    remove_regex:
+        - ^internal/generated/snippets/apps/
+        - ^apps/events/subscriptions/apiv1/[^/]*_client\.go$
+        - ^apps/events/subscriptions/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^apps/events/subscriptions/apiv1/[^/]*_client_example_test\.go$
+        - ^apps/events/subscriptions/apiv1/auxiliary\.go$
+        - ^apps/events/subscriptions/apiv1/auxiliary_go123\.go$
+        - ^apps/events/subscriptions/apiv1/doc\.go$
+        - ^apps/events/subscriptions/apiv1/gapic_metadata\.json$
+        - ^apps/events/subscriptions/apiv1/helpers\.go$
+        - ^apps/events/subscriptions/apiv1/subscriptionspb/.*$
+        - ^apps/events/subscriptions/apiv1/\.repo-metadata\.json$
+        - ^apps/events/subscriptions/apiv1beta/[^/]*_client\.go$
+        - ^apps/events/subscriptions/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^apps/events/subscriptions/apiv1beta/[^/]*_client_example_test\.go$
+        - ^apps/events/subscriptions/apiv1beta/auxiliary\.go$
+        - ^apps/events/subscriptions/apiv1beta/auxiliary_go123\.go$
+        - ^apps/events/subscriptions/apiv1beta/doc\.go$
+        - ^apps/events/subscriptions/apiv1beta/gapic_metadata\.json$
+        - ^apps/events/subscriptions/apiv1beta/helpers\.go$
+        - ^apps/events/subscriptions/apiv1beta/subscriptionspb/.*$
+        - ^apps/events/subscriptions/apiv1beta/\.repo-metadata\.json$
+        - ^apps/meet/apiv2/[^/]*_client\.go$
+        - ^apps/meet/apiv2/[^/]*_client_example_go123_test\.go$
+        - ^apps/meet/apiv2/[^/]*_client_example_test\.go$
+        - ^apps/meet/apiv2/auxiliary\.go$
+        - ^apps/meet/apiv2/auxiliary_go123\.go$
+        - ^apps/meet/apiv2/doc\.go$
+        - ^apps/meet/apiv2/gapic_metadata\.json$
+        - ^apps/meet/apiv2/helpers\.go$
+        - ^apps/meet/apiv2/meetpb/.*$
+        - ^apps/meet/apiv2/\.repo-metadata\.json$
+        - ^apps/meet/apiv2beta/[^/]*_client\.go$
+        - ^apps/meet/apiv2beta/[^/]*_client_example_go123_test\.go$
+        - ^apps/meet/apiv2beta/[^/]*_client_example_test\.go$
+        - ^apps/meet/apiv2beta/auxiliary\.go$
+        - ^apps/meet/apiv2beta/auxiliary_go123\.go$
+        - ^apps/meet/apiv2beta/doc\.go$
+        - ^apps/meet/apiv2beta/gapic_metadata\.json$
+        - ^apps/meet/apiv2beta/helpers\.go$
+        - ^apps/meet/apiv2beta/meetpb/.*$
+        - ^apps/meet/apiv2beta/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/apps/
+    tag_format: '{id}/v{version}'

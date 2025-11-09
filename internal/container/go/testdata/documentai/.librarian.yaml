@@ -1,0 +1,38 @@
+name: documentai
+version: 1.39.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/documentai/v1
+          service_config: documentai_v1.yaml
+        - path: google/cloud/documentai/v1beta3
+          service_config: documentai_v1beta3.yaml
+go:
+    source_roots:
+        - documentai
+        - internal/generated/snippets/documentai
+    remove_regex:
+        - ^internal/generated/snippets/documentai/
+        - ^documentai/apiv1/[^/]*_client\.go$
+        - ^documentai/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^documentai/apiv1/[^/]*_client_example_test\.go$
+        - ^documentai/apiv1/auxiliary\.go$
+        - ^documentai/apiv1/auxiliary_go123\.go$
+        - ^documentai/apiv1/doc\.go$
+        - ^documentai/apiv1/gapic_metadata\.json$
+        - ^documentai/apiv1/helpers\.go$
+        - ^documentai/apiv1/documentaipb/.*$
+        - ^documentai/apiv1/\.repo-metadata\.json$
+        - ^documentai/apiv1beta3/[^/]*_client\.go$
+        - ^documentai/apiv1beta3/[^/]*_client_example_go123_test\.go$
+        - ^documentai/apiv1beta3/[^/]*_client_example_test\.go$
+        - ^documentai/apiv1beta3/auxiliary\.go$
+        - ^documentai/apiv1beta3/auxiliary_go123\.go$
+        - ^documentai/apiv1beta3/doc\.go$
+        - ^documentai/apiv1beta3/gapic_metadata\.json$
+        - ^documentai/apiv1beta3/helpers\.go$
+        - ^documentai/apiv1beta3/documentaipb/.*$
+        - ^documentai/apiv1beta3/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/documentai/
+    tag_format: '{id}/v{version}'

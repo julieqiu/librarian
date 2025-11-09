@@ -1,0 +1,26 @@
+name: iot
+version: 1.8.7
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/iot/v1
+          service_config: cloudiot_v1.yaml
+go:
+    source_roots:
+        - iot
+        - internal/generated/snippets/iot
+    remove_regex:
+        - ^internal/generated/snippets/iot/
+        - ^iot/apiv1/[^/]*_client\.go$
+        - ^iot/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^iot/apiv1/[^/]*_client_example_test\.go$
+        - ^iot/apiv1/auxiliary\.go$
+        - ^iot/apiv1/auxiliary_go123\.go$
+        - ^iot/apiv1/doc\.go$
+        - ^iot/apiv1/gapic_metadata\.json$
+        - ^iot/apiv1/helpers\.go$
+        - ^iot/apiv1/iotpb/.*$
+        - ^iot/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/iot/
+    tag_format: '{id}/v{version}'

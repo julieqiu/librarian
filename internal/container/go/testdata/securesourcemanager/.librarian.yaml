@@ -1,0 +1,26 @@
+name: securesourcemanager
+version: 1.4.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/securesourcemanager/v1
+          service_config: securesourcemanager_v1.yaml
+go:
+    source_roots:
+        - securesourcemanager
+        - internal/generated/snippets/securesourcemanager
+    remove_regex:
+        - ^internal/generated/snippets/securesourcemanager/
+        - ^securesourcemanager/apiv1/[^/]*_client\.go$
+        - ^securesourcemanager/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^securesourcemanager/apiv1/[^/]*_client_example_test\.go$
+        - ^securesourcemanager/apiv1/auxiliary\.go$
+        - ^securesourcemanager/apiv1/auxiliary_go123\.go$
+        - ^securesourcemanager/apiv1/doc\.go$
+        - ^securesourcemanager/apiv1/gapic_metadata\.json$
+        - ^securesourcemanager/apiv1/helpers\.go$
+        - ^securesourcemanager/apiv1/securesourcemanagerpb/.*$
+        - ^securesourcemanager/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/securesourcemanager/
+    tag_format: '{id}/v{version}'

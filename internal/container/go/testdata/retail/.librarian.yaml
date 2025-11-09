@@ -1,0 +1,50 @@
+name: retail
+version: 1.25.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/retail/v2
+          service_config: retail_v2.yaml
+        - path: google/cloud/retail/v2alpha
+          service_config: retail_v2alpha.yaml
+        - path: google/cloud/retail/v2beta
+          service_config: retail_v2beta.yaml
+go:
+    source_roots:
+        - retail
+        - internal/generated/snippets/retail
+    remove_regex:
+        - ^internal/generated/snippets/retail/
+        - ^retail/apiv2/[^/]*_client\.go$
+        - ^retail/apiv2/[^/]*_client_example_go123_test\.go$
+        - ^retail/apiv2/[^/]*_client_example_test\.go$
+        - ^retail/apiv2/auxiliary\.go$
+        - ^retail/apiv2/auxiliary_go123\.go$
+        - ^retail/apiv2/doc\.go$
+        - ^retail/apiv2/gapic_metadata\.json$
+        - ^retail/apiv2/helpers\.go$
+        - ^retail/apiv2/retailpb/.*$
+        - ^retail/apiv2/\.repo-metadata\.json$
+        - ^retail/apiv2alpha/[^/]*_client\.go$
+        - ^retail/apiv2alpha/[^/]*_client_example_go123_test\.go$
+        - ^retail/apiv2alpha/[^/]*_client_example_test\.go$
+        - ^retail/apiv2alpha/auxiliary\.go$
+        - ^retail/apiv2alpha/auxiliary_go123\.go$
+        - ^retail/apiv2alpha/doc\.go$
+        - ^retail/apiv2alpha/gapic_metadata\.json$
+        - ^retail/apiv2alpha/helpers\.go$
+        - ^retail/apiv2alpha/retailpb/.*$
+        - ^retail/apiv2alpha/\.repo-metadata\.json$
+        - ^retail/apiv2beta/[^/]*_client\.go$
+        - ^retail/apiv2beta/[^/]*_client_example_go123_test\.go$
+        - ^retail/apiv2beta/[^/]*_client_example_test\.go$
+        - ^retail/apiv2beta/auxiliary\.go$
+        - ^retail/apiv2beta/auxiliary_go123\.go$
+        - ^retail/apiv2beta/doc\.go$
+        - ^retail/apiv2beta/gapic_metadata\.json$
+        - ^retail/apiv2beta/helpers\.go$
+        - ^retail/apiv2beta/retailpb/.*$
+        - ^retail/apiv2beta/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/retail/
+    tag_format: '{id}/v{version}'

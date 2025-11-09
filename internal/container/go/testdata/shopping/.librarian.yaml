@@ -1,0 +1,341 @@
+name: shopping
+version: 1.2.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/shopping/css/v1
+          service_config: css_v1.yaml
+        - path: google/shopping/merchant/accounts/v1
+          service_config: merchantapi_v1.yaml
+        - path: google/shopping/merchant/accounts/v1beta
+          service_config: merchantapi_v1beta.yaml
+        - path: google/shopping/merchant/conversions/v1
+          service_config: merchantapi_v1.yaml
+        - path: google/shopping/merchant/conversions/v1beta
+          service_config: merchantapi_v1beta.yaml
+        - path: google/shopping/merchant/datasources/v1
+          service_config: merchantapi_v1.yaml
+        - path: google/shopping/merchant/datasources/v1beta
+          service_config: merchantapi_v1beta.yaml
+        - path: google/shopping/merchant/notifications/v1
+          service_config: merchantapi_v1.yaml
+        - path: google/shopping/merchant/notifications/v1beta
+          service_config: merchantapi_v1beta.yaml
+        - path: google/shopping/merchant/ordertracking/v1
+          service_config: merchantapi_v1.yaml
+        - path: google/shopping/merchant/ordertracking/v1beta
+          service_config: merchantapi_v1beta.yaml
+        - path: google/shopping/merchant/products/v1
+          service_config: merchantapi_v1.yaml
+        - path: google/shopping/merchant/products/v1beta
+          service_config: merchantapi_v1beta.yaml
+        - path: google/shopping/merchant/productstudio/v1alpha
+          service_config: merchantapi_v1alpha.yaml
+        - path: google/shopping/merchant/promotions/v1
+          service_config: merchantapi_v1.yaml
+        - path: google/shopping/merchant/promotions/v1beta
+          service_config: merchantapi_v1beta.yaml
+        - path: google/shopping/merchant/quota/v1
+          service_config: merchantapi_v1.yaml
+        - path: google/shopping/merchant/quota/v1beta
+          service_config: merchantapi_v1beta.yaml
+        - path: google/shopping/merchant/inventories/v1
+          service_config: merchantapi_v1.yaml
+        - path: google/shopping/merchant/inventories/v1beta
+          service_config: merchantapi_v1beta.yaml
+        - path: google/shopping/merchant/issueresolution/v1
+          service_config: merchantapi_v1.yaml
+        - path: google/shopping/merchant/issueresolution/v1beta
+          service_config: merchantapi_v1beta.yaml
+        - path: google/shopping/merchant/lfp/v1
+          service_config: merchantapi_v1.yaml
+        - path: google/shopping/merchant/lfp/v1beta
+          service_config: merchantapi_v1beta.yaml
+        - path: google/shopping/merchant/reports/v1
+          service_config: merchantapi_v1.yaml
+        - path: google/shopping/merchant/reports/v1beta
+          service_config: merchantapi_v1beta.yaml
+        - path: google/shopping/merchant/reviews/v1beta
+          service_config: merchantapi_v1beta.yaml
+        - path: google/shopping/type
+go:
+    source_roots:
+        - shopping
+        - internal/generated/snippets/shopping
+    remove_regex:
+        - ^internal/generated/snippets/shopping/
+        - ^shopping/css/apiv1/[^/]*_client\.go$
+        - ^shopping/css/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^shopping/css/apiv1/[^/]*_client_example_test\.go$
+        - ^shopping/css/apiv1/auxiliary\.go$
+        - ^shopping/css/apiv1/auxiliary_go123\.go$
+        - ^shopping/css/apiv1/doc\.go$
+        - ^shopping/css/apiv1/gapic_metadata\.json$
+        - ^shopping/css/apiv1/helpers\.go$
+        - ^shopping/css/apiv1/csspb/.*$
+        - ^shopping/css/apiv1/\.repo-metadata\.json$
+        - ^shopping/merchant/accounts/apiv1/[^/]*_client\.go$
+        - ^shopping/merchant/accounts/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/accounts/apiv1/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/accounts/apiv1/auxiliary\.go$
+        - ^shopping/merchant/accounts/apiv1/auxiliary_go123\.go$
+        - ^shopping/merchant/accounts/apiv1/doc\.go$
+        - ^shopping/merchant/accounts/apiv1/gapic_metadata\.json$
+        - ^shopping/merchant/accounts/apiv1/helpers\.go$
+        - ^shopping/merchant/accounts/apiv1/accountspb/.*$
+        - ^shopping/merchant/accounts/apiv1/\.repo-metadata\.json$
+        - ^shopping/merchant/accounts/apiv1beta/[^/]*_client\.go$
+        - ^shopping/merchant/accounts/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/accounts/apiv1beta/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/accounts/apiv1beta/auxiliary\.go$
+        - ^shopping/merchant/accounts/apiv1beta/auxiliary_go123\.go$
+        - ^shopping/merchant/accounts/apiv1beta/doc\.go$
+        - ^shopping/merchant/accounts/apiv1beta/gapic_metadata\.json$
+        - ^shopping/merchant/accounts/apiv1beta/helpers\.go$
+        - ^shopping/merchant/accounts/apiv1beta/accountspb/.*$
+        - ^shopping/merchant/accounts/apiv1beta/\.repo-metadata\.json$
+        - ^shopping/merchant/conversions/apiv1/[^/]*_client\.go$
+        - ^shopping/merchant/conversions/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/conversions/apiv1/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/conversions/apiv1/auxiliary\.go$
+        - ^shopping/merchant/conversions/apiv1/auxiliary_go123\.go$
+        - ^shopping/merchant/conversions/apiv1/doc\.go$
+        - ^shopping/merchant/conversions/apiv1/gapic_metadata\.json$
+        - ^shopping/merchant/conversions/apiv1/helpers\.go$
+        - ^shopping/merchant/conversions/apiv1/conversionspb/.*$
+        - ^shopping/merchant/conversions/apiv1/\.repo-metadata\.json$
+        - ^shopping/merchant/conversions/apiv1beta/[^/]*_client\.go$
+        - ^shopping/merchant/conversions/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/conversions/apiv1beta/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/conversions/apiv1beta/auxiliary\.go$
+        - ^shopping/merchant/conversions/apiv1beta/auxiliary_go123\.go$
+        - ^shopping/merchant/conversions/apiv1beta/doc\.go$
+        - ^shopping/merchant/conversions/apiv1beta/gapic_metadata\.json$
+        - ^shopping/merchant/conversions/apiv1beta/helpers\.go$
+        - ^shopping/merchant/conversions/apiv1beta/conversionspb/.*$
+        - ^shopping/merchant/conversions/apiv1beta/\.repo-metadata\.json$
+        - ^shopping/merchant/datasources/apiv1/[^/]*_client\.go$
+        - ^shopping/merchant/datasources/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/datasources/apiv1/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/datasources/apiv1/auxiliary\.go$
+        - ^shopping/merchant/datasources/apiv1/auxiliary_go123\.go$
+        - ^shopping/merchant/datasources/apiv1/doc\.go$
+        - ^shopping/merchant/datasources/apiv1/gapic_metadata\.json$
+        - ^shopping/merchant/datasources/apiv1/helpers\.go$
+        - ^shopping/merchant/datasources/apiv1/datasourcespb/.*$
+        - ^shopping/merchant/datasources/apiv1/\.repo-metadata\.json$
+        - ^shopping/merchant/datasources/apiv1beta/[^/]*_client\.go$
+        - ^shopping/merchant/datasources/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/datasources/apiv1beta/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/datasources/apiv1beta/auxiliary\.go$
+        - ^shopping/merchant/datasources/apiv1beta/auxiliary_go123\.go$
+        - ^shopping/merchant/datasources/apiv1beta/doc\.go$
+        - ^shopping/merchant/datasources/apiv1beta/gapic_metadata\.json$
+        - ^shopping/merchant/datasources/apiv1beta/helpers\.go$
+        - ^shopping/merchant/datasources/apiv1beta/datasourcespb/.*$
+        - ^shopping/merchant/datasources/apiv1beta/\.repo-metadata\.json$
+        - ^shopping/merchant/inventories/apiv1/[^/]*_client\.go$
+        - ^shopping/merchant/inventories/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/inventories/apiv1/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/inventories/apiv1/auxiliary\.go$
+        - ^shopping/merchant/inventories/apiv1/auxiliary_go123\.go$
+        - ^shopping/merchant/inventories/apiv1/doc\.go$
+        - ^shopping/merchant/inventories/apiv1/gapic_metadata\.json$
+        - ^shopping/merchant/inventories/apiv1/helpers\.go$
+        - ^shopping/merchant/inventories/apiv1/inventoriespb/.*$
+        - ^shopping/merchant/inventories/apiv1/\.repo-metadata\.json$
+        - ^shopping/merchant/inventories/apiv1beta/[^/]*_client\.go$
+        - ^shopping/merchant/inventories/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/inventories/apiv1beta/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/inventories/apiv1beta/auxiliary\.go$
+        - ^shopping/merchant/inventories/apiv1beta/auxiliary_go123\.go$
+        - ^shopping/merchant/inventories/apiv1beta/doc\.go$
+        - ^shopping/merchant/inventories/apiv1beta/gapic_metadata\.json$
+        - ^shopping/merchant/inventories/apiv1beta/helpers\.go$
+        - ^shopping/merchant/inventories/apiv1beta/inventoriespb/.*$
+        - ^shopping/merchant/inventories/apiv1beta/\.repo-metadata\.json$
+        - ^shopping/merchant/issueresolution/apiv1/[^/]*_client\.go$
+        - ^shopping/merchant/issueresolution/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/issueresolution/apiv1/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/issueresolution/apiv1/auxiliary\.go$
+        - ^shopping/merchant/issueresolution/apiv1/auxiliary_go123\.go$
+        - ^shopping/merchant/issueresolution/apiv1/doc\.go$
+        - ^shopping/merchant/issueresolution/apiv1/gapic_metadata\.json$
+        - ^shopping/merchant/issueresolution/apiv1/helpers\.go$
+        - ^shopping/merchant/issueresolution/apiv1/issueresolutionpb/.*$
+        - ^shopping/merchant/issueresolution/apiv1/\.repo-metadata\.json$
+        - ^shopping/merchant/issueresolution/apiv1beta/[^/]*_client\.go$
+        - ^shopping/merchant/issueresolution/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/issueresolution/apiv1beta/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/issueresolution/apiv1beta/auxiliary\.go$
+        - ^shopping/merchant/issueresolution/apiv1beta/auxiliary_go123\.go$
+        - ^shopping/merchant/issueresolution/apiv1beta/doc\.go$
+        - ^shopping/merchant/issueresolution/apiv1beta/gapic_metadata\.json$
+        - ^shopping/merchant/issueresolution/apiv1beta/helpers\.go$
+        - ^shopping/merchant/issueresolution/apiv1beta/issueresolutionpb/.*$
+        - ^shopping/merchant/issueresolution/apiv1beta/\.repo-metadata\.json$
+        - ^shopping/merchant/lfp/apiv1/[^/]*_client\.go$
+        - ^shopping/merchant/lfp/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/lfp/apiv1/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/lfp/apiv1/auxiliary\.go$
+        - ^shopping/merchant/lfp/apiv1/auxiliary_go123\.go$
+        - ^shopping/merchant/lfp/apiv1/doc\.go$
+        - ^shopping/merchant/lfp/apiv1/gapic_metadata\.json$
+        - ^shopping/merchant/lfp/apiv1/helpers\.go$
+        - ^shopping/merchant/lfp/apiv1/lfppb/.*$
+        - ^shopping/merchant/lfp/apiv1/\.repo-metadata\.json$
+        - ^shopping/merchant/lfp/apiv1beta/[^/]*_client\.go$
+        - ^shopping/merchant/lfp/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/lfp/apiv1beta/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/lfp/apiv1beta/auxiliary\.go$
+        - ^shopping/merchant/lfp/apiv1beta/auxiliary_go123\.go$
+        - ^shopping/merchant/lfp/apiv1beta/doc\.go$
+        - ^shopping/merchant/lfp/apiv1beta/gapic_metadata\.json$
+        - ^shopping/merchant/lfp/apiv1beta/helpers\.go$
+        - ^shopping/merchant/lfp/apiv1beta/lfppb/.*$
+        - ^shopping/merchant/lfp/apiv1beta/\.repo-metadata\.json$
+        - ^shopping/merchant/notifications/apiv1/[^/]*_client\.go$
+        - ^shopping/merchant/notifications/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/notifications/apiv1/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/notifications/apiv1/auxiliary\.go$
+        - ^shopping/merchant/notifications/apiv1/auxiliary_go123\.go$
+        - ^shopping/merchant/notifications/apiv1/doc\.go$
+        - ^shopping/merchant/notifications/apiv1/gapic_metadata\.json$
+        - ^shopping/merchant/notifications/apiv1/helpers\.go$
+        - ^shopping/merchant/notifications/apiv1/notificationspb/.*$
+        - ^shopping/merchant/notifications/apiv1/\.repo-metadata\.json$
+        - ^shopping/merchant/notifications/apiv1beta/[^/]*_client\.go$
+        - ^shopping/merchant/notifications/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/notifications/apiv1beta/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/notifications/apiv1beta/auxiliary\.go$
+        - ^shopping/merchant/notifications/apiv1beta/auxiliary_go123\.go$
+        - ^shopping/merchant/notifications/apiv1beta/doc\.go$
+        - ^shopping/merchant/notifications/apiv1beta/gapic_metadata\.json$
+        - ^shopping/merchant/notifications/apiv1beta/helpers\.go$
+        - ^shopping/merchant/notifications/apiv1beta/notificationspb/.*$
+        - ^shopping/merchant/notifications/apiv1beta/\.repo-metadata\.json$
+        - ^shopping/merchant/ordertracking/apiv1/[^/]*_client\.go$
+        - ^shopping/merchant/ordertracking/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/ordertracking/apiv1/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/ordertracking/apiv1/auxiliary\.go$
+        - ^shopping/merchant/ordertracking/apiv1/auxiliary_go123\.go$
+        - ^shopping/merchant/ordertracking/apiv1/doc\.go$
+        - ^shopping/merchant/ordertracking/apiv1/gapic_metadata\.json$
+        - ^shopping/merchant/ordertracking/apiv1/helpers\.go$
+        - ^shopping/merchant/ordertracking/apiv1/ordertrackingpb/.*$
+        - ^shopping/merchant/ordertracking/apiv1/\.repo-metadata\.json$
+        - ^shopping/merchant/ordertracking/apiv1beta/[^/]*_client\.go$
+        - ^shopping/merchant/ordertracking/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/ordertracking/apiv1beta/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/ordertracking/apiv1beta/auxiliary\.go$
+        - ^shopping/merchant/ordertracking/apiv1beta/auxiliary_go123\.go$
+        - ^shopping/merchant/ordertracking/apiv1beta/doc\.go$
+        - ^shopping/merchant/ordertracking/apiv1beta/gapic_metadata\.json$
+        - ^shopping/merchant/ordertracking/apiv1beta/helpers\.go$
+        - ^shopping/merchant/ordertracking/apiv1beta/ordertrackingpb/.*$
+        - ^shopping/merchant/ordertracking/apiv1beta/\.repo-metadata\.json$
+        - ^shopping/merchant/products/apiv1/[^/]*_client\.go$
+        - ^shopping/merchant/products/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/products/apiv1/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/products/apiv1/auxiliary\.go$
+        - ^shopping/merchant/products/apiv1/auxiliary_go123\.go$
+        - ^shopping/merchant/products/apiv1/doc\.go$
+        - ^shopping/merchant/products/apiv1/gapic_metadata\.json$
+        - ^shopping/merchant/products/apiv1/helpers\.go$
+        - ^shopping/merchant/products/apiv1/productspb/.*$
+        - ^shopping/merchant/products/apiv1/\.repo-metadata\.json$
+        - ^shopping/merchant/products/apiv1beta/[^/]*_client\.go$
+        - ^shopping/merchant/products/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/products/apiv1beta/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/products/apiv1beta/auxiliary\.go$
+        - ^shopping/merchant/products/apiv1beta/auxiliary_go123\.go$
+        - ^shopping/merchant/products/apiv1beta/doc\.go$
+        - ^shopping/merchant/products/apiv1beta/gapic_metadata\.json$
+        - ^shopping/merchant/products/apiv1beta/helpers\.go$
+        - ^shopping/merchant/products/apiv1beta/productspb/.*$
+        - ^shopping/merchant/products/apiv1beta/\.repo-metadata\.json$
+        - ^shopping/merchant/productstudio/apiv1alpha/[^/]*_client\.go$
+        - ^shopping/merchant/productstudio/apiv1alpha/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/productstudio/apiv1alpha/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/productstudio/apiv1alpha/auxiliary\.go$
+        - ^shopping/merchant/productstudio/apiv1alpha/auxiliary_go123\.go$
+        - ^shopping/merchant/productstudio/apiv1alpha/doc\.go$
+        - ^shopping/merchant/productstudio/apiv1alpha/gapic_metadata\.json$
+        - ^shopping/merchant/productstudio/apiv1alpha/helpers\.go$
+        - ^shopping/merchant/productstudio/apiv1alpha/productstudiopb/.*$
+        - ^shopping/merchant/productstudio/apiv1alpha/\.repo-metadata\.json$
+        - ^shopping/merchant/promotions/apiv1/[^/]*_client\.go$
+        - ^shopping/merchant/promotions/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/promotions/apiv1/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/promotions/apiv1/auxiliary\.go$
+        - ^shopping/merchant/promotions/apiv1/auxiliary_go123\.go$
+        - ^shopping/merchant/promotions/apiv1/doc\.go$
+        - ^shopping/merchant/promotions/apiv1/gapic_metadata\.json$
+        - ^shopping/merchant/promotions/apiv1/helpers\.go$
+        - ^shopping/merchant/promotions/apiv1/promotionspb/.*$
+        - ^shopping/merchant/promotions/apiv1/\.repo-metadata\.json$
+        - ^shopping/merchant/promotions/apiv1beta/[^/]*_client\.go$
+        - ^shopping/merchant/promotions/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/promotions/apiv1beta/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/promotions/apiv1beta/auxiliary\.go$
+        - ^shopping/merchant/promotions/apiv1beta/auxiliary_go123\.go$
+        - ^shopping/merchant/promotions/apiv1beta/doc\.go$
+        - ^shopping/merchant/promotions/apiv1beta/gapic_metadata\.json$
+        - ^shopping/merchant/promotions/apiv1beta/helpers\.go$
+        - ^shopping/merchant/promotions/apiv1beta/promotionspb/.*$
+        - ^shopping/merchant/promotions/apiv1beta/\.repo-metadata\.json$
+        - ^shopping/merchant/quota/apiv1/[^/]*_client\.go$
+        - ^shopping/merchant/quota/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/quota/apiv1/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/quota/apiv1/auxiliary\.go$
+        - ^shopping/merchant/quota/apiv1/auxiliary_go123\.go$
+        - ^shopping/merchant/quota/apiv1/doc\.go$
+        - ^shopping/merchant/quota/apiv1/gapic_metadata\.json$
+        - ^shopping/merchant/quota/apiv1/helpers\.go$
+        - ^shopping/merchant/quota/apiv1/quotapb/.*$
+        - ^shopping/merchant/quota/apiv1/\.repo-metadata\.json$
+        - ^shopping/merchant/quota/apiv1beta/[^/]*_client\.go$
+        - ^shopping/merchant/quota/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/quota/apiv1beta/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/quota/apiv1beta/auxiliary\.go$
+        - ^shopping/merchant/quota/apiv1beta/auxiliary_go123\.go$
+        - ^shopping/merchant/quota/apiv1beta/doc\.go$
+        - ^shopping/merchant/quota/apiv1beta/gapic_metadata\.json$
+        - ^shopping/merchant/quota/apiv1beta/helpers\.go$
+        - ^shopping/merchant/quota/apiv1beta/quotapb/.*$
+        - ^shopping/merchant/quota/apiv1beta/\.repo-metadata\.json$
+        - ^shopping/merchant/reports/apiv1/[^/]*_client\.go$
+        - ^shopping/merchant/reports/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/reports/apiv1/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/reports/apiv1/auxiliary\.go$
+        - ^shopping/merchant/reports/apiv1/auxiliary_go123\.go$
+        - ^shopping/merchant/reports/apiv1/doc\.go$
+        - ^shopping/merchant/reports/apiv1/gapic_metadata\.json$
+        - ^shopping/merchant/reports/apiv1/helpers\.go$
+        - ^shopping/merchant/reports/apiv1/reportspb/.*$
+        - ^shopping/merchant/reports/apiv1/\.repo-metadata\.json$
+        - ^shopping/merchant/reports/apiv1beta/[^/]*_client\.go$
+        - ^shopping/merchant/reports/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/reports/apiv1beta/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/reports/apiv1beta/auxiliary\.go$
+        - ^shopping/merchant/reports/apiv1beta/auxiliary_go123\.go$
+        - ^shopping/merchant/reports/apiv1beta/doc\.go$
+        - ^shopping/merchant/reports/apiv1beta/gapic_metadata\.json$
+        - ^shopping/merchant/reports/apiv1beta/helpers\.go$
+        - ^shopping/merchant/reports/apiv1beta/reportspb/.*$
+        - ^shopping/merchant/reports/apiv1beta/\.repo-metadata\.json$
+        - ^shopping/merchant/reviews/apiv1beta/[^/]*_client\.go$
+        - ^shopping/merchant/reviews/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^shopping/merchant/reviews/apiv1beta/[^/]*_client_example_test\.go$
+        - ^shopping/merchant/reviews/apiv1beta/auxiliary\.go$
+        - ^shopping/merchant/reviews/apiv1beta/auxiliary_go123\.go$
+        - ^shopping/merchant/reviews/apiv1beta/doc\.go$
+        - ^shopping/merchant/reviews/apiv1beta/gapic_metadata\.json$
+        - ^shopping/merchant/reviews/apiv1beta/helpers\.go$
+        - ^shopping/merchant/reviews/apiv1beta/reviewspb/.*$
+        - ^shopping/merchant/reviews/apiv1beta/\.repo-metadata\.json$
+        - ^shopping/type/typepb/.*$
+        - ^shopping/type/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/shopping/
+    tag_format: '{id}/v{version}'

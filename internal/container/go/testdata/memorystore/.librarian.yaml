@@ -1,0 +1,38 @@
+name: memorystore
+version: 0.3.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/memorystore/v1
+          service_config: memorystore_v1.yaml
+        - path: google/cloud/memorystore/v1beta
+          service_config: memorystore_v1beta.yaml
+go:
+    source_roots:
+        - memorystore
+        - internal/generated/snippets/memorystore
+    remove_regex:
+        - ^internal/generated/snippets/memorystore/
+        - ^memorystore/apiv1/[^/]*_client\.go$
+        - ^memorystore/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^memorystore/apiv1/[^/]*_client_example_test\.go$
+        - ^memorystore/apiv1/auxiliary\.go$
+        - ^memorystore/apiv1/auxiliary_go123\.go$
+        - ^memorystore/apiv1/doc\.go$
+        - ^memorystore/apiv1/gapic_metadata\.json$
+        - ^memorystore/apiv1/helpers\.go$
+        - ^memorystore/apiv1/memorystorepb/.*$
+        - ^memorystore/apiv1/\.repo-metadata\.json$
+        - ^memorystore/apiv1beta/[^/]*_client\.go$
+        - ^memorystore/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^memorystore/apiv1beta/[^/]*_client_example_test\.go$
+        - ^memorystore/apiv1beta/auxiliary\.go$
+        - ^memorystore/apiv1beta/auxiliary_go123\.go$
+        - ^memorystore/apiv1beta/doc\.go$
+        - ^memorystore/apiv1beta/gapic_metadata\.json$
+        - ^memorystore/apiv1beta/helpers\.go$
+        - ^memorystore/apiv1beta/memorystorepb/.*$
+        - ^memorystore/apiv1beta/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/memorystore/
+    tag_format: '{id}/v{version}'

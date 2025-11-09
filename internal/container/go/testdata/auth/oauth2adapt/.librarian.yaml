@@ -1,0 +1,8 @@
+name: auth/oauth2adapt
+version: 0.2.8
+generate:
+    specification_format: protobuf
+go:
+    source_roots:
+        - auth/oauth2adapt
+    tag_format: '{id}/v{version}'

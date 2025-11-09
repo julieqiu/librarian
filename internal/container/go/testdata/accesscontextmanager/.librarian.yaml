@@ -1,0 +1,26 @@
+name: accesscontextmanager
+version: 1.9.7
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/identity/accesscontextmanager/v1
+          service_config: accesscontextmanager_v1.yaml
+go:
+    source_roots:
+        - accesscontextmanager
+        - internal/generated/snippets/accesscontextmanager
+    remove_regex:
+        - ^internal/generated/snippets/accesscontextmanager/
+        - ^accesscontextmanager/apiv1/[^/]*_client\.go$
+        - ^accesscontextmanager/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^accesscontextmanager/apiv1/[^/]*_client_example_test\.go$
+        - ^accesscontextmanager/apiv1/auxiliary\.go$
+        - ^accesscontextmanager/apiv1/auxiliary_go123\.go$
+        - ^accesscontextmanager/apiv1/doc\.go$
+        - ^accesscontextmanager/apiv1/gapic_metadata\.json$
+        - ^accesscontextmanager/apiv1/helpers\.go$
+        - ^accesscontextmanager/apiv1/accesscontextmanagerpb/.*$
+        - ^accesscontextmanager/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/accesscontextmanager/
+    tag_format: '{id}/v{version}'

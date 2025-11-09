@@ -1,0 +1,26 @@
+name: essentialcontacts
+version: 1.7.7
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/essentialcontacts/v1
+          service_config: essentialcontacts_v1.yaml
+go:
+    source_roots:
+        - essentialcontacts
+        - internal/generated/snippets/essentialcontacts
+    remove_regex:
+        - ^internal/generated/snippets/essentialcontacts/
+        - ^essentialcontacts/apiv1/[^/]*_client\.go$
+        - ^essentialcontacts/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^essentialcontacts/apiv1/[^/]*_client_example_test\.go$
+        - ^essentialcontacts/apiv1/auxiliary\.go$
+        - ^essentialcontacts/apiv1/auxiliary_go123\.go$
+        - ^essentialcontacts/apiv1/doc\.go$
+        - ^essentialcontacts/apiv1/gapic_metadata\.json$
+        - ^essentialcontacts/apiv1/helpers\.go$
+        - ^essentialcontacts/apiv1/essentialcontactspb/.*$
+        - ^essentialcontacts/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/essentialcontacts/
+    tag_format: '{id}/v{version}'

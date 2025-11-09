@@ -1,0 +1,26 @@
+name: dataproc
+version: 2.15.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/dataproc/v1
+          service_config: dataproc_v1.yaml
+go:
+    source_roots:
+        - dataproc
+        - internal/generated/snippets/dataproc
+    remove_regex:
+        - ^internal/generated/snippets/dataproc/
+        - ^dataproc/apiv1/[^/]*_client\.go$
+        - ^dataproc/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^dataproc/apiv1/[^/]*_client_example_test\.go$
+        - ^dataproc/apiv1/auxiliary\.go$
+        - ^dataproc/apiv1/auxiliary_go123\.go$
+        - ^dataproc/apiv1/doc\.go$
+        - ^dataproc/apiv1/gapic_metadata\.json$
+        - ^dataproc/apiv1/helpers\.go$
+        - ^dataproc/apiv1/dataprocpb/.*$
+        - ^dataproc/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/dataproc/
+    tag_format: '{id}/v{version}'

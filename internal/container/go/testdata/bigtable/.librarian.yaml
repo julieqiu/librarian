@@ -1,0 +1,22 @@
+name: bigtable
+version: 1.40.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/bigtable/admin/v2
+          service_config: bigtableadmin_v2.yaml
+        - path: google/bigtable/v2
+          service_config: bigtable_v2.yaml
+go:
+    source_roots:
+        - bigtable
+    remove_regex:
+        - ^bigtable/admin/apiv2/adminpb/.*$
+        - ^bigtable/admin/apiv2/\.repo-metadata\.json$
+        - ^bigtable/apiv2/bigtablepb/.*$
+        - ^bigtable/apiv2/\.repo-metadata\.json$
+    release_exclude_paths:
+        - bigtable/bttest
+        - bigtable/internal/conformance
+        - bigtable/testdata
+    tag_format: '{id}/v{version}'

@@ -1,0 +1,26 @@
+name: edgenetwork
+version: 1.2.7
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/edgenetwork/v1
+          service_config: edgenetwork_v1.yaml
+go:
+    source_roots:
+        - edgenetwork
+        - internal/generated/snippets/edgenetwork
+    remove_regex:
+        - ^internal/generated/snippets/edgenetwork/
+        - ^edgenetwork/apiv1/[^/]*_client\.go$
+        - ^edgenetwork/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^edgenetwork/apiv1/[^/]*_client_example_test\.go$
+        - ^edgenetwork/apiv1/auxiliary\.go$
+        - ^edgenetwork/apiv1/auxiliary_go123\.go$
+        - ^edgenetwork/apiv1/doc\.go$
+        - ^edgenetwork/apiv1/gapic_metadata\.json$
+        - ^edgenetwork/apiv1/helpers\.go$
+        - ^edgenetwork/apiv1/edgenetworkpb/.*$
+        - ^edgenetwork/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/edgenetwork/
+    tag_format: '{id}/v{version}'

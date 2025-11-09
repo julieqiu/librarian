@@ -1,0 +1,74 @@
+name: beyondcorp
+version: 1.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/beyondcorp/appconnections/v1
+          service_config: beyondcorp_v1.yaml
+        - path: google/cloud/beyondcorp/appconnectors/v1
+          service_config: beyondcorp_v1.yaml
+        - path: google/cloud/beyondcorp/appgateways/v1
+          service_config: beyondcorp_v1.yaml
+        - path: google/cloud/beyondcorp/clientconnectorservices/v1
+          service_config: beyondcorp_v1.yaml
+        - path: google/cloud/beyondcorp/clientgateways/v1
+          service_config: beyondcorp_v1.yaml
+go:
+    source_roots:
+        - beyondcorp
+        - internal/generated/snippets/beyondcorp
+    remove_regex:
+        - ^internal/generated/snippets/beyondcorp/
+        - ^beyondcorp/appconnections/apiv1/[^/]*_client\.go$
+        - ^beyondcorp/appconnections/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^beyondcorp/appconnections/apiv1/[^/]*_client_example_test\.go$
+        - ^beyondcorp/appconnections/apiv1/auxiliary\.go$
+        - ^beyondcorp/appconnections/apiv1/auxiliary_go123\.go$
+        - ^beyondcorp/appconnections/apiv1/doc\.go$
+        - ^beyondcorp/appconnections/apiv1/gapic_metadata\.json$
+        - ^beyondcorp/appconnections/apiv1/helpers\.go$
+        - ^beyondcorp/appconnections/apiv1/appconnectionspb/.*$
+        - ^beyondcorp/appconnections/apiv1/\.repo-metadata\.json$
+        - ^beyondcorp/appconnectors/apiv1/[^/]*_client\.go$
+        - ^beyondcorp/appconnectors/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^beyondcorp/appconnectors/apiv1/[^/]*_client_example_test\.go$
+        - ^beyondcorp/appconnectors/apiv1/auxiliary\.go$
+        - ^beyondcorp/appconnectors/apiv1/auxiliary_go123\.go$
+        - ^beyondcorp/appconnectors/apiv1/doc\.go$
+        - ^beyondcorp/appconnectors/apiv1/gapic_metadata\.json$
+        - ^beyondcorp/appconnectors/apiv1/helpers\.go$
+        - ^beyondcorp/appconnectors/apiv1/appconnectorspb/.*$
+        - ^beyondcorp/appconnectors/apiv1/\.repo-metadata\.json$
+        - ^beyondcorp/appgateways/apiv1/[^/]*_client\.go$
+        - ^beyondcorp/appgateways/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^beyondcorp/appgateways/apiv1/[^/]*_client_example_test\.go$
+        - ^beyondcorp/appgateways/apiv1/auxiliary\.go$
+        - ^beyondcorp/appgateways/apiv1/auxiliary_go123\.go$
+        - ^beyondcorp/appgateways/apiv1/doc\.go$
+        - ^beyondcorp/appgateways/apiv1/gapic_metadata\.json$
+        - ^beyondcorp/appgateways/apiv1/helpers\.go$
+        - ^beyondcorp/appgateways/apiv1/appgatewayspb/.*$
+        - ^beyondcorp/appgateways/apiv1/\.repo-metadata\.json$
+        - ^beyondcorp/clientconnectorservices/apiv1/[^/]*_client\.go$
+        - ^beyondcorp/clientconnectorservices/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^beyondcorp/clientconnectorservices/apiv1/[^/]*_client_example_test\.go$
+        - ^beyondcorp/clientconnectorservices/apiv1/auxiliary\.go$
+        - ^beyondcorp/clientconnectorservices/apiv1/auxiliary_go123\.go$
+        - ^beyondcorp/clientconnectorservices/apiv1/doc\.go$
+        - ^beyondcorp/clientconnectorservices/apiv1/gapic_metadata\.json$
+        - ^beyondcorp/clientconnectorservices/apiv1/helpers\.go$
+        - ^beyondcorp/clientconnectorservices/apiv1/clientconnectorservicespb/.*$
+        - ^beyondcorp/clientconnectorservices/apiv1/\.repo-metadata\.json$
+        - ^beyondcorp/clientgateways/apiv1/[^/]*_client\.go$
+        - ^beyondcorp/clientgateways/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^beyondcorp/clientgateways/apiv1/[^/]*_client_example_test\.go$
+        - ^beyondcorp/clientgateways/apiv1/auxiliary\.go$
+        - ^beyondcorp/clientgateways/apiv1/auxiliary_go123\.go$
+        - ^beyondcorp/clientgateways/apiv1/doc\.go$
+        - ^beyondcorp/clientgateways/apiv1/gapic_metadata\.json$
+        - ^beyondcorp/clientgateways/apiv1/helpers\.go$
+        - ^beyondcorp/clientgateways/apiv1/clientgatewayspb/.*$
+        - ^beyondcorp/clientgateways/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/beyondcorp/
+    tag_format: '{id}/v{version}'

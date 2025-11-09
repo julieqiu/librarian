@@ -1,0 +1,26 @@
+name: identitytoolkit
+version: 0.2.6
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/identitytoolkit/v2
+          service_config: identitytoolkit_v2.yaml
+go:
+    source_roots:
+        - identitytoolkit
+        - internal/generated/snippets/identitytoolkit
+    remove_regex:
+        - ^internal/generated/snippets/identitytoolkit/
+        - ^identitytoolkit/apiv2/[^/]*_client\.go$
+        - ^identitytoolkit/apiv2/[^/]*_client_example_go123_test\.go$
+        - ^identitytoolkit/apiv2/[^/]*_client_example_test\.go$
+        - ^identitytoolkit/apiv2/auxiliary\.go$
+        - ^identitytoolkit/apiv2/auxiliary_go123\.go$
+        - ^identitytoolkit/apiv2/doc\.go$
+        - ^identitytoolkit/apiv2/gapic_metadata\.json$
+        - ^identitytoolkit/apiv2/helpers\.go$
+        - ^identitytoolkit/apiv2/identitytoolkitpb/.*$
+        - ^identitytoolkit/apiv2/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/identitytoolkit/
+    tag_format: '{id}/v{version}'

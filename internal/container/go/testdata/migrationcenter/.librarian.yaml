@@ -1,0 +1,26 @@
+name: migrationcenter
+version: 1.1.6
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/migrationcenter/v1
+          service_config: migrationcenter_v1.yaml
+go:
+    source_roots:
+        - migrationcenter
+        - internal/generated/snippets/migrationcenter
+    remove_regex:
+        - ^internal/generated/snippets/migrationcenter/
+        - ^migrationcenter/apiv1/[^/]*_client\.go$
+        - ^migrationcenter/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^migrationcenter/apiv1/[^/]*_client_example_test\.go$
+        - ^migrationcenter/apiv1/auxiliary\.go$
+        - ^migrationcenter/apiv1/auxiliary_go123\.go$
+        - ^migrationcenter/apiv1/doc\.go$
+        - ^migrationcenter/apiv1/gapic_metadata\.json$
+        - ^migrationcenter/apiv1/helpers\.go$
+        - ^migrationcenter/apiv1/migrationcenterpb/.*$
+        - ^migrationcenter/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/migrationcenter/
+    tag_format: '{id}/v{version}'

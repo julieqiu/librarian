@@ -1,0 +1,26 @@
+name: streetview
+version: 0.2.6
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/streetview/publish/v1
+          service_config: streetviewpublish.yaml
+go:
+    source_roots:
+        - streetview
+        - internal/generated/snippets/streetview
+    remove_regex:
+        - ^internal/generated/snippets/streetview/
+        - ^streetview/publish/apiv1/[^/]*_client\.go$
+        - ^streetview/publish/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^streetview/publish/apiv1/[^/]*_client_example_test\.go$
+        - ^streetview/publish/apiv1/auxiliary\.go$
+        - ^streetview/publish/apiv1/auxiliary_go123\.go$
+        - ^streetview/publish/apiv1/doc\.go$
+        - ^streetview/publish/apiv1/gapic_metadata\.json$
+        - ^streetview/publish/apiv1/helpers\.go$
+        - ^streetview/publish/apiv1/publishpb/.*$
+        - ^streetview/publish/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/streetview/
+    tag_format: '{id}/v{version}'

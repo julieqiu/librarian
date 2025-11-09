@@ -1,0 +1,38 @@
+name: policytroubleshooter
+version: 1.11.7
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/policytroubleshooter/iam/v3
+          service_config: policytroubleshooter_v3.yaml
+        - path: google/cloud/policytroubleshooter/v1
+          service_config: policytroubleshooter_v1.yaml
+go:
+    source_roots:
+        - policytroubleshooter
+        - internal/generated/snippets/policytroubleshooter
+    remove_regex:
+        - ^internal/generated/snippets/policytroubleshooter/
+        - ^policytroubleshooter/apiv1/[^/]*_client\.go$
+        - ^policytroubleshooter/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^policytroubleshooter/apiv1/[^/]*_client_example_test\.go$
+        - ^policytroubleshooter/apiv1/auxiliary\.go$
+        - ^policytroubleshooter/apiv1/auxiliary_go123\.go$
+        - ^policytroubleshooter/apiv1/doc\.go$
+        - ^policytroubleshooter/apiv1/gapic_metadata\.json$
+        - ^policytroubleshooter/apiv1/helpers\.go$
+        - ^policytroubleshooter/apiv1/policytroubleshooterpb/.*$
+        - ^policytroubleshooter/apiv1/\.repo-metadata\.json$
+        - ^policytroubleshooter/iam/apiv3/[^/]*_client\.go$
+        - ^policytroubleshooter/iam/apiv3/[^/]*_client_example_go123_test\.go$
+        - ^policytroubleshooter/iam/apiv3/[^/]*_client_example_test\.go$
+        - ^policytroubleshooter/iam/apiv3/auxiliary\.go$
+        - ^policytroubleshooter/iam/apiv3/auxiliary_go123\.go$
+        - ^policytroubleshooter/iam/apiv3/doc\.go$
+        - ^policytroubleshooter/iam/apiv3/gapic_metadata\.json$
+        - ^policytroubleshooter/iam/apiv3/helpers\.go$
+        - ^policytroubleshooter/iam/apiv3/iampb/.*$
+        - ^policytroubleshooter/iam/apiv3/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/policytroubleshooter/
+    tag_format: '{id}/v{version}'

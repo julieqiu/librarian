@@ -1,0 +1,26 @@
+name: container
+version: 1.45.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/container/v1
+          service_config: container_v1.yaml
+go:
+    source_roots:
+        - container
+        - internal/generated/snippets/container
+    remove_regex:
+        - ^internal/generated/snippets/container/
+        - ^container/apiv1/[^/]*_client\.go$
+        - ^container/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^container/apiv1/[^/]*_client_example_test\.go$
+        - ^container/apiv1/auxiliary\.go$
+        - ^container/apiv1/auxiliary_go123\.go$
+        - ^container/apiv1/doc\.go$
+        - ^container/apiv1/gapic_metadata\.json$
+        - ^container/apiv1/helpers\.go$
+        - ^container/apiv1/containerpb/.*$
+        - ^container/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/container/
+    tag_format: '{id}/v{version}'

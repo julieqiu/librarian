@@ -1,0 +1,29 @@
+name: bigquery/v2
+version: 0.0.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/bigquery/v2
+          service_config: bigquery_v2.yaml
+go:
+    source_roots:
+        - bigquery/v2
+        - internal/generated/snippets/bigquery/v2
+    remove_regex:
+        - ^internal/generated/snippets/bigquery/v2
+        - ^bigquery/v2/apiv2/[^/]*_client\.go$
+        - ^bigquery/v2/apiv2/[^/]*_client_example_go123_test\.go$
+        - ^bigquery/v2/apiv2/[^/]*_client_example_test\.go$
+        - ^bigquery/v2/apiv2/auxiliary\.go$
+        - ^bigquery/v2/apiv2/auxiliary_go123\.go$
+        - ^bigquery/v2/apiv2/doc\.go$
+        - ^bigquery/v2/apiv2/gapic_metadata\.json$
+        - ^bigquery/v2/apiv2/helpers\.go$
+        - ^bigquery/v2/apiv2/bigquerypb/.*$
+        - ^bigquery/v2/apiv2/\.repo-metadata\.json$
+        - ^bigquery/v2/apiv2/v2pb/.*$
+        - ^bigquery/v2/apiv2/\.repo-metadata\.json$
+    release_exclude_paths:
+        - bigquery/v2/apiv2_smoketests/
+        - internal/generated/snippets/bigquery/v2
+    tag_format: bigquery/v{version}

@@ -1,0 +1,26 @@
+name: tpu
+version: 1.8.4
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/tpu/v1
+          service_config: tpu_v1.yaml
+go:
+    source_roots:
+        - tpu
+        - internal/generated/snippets/tpu
+    remove_regex:
+        - ^internal/generated/snippets/tpu/
+        - ^tpu/apiv1/[^/]*_client\.go$
+        - ^tpu/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^tpu/apiv1/[^/]*_client_example_test\.go$
+        - ^tpu/apiv1/auxiliary\.go$
+        - ^tpu/apiv1/auxiliary_go123\.go$
+        - ^tpu/apiv1/doc\.go$
+        - ^tpu/apiv1/gapic_metadata\.json$
+        - ^tpu/apiv1/helpers\.go$
+        - ^tpu/apiv1/tpupb/.*$
+        - ^tpu/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/tpu/
+    tag_format: '{id}/v{version}'

@@ -1,0 +1,8 @@
+name: vertexai
+version: 0.15.0
+generate:
+    specification_format: protobuf
+go:
+    source_roots:
+        - vertexai
+    tag_format: '{id}/v{version}'

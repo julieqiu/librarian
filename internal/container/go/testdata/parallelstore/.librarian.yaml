@@ -1,0 +1,38 @@
+name: parallelstore
+version: 0.11.4
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/parallelstore/v1
+          service_config: parallelstore_v1.yaml
+        - path: google/cloud/parallelstore/v1beta
+          service_config: parallelstore_v1beta.yaml
+go:
+    source_roots:
+        - parallelstore
+        - internal/generated/snippets/parallelstore
+    remove_regex:
+        - ^internal/generated/snippets/parallelstore/
+        - ^parallelstore/apiv1/[^/]*_client\.go$
+        - ^parallelstore/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^parallelstore/apiv1/[^/]*_client_example_test\.go$
+        - ^parallelstore/apiv1/auxiliary\.go$
+        - ^parallelstore/apiv1/auxiliary_go123\.go$
+        - ^parallelstore/apiv1/doc\.go$
+        - ^parallelstore/apiv1/gapic_metadata\.json$
+        - ^parallelstore/apiv1/helpers\.go$
+        - ^parallelstore/apiv1/parallelstorepb/.*$
+        - ^parallelstore/apiv1/\.repo-metadata\.json$
+        - ^parallelstore/apiv1beta/[^/]*_client\.go$
+        - ^parallelstore/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^parallelstore/apiv1beta/[^/]*_client_example_test\.go$
+        - ^parallelstore/apiv1beta/auxiliary\.go$
+        - ^parallelstore/apiv1beta/auxiliary_go123\.go$
+        - ^parallelstore/apiv1beta/doc\.go$
+        - ^parallelstore/apiv1beta/gapic_metadata\.json$
+        - ^parallelstore/apiv1beta/helpers\.go$
+        - ^parallelstore/apiv1beta/parallelstorepb/.*$
+        - ^parallelstore/apiv1beta/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/parallelstore/
+    tag_format: '{id}/v{version}'

@@ -1,0 +1,38 @@
+name: eventarc
+version: 1.17.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/eventarc/v1
+          service_config: eventarc_v1.yaml
+        - path: google/cloud/eventarc/publishing/v1
+          service_config: eventarcpublishing_v1.yaml
+go:
+    source_roots:
+        - eventarc
+        - internal/generated/snippets/eventarc
+    remove_regex:
+        - ^internal/generated/snippets/eventarc/
+        - ^eventarc/apiv1/[^/]*_client\.go$
+        - ^eventarc/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^eventarc/apiv1/[^/]*_client_example_test\.go$
+        - ^eventarc/apiv1/auxiliary\.go$
+        - ^eventarc/apiv1/auxiliary_go123\.go$
+        - ^eventarc/apiv1/doc\.go$
+        - ^eventarc/apiv1/gapic_metadata\.json$
+        - ^eventarc/apiv1/helpers\.go$
+        - ^eventarc/apiv1/eventarcpb/.*$
+        - ^eventarc/apiv1/\.repo-metadata\.json$
+        - ^eventarc/publishing/apiv1/[^/]*_client\.go$
+        - ^eventarc/publishing/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^eventarc/publishing/apiv1/[^/]*_client_example_test\.go$
+        - ^eventarc/publishing/apiv1/auxiliary\.go$
+        - ^eventarc/publishing/apiv1/auxiliary_go123\.go$
+        - ^eventarc/publishing/apiv1/doc\.go$
+        - ^eventarc/publishing/apiv1/gapic_metadata\.json$
+        - ^eventarc/publishing/apiv1/helpers\.go$
+        - ^eventarc/publishing/apiv1/publishingpb/.*$
+        - ^eventarc/publishing/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/eventarc/
+    tag_format: '{id}/v{version}'

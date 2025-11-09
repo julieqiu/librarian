@@ -1,0 +1,26 @@
+name: apihub
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/apihub/v1
+          service_config: apihub_v1.yaml
+go:
+    source_roots:
+        - apihub
+        - internal/generated/snippets/apihub
+    remove_regex:
+        - ^internal/generated/snippets/apihub/
+        - ^apihub/apiv1/[^/]*_client\.go$
+        - ^apihub/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^apihub/apiv1/[^/]*_client_example_test\.go$
+        - ^apihub/apiv1/auxiliary\.go$
+        - ^apihub/apiv1/auxiliary_go123\.go$
+        - ^apihub/apiv1/doc\.go$
+        - ^apihub/apiv1/gapic_metadata\.json$
+        - ^apihub/apiv1/helpers\.go$
+        - ^apihub/apiv1/apihubpb/.*$
+        - ^apihub/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/apihub/
+    tag_format: '{id}/v{version}'

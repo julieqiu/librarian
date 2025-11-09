@@ -1,0 +1,30 @@
+name: root-module
+version: 0.123.0
+generate:
+    specification_format: protobuf
+go:
+    source_roots:
+        - civil
+        - httpreplay
+        - internal
+        - rpcreplay
+    release_exclude_paths:
+        - internal/.repo-metadata-full.json
+        - internal/actions
+        - internal/aliasfix
+        - internal/aliasgen
+        - internal/carver
+        - internal/examples
+        - internal/gapicgen
+        - internal/generated
+        - internal/godocfx
+        - internal/kokoro
+        - internal/leakcheck
+        - internal/librariangen
+        - internal/postprocessor
+        - internal/pretty
+        - internal/protoveneer
+        - internal/testutil
+        - internal/tracecontext
+        - internal/version
+    tag_format: v{version}

@@ -1,0 +1,40 @@
+name: datastream
+version: 1.15.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/datastream/v1
+          service_config: datastream_v1.yaml
+        - path: google/cloud/datastream/v1alpha1
+          service_config: datastream_v1alpha1.yaml
+go:
+    source_roots:
+        - datastream
+        - internal/generated/snippets/datastream
+    preserve_regex:
+        - ^datastream/apiv1/iam_policy_client\.go$
+    remove_regex:
+        - ^internal/generated/snippets/datastream/
+        - ^datastream/apiv1/[^/]*_client\.go$
+        - ^datastream/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^datastream/apiv1/[^/]*_client_example_test\.go$
+        - ^datastream/apiv1/auxiliary\.go$
+        - ^datastream/apiv1/auxiliary_go123\.go$
+        - ^datastream/apiv1/doc\.go$
+        - ^datastream/apiv1/gapic_metadata\.json$
+        - ^datastream/apiv1/helpers\.go$
+        - ^datastream/apiv1/datastreampb/.*$
+        - ^datastream/apiv1/\.repo-metadata\.json$
+        - ^datastream/apiv1alpha1/[^/]*_client\.go$
+        - ^datastream/apiv1alpha1/[^/]*_client_example_go123_test\.go$
+        - ^datastream/apiv1alpha1/[^/]*_client_example_test\.go$
+        - ^datastream/apiv1alpha1/auxiliary\.go$
+        - ^datastream/apiv1alpha1/auxiliary_go123\.go$
+        - ^datastream/apiv1alpha1/doc\.go$
+        - ^datastream/apiv1alpha1/gapic_metadata\.json$
+        - ^datastream/apiv1alpha1/helpers\.go$
+        - ^datastream/apiv1alpha1/datastreampb/.*$
+        - ^datastream/apiv1alpha1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/datastream/
+    tag_format: '{id}/v{version}'

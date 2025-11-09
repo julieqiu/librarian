@@ -1,0 +1,26 @@
+name: privilegedaccessmanager
+version: 0.3.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/privilegedaccessmanager/v1
+          service_config: privilegedaccessmanager_v1.yaml
+go:
+    source_roots:
+        - privilegedaccessmanager
+        - internal/generated/snippets/privilegedaccessmanager
+    remove_regex:
+        - ^internal/generated/snippets/privilegedaccessmanager/
+        - ^privilegedaccessmanager/apiv1/[^/]*_client\.go$
+        - ^privilegedaccessmanager/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^privilegedaccessmanager/apiv1/[^/]*_client_example_test\.go$
+        - ^privilegedaccessmanager/apiv1/auxiliary\.go$
+        - ^privilegedaccessmanager/apiv1/auxiliary_go123\.go$
+        - ^privilegedaccessmanager/apiv1/doc\.go$
+        - ^privilegedaccessmanager/apiv1/gapic_metadata\.json$
+        - ^privilegedaccessmanager/apiv1/helpers\.go$
+        - ^privilegedaccessmanager/apiv1/privilegedaccessmanagerpb/.*$
+        - ^privilegedaccessmanager/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/privilegedaccessmanager/
+    tag_format: '{id}/v{version}'

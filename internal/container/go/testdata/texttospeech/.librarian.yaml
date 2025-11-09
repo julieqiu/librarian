@@ -1,0 +1,26 @@
+name: texttospeech
+version: 1.16.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/texttospeech/v1
+          service_config: texttospeech_v1.yaml
+go:
+    source_roots:
+        - texttospeech
+        - internal/generated/snippets/texttospeech
+    remove_regex:
+        - ^internal/generated/snippets/texttospeech/
+        - ^texttospeech/apiv1/[^/]*_client\.go$
+        - ^texttospeech/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^texttospeech/apiv1/[^/]*_client_example_test\.go$
+        - ^texttospeech/apiv1/auxiliary\.go$
+        - ^texttospeech/apiv1/auxiliary_go123\.go$
+        - ^texttospeech/apiv1/doc\.go$
+        - ^texttospeech/apiv1/gapic_metadata\.json$
+        - ^texttospeech/apiv1/helpers\.go$
+        - ^texttospeech/apiv1/texttospeechpb/.*$
+        - ^texttospeech/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/texttospeech/
+    tag_format: '{id}/v{version}'

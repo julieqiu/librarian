@@ -1,0 +1,26 @@
+name: telcoautomation
+version: 1.1.6
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/telcoautomation/v1
+          service_config: telcoautomation_v1.yaml
+go:
+    source_roots:
+        - telcoautomation
+        - internal/generated/snippets/telcoautomation
+    remove_regex:
+        - ^internal/generated/snippets/telcoautomation/
+        - ^telcoautomation/apiv1/[^/]*_client\.go$
+        - ^telcoautomation/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^telcoautomation/apiv1/[^/]*_client_example_test\.go$
+        - ^telcoautomation/apiv1/auxiliary\.go$
+        - ^telcoautomation/apiv1/auxiliary_go123\.go$
+        - ^telcoautomation/apiv1/doc\.go$
+        - ^telcoautomation/apiv1/gapic_metadata\.json$
+        - ^telcoautomation/apiv1/helpers\.go$
+        - ^telcoautomation/apiv1/telcoautomationpb/.*$
+        - ^telcoautomation/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/telcoautomation/
+    tag_format: '{id}/v{version}'

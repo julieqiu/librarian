@@ -1,0 +1,26 @@
+name: dataflow
+version: 0.11.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/dataflow/v1beta3
+          service_config: dataflow_v1beta3.yaml
+go:
+    source_roots:
+        - dataflow
+        - internal/generated/snippets/dataflow
+    remove_regex:
+        - ^internal/generated/snippets/dataflow/
+        - ^dataflow/apiv1beta3/[^/]*_client\.go$
+        - ^dataflow/apiv1beta3/[^/]*_client_example_go123_test\.go$
+        - ^dataflow/apiv1beta3/[^/]*_client_example_test\.go$
+        - ^dataflow/apiv1beta3/auxiliary\.go$
+        - ^dataflow/apiv1beta3/auxiliary_go123\.go$
+        - ^dataflow/apiv1beta3/doc\.go$
+        - ^dataflow/apiv1beta3/gapic_metadata\.json$
+        - ^dataflow/apiv1beta3/helpers\.go$
+        - ^dataflow/apiv1beta3/dataflowpb/.*$
+        - ^dataflow/apiv1beta3/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/dataflow/
+    tag_format: '{id}/v{version}'

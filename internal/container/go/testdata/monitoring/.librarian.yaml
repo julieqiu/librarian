@@ -1,0 +1,50 @@
+name: monitoring
+version: 1.24.3
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/monitoring/dashboard/v1
+          service_config: monitoring.yaml
+        - path: google/monitoring/metricsscope/v1
+          service_config: monitoring.yaml
+        - path: google/monitoring/v3
+          service_config: monitoring.yaml
+go:
+    source_roots:
+        - monitoring
+        - internal/generated/snippets/monitoring
+    remove_regex:
+        - ^internal/generated/snippets/monitoring/
+        - ^monitoring/apiv3/v2/[^/]*_client\.go$
+        - ^monitoring/apiv3/v2/[^/]*_client_example_go123_test\.go$
+        - ^monitoring/apiv3/v2/[^/]*_client_example_test\.go$
+        - ^monitoring/apiv3/v2/auxiliary\.go$
+        - ^monitoring/apiv3/v2/auxiliary_go123\.go$
+        - ^monitoring/apiv3/v2/doc\.go$
+        - ^monitoring/apiv3/v2/gapic_metadata\.json$
+        - ^monitoring/apiv3/v2/helpers\.go$
+        - ^monitoring/apiv3/v2/monitoringpb/.*$
+        - ^monitoring/apiv3/v2/\.repo-metadata\.json$
+        - ^monitoring/dashboard/apiv1/[^/]*_client\.go$
+        - ^monitoring/dashboard/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^monitoring/dashboard/apiv1/[^/]*_client_example_test\.go$
+        - ^monitoring/dashboard/apiv1/auxiliary\.go$
+        - ^monitoring/dashboard/apiv1/auxiliary_go123\.go$
+        - ^monitoring/dashboard/apiv1/doc\.go$
+        - ^monitoring/dashboard/apiv1/gapic_metadata\.json$
+        - ^monitoring/dashboard/apiv1/helpers\.go$
+        - ^monitoring/dashboard/apiv1/dashboardpb/.*$
+        - ^monitoring/dashboard/apiv1/\.repo-metadata\.json$
+        - ^monitoring/metricsscope/apiv1/[^/]*_client\.go$
+        - ^monitoring/metricsscope/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^monitoring/metricsscope/apiv1/[^/]*_client_example_test\.go$
+        - ^monitoring/metricsscope/apiv1/auxiliary\.go$
+        - ^monitoring/metricsscope/apiv1/auxiliary_go123\.go$
+        - ^monitoring/metricsscope/apiv1/doc\.go$
+        - ^monitoring/metricsscope/apiv1/gapic_metadata\.json$
+        - ^monitoring/metricsscope/apiv1/helpers\.go$
+        - ^monitoring/metricsscope/apiv1/metricsscopepb/.*$
+        - ^monitoring/metricsscope/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/monitoring/
+    tag_format: '{id}/v{version}'

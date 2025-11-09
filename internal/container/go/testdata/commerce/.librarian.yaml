@@ -1,0 +1,26 @@
+name: commerce
+version: 1.2.6
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/commerce/consumer/procurement/v1
+          service_config: cloudcommerceconsumerprocurement_v1.yaml
+go:
+    source_roots:
+        - commerce
+        - internal/generated/snippets/commerce
+    remove_regex:
+        - ^internal/generated/snippets/commerce/
+        - ^commerce/consumer/procurement/apiv1/[^/]*_client\.go$
+        - ^commerce/consumer/procurement/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^commerce/consumer/procurement/apiv1/[^/]*_client_example_test\.go$
+        - ^commerce/consumer/procurement/apiv1/auxiliary\.go$
+        - ^commerce/consumer/procurement/apiv1/auxiliary_go123\.go$
+        - ^commerce/consumer/procurement/apiv1/doc\.go$
+        - ^commerce/consumer/procurement/apiv1/gapic_metadata\.json$
+        - ^commerce/consumer/procurement/apiv1/helpers\.go$
+        - ^commerce/consumer/procurement/apiv1/procurementpb/.*$
+        - ^commerce/consumer/procurement/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/commerce/
+    tag_format: '{id}/v{version}'

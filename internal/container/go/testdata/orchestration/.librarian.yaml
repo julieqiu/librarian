@@ -1,0 +1,26 @@
+name: orchestration
+version: 1.11.10
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/orchestration/airflow/service/v1
+          service_config: composer_v1.yaml
+go:
+    source_roots:
+        - orchestration
+        - internal/generated/snippets/orchestration
+    remove_regex:
+        - ^internal/generated/snippets/orchestration/
+        - ^orchestration/airflow/service/apiv1/[^/]*_client\.go$
+        - ^orchestration/airflow/service/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^orchestration/airflow/service/apiv1/[^/]*_client_example_test\.go$
+        - ^orchestration/airflow/service/apiv1/auxiliary\.go$
+        - ^orchestration/airflow/service/apiv1/auxiliary_go123\.go$
+        - ^orchestration/airflow/service/apiv1/doc\.go$
+        - ^orchestration/airflow/service/apiv1/gapic_metadata\.json$
+        - ^orchestration/airflow/service/apiv1/helpers\.go$
+        - ^orchestration/airflow/service/apiv1/servicepb/.*$
+        - ^orchestration/airflow/service/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/orchestration/
+    tag_format: '{id}/v{version}'

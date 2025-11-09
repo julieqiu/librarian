@@ -1,0 +1,26 @@
+name: datafusion
+version: 1.8.7
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/datafusion/v1
+          service_config: datafusion_v1.yaml
+go:
+    source_roots:
+        - datafusion
+        - internal/generated/snippets/datafusion
+    remove_regex:
+        - ^internal/generated/snippets/datafusion/
+        - ^datafusion/apiv1/[^/]*_client\.go$
+        - ^datafusion/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^datafusion/apiv1/[^/]*_client_example_test\.go$
+        - ^datafusion/apiv1/auxiliary\.go$
+        - ^datafusion/apiv1/auxiliary_go123\.go$
+        - ^datafusion/apiv1/doc\.go$
+        - ^datafusion/apiv1/gapic_metadata\.json$
+        - ^datafusion/apiv1/helpers\.go$
+        - ^datafusion/apiv1/datafusionpb/.*$
+        - ^datafusion/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/datafusion/
+    tag_format: '{id}/v{version}'

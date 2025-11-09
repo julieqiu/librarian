@@ -1,0 +1,26 @@
+name: locationfinder
+version: 0.1.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/locationfinder/v1
+          service_config: cloudlocationfinder_v1.yaml
+go:
+    source_roots:
+        - locationfinder
+        - internal/generated/snippets/locationfinder
+    remove_regex:
+        - ^internal/generated/snippets/locationfinder/
+        - ^locationfinder/apiv1/[^/]*_client\.go$
+        - ^locationfinder/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^locationfinder/apiv1/[^/]*_client_example_test\.go$
+        - ^locationfinder/apiv1/auxiliary\.go$
+        - ^locationfinder/apiv1/auxiliary_go123\.go$
+        - ^locationfinder/apiv1/doc\.go$
+        - ^locationfinder/apiv1/gapic_metadata\.json$
+        - ^locationfinder/apiv1/helpers\.go$
+        - ^locationfinder/apiv1/locationfinderpb/.*$
+        - ^locationfinder/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/locationfinder/
+    tag_format: '{id}/v{version}'

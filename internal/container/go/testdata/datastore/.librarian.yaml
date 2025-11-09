@@ -1,0 +1,37 @@
+name: datastore
+version: 1.21.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/datastore/admin/v1
+          service_config: datastore_v1.yaml
+        - path: google/datastore/v1
+          service_config: datastore_v1.yaml
+go:
+    source_roots:
+        - datastore
+        - internal/generated/snippets/datastore
+    remove_regex:
+        - ^internal/generated/snippets/datastore/
+        - ^datastore/admin/apiv1/[^/]*_client\.go$
+        - ^datastore/admin/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^datastore/admin/apiv1/[^/]*_client_example_test\.go$
+        - ^datastore/admin/apiv1/auxiliary\.go$
+        - ^datastore/admin/apiv1/auxiliary_go123\.go$
+        - ^datastore/admin/apiv1/doc\.go$
+        - ^datastore/admin/apiv1/gapic_metadata\.json$
+        - ^datastore/admin/apiv1/helpers\.go$
+        - ^datastore/admin/apiv1/adminpb/.*$
+        - ^datastore/admin/apiv1/\.repo-metadata\.json$
+        - ^datastore/apiv1/[^/]*_client\.go$
+        - ^datastore/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^datastore/apiv1/[^/]*_client_example_test\.go$
+        - ^datastore/apiv1/auxiliary\.go$
+        - ^datastore/apiv1/auxiliary_go123\.go$
+        - ^datastore/apiv1/doc\.go$
+        - ^datastore/apiv1/gapic_metadata\.json$
+        - ^datastore/apiv1/helpers\.go$
+        - ^datastore/apiv1/datastorepb/.*$
+        - ^datastore/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/datastore/

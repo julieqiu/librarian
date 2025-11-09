@@ -1,0 +1,8 @@
+name: profiler
+version: 0.4.3
+generate:
+    specification_format: protobuf
+go:
+    source_roots:
+        - profiler
+    tag_format: '{id}/v{version}'

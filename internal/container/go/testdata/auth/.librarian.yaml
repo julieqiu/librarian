@@ -1,0 +1,10 @@
+name: auth
+version: 0.17.0
+generate:
+    specification_format: protobuf
+go:
+    source_roots:
+        - auth
+    release_exclude_paths:
+        - auth/oauth2adapt
+    tag_format: '{id}/v{version}'

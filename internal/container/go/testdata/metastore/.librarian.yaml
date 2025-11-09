@@ -1,0 +1,50 @@
+name: metastore
+version: 1.14.8
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/metastore/v1
+          service_config: metastore_v1.yaml
+        - path: google/cloud/metastore/v1alpha
+          service_config: metastore_v1alpha.yaml
+        - path: google/cloud/metastore/v1beta
+          service_config: metastore_v1beta.yaml
+go:
+    source_roots:
+        - metastore
+        - internal/generated/snippets/metastore
+    remove_regex:
+        - ^internal/generated/snippets/metastore/
+        - ^metastore/apiv1/[^/]*_client\.go$
+        - ^metastore/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^metastore/apiv1/[^/]*_client_example_test\.go$
+        - ^metastore/apiv1/auxiliary\.go$
+        - ^metastore/apiv1/auxiliary_go123\.go$
+        - ^metastore/apiv1/doc\.go$
+        - ^metastore/apiv1/gapic_metadata\.json$
+        - ^metastore/apiv1/helpers\.go$
+        - ^metastore/apiv1/metastorepb/.*$
+        - ^metastore/apiv1/\.repo-metadata\.json$
+        - ^metastore/apiv1alpha/[^/]*_client\.go$
+        - ^metastore/apiv1alpha/[^/]*_client_example_go123_test\.go$
+        - ^metastore/apiv1alpha/[^/]*_client_example_test\.go$
+        - ^metastore/apiv1alpha/auxiliary\.go$
+        - ^metastore/apiv1alpha/auxiliary_go123\.go$
+        - ^metastore/apiv1alpha/doc\.go$
+        - ^metastore/apiv1alpha/gapic_metadata\.json$
+        - ^metastore/apiv1alpha/helpers\.go$
+        - ^metastore/apiv1alpha/metastorepb/.*$
+        - ^metastore/apiv1alpha/\.repo-metadata\.json$
+        - ^metastore/apiv1beta/[^/]*_client\.go$
+        - ^metastore/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^metastore/apiv1beta/[^/]*_client_example_test\.go$
+        - ^metastore/apiv1beta/auxiliary\.go$
+        - ^metastore/apiv1beta/auxiliary_go123\.go$
+        - ^metastore/apiv1beta/doc\.go$
+        - ^metastore/apiv1beta/gapic_metadata\.json$
+        - ^metastore/apiv1beta/helpers\.go$
+        - ^metastore/apiv1beta/metastorepb/.*$
+        - ^metastore/apiv1beta/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/metastore/
+    tag_format: '{id}/v{version}'

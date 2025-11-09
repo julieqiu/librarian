@@ -1,0 +1,8 @@
+name: compute/metadata
+version: 0.9.0
+generate:
+    specification_format: protobuf
+go:
+    source_roots:
+        - compute/metadata
+    tag_format: '{id}/v{version}'

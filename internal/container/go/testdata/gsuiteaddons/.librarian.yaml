@@ -1,0 +1,26 @@
+name: gsuiteaddons
+version: 1.7.8
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/gsuiteaddons/v1
+          service_config: gsuiteaddons_v1.yaml
+go:
+    source_roots:
+        - gsuiteaddons
+        - internal/generated/snippets/gsuiteaddons
+    remove_regex:
+        - ^internal/generated/snippets/gsuiteaddons/
+        - ^gsuiteaddons/apiv1/[^/]*_client\.go$
+        - ^gsuiteaddons/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^gsuiteaddons/apiv1/[^/]*_client_example_test\.go$
+        - ^gsuiteaddons/apiv1/auxiliary\.go$
+        - ^gsuiteaddons/apiv1/auxiliary_go123\.go$
+        - ^gsuiteaddons/apiv1/doc\.go$
+        - ^gsuiteaddons/apiv1/gapic_metadata\.json$
+        - ^gsuiteaddons/apiv1/helpers\.go$
+        - ^gsuiteaddons/apiv1/gsuiteaddonspb/.*$
+        - ^gsuiteaddons/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/gsuiteaddons/
+    tag_format: '{id}/v{version}'

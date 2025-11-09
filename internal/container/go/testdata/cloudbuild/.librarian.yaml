@@ -1,0 +1,38 @@
+name: cloudbuild
+version: 1.23.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/devtools/cloudbuild/v1
+          service_config: cloudbuild_v1.yaml
+        - path: google/devtools/cloudbuild/v2
+          service_config: cloudbuild_v2.yaml
+go:
+    source_roots:
+        - cloudbuild
+        - internal/generated/snippets/cloudbuild
+    remove_regex:
+        - ^internal/generated/snippets/cloudbuild/
+        - ^cloudbuild/apiv1/v2/[^/]*_client\.go$
+        - ^cloudbuild/apiv1/v2/[^/]*_client_example_go123_test\.go$
+        - ^cloudbuild/apiv1/v2/[^/]*_client_example_test\.go$
+        - ^cloudbuild/apiv1/v2/auxiliary\.go$
+        - ^cloudbuild/apiv1/v2/auxiliary_go123\.go$
+        - ^cloudbuild/apiv1/v2/doc\.go$
+        - ^cloudbuild/apiv1/v2/gapic_metadata\.json$
+        - ^cloudbuild/apiv1/v2/helpers\.go$
+        - ^cloudbuild/apiv1/v2/cloudbuildpb/.*$
+        - ^cloudbuild/apiv1/v2/\.repo-metadata\.json$
+        - ^cloudbuild/apiv2/[^/]*_client\.go$
+        - ^cloudbuild/apiv2/[^/]*_client_example_go123_test\.go$
+        - ^cloudbuild/apiv2/[^/]*_client_example_test\.go$
+        - ^cloudbuild/apiv2/auxiliary\.go$
+        - ^cloudbuild/apiv2/auxiliary_go123\.go$
+        - ^cloudbuild/apiv2/doc\.go$
+        - ^cloudbuild/apiv2/gapic_metadata\.json$
+        - ^cloudbuild/apiv2/helpers\.go$
+        - ^cloudbuild/apiv2/cloudbuildpb/.*$
+        - ^cloudbuild/apiv2/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/cloudbuild/
+    tag_format: '{id}/v{version}'

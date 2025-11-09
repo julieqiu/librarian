@@ -1,0 +1,26 @@
+name: securitycentermanagement
+version: 1.1.6
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/securitycentermanagement/v1
+          service_config: securitycentermanagement_v1.yaml
+go:
+    source_roots:
+        - securitycentermanagement
+        - internal/generated/snippets/securitycentermanagement
+    remove_regex:
+        - ^internal/generated/snippets/securitycentermanagement/
+        - ^securitycentermanagement/apiv1/[^/]*_client\.go$
+        - ^securitycentermanagement/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^securitycentermanagement/apiv1/[^/]*_client_example_test\.go$
+        - ^securitycentermanagement/apiv1/auxiliary\.go$
+        - ^securitycentermanagement/apiv1/auxiliary_go123\.go$
+        - ^securitycentermanagement/apiv1/doc\.go$
+        - ^securitycentermanagement/apiv1/gapic_metadata\.json$
+        - ^securitycentermanagement/apiv1/helpers\.go$
+        - ^securitycentermanagement/apiv1/securitycentermanagementpb/.*$
+        - ^securitycentermanagement/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/securitycentermanagement/
+    tag_format: '{id}/v{version}'

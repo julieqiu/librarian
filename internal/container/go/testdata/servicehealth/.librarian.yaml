@@ -1,0 +1,26 @@
+name: servicehealth
+version: 1.2.4
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/servicehealth/v1
+          service_config: servicehealth_v1.yaml
+go:
+    source_roots:
+        - servicehealth
+        - internal/generated/snippets/servicehealth
+    remove_regex:
+        - ^internal/generated/snippets/servicehealth/
+        - ^servicehealth/apiv1/[^/]*_client\.go$
+        - ^servicehealth/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^servicehealth/apiv1/[^/]*_client_example_test\.go$
+        - ^servicehealth/apiv1/auxiliary\.go$
+        - ^servicehealth/apiv1/auxiliary_go123\.go$
+        - ^servicehealth/apiv1/doc\.go$
+        - ^servicehealth/apiv1/gapic_metadata\.json$
+        - ^servicehealth/apiv1/helpers\.go$
+        - ^servicehealth/apiv1/servicehealthpb/.*$
+        - ^servicehealth/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/servicehealth/
+    tag_format: '{id}/v{version}'

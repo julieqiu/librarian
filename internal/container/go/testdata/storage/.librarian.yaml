@@ -1,0 +1,40 @@
+name: storage
+version: 1.57.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/storage/control/v2
+          service_config: storage_v2.yaml
+        - path: google/storage/v2
+          service_config: storage_v2.yaml
+go:
+    source_roots:
+        - storage
+        - internal/generated/snippets/storage
+    remove_regex:
+        - ^internal/generated/snippets/storage/
+        - ^storage/control/apiv2/[^/]*_client\.go$
+        - ^storage/control/apiv2/[^/]*_client_example_go123_test\.go$
+        - ^storage/control/apiv2/[^/]*_client_example_test\.go$
+        - ^storage/control/apiv2/auxiliary\.go$
+        - ^storage/control/apiv2/auxiliary_go123\.go$
+        - ^storage/control/apiv2/doc\.go$
+        - ^storage/control/apiv2/gapic_metadata\.json$
+        - ^storage/control/apiv2/helpers\.go$
+        - ^storage/control/apiv2/controlpb/.*$
+        - ^storage/control/apiv2/\.repo-metadata\.json$
+        - ^storage/internal/apiv2/[^/]*_client\.go$
+        - ^storage/internal/apiv2/[^/]*_client_example_go123_test\.go$
+        - ^storage/internal/apiv2/[^/]*_client_example_test\.go$
+        - ^storage/internal/apiv2/auxiliary\.go$
+        - ^storage/internal/apiv2/auxiliary_go123\.go$
+        - ^storage/internal/apiv2/doc\.go$
+        - ^storage/internal/apiv2/gapic_metadata\.json$
+        - ^storage/internal/apiv2/helpers\.go$
+        - ^storage/internal/apiv2/storagepb/.*$
+        - ^storage/internal/apiv2/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/storage/
+        - storage/internal/benchmarks
+        - storage/internal/test
+    tag_format: '{id}/v{version}'

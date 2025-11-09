@@ -1,0 +1,26 @@
+name: storageinsights
+version: 1.2.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/storageinsights/v1
+          service_config: storageinsights_v1.yaml
+go:
+    source_roots:
+        - storageinsights
+        - internal/generated/snippets/storageinsights
+    remove_regex:
+        - ^internal/generated/snippets/storageinsights/
+        - ^storageinsights/apiv1/[^/]*_client\.go$
+        - ^storageinsights/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^storageinsights/apiv1/[^/]*_client_example_test\.go$
+        - ^storageinsights/apiv1/auxiliary\.go$
+        - ^storageinsights/apiv1/auxiliary_go123\.go$
+        - ^storageinsights/apiv1/doc\.go$
+        - ^storageinsights/apiv1/gapic_metadata\.json$
+        - ^storageinsights/apiv1/helpers\.go$
+        - ^storageinsights/apiv1/storageinsightspb/.*$
+        - ^storageinsights/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/storageinsights/
+    tag_format: '{id}/v{version}'

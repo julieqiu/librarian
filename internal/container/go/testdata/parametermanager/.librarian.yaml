@@ -1,0 +1,26 @@
+name: parametermanager
+version: 0.3.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/parametermanager/v1
+          service_config: parametermanager_v1.yaml
+go:
+    source_roots:
+        - parametermanager
+        - internal/generated/snippets/parametermanager
+    remove_regex:
+        - ^internal/generated/snippets/parametermanager/
+        - ^parametermanager/apiv1/[^/]*_client\.go$
+        - ^parametermanager/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^parametermanager/apiv1/[^/]*_client_example_test\.go$
+        - ^parametermanager/apiv1/auxiliary\.go$
+        - ^parametermanager/apiv1/auxiliary_go123\.go$
+        - ^parametermanager/apiv1/doc\.go$
+        - ^parametermanager/apiv1/gapic_metadata\.json$
+        - ^parametermanager/apiv1/helpers\.go$
+        - ^parametermanager/apiv1/parametermanagerpb/.*$
+        - ^parametermanager/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/parametermanager/
+    tag_format: '{id}/v{version}'

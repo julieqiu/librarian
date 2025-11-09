@@ -1,0 +1,26 @@
+name: filestore
+version: 1.10.3
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/filestore/v1
+          service_config: file_v1.yaml
+go:
+    source_roots:
+        - filestore
+        - internal/generated/snippets/filestore
+    remove_regex:
+        - ^internal/generated/snippets/filestore/
+        - ^filestore/apiv1/[^/]*_client\.go$
+        - ^filestore/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^filestore/apiv1/[^/]*_client_example_test\.go$
+        - ^filestore/apiv1/auxiliary\.go$
+        - ^filestore/apiv1/auxiliary_go123\.go$
+        - ^filestore/apiv1/doc\.go$
+        - ^filestore/apiv1/gapic_metadata\.json$
+        - ^filestore/apiv1/helpers\.go$
+        - ^filestore/apiv1/filestorepb/.*$
+        - ^filestore/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/filestore/
+    tag_format: '{id}/v{version}'

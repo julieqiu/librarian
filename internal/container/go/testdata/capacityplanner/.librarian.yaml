@@ -1,0 +1,26 @@
+name: capacityplanner
+version: 0.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/capacityplanner/v1beta
+          service_config: capacityplanner_v1beta.yaml
+go:
+    source_roots:
+        - capacityplanner
+        - internal/generated/snippets/capacityplanner
+    remove_regex:
+        - ^internal/generated/snippets/capacityplanner/
+        - ^capacityplanner/apiv1beta/[^/]*_client\.go$
+        - ^capacityplanner/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^capacityplanner/apiv1beta/[^/]*_client_example_test\.go$
+        - ^capacityplanner/apiv1beta/auxiliary\.go$
+        - ^capacityplanner/apiv1beta/auxiliary_go123\.go$
+        - ^capacityplanner/apiv1beta/doc\.go$
+        - ^capacityplanner/apiv1beta/gapic_metadata\.json$
+        - ^capacityplanner/apiv1beta/helpers\.go$
+        - ^capacityplanner/apiv1beta/capacityplannerpb/.*$
+        - ^capacityplanner/apiv1beta/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/capacityplanner/
+    tag_format: '{id}/v{version}'

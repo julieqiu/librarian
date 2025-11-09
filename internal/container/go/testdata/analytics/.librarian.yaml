@@ -1,0 +1,26 @@
+name: analytics
+version: 0.30.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/analytics/admin/v1alpha
+          service_config: analyticsadmin_v1alpha.yaml
+go:
+    source_roots:
+        - analytics
+        - internal/generated/snippets/analytics
+    remove_regex:
+        - ^internal/generated/snippets/analytics/
+        - ^analytics/admin/apiv1alpha/[^/]*_client\.go$
+        - ^analytics/admin/apiv1alpha/[^/]*_client_example_go123_test\.go$
+        - ^analytics/admin/apiv1alpha/[^/]*_client_example_test\.go$
+        - ^analytics/admin/apiv1alpha/auxiliary\.go$
+        - ^analytics/admin/apiv1alpha/auxiliary_go123\.go$
+        - ^analytics/admin/apiv1alpha/doc\.go$
+        - ^analytics/admin/apiv1alpha/gapic_metadata\.json$
+        - ^analytics/admin/apiv1alpha/helpers\.go$
+        - ^analytics/admin/apiv1alpha/adminpb/.*$
+        - ^analytics/admin/apiv1alpha/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/analytics/
+    tag_format: '{id}/v{version}'

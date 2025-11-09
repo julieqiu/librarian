@@ -1,0 +1,26 @@
+name: cloudprofiler
+version: 0.4.6
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/devtools/cloudprofiler/v2
+          service_config: cloudprofiler_v2.yaml
+go:
+    source_roots:
+        - cloudprofiler
+        - internal/generated/snippets/cloudprofiler
+    remove_regex:
+        - ^internal/generated/snippets/cloudprofiler/
+        - ^cloudprofiler/apiv2/[^/]*_client\.go$
+        - ^cloudprofiler/apiv2/[^/]*_client_example_go123_test\.go$
+        - ^cloudprofiler/apiv2/[^/]*_client_example_test\.go$
+        - ^cloudprofiler/apiv2/auxiliary\.go$
+        - ^cloudprofiler/apiv2/auxiliary_go123\.go$
+        - ^cloudprofiler/apiv2/doc\.go$
+        - ^cloudprofiler/apiv2/gapic_metadata\.json$
+        - ^cloudprofiler/apiv2/helpers\.go$
+        - ^cloudprofiler/apiv2/cloudprofilerpb/.*$
+        - ^cloudprofiler/apiv2/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/cloudprofiler/
+    tag_format: '{id}/v{version}'

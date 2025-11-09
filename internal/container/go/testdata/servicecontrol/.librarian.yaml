@@ -1,0 +1,26 @@
+name: servicecontrol
+version: 1.14.6
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/api/servicecontrol/v1
+          service_config: servicecontrol.yaml
+go:
+    source_roots:
+        - servicecontrol
+        - internal/generated/snippets/servicecontrol
+    remove_regex:
+        - ^internal/generated/snippets/servicecontrol/
+        - ^servicecontrol/apiv1/[^/]*_client\.go$
+        - ^servicecontrol/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^servicecontrol/apiv1/[^/]*_client_example_test\.go$
+        - ^servicecontrol/apiv1/auxiliary\.go$
+        - ^servicecontrol/apiv1/auxiliary_go123\.go$
+        - ^servicecontrol/apiv1/doc\.go$
+        - ^servicecontrol/apiv1/gapic_metadata\.json$
+        - ^servicecontrol/apiv1/helpers\.go$
+        - ^servicecontrol/apiv1/servicecontrolpb/.*$
+        - ^servicecontrol/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/servicecontrol/
+    tag_format: '{id}/v{version}'

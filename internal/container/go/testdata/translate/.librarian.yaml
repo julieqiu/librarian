@@ -1,0 +1,26 @@
+name: translate
+version: 1.12.7
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/translate/v3
+          service_config: translate_v3.yaml
+go:
+    source_roots:
+        - translate
+        - internal/generated/snippets/translate
+    remove_regex:
+        - ^internal/generated/snippets/translate/
+        - ^translate/apiv3/[^/]*_client\.go$
+        - ^translate/apiv3/[^/]*_client_example_go123_test\.go$
+        - ^translate/apiv3/[^/]*_client_example_test\.go$
+        - ^translate/apiv3/auxiliary\.go$
+        - ^translate/apiv3/auxiliary_go123\.go$
+        - ^translate/apiv3/doc\.go$
+        - ^translate/apiv3/gapic_metadata\.json$
+        - ^translate/apiv3/helpers\.go$
+        - ^translate/apiv3/translatepb/.*$
+        - ^translate/apiv3/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/translate/
+    tag_format: '{id}/v{version}'

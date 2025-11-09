@@ -1,0 +1,26 @@
+name: developerconnect
+version: 0.4.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/developerconnect/v1
+          service_config: developerconnect_v1.yaml
+go:
+    source_roots:
+        - developerconnect
+        - internal/generated/snippets/developerconnect
+    remove_regex:
+        - ^internal/generated/snippets/developerconnect/
+        - ^developerconnect/apiv1/[^/]*_client\.go$
+        - ^developerconnect/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^developerconnect/apiv1/[^/]*_client_example_test\.go$
+        - ^developerconnect/apiv1/auxiliary\.go$
+        - ^developerconnect/apiv1/auxiliary_go123\.go$
+        - ^developerconnect/apiv1/doc\.go$
+        - ^developerconnect/apiv1/gapic_metadata\.json$
+        - ^developerconnect/apiv1/helpers\.go$
+        - ^developerconnect/apiv1/developerconnectpb/.*$
+        - ^developerconnect/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/developerconnect/
+    tag_format: '{id}/v{version}'

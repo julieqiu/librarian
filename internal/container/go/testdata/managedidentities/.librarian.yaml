@@ -1,0 +1,26 @@
+name: managedidentities
+version: 1.7.7
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/managedidentities/v1
+          service_config: managedidentities_v1.yaml
+go:
+    source_roots:
+        - managedidentities
+        - internal/generated/snippets/managedidentities
+    remove_regex:
+        - ^internal/generated/snippets/managedidentities/
+        - ^managedidentities/apiv1/[^/]*_client\.go$
+        - ^managedidentities/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^managedidentities/apiv1/[^/]*_client_example_test\.go$
+        - ^managedidentities/apiv1/auxiliary\.go$
+        - ^managedidentities/apiv1/auxiliary_go123\.go$
+        - ^managedidentities/apiv1/doc\.go$
+        - ^managedidentities/apiv1/gapic_metadata\.json$
+        - ^managedidentities/apiv1/helpers\.go$
+        - ^managedidentities/apiv1/managedidentitiespb/.*$
+        - ^managedidentities/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/managedidentities/
+    tag_format: '{id}/v{version}'

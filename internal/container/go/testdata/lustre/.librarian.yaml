@@ -1,0 +1,26 @@
+name: lustre
+version: 0.2.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/lustre/v1
+          service_config: lustre_v1.yaml
+go:
+    source_roots:
+        - lustre
+        - internal/generated/snippets/lustre
+    remove_regex:
+        - ^internal/generated/snippets/lustre/
+        - ^lustre/apiv1/[^/]*_client\.go$
+        - ^lustre/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^lustre/apiv1/[^/]*_client_example_test\.go$
+        - ^lustre/apiv1/auxiliary\.go$
+        - ^lustre/apiv1/auxiliary_go123\.go$
+        - ^lustre/apiv1/doc\.go$
+        - ^lustre/apiv1/gapic_metadata\.json$
+        - ^lustre/apiv1/helpers\.go$
+        - ^lustre/apiv1/lustrepb/.*$
+        - ^lustre/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/lustre/
+    tag_format: '{id}/v{version}'

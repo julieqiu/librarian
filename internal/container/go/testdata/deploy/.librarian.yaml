@@ -1,0 +1,26 @@
+name: deploy
+version: 1.27.3
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/deploy/v1
+          service_config: clouddeploy_v1.yaml
+go:
+    source_roots:
+        - deploy
+        - internal/generated/snippets/deploy
+    remove_regex:
+        - ^internal/generated/snippets/deploy/
+        - ^deploy/apiv1/[^/]*_client\.go$
+        - ^deploy/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^deploy/apiv1/[^/]*_client_example_test\.go$
+        - ^deploy/apiv1/auxiliary\.go$
+        - ^deploy/apiv1/auxiliary_go123\.go$
+        - ^deploy/apiv1/doc\.go$
+        - ^deploy/apiv1/gapic_metadata\.json$
+        - ^deploy/apiv1/helpers\.go$
+        - ^deploy/apiv1/deploypb/.*$
+        - ^deploy/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/deploy/
+    tag_format: '{id}/v{version}'

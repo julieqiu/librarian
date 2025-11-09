@@ -1,0 +1,26 @@
+name: servicemanagement
+version: 1.10.7
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/api/servicemanagement/v1
+          service_config: servicemanagement_v1.yaml
+go:
+    source_roots:
+        - servicemanagement
+        - internal/generated/snippets/servicemanagement
+    remove_regex:
+        - ^internal/generated/snippets/servicemanagement/
+        - ^servicemanagement/apiv1/[^/]*_client\.go$
+        - ^servicemanagement/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^servicemanagement/apiv1/[^/]*_client_example_test\.go$
+        - ^servicemanagement/apiv1/auxiliary\.go$
+        - ^servicemanagement/apiv1/auxiliary_go123\.go$
+        - ^servicemanagement/apiv1/doc\.go$
+        - ^servicemanagement/apiv1/gapic_metadata\.json$
+        - ^servicemanagement/apiv1/helpers\.go$
+        - ^servicemanagement/apiv1/servicemanagementpb/.*$
+        - ^servicemanagement/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/servicemanagement/
+    tag_format: '{id}/v{version}'

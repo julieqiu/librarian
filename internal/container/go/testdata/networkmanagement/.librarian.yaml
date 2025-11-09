@@ -1,0 +1,26 @@
+name: networkmanagement
+version: 1.20.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/networkmanagement/v1
+          service_config: networkmanagement_v1.yaml
+go:
+    source_roots:
+        - networkmanagement
+        - internal/generated/snippets/networkmanagement
+    remove_regex:
+        - ^internal/generated/snippets/networkmanagement/
+        - ^networkmanagement/apiv1/[^/]*_client\.go$
+        - ^networkmanagement/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^networkmanagement/apiv1/[^/]*_client_example_test\.go$
+        - ^networkmanagement/apiv1/auxiliary\.go$
+        - ^networkmanagement/apiv1/auxiliary_go123\.go$
+        - ^networkmanagement/apiv1/doc\.go$
+        - ^networkmanagement/apiv1/gapic_metadata\.json$
+        - ^networkmanagement/apiv1/helpers\.go$
+        - ^networkmanagement/apiv1/networkmanagementpb/.*$
+        - ^networkmanagement/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/networkmanagement/
+    tag_format: '{id}/v{version}'

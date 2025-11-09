@@ -1,0 +1,38 @@
+name: trace
+version: 1.11.7
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/devtools/cloudtrace/v1
+          service_config: cloudtrace_v1.yaml
+        - path: google/devtools/cloudtrace/v2
+          service_config: cloudtrace_v2.yaml
+go:
+    source_roots:
+        - trace
+        - internal/generated/snippets/trace
+    remove_regex:
+        - ^internal/generated/snippets/trace/
+        - ^trace/apiv1/[^/]*_client\.go$
+        - ^trace/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^trace/apiv1/[^/]*_client_example_test\.go$
+        - ^trace/apiv1/auxiliary\.go$
+        - ^trace/apiv1/auxiliary_go123\.go$
+        - ^trace/apiv1/doc\.go$
+        - ^trace/apiv1/gapic_metadata\.json$
+        - ^trace/apiv1/helpers\.go$
+        - ^trace/apiv1/tracepb/.*$
+        - ^trace/apiv1/\.repo-metadata\.json$
+        - ^trace/apiv2/[^/]*_client\.go$
+        - ^trace/apiv2/[^/]*_client_example_go123_test\.go$
+        - ^trace/apiv2/[^/]*_client_example_test\.go$
+        - ^trace/apiv2/auxiliary\.go$
+        - ^trace/apiv2/auxiliary_go123\.go$
+        - ^trace/apiv2/doc\.go$
+        - ^trace/apiv2/gapic_metadata\.json$
+        - ^trace/apiv2/helpers\.go$
+        - ^trace/apiv2/tracepb/.*$
+        - ^trace/apiv2/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/trace/
+    tag_format: '{id}/v{version}'

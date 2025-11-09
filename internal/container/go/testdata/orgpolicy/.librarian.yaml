@@ -1,0 +1,37 @@
+name: orgpolicy
+version: 1.15.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/orgpolicy/v1
+        - path: google/cloud/orgpolicy/v2
+          service_config: orgpolicy_v2.yaml
+go:
+    source_roots:
+        - orgpolicy
+        - internal/generated/snippets/orgpolicy
+    remove_regex:
+        - ^internal/generated/snippets/orgpolicy/
+        - ^orgpolicy/apiv1/[^/]*_client\.go$
+        - ^orgpolicy/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^orgpolicy/apiv1/[^/]*_client_example_test\.go$
+        - ^orgpolicy/apiv1/auxiliary\.go$
+        - ^orgpolicy/apiv1/auxiliary_go123\.go$
+        - ^orgpolicy/apiv1/doc\.go$
+        - ^orgpolicy/apiv1/gapic_metadata\.json$
+        - ^orgpolicy/apiv1/helpers\.go$
+        - ^orgpolicy/apiv1/orgpolicypb/.*$
+        - ^orgpolicy/apiv1/\.repo-metadata\.json$
+        - ^orgpolicy/apiv2/[^/]*_client\.go$
+        - ^orgpolicy/apiv2/[^/]*_client_example_go123_test\.go$
+        - ^orgpolicy/apiv2/[^/]*_client_example_test\.go$
+        - ^orgpolicy/apiv2/auxiliary\.go$
+        - ^orgpolicy/apiv2/auxiliary_go123\.go$
+        - ^orgpolicy/apiv2/doc\.go$
+        - ^orgpolicy/apiv2/gapic_metadata\.json$
+        - ^orgpolicy/apiv2/helpers\.go$
+        - ^orgpolicy/apiv2/orgpolicypb/.*$
+        - ^orgpolicy/apiv2/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/orgpolicy/
+    tag_format: '{id}/v{version}'

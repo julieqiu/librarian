@@ -1,0 +1,38 @@
+name: support
+version: 1.4.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/support/v2
+          service_config: cloudsupport_v2.yaml
+        - path: google/cloud/support/v2beta
+          service_config: cloudsupport_v2beta.yaml
+go:
+    source_roots:
+        - support
+        - internal/generated/snippets/support
+    remove_regex:
+        - ^internal/generated/snippets/support/
+        - ^support/apiv2/[^/]*_client\.go$
+        - ^support/apiv2/[^/]*_client_example_go123_test\.go$
+        - ^support/apiv2/[^/]*_client_example_test\.go$
+        - ^support/apiv2/auxiliary\.go$
+        - ^support/apiv2/auxiliary_go123\.go$
+        - ^support/apiv2/doc\.go$
+        - ^support/apiv2/gapic_metadata\.json$
+        - ^support/apiv2/helpers\.go$
+        - ^support/apiv2/supportpb/.*$
+        - ^support/apiv2/\.repo-metadata\.json$
+        - ^support/apiv2beta/[^/]*_client\.go$
+        - ^support/apiv2beta/[^/]*_client_example_go123_test\.go$
+        - ^support/apiv2beta/[^/]*_client_example_test\.go$
+        - ^support/apiv2beta/auxiliary\.go$
+        - ^support/apiv2beta/auxiliary_go123\.go$
+        - ^support/apiv2beta/doc\.go$
+        - ^support/apiv2beta/gapic_metadata\.json$
+        - ^support/apiv2beta/helpers\.go$
+        - ^support/apiv2beta/supportpb/.*$
+        - ^support/apiv2beta/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/support/
+    tag_format: '{id}/v{version}'

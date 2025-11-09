@@ -1,0 +1,41 @@
+name: oslogin
+version: 1.14.7
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/oslogin/v1
+          service_config: oslogin_v1.yaml
+        - path: google/cloud/oslogin/v1beta
+          service_config: oslogin_v1beta.yaml
+        - path: google/cloud/oslogin/common
+go:
+    source_roots:
+        - oslogin
+        - internal/generated/snippets/oslogin
+    remove_regex:
+        - ^internal/generated/snippets/oslogin/
+        - ^oslogin/apiv1/[^/]*_client\.go$
+        - ^oslogin/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^oslogin/apiv1/[^/]*_client_example_test\.go$
+        - ^oslogin/apiv1/auxiliary\.go$
+        - ^oslogin/apiv1/auxiliary_go123\.go$
+        - ^oslogin/apiv1/doc\.go$
+        - ^oslogin/apiv1/gapic_metadata\.json$
+        - ^oslogin/apiv1/helpers\.go$
+        - ^oslogin/apiv1/osloginpb/.*$
+        - ^oslogin/apiv1/\.repo-metadata\.json$
+        - ^oslogin/apiv1beta/[^/]*_client\.go$
+        - ^oslogin/apiv1beta/[^/]*_client_example_go123_test\.go$
+        - ^oslogin/apiv1beta/[^/]*_client_example_test\.go$
+        - ^oslogin/apiv1beta/auxiliary\.go$
+        - ^oslogin/apiv1beta/auxiliary_go123\.go$
+        - ^oslogin/apiv1beta/doc\.go$
+        - ^oslogin/apiv1beta/gapic_metadata\.json$
+        - ^oslogin/apiv1beta/helpers\.go$
+        - ^oslogin/apiv1beta/osloginpb/.*$
+        - ^oslogin/apiv1beta/\.repo-metadata\.json$
+        - ^oslogin/common/commonpb/.*$
+        - ^oslogin/common/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/oslogin/
+    tag_format: '{id}/v{version}'

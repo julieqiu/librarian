@@ -1,0 +1,26 @@
+name: financialservices
+version: 0.1.4
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/financialservices/v1
+          service_config: financialservices_v1.yaml
+go:
+    source_roots:
+        - financialservices
+        - internal/generated/snippets/financialservices
+    remove_regex:
+        - ^internal/generated/snippets/financialservices/
+        - ^financialservices/apiv1/[^/]*_client\.go$
+        - ^financialservices/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^financialservices/apiv1/[^/]*_client_example_test\.go$
+        - ^financialservices/apiv1/auxiliary\.go$
+        - ^financialservices/apiv1/auxiliary_go123\.go$
+        - ^financialservices/apiv1/doc\.go$
+        - ^financialservices/apiv1/gapic_metadata\.json$
+        - ^financialservices/apiv1/helpers\.go$
+        - ^financialservices/apiv1/financialservicespb/.*$
+        - ^financialservices/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/financialservices/
+    tag_format: '{id}/v{version}'

@@ -1,0 +1,26 @@
+name: networkservices
+version: 0.5.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/networkservices/v1
+          service_config: networkservices_v1.yaml
+go:
+    source_roots:
+        - networkservices
+        - internal/generated/snippets/networkservices
+    remove_regex:
+        - ^internal/generated/snippets/networkservices/
+        - ^networkservices/apiv1/[^/]*_client\.go$
+        - ^networkservices/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^networkservices/apiv1/[^/]*_client_example_test\.go$
+        - ^networkservices/apiv1/auxiliary\.go$
+        - ^networkservices/apiv1/auxiliary_go123\.go$
+        - ^networkservices/apiv1/doc\.go$
+        - ^networkservices/apiv1/gapic_metadata\.json$
+        - ^networkservices/apiv1/helpers\.go$
+        - ^networkservices/apiv1/networkservicespb/.*$
+        - ^networkservices/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/networkservices/
+    tag_format: '{id}/v{version}'

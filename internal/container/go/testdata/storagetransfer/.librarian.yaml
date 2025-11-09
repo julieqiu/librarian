@@ -1,0 +1,26 @@
+name: storagetransfer
+version: 1.13.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/storagetransfer/v1
+          service_config: storagetransfer_v1.yaml
+go:
+    source_roots:
+        - storagetransfer
+        - internal/generated/snippets/storagetransfer
+    remove_regex:
+        - ^internal/generated/snippets/storagetransfer/
+        - ^storagetransfer/apiv1/[^/]*_client\.go$
+        - ^storagetransfer/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^storagetransfer/apiv1/[^/]*_client_example_test\.go$
+        - ^storagetransfer/apiv1/auxiliary\.go$
+        - ^storagetransfer/apiv1/auxiliary_go123\.go$
+        - ^storagetransfer/apiv1/doc\.go$
+        - ^storagetransfer/apiv1/gapic_metadata\.json$
+        - ^storagetransfer/apiv1/helpers\.go$
+        - ^storagetransfer/apiv1/storagetransferpb/.*$
+        - ^storagetransfer/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/storagetransfer/
+    tag_format: '{id}/v{version}'

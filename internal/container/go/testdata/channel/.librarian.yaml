@@ -1,0 +1,26 @@
+name: channel
+version: 1.20.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/channel/v1
+          service_config: cloudchannel_v1.yaml
+go:
+    source_roots:
+        - channel
+        - internal/generated/snippets/channel
+    remove_regex:
+        - ^internal/generated/snippets/channel/
+        - ^channel/apiv1/[^/]*_client\.go$
+        - ^channel/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^channel/apiv1/[^/]*_client_example_test\.go$
+        - ^channel/apiv1/auxiliary\.go$
+        - ^channel/apiv1/auxiliary_go123\.go$
+        - ^channel/apiv1/doc\.go$
+        - ^channel/apiv1/gapic_metadata\.json$
+        - ^channel/apiv1/helpers\.go$
+        - ^channel/apiv1/channelpb/.*$
+        - ^channel/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/channel/
+    tag_format: '{id}/v{version}'

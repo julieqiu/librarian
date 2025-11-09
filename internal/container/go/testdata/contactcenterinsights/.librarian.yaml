@@ -1,0 +1,26 @@
+name: contactcenterinsights
+version: 1.17.4
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/contactcenterinsights/v1
+          service_config: contactcenterinsights_v1.yaml
+go:
+    source_roots:
+        - contactcenterinsights
+        - internal/generated/snippets/contactcenterinsights
+    remove_regex:
+        - ^internal/generated/snippets/contactcenterinsights/
+        - ^contactcenterinsights/apiv1/[^/]*_client\.go$
+        - ^contactcenterinsights/apiv1/[^/]*_client_example_go123_test\.go$
+        - ^contactcenterinsights/apiv1/[^/]*_client_example_test\.go$
+        - ^contactcenterinsights/apiv1/auxiliary\.go$
+        - ^contactcenterinsights/apiv1/auxiliary_go123\.go$
+        - ^contactcenterinsights/apiv1/doc\.go$
+        - ^contactcenterinsights/apiv1/gapic_metadata\.json$
+        - ^contactcenterinsights/apiv1/helpers\.go$
+        - ^contactcenterinsights/apiv1/contactcenterinsightspb/.*$
+        - ^contactcenterinsights/apiv1/\.repo-metadata\.json$
+    release_exclude_paths:
+        - internal/generated/snippets/contactcenterinsights/
+    tag_format: '{id}/v{version}'
