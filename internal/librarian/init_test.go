@@ -63,15 +63,7 @@ func TestInitRunner(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			// Create temp directory
 			tmpDir := t.TempDir()
-			origDir, err := os.Getwd()
-			if err != nil {
-				t.Fatalf("failed to get current directory: %v", err)
-			}
-			defer os.Chdir(origDir)
-
-			if err := os.Chdir(tmpDir); err != nil {
-				t.Fatalf("failed to change to temp directory: %v", err)
-			}
+			t.Chdir(tmpDir)
 
 			// Create runner
 			var args []string
@@ -161,15 +153,7 @@ func TestInitRunner(t *testing.T) {
 func TestInitRunner_AlreadyExists(t *testing.T) {
 	// Create temp directory
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
-
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
+	t.Chdir(tmpDir)
 
 	// Create .librarian.yaml
 	configPath := filepath.Join(tmpDir, ".librarian.yaml")

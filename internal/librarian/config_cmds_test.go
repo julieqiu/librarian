@@ -16,7 +16,6 @@ package librarian
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/googleapis/librarian/internal/config"
@@ -87,15 +86,7 @@ func TestConfigGetRunner(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			tmpDir := t.TempDir()
-			origDir, err := os.Getwd()
-			if err != nil {
-				t.Fatalf("failed to get current directory: %v", err)
-			}
-			defer os.Chdir(origDir)
-
-			if err := os.Chdir(tmpDir); err != nil {
-				t.Fatalf("failed to change to temp directory: %v", err)
-			}
+			t.Chdir(tmpDir)
 
 			// Init repository
 			initRunner, err := newInitRunner([]string{test.language}, test.language)
@@ -221,15 +212,7 @@ func TestConfigSetRunner(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			tmpDir := t.TempDir()
-			origDir, err := os.Getwd()
-			if err != nil {
-				t.Fatalf("failed to get current directory: %v", err)
-			}
-			defer os.Chdir(origDir)
-
-			if err := os.Chdir(tmpDir); err != nil {
-				t.Fatalf("failed to change to temp directory: %v", err)
-			}
+			t.Chdir(tmpDir)
 
 			// Init repository
 			initRunner, err := newInitRunner([]string{test.language}, test.language)
@@ -269,17 +252,9 @@ func TestConfigSetRunner(t *testing.T) {
 
 func TestConfigGetRunner_MissingArgs(t *testing.T) {
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
+	t.Chdir(tmpDir)
 
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
-
-	_, err = newConfigGetRunner([]string{})
+	_, err := newConfigGetRunner([]string{})
 	if err == nil {
 		t.Error("newConfigGetRunner() should return error when key is missing")
 	}
@@ -287,17 +262,9 @@ func TestConfigGetRunner_MissingArgs(t *testing.T) {
 
 func TestConfigSetRunner_MissingArgs(t *testing.T) {
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
+	t.Chdir(tmpDir)
 
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
-
-	_, err = newConfigSetRunner([]string{"key"})
+	_, err := newConfigSetRunner([]string{"key"})
 	if err == nil {
 		t.Error("newConfigSetRunner() should return error when value is missing")
 	}
@@ -305,15 +272,7 @@ func TestConfigSetRunner_MissingArgs(t *testing.T) {
 
 func TestConfigUpdateRunner(t *testing.T) {
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
-
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
+	t.Chdir(tmpDir)
 
 	// Init repository
 	initRunner, err := newInitRunner([]string{"python"}, "python")
@@ -336,15 +295,7 @@ func TestConfigUpdateRunner(t *testing.T) {
 
 func TestConfigUpdateRunner_InvalidKey(t *testing.T) {
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
-
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
+	t.Chdir(tmpDir)
 
 	// Init repository
 	initRunner, err := newInitRunner([]string{"python"}, "python")
@@ -368,17 +319,9 @@ func TestConfigUpdateRunner_InvalidKey(t *testing.T) {
 
 func TestConfigUpdateRunner_BothKeyAndAll(t *testing.T) {
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
+	t.Chdir(tmpDir)
 
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
-
-	_, err = newConfigUpdateRunner([]string{"generate.container"}, true)
+	_, err := newConfigUpdateRunner([]string{"generate.container"}, true)
 	if err == nil {
 		t.Error("newConfigUpdateRunner() should return error when both key and --all are specified")
 	}

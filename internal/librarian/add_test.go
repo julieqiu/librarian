@@ -16,7 +16,6 @@ package librarian
 
 import (
 	"context"
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -26,15 +25,7 @@ import (
 func TestAddRunner_ReleaseOnly(t *testing.T) {
 	// Create temp directory and init repository
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
-
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
+	t.Chdir(tmpDir)
 
 	// Init release-only repository
 	initRunner, err := newInitRunner([]string{}, "")
@@ -75,15 +66,7 @@ func TestAddRunner_ReleaseOnly(t *testing.T) {
 func TestAddRunner_WithAPIs(t *testing.T) {
 	// Create temp directory and init repository
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
-
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
+	t.Chdir(tmpDir)
 
 	// Init python repository
 	initRunner, err := newInitRunner([]string{"python"}, "python")
@@ -130,17 +113,9 @@ func TestAddRunner_WithAPIs(t *testing.T) {
 
 func TestAddRunner_MissingPath(t *testing.T) {
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
+	t.Chdir(tmpDir)
 
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
-
-	_, err = newAddRunner([]string{}, false)
+	_, err := newAddRunner([]string{}, false)
 	if err == nil {
 		t.Error("newAddRunner() should return error when path is missing")
 	}
@@ -148,15 +123,7 @@ func TestAddRunner_MissingPath(t *testing.T) {
 
 func TestAddRunner_AlreadyExists(t *testing.T) {
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
-
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
+	t.Chdir(tmpDir)
 
 	// Init repository
 	initRunner, err := newInitRunner([]string{}, "")
@@ -189,18 +156,10 @@ func TestAddRunner_AlreadyExists(t *testing.T) {
 
 func TestAddRunner_NoRepositoryConfig(t *testing.T) {
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
-
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
+	t.Chdir(tmpDir)
 
 	// Don't init repository
-	_, err = newAddRunner([]string{"packages/my-tool"}, false)
+	_, err := newAddRunner([]string{"packages/my-tool"}, false)
 	if err == nil {
 		t.Error("newAddRunner() should return error when repository is not initialized")
 	}

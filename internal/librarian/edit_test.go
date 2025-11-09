@@ -16,7 +16,6 @@ package librarian
 
 import (
 	"context"
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -27,15 +26,7 @@ import (
 func TestEditRunner_Metadata(t *testing.T) {
 	// Create temp directory and init repository
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
-
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
+	t.Chdir(tmpDir)
 
 	// Init python repository and add artifact with APIs
 	initRunner, err := newInitRunner([]string{"python"}, "python")
@@ -85,15 +76,7 @@ func TestEditRunner_Metadata(t *testing.T) {
 func TestEditRunner_Language(t *testing.T) {
 	// Create temp directory and init repository
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
-
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
+	t.Chdir(tmpDir)
 
 	// Init python repository and add artifact
 	initRunner, err := newInitRunner([]string{"python"}, "python")
@@ -139,15 +122,7 @@ func TestEditRunner_Language(t *testing.T) {
 func TestEditRunner_KeepRemoveExclude(t *testing.T) {
 	// Create temp directory and init repository
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
-
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
+	t.Chdir(tmpDir)
 
 	// Init repository and add artifact
 	initRunner, err := newInitRunner([]string{"python"}, "python")
@@ -198,15 +173,7 @@ func TestEditRunner_KeepRemoveExclude(t *testing.T) {
 
 func TestEditRunner_InvalidMetadata(t *testing.T) {
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
-
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
+	t.Chdir(tmpDir)
 
 	// Init and add artifact
 	initRunner, err := newInitRunner([]string{"python"}, "python")
@@ -240,17 +207,9 @@ func TestEditRunner_InvalidMetadata(t *testing.T) {
 
 func TestEditRunner_MissingPath(t *testing.T) {
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
+	t.Chdir(tmpDir)
 
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
-
-	_, err = newEditRunner([]string{}, nil, "", nil, nil, nil)
+	_, err := newEditRunner([]string{}, nil, "", nil, nil, nil)
 	if err == nil {
 		t.Error("newEditRunner() should return error when path is missing")
 	}
@@ -258,15 +217,7 @@ func TestEditRunner_MissingPath(t *testing.T) {
 
 func TestEditRunner_NotExists(t *testing.T) {
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
-
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
+	t.Chdir(tmpDir)
 
 	editRunner, err := newEditRunner([]string{"packages/nonexistent"}, nil, "", nil, nil, nil)
 	if err != nil {
@@ -281,15 +232,7 @@ func TestEditRunner_NotExists(t *testing.T) {
 
 func TestEditRunner_ReleaseOnlyArtifact(t *testing.T) {
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
-
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
+	t.Chdir(tmpDir)
 
 	// Init release-only repository
 	initRunner, err := newInitRunner([]string{}, "")

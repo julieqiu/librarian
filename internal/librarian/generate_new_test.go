@@ -16,7 +16,6 @@ package librarian
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/googleapis/librarian/internal/config"
@@ -25,15 +24,7 @@ import (
 func TestGenerateNewRunner_Single(t *testing.T) {
 	t.Skip("Skipping integration test - requires Docker and network access")
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
-
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
+	t.Chdir(tmpDir)
 
 	// Init python repository
 	initRunner, err := newInitRunner([]string{"python"}, "python")
@@ -79,15 +70,7 @@ func TestGenerateNewRunner_Single(t *testing.T) {
 func TestGenerateNewRunner_All(t *testing.T) {
 	t.Skip("Skipping integration test - requires Docker and network access")
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
-
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
+	t.Chdir(tmpDir)
 
 	// Init python repository
 	initRunner, err := newInitRunner([]string{"python"}, "python")
@@ -155,17 +138,9 @@ func TestGenerateNewRunner_All(t *testing.T) {
 
 func TestGenerateNewRunner_MissingPath(t *testing.T) {
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
+	t.Chdir(tmpDir)
 
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
-
-	_, err = newGenerateNewRunner([]string{}, false, false)
+	_, err := newGenerateNewRunner([]string{}, false, false)
 	if err == nil {
 		t.Error("newGenerateNewRunner() should return error when path is missing and --all not specified")
 	}
@@ -173,17 +148,9 @@ func TestGenerateNewRunner_MissingPath(t *testing.T) {
 
 func TestGenerateNewRunner_BothPathAndAll(t *testing.T) {
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
+	t.Chdir(tmpDir)
 
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
-
-	_, err = newGenerateNewRunner([]string{"packages/my-lib"}, true, false)
+	_, err := newGenerateNewRunner([]string{"packages/my-lib"}, true, false)
 	if err == nil {
 		t.Error("newGenerateNewRunner() should return error when both path and --all are specified")
 	}
@@ -191,15 +158,7 @@ func TestGenerateNewRunner_BothPathAndAll(t *testing.T) {
 
 func TestGenerateNewRunner_NoGenerateSection(t *testing.T) {
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
-
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
+	t.Chdir(tmpDir)
 
 	// Init release-only repository
 	initRunner, err := newInitRunner([]string{}, "")
@@ -219,15 +178,7 @@ func TestGenerateNewRunner_NoGenerateSection(t *testing.T) {
 
 func TestGenerateNewRunner_ArtifactNoGenerateSection(t *testing.T) {
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
-
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
+	t.Chdir(tmpDir)
 
 	// Init python repository
 	initRunner, err := newInitRunner([]string{"python"}, "python")
@@ -260,15 +211,7 @@ func TestGenerateNewRunner_ArtifactNoGenerateSection(t *testing.T) {
 
 func TestGenerateNewRunner_FindGeneratableArtifacts(t *testing.T) {
 	tmpDir := t.TempDir()
-	origDir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("failed to get current directory: %v", err)
-	}
-	defer os.Chdir(origDir)
-
-	if err := os.Chdir(tmpDir); err != nil {
-		t.Fatalf("failed to change to temp directory: %v", err)
-	}
+	t.Chdir(tmpDir)
 
 	// Init python repository
 	initRunner, err := newInitRunner([]string{"python"}, "python")
