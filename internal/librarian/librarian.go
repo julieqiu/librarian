@@ -95,7 +95,13 @@ func newCmdGenerate() *cli.Command {
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			setupLogger(verbose)
 			slog.Debug("generate command verbose logging")
-			return fmt.Errorf("generate command not yet implemented")
+
+			args := cmd.Flags.Args()
+			runner, err := newGenerateNewRunner(args, all, commit)
+			if err != nil {
+				return err
+			}
+			return runner.run(ctx)
 		},
 	}
 	cmdGenerate.Init()

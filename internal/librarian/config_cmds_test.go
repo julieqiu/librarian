@@ -19,7 +19,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/librarian/internal/config"
 )
 
@@ -108,12 +107,6 @@ func TestConfigGetRunner(t *testing.T) {
 			}
 
 			// Get config value
-			getRunner, err := newConfigGetRunner([]string{test.key})
-			if err != nil {
-				t.Fatalf("newConfigGetRunner() error = %v", err)
-			}
-
-			// Capture output
 			librarianConfig, err := config.ReadLibrarianConfig(tmpDir)
 			if err != nil {
 				t.Fatalf("failed to read config: %v", err)
