@@ -192,11 +192,6 @@ func (r *tagRunner) processPullRequest(ctx context.Context, p *github.PullReques
 		return err
 	}
 
-	librarianConfig, err := loadLibrarianConfigFromGitHub(ctx, r.ghClient, targetBranch)
-	if err != nil {
-		slog.Warn("error loading .librarian/config.yaml", slog.Any("err", err))
-	}
-
 	// Add a tag to the release commit to trigger louhi flow: "release-{pr number}".
 	// See: go/sdk-librarian:louhi-trigger for details.
 	commitSha := p.GetMergeCommitSHA()
@@ -221,7 +216,7 @@ func (r *tagRunner) processPullRequest(ctx context.Context, p *github.PullReques
 		}
 
 		slog.Info("creating release", "library", release.Library, "version", release.Version)
-		tagFormat := config.DetermineTagFormat(release.Library, libraryState, librarianConfig)
+		tagFormat := config.DetermineTagFormat(release.Library, libraryState)
 		tagName := config.FormatTag(tagFormat, release.Library, release.Version)
 		releaseName := fmt.Sprintf("%s %s", release.Library, release.Version)
 		if _, err := r.ghClient.CreateRelease(ctx, tagName, releaseName, release.Body, commitSha); err != nil {

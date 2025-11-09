@@ -35,7 +35,6 @@ type stageRunner struct {
 	containerClient ContainerClient
 	ghClient        GitHubClient
 	image           string
-	librarianConfig *config.OldLibrarianConfig
 	library         string
 	libraryVersion  string
 	push            bool
@@ -56,7 +55,6 @@ func newStageRunner(cfg *config.Config) (*stageRunner, error) {
 		containerClient: runner.containerClient,
 		ghClient:        runner.ghClient,
 		image:           runner.image,
-		librarianConfig: runner.librarianConfig,
 		library:         cfg.Library,
 		libraryVersion:  cfg.LibraryVersion,
 		push:            cfg.Push,
@@ -143,14 +141,6 @@ func (r *stageRunner) runStageCommand(ctx context.Context, outputDir string) err
 	// Mark if there are any library that needs to be released
 	foundReleasableLibrary := false
 	for _, library := range librariesToRelease {
-		if r.librarianConfig != nil {
-			libraryConfig := r.librarianConfig.LibraryConfigFor(library.ID)
-			if libraryConfig != nil && libraryConfig.ReleaseBlocked && r.library != library.ID {
-				// Do not skip the `release_blocked` library if library ID is explicitly specified.
-				slog.Info("library has release_blocked, skipping", "id", library.ID)
-				continue
-			}
-		}
 		if err := r.processLibrary(library); err != nil {
 			return err
 		}
@@ -167,15 +157,14 @@ func (r *stageRunner) runStageCommand(ctx context.Context, outputDir string) err
 	}
 
 	stageRequest := &docker.ReleaseStageRequest{
-		Branch:          r.branch,
-		Commit:          r.commit,
-		LibrarianConfig: r.librarianConfig,
-		LibraryID:       r.library,
-		LibraryVersion:  r.libraryVersion,
-		Output:          outputDir,
-		RepoDir:         src,
-		Push:            r.push,
-		State:           r.state,
+		Branch:         r.branch,
+		Commit:         r.commit,
+		LibraryID:      r.library,
+		LibraryVersion: r.libraryVersion,
+		Output:         outputDir,
+		RepoDir:        src,
+		Push:           r.push,
+		State:          r.state,
 	}
 
 	if err := r.containerClient.ReleaseStage(ctx, stageRequest); err != nil {
@@ -197,7 +186,7 @@ func (r *stageRunner) runStageCommand(ctx context.Context, outputDir string) err
 		}
 	}
 
-	return copyGlobalAllowlist(r.librarianConfig, r.repo.GetDir(), outputDir, false)
+	return nil
 }
 
 // processLibrary wrapper to process the library for release. Helps retrieve latest commits
@@ -205,7 +194,7 @@ func (r *stageRunner) runStageCommand(ctx context.Context, outputDir string) err
 func (r *stageRunner) processLibrary(library *config.LibraryState) error {
 	var tagName string
 	if library.Version != "0.0.0" {
-		tagFormat := config.DetermineTagFormat(library.ID, library, r.librarianConfig)
+		tagFormat := config.DetermineTagFormat(library.ID, library)
 		tagName = config.FormatTag(tagFormat, library.ID, library.Version)
 	}
 	commits, err := getConventionalCommitsSinceLastRelease(r.repo, library, tagName)
@@ -284,28 +273,14 @@ func (r *stageRunner) updateLibrary(library *config.LibraryState, commits []*git
 	return nil
 }
 
-// determineNextVersion determines the next valid SemVer version from the commits or from
-// the next_version override value in the config.yaml file.
+// determineNextVersion determines the next valid SemVer version from the commits.
 func (r *stageRunner) determineNextVersion(commits []*gitrepo.ConventionalCommit, currentVersion string, libraryID string) (string, error) {
 	nextVersionFromCommits, err := NextVersion(commits, currentVersion)
 	if err != nil {
 		return "", err
 	}
 
-	if r.librarianConfig == nil {
-		slog.Debug("no librarian config")
-		return nextVersionFromCommits, nil
-	}
-
-	// Look for next_version override from config.yaml
-	libraryConfig := r.librarianConfig.LibraryConfigFor(libraryID)
-	slog.Debug("looking up library config", "library", libraryID, slog.Any("config", libraryConfig))
-	if libraryConfig == nil || libraryConfig.NextVersion == "" {
-		return nextVersionFromCommits, nil
-	}
-
-	// Compare versions and pick latest
-	return semver.MaxVersion(nextVersionFromCommits, libraryConfig.NextVersion), nil
+	return nextVersionFromCommits, nil
 }
 
 // toCommit converts a slice of gitrepo.ConventionalCommit to a slice of config.Commit.

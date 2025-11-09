@@ -58,7 +58,6 @@ type mockGitHubClient struct {
 	pullRequest             *github.PullRequest
 	createdRelease          *github.RepositoryRelease
 	librarianState          *config.LibrarianState
-	librarianConfig         *config.OldLibrarianConfig
 }
 
 func (m *mockGitHubClient) GetRawContent(ctx context.Context, path, ref string) ([]byte, error) {
@@ -66,9 +65,6 @@ func (m *mockGitHubClient) GetRawContent(ctx context.Context, path, ref string) 
 		return yaml.Marshal(m.librarianState)
 	}
 
-	if path == ".librarian/config.yaml" && m.librarianConfig != nil {
-		return yaml.Marshal(m.librarianConfig)
-	}
 	return m.rawContent, m.rawErr
 }
 

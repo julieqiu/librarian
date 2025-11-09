@@ -139,7 +139,6 @@ type commandRunner struct {
 	repo            gitrepo.Repository
 	sourceRepo      gitrepo.Repository
 	state           *config.LibrarianState
-	librarianConfig *config.OldLibrarianConfig
 	ghClient        GitHubClient
 	containerClient ContainerClient
 	image           string
@@ -170,11 +169,6 @@ func newCommandRunner(cfg *config.Config) (*commandRunner, error) {
 		return nil, err
 	}
 
-	librarianConfig, err := loadLibrarianConfig(languageRepo)
-	if err != nil {
-		return nil, err
-	}
-
 	image := deriveImage(cfg.Image, state)
 
 	gitHubRepo, err := GetGitHubRepository(cfg, languageRepo)
@@ -196,7 +190,6 @@ func newCommandRunner(cfg *config.Config) (*commandRunner, error) {
 		repo:            languageRepo,
 		sourceRepo:      sourceRepo,
 		state:           state,
-		librarianConfig: librarianConfig,
 		image:           image,
 		ghClient:        ghClient,
 		containerClient: container,
@@ -484,31 +477,6 @@ func addLabelsToPullRequest(ctx context.Context, ghClient GitHubClient, pullRequ
 	return nil
 }
 
-// copyGlobalAllowlist copies files in the global file allowlist from src to dst.
-func copyGlobalAllowlist(cfg *config.OldLibrarianConfig, dst, src string, copyReadOnly bool) error {
-	if cfg == nil {
-		slog.Info("librarian config is not setup, skip copying global allowlist")
-		return nil
-	}
-	slog.Info("copying global allowlist files", "destination", dst, "source", src)
-	for _, globalFile := range cfg.GlobalFilesAllowlist {
-		if globalFile.Permissions == config.PermissionReadOnly && !copyReadOnly {
-			slog.Debug("skipping read-only file", "path", globalFile.Path)
-			continue
-		}
-
-		srcPath := filepath.Join(src, globalFile.Path)
-		if _, err := os.Lstat(srcPath); os.IsNotExist(err) {
-			slog.Info("skip copying a non-existent global allowlist file", "source", srcPath)
-			continue
-		}
-		dstPath := filepath.Join(dst, globalFile.Path)
-		if err := copyFile(dstPath, srcPath); err != nil {
-			return fmt.Errorf("failed to copy global file %s from %s: %w", dstPath, srcPath, err)
-		}
-	}
-	return nil
-}
 
 func copyFile(dst, src string) (err error) {
 	lstat, err := os.Lstat(src)

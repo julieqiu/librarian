@@ -46,7 +46,6 @@ type generateRunner struct {
 	repo              gitrepo.Repository
 	sourceRepo        gitrepo.Repository
 	state             *config.LibrarianState
-	librarianConfig   *config.OldLibrarianConfig
 	workRoot          string
 }
 
@@ -77,7 +76,6 @@ func newGenerateRunner(cfg *config.Config) (*generateRunner, error) {
 		repo:              runner.repo,
 		sourceRepo:        runner.sourceRepo,
 		state:             runner.state,
-		librarianConfig:   runner.librarianConfig,
 		workRoot:          runner.workRoot,
 	}, nil
 }
@@ -336,17 +334,12 @@ func (r *generateRunner) runConfigureCommand(ctx context.Context, outputDir stri
 		return "", err
 	}
 
-	var globalFiles []string
-	if r.librarianConfig != nil {
-		globalFiles = r.librarianConfig.GetGlobalFiles()
-	}
-
 	configureRequest := &docker.ConfigureRequest{
 		GoogleapisDir:       apiRoot,
 		LibraryID:           r.library,
 		Output:              outputDir,
 		RepoDir:             r.repo.GetDir(),
-		GlobalFiles:         globalFiles,
+		GlobalFiles:         []string{},
 		ExistingSourceRoots: r.getExistingSrc(r.library),
 		State:               r.state,
 	}
@@ -380,10 +373,6 @@ func (r *generateRunner) runConfigureCommand(ctx context.Context, outputDir stri
 	}
 
 	if err := copyLibraryFiles(r.state, r.repo.GetDir(), libraryState.ID, outputDir, false); err != nil {
-		return "", err
-	}
-
-	if err := copyGlobalAllowlist(r.librarianConfig, r.repo.GetDir(), outputDir, false); err != nil {
 		return "", err
 	}
 
@@ -425,13 +414,6 @@ func setAllAPIStatus(state *config.LibrarianState, status string) {
 // and should be kept centrally in this function, with a comment for each path in the flow
 // for clarity.
 func (r *generateRunner) shouldGenerate(library *config.LibraryState) (bool, error) {
-	// If the library has a manual configuration which indicates generation is blocked,
-	// the library is skipped.
-	if r.librarianConfig.IsGenerationBlocked(library.ID) {
-		slog.Info("library has generate_blocked, skipping", "id", library.ID)
-		return false, nil
-	}
-
 	// If the library has no APIs, it is skipped.
 	if len(library.APIs) == 0 {
 		slog.Info("library has no APIs, skipping", "id", library.ID)

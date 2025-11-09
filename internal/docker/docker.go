@@ -151,10 +151,6 @@ type ReleaseStageRequest struct {
 	// create a pull request. This flag is ignored if Push is set to true.
 	Commit bool
 
-	// LibrarianConfig is a pointer to the [config.LibrarianConfig] struct, holding
-	// global files configuration in a language repository.
-	LibrarianConfig *config.OldLibrarianConfig
-
 	// LibraryID specifies the ID of the library to release.
 	LibraryID string
 

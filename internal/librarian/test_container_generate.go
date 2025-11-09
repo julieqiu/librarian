@@ -28,14 +28,11 @@ import (
 	"github.com/googleapis/librarian/internal/gitrepo"
 )
 
-var errGenerateBlocked = errors.New("generation is blocked for library")
-
 type testGenerateRunner struct {
 	library                string
 	repo                   gitrepo.Repository
 	sourceRepo             gitrepo.Repository
 	state                  *config.LibrarianState
-	librarianConfig        *config.OldLibrarianConfig
 	workRoot               string
 	containerClient        ContainerClient
 	checkUnexpectedChanges bool
@@ -162,10 +159,6 @@ func (r *testGenerateRunner) testSingleLibrary(ctx context.Context, libraryID, s
 	libraryState := r.state.LibraryByID(libraryID)
 	if libraryState == nil {
 		return fmt.Errorf("library %q not found in state", libraryID)
-	}
-
-	if r.librarianConfig.IsGenerationBlocked(libraryID) {
-		return errGenerateBlocked
 	}
 
 	protoFileToGUIDs, err := r.prepareForGenerateTest(libraryState, libraryID)

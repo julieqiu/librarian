@@ -22,23 +22,8 @@ import (
 const defaultTagFormat = "{id}-{version}"
 
 // DetermineTagFormat finds the tag_format config given a library ID.
-func DetermineTagFormat(libraryID string, libraryState *LibraryState, librarianConfig *OldLibrarianConfig) string {
-	// Order of preference:
-	// 1. per-library from config.yaml
-	// 2. top-level from config.yaml
-	// 3. per-library from state.yaml (deprecated)
-	if librarianConfig != nil {
-		// prefer per-library config
-		libraryConfig := librarianConfig.LibraryConfigFor(libraryID)
-		if libraryConfig != nil && libraryConfig.TagFormat != "" {
-			return libraryConfig.TagFormat
-		}
-		// top-level from config
-		if librarianConfig.TagFormat != "" {
-			return librarianConfig.TagFormat
-		}
-	}
-
+func DetermineTagFormat(libraryID string, libraryState *LibraryState) string {
+	// Use per-library from state.yaml (deprecated)
 	if libraryState != nil {
 		if libraryState.TagFormat != "" {
 			return libraryState.TagFormat

@@ -62,27 +62,6 @@ func loadRepoStateFromGitHub(ctx context.Context, ghClient GitHubClient, branch 
 	return state, nil
 }
 
-func loadLibrarianConfig(repo *gitrepo.LocalRepository) (*config.OldLibrarianConfig, error) {
-	if repo == nil {
-		slog.Info("repo is nil, skipping state loading")
-		return nil, nil
-	}
-	path := filepath.Join(repo.Dir, config.LibrarianDir, librarianConfigFile)
-	return parseLibrarianConfig(path)
-}
-
-func loadLibrarianConfigFromGitHub(ctx context.Context, ghClient GitHubClient, branch string) (*config.OldLibrarianConfig, error) {
-	content, err := ghClient.GetRawContent(ctx, path.Join(config.LibrarianDir, config.LibrarianConfigFile), branch)
-	if err != nil {
-		return nil, err
-	}
-	cfg, err := loadLibrarianConfigFromBytes(content)
-	if err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
 func parseLibrarianState(path, source string) (*config.LibrarianState, error) {
 	bytes, err := os.ReadFile(path)
 	if err != nil {
@@ -103,29 +82,6 @@ func loadLibrarianStateFromBytes(data []byte, source string) (*config.LibrarianS
 		return nil, fmt.Errorf("validating librarian state: %w", err)
 	}
 	return &s, nil
-}
-
-func parseLibrarianConfig(path string) (*config.OldLibrarianConfig, error) {
-	bytes, err := os.ReadFile(path)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			slog.Info("config.yaml not found, proceeding")
-			return nil, nil
-		}
-		return nil, err
-	}
-	return loadLibrarianConfigFromBytes(bytes)
-}
-
-func loadLibrarianConfigFromBytes(data []byte) (*config.OldLibrarianConfig, error) {
-	var lc config.OldLibrarianConfig
-	if err := yaml.Unmarshal(data, &lc); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal global config: %w", err)
-	}
-	if err := lc.Validate(); err != nil {
-		return nil, fmt.Errorf("invalid global config: %w", err)
-	}
-	return &lc, nil
 }
 
 func populateServiceConfigIfEmpty(state *config.LibrarianState, source string) error {
