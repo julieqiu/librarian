@@ -4,7 +4,6 @@ generate:
     specification_format: protobuf
     apis:
         - path: google/appengine/logging/v1
-          service_config: ""
 python:
     keep:
         - packages/google-cloud-appengine-logging/CHANGELOG.md
@@ -17,6 +16,14 @@ python:
         - tests/unit/gapic/appengine_logging_v1/test_appengine_logging_v1.py
     remove:
         - packages/google-cloud-appengine-logging/
+    py_gapic_library:
+        google/appengine/logging/v1:
+            rest_numeric_enums: false
+            transport: grpc
+            opt_args:
+                - google-cloud-appengine-logging
+                - google.cloud
+                - appengine_logging
     metadata:
         name_pretty: App Engine Logging Protos
         distribution_name: google-cloud-appengine-logging

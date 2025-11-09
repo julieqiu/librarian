@@ -4,7 +4,6 @@ generate:
     specification_format: protobuf
     apis:
         - path: google/iam/v1/logging
-          service_config: ""
 python:
     keep:
         - packages/google-cloud-iam-logging/CHANGELOG.md
@@ -17,6 +16,14 @@ python:
         - tests/unit/gapic/iam_logging_v1/test_iam_logging.py
     remove:
         - packages/google-cloud-iam-logging/
+    py_gapic_library:
+        google/iam/v1/logging:
+            rest_numeric_enums: false
+            transport: grpc
+            opt_args:
+                - google-cloud-iam-logging
+                - google.cloud
+                - iam_logging
     metadata:
         name_pretty: IAM Logging Protos
         distribution_name: google-cloud-iam-logging

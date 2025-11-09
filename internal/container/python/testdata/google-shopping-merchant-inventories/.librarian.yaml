@@ -18,6 +18,23 @@ python:
         - tests/system
     remove:
         - packages/google-shopping-merchant-inventories/
+    py_gapic_library:
+        google/shopping/merchant/inventories/v1:
+            grpc_service_config: inventories_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google.shopping.type
+                - merchant_inventories
+                - google.shopping
+        google/shopping/merchant/inventories/v1beta:
+            grpc_service_config: inventories_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google.shopping.type
+                - google.shopping
+                - merchant_inventories
     metadata:
         name_pretty: Merchant Inventories API
         description: Programmatically manage your Merchant Center accounts.

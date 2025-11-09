@@ -16,6 +16,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-bigquery-data-exchange/
+    py_gapic_library:
+        google/cloud/bigquery/dataexchange/v1beta1:
+            grpc_service_config: analyticshub_v1beta1_grpc_service_config.json
+            rest_numeric_enums: false
+            transport: grpc
+            opt_args:
+                - bigquery_data_exchange
+                - google.cloud
+                - google-cloud-bigquery-data-exchange
     metadata:
         name_pretty: BigQuery Analytics Hub
         description: is a data exchange that allows you to efficiently and securely exchange data assets across organizations to address challenges of data reliability and cost.

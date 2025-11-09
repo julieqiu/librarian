@@ -5,6 +5,13 @@ generate:
     apis:
         - path: google/marketingplatform/admin/v1alpha
           service_config: marketingplatformadmin_v1alpha.yaml
+          grpc_service_config: marketingplatform_admin_v1alpha_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          opt_args:
+            - google.ads
+            - marketingplatform_admin
+            - google-ads-marketingplatform-admin
 python:
     keep:
         - packages/google-ads-marketingplatform-admin/CHANGELOG.md

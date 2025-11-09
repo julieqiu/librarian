@@ -22,6 +22,23 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-workflows/
+    py_gapic_library:
+        google/cloud/workflows/executions/v1:
+            grpc_service_config: executions_grpc_service_config.json
+            rest_numeric_enums: false
+            transport: grpc
+        google/cloud/workflows/executions/v1beta:
+            grpc_service_config: executions_grpc_service_config.json
+            rest_numeric_enums: false
+            transport: grpc
+        google/cloud/workflows/v1:
+            grpc_service_config: workflows_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/workflows/v1beta:
+            grpc_service_config: workflows_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Cloud Workflows
         description: Orchestrate and automate Google Cloud and HTTP-based API services with serverless workflows.

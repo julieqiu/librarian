@@ -18,6 +18,23 @@ python:
         - tests/system
     remove:
         - packages/google-shopping-merchant-lfp/
+    py_gapic_library:
+        google/shopping/merchant/lfp/v1:
+            grpc_service_config: lfp_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google.shopping.type
+                - merchant_lfp
+                - google.shopping
+        google/shopping/merchant/lfp/v1beta:
+            grpc_service_config: lfp_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google.shopping.type
+                - merchant_lfp
+                - google.shopping
     metadata:
         name_pretty: Merchant API
         description: Programmatically manage your Merchant Center accounts.

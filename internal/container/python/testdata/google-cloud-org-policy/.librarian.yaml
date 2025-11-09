@@ -4,7 +4,6 @@ generate:
     specification_format: protobuf
     apis:
         - path: google/cloud/orgpolicy/v1
-          service_config: ""
         - path: google/cloud/orgpolicy/v2
           service_config: orgpolicy_v2.yaml
 python:
@@ -21,6 +20,13 @@ python:
         - tests/unit/test_packaging.py
     remove:
         - packages/google-cloud-org-policy
+    py_gapic_library:
+        google/cloud/orgpolicy/v2:
+            grpc_service_config: orgpolicy_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - warehouse-package-name=google-cloud-org-policy
     metadata:
         name_pretty: Organization Policy
         description: The Organization Policy API allows users to configure governance rules on their GCP resources across the Cloud Resource Hierarchy.

@@ -5,14 +5,29 @@ generate:
     apis:
         - path: google/ai/generativelanguage/v1
           service_config: generativelanguage_v1.yaml
+          grpc_service_config: generativeai_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
         - path: google/ai/generativelanguage/v1beta
           service_config: generativelanguage_v1beta.yaml
+          grpc_service_config: generativeai_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
         - path: google/ai/generativelanguage/v1beta3
           service_config: generativelanguage_v1beta3.yaml
+          grpc_service_config: generativeai_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
         - path: google/ai/generativelanguage/v1beta2
           service_config: generativelanguage_v1beta2.yaml
+          grpc_service_config: generativeai_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
         - path: google/ai/generativelanguage/v1alpha
           service_config: generativelanguage_v1alpha.yaml
+          grpc_service_config: generativeai_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
 python:
     keep:
         - packages/google-ai-generativelanguage/CHANGELOG.md

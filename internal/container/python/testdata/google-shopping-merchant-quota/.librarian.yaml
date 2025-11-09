@@ -18,6 +18,21 @@ python:
         - tests/system
     remove:
         - packages/google-shopping-merchant-quota/
+    py_gapic_library:
+        google/shopping/merchant/quota/v1:
+            grpc_service_config: quota_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google.shopping
+                - merchant_quota
+        google/shopping/merchant/quota/v1beta:
+            grpc_service_config: quota_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google.shopping
+                - merchant_quota
     metadata:
         name_pretty: Shopping Merchant Quota
         description: Programmatically manage your Merchant Center accounts.

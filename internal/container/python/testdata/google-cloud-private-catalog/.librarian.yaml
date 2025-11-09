@@ -16,6 +16,14 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-private-catalog/
+    py_gapic_library:
+        google/cloud/privatecatalog/v1beta1:
+            grpc_service_config: cloudprivatecatalog_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google-cloud-private-catalog
+                - autogen-snippets
     metadata:
         name_pretty: Private Catalog
         description: allows developers and cloud admins to make their solutions discoverable to their internal enterprise users. Cloud admins can manage their solutions and ensure their users are always launching the latest versions.

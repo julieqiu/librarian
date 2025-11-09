@@ -16,6 +16,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-gke-backup/
+    py_gapic_library:
+        google/cloud/gkebackup/v1:
+            grpc_service_config: gkebackup_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - gke_backup
+                - google.cloud
+                - google-cloud-gke-backup
     metadata:
         name_pretty: Backup for GKE
         description: An API for backing up and restoring workloads in GKE.

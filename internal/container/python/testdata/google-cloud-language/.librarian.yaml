@@ -20,6 +20,19 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-language/
+    py_gapic_library:
+        google/cloud/language/v1:
+            grpc_service_config: language_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/language/v1beta2:
+            grpc_service_config: language_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/language/v2:
+            grpc_service_config: language_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Natural Language
         description: provides natural language understanding technologies to developers, including sentiment analysis, entity analysis, entity sentiment analysis, content classification, and syntax analysis. This API is part of the larger Cloud Machine Learning API family.

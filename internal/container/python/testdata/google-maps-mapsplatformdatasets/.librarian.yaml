@@ -16,6 +16,11 @@ python:
         - tests/system
     remove:
         - packages/google-maps-mapsplatformdatasets
+    py_gapic_library:
+        google/maps/mapsplatformdatasets/v1:
+            grpc_service_config: mapsplatformdatasets_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Maps Platform Datasets API
         description: Maps Platform Datasets API

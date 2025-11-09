@@ -16,6 +16,11 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-chronicle/
+    py_gapic_library:
+        google/cloud/chronicle/v1:
+            grpc_service_config: chronicle_v1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Chronicle API
         description: The Google Cloud Security Operations API, popularly known as the Chronicle API, serves endpoints that enable security analysts to analyze and mitigate a security threat throughout its lifecycle

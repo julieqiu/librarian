@@ -16,6 +16,11 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-dataplex/
+    py_gapic_library:
+        google/cloud/dataplex/v1:
+            grpc_service_config: dataplex_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Cloud Dataplex
         description: provides intelligent data fabric that enables organizations to centrally manage, monitor, and govern their data across data lakes, data warehouses, and data marts with consistent controls, providing access to trusted data and powering analytics at scale.

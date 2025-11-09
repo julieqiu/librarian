@@ -18,6 +18,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-scheduler/
+    py_gapic_library:
+        google/cloud/scheduler/v1:
+            grpc_service_config: cloudscheduler_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/scheduler/v1beta1:
+            grpc_service_config: cloudscheduler_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Cloud Scheduler
         description: lets you set up scheduled units of work to be executed at defined times or regular intervals. These work units are commonly known as cron jobs. Typical use cases might include sending out a report email on a daily basis, updating some cached data every 10 minutes, or updating some summary information once an hour.

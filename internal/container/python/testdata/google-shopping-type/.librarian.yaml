@@ -4,7 +4,6 @@ generate:
     specification_format: protobuf
     apis:
         - path: google/shopping/type
-          service_config: ""
 python:
     keep:
         - packages/google-shopping-type/CHANGELOG.md
@@ -17,6 +16,10 @@ python:
         - tests/unit/gapic/type/test_type.py
     remove:
         - packages/google-shopping-type/
+    py_gapic_library:
+        google/shopping/type:
+            rest_numeric_enums: false
+            transport: grpc+rest
     metadata:
         name_pretty: Shopping Type Protos
         distribution_name: google-shopping-type

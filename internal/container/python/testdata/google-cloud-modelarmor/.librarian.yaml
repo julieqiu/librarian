@@ -18,6 +18,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-modelarmor/
+    py_gapic_library:
+        google/cloud/modelarmor/v1:
+            grpc_service_config: modelarmor_v1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/modelarmor/v1beta:
+            grpc_service_config: modelarmor_v1beta_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Model Armor API
         description: Model Armor helps you protect against risks like prompt injection, harmful content, and data leakage in generative AI applications by letting you define policies that filter user prompts and model responses.

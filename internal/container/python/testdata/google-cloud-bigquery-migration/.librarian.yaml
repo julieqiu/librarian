@@ -18,6 +18,21 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-bigquery-migration/
+    py_gapic_library:
+        google/cloud/bigquery/migration/v2:
+            grpc_service_config: bigquerymigration_grpc_service_config.json
+            rest_numeric_enums: false
+            transport: grpc
+            opt_args:
+                - bigquery_migration
+                - google.cloud
+        google/cloud/bigquery/migration/v2alpha:
+            grpc_service_config: bigquerymigration_grpc_service_config.json
+            rest_numeric_enums: false
+            transport: grpc
+            opt_args:
+                - bigquery_migration
+                - google.cloud
     metadata:
         name_pretty: Google BigQuery Migration
         distribution_name: google-cloud-bigquery-migration

@@ -16,6 +16,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-video-live-stream/
+    py_gapic_library:
+        google/cloud/video/livestream/v1:
+            grpc_service_config: livestream_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - live_stream
+                - google.cloud.video
+                - google-cloud-video-live-stream
     metadata:
         name_pretty: Live Stream
         description: transcodes mezzanine live signals into direct-to-consumer streaming formats, including Dynamic Adaptive Streaming over HTTP (DASH/MPEG-DASH), and HTTP Live Streaming (HLS), for multiple device platforms.

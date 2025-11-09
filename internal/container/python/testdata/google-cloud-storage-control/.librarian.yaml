@@ -16,6 +16,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-storage-control/
+    py_gapic_library:
+        google/storage/control/v2:
+            grpc_service_config: storage_control_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google.cloud
+                - storage_control
+                - google-cloud-storage-control
     metadata:
         name_pretty: Storage Control API
         description: Lets you perform metadata-specific, control plane, and long-running operations apart from the Storage API. Separating these operations from the Storage API improves API standardization and lets you run faster releases.

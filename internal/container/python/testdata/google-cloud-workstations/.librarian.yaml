@@ -18,6 +18,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-workstations/
+    py_gapic_library:
+        google/cloud/workstations/v1:
+            grpc_service_config: workstations_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/workstations/v1beta:
+            grpc_service_config: workstations_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Cloud Workstations
         distribution_name: google-cloud-workstations

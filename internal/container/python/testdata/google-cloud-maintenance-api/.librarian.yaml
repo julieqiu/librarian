@@ -16,6 +16,14 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-maintenance-api/
+    py_gapic_library:
+        google/cloud/maintenance/api/v1beta:
+            grpc_service_config: maintenance_v1beta_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - maintenance_api
+                - google.cloud
     metadata:
         name_pretty: Maintenance API
         description: The Maintenance API provides a centralized view of planned disruptive maintenance events across supported Google Cloud products. It offers users visibility into upcoming, ongoing, and completed maintenance, along with controls to manage certain maintenance activities, such as mainteance windows, rescheduling, and on-demand updates.

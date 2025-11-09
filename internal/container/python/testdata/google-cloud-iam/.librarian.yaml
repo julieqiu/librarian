@@ -26,6 +26,55 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-iam
+    py_gapic_library:
+        google/iam/admin/v1:
+            grpc_service_config: iam_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc
+            opt_args:
+                - iam_admin
+                - google.cloud
+                - google-cloud-iam
+        google/iam/credentials/v1:
+            grpc_service_config: iamcredentials_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google-cloud-iam
+                - google.cloud
+                - iam_credentials
+        google/iam/v2:
+            grpc_service_config: iam_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - iam
+                - google.cloud
+                - google-cloud-iam
+        google/iam/v2beta:
+            grpc_service_config: iam_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc
+            opt_args:
+                - iam
+                - google.cloud
+                - google-cloud-iam
+        google/iam/v3:
+            grpc_service_config: iam_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - iam
+                - google.cloud
+                - google-cloud-iam
+        google/iam/v3beta:
+            grpc_service_config: iam_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - iam
+                - google.cloud
+                - google-cloud-iam
     metadata:
         name_pretty: Cloud Identity and Access Management
         description: Manages identity and access control for Google Cloud Platform resources, including the creation of service accounts, which you can use to authenticate to Google and make API calls.

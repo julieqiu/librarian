@@ -16,6 +16,11 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-biglake
+    py_gapic_library:
+        google/cloud/biglake/v1:
+            grpc_service_config: biglake_iceberg_v1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: BigLake API
         description: The BigLake API provides access to BigLake Metastore, a serverless, fully managed, and highly available metastore for open-source data that can be used for querying Apache Iceberg tables in BigQuery.

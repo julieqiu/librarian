@@ -18,6 +18,19 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-documentai/
+    py_gapic_library:
+        google/cloud/documentai/v1:
+            grpc_service_config: documentai_v1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - autogen-snippets
+        google/cloud/documentai/v1beta3:
+            grpc_service_config: documentai_v1beta3_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - autogen-snippets
     metadata:
         name_pretty: Document AI
         description: Service to parse structured information from unstructured or semi-structured documents using state-of-the-art Google AI such as natural language, computer vision, translation, and AutoML.

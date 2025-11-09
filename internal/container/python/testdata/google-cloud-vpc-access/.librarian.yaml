@@ -16,6 +16,13 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-vpc-access/
+    py_gapic_library:
+        google/cloud/vpcaccess/v1:
+            grpc_service_config: vpcaccess_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - warehouse-package-name=google-cloud-vpc-access
     metadata:
         name_pretty: Virtual Private Cloud
         description: provides networking functionality to Compute Engine virtual machine (VM) instances, Google Kubernetes Engine (GKE) containers, and the App Engine flexible environment. VPC provides networking for your cloud-based services that is global, scalable, and flexible.

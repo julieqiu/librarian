@@ -19,6 +19,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-telcoautomation/
+    py_gapic_library:
+        google/cloud/telcoautomation/v1:
+            grpc_service_config: telcoautomation_v1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/telcoautomation/v1alpha1:
+            grpc_service_config: telcoautomation_v1alpha1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Telco Automation API
         description: APIs to automate 5G deployment and management of cloud infrastructure and network functions.

@@ -16,6 +16,13 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-contentwarehouse/
+    py_gapic_library:
+        google/cloud/contentwarehouse/v1:
+            grpc_service_config: contentwarehouse_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - proto-plus-deps=google.cloud.documentai.v1
     metadata:
         name_pretty: Document AI Warehouse
         distribution_name: google-cloud-contentwarehouse

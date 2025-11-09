@@ -18,6 +18,23 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-service-control/
+    py_gapic_library:
+        google/api/servicecontrol/v1:
+            grpc_service_config: servicecontrol_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - servicecontrol
+                - google.cloud
+                - google-cloud-service-control
+        google/api/servicecontrol/v2:
+            grpc_service_config: servicecontrol_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - servicecontrol
+                - google.cloud
+                - google-cloud-service-control
     metadata:
         name_pretty: Service Control
         description: ' is a foundational platform for creating, managing, securing, and consuming APIs and services across organizations. It is used by Google APIs, Cloud APIs, Cloud Endpoints, and API Gateway.'

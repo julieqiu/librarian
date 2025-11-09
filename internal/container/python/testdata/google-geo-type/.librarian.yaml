@@ -17,6 +17,10 @@ python:
         - tests/unit/gapic/type/test_type.py
     remove:
         - packages/google-geo-type
+    py_gapic_library:
+        google/geo/type:
+            rest_numeric_enums: false
+            transport: grpc
     metadata:
         name_pretty: Geo Type Protos
         distribution_name: google-geo-type

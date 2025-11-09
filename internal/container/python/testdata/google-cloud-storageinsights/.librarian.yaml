@@ -16,6 +16,11 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-storageinsights/
+    py_gapic_library:
+        google/cloud/storageinsights/v1:
+            grpc_service_config: storageinsights_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Storage Insights API
         description: The Storage Insights inventory report feature helps you manage your object storage at scale.

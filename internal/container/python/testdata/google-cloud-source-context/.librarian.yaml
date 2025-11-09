@@ -4,7 +4,6 @@ generate:
     specification_format: protobuf
     apis:
         - path: google/devtools/source/v1
-          service_config: ""
 python:
     keep:
         - packages/google-cloud-source-context/CHANGELOG.md
@@ -17,6 +16,14 @@ python:
         - tests/unit/gapic/source_context_v1/test_source_context_v1.py
     remove:
         - packages/google-cloud-source-context/
+    py_gapic_library:
+        google/devtools/source/v1:
+            rest_numeric_enums: false
+            transport: grpc
+            opt_args:
+                - google-cloud-source-context
+                - google.cloud
+                - source_context
     metadata:
         name_pretty: Source Context
         distribution_name: google-cloud-source-context

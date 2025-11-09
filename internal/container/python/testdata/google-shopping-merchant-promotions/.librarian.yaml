@@ -18,6 +18,23 @@ python:
         - tests/system
     remove:
         - packages/google-shopping-merchant-promotions/
+    py_gapic_library:
+        google/shopping/merchant/promotions/v1:
+            grpc_service_config: promotions_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google.shopping.type
+                - merchant_promotions
+                - google.shopping
+        google/shopping/merchant/promotions/v1beta:
+            grpc_service_config: promotions_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - 'google.shopping.type",  # Added manually'
+                - google.shopping
+                - merchant_promotions
     metadata:
         name_pretty: Merchant API
         description: Programmatically manage your Merchant Center accounts.

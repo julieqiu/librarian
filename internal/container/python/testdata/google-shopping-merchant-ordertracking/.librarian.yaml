@@ -18,6 +18,23 @@ python:
         - tests/system
     remove:
         - packages/google-shopping-merchant-ordertracking/
+    py_gapic_library:
+        google/shopping/merchant/ordertracking/v1:
+            grpc_service_config: ordertracking_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google.shopping.type
+                - merchant_ordertracking
+                - google.shopping
+        google/shopping/merchant/ordertracking/v1beta:
+            grpc_service_config: ordertracking_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - 'google.shopping.type",  # Added manually'
+                - google.shopping
+                - merchant_ordertracking
     metadata:
         name_pretty: Merchant API
         description: 'Programmatically manage your Merchant Center Accounts. '

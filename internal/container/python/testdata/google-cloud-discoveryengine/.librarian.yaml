@@ -20,6 +20,19 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-discoveryengine/
+    py_gapic_library:
+        google/cloud/discoveryengine/v1:
+            grpc_service_config: discoveryengine_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/discoveryengine/v1alpha:
+            grpc_service_config: discoveryengine_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/discoveryengine/v1beta:
+            grpc_service_config: discoveryengine_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Discovery Engine API
         distribution_name: google-cloud-discoveryengine

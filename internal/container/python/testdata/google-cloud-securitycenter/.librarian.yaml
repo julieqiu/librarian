@@ -22,6 +22,23 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-securitycenter/
+    py_gapic_library:
+        google/cloud/securitycenter/v1:
+            grpc_service_config: securitycenter_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/securitycenter/v1beta1:
+            grpc_service_config: securitycenter_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/securitycenter/v1p1beta1:
+            grpc_service_config: securitycenter_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/securitycenter/v2:
+            grpc_service_config: None
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Google Cloud Security Command Center
         description: makes it easier for you to prevent, detect, and respond to threats. Identify security misconfigurations in virtual machines, networks, applications, and storage buckets from a centralized dashboard. Take action on them before they can potentially result in business damage or loss. Built-in capabilities can quickly surface suspicious activity in your Stackdriver security logs or indicate compromised virtual machines. Respond to threats by following actionable recommendations or exporting logs to your SIEM for further investigation.

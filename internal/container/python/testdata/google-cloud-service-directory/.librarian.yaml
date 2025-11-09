@@ -18,6 +18,19 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-service-directory/
+    py_gapic_library:
+        google/cloud/servicedirectory/v1:
+            grpc_service_config: servicedirectory_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - warehouse-package-name=google-cloud-service-directory
+        google/cloud/servicedirectory/v1beta1:
+            grpc_service_config: servicedirectory_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - warehouse-package-name=google-cloud-service-directory
     metadata:
         name_pretty: Service Directory
         description: Allows the registration and lookup of services.

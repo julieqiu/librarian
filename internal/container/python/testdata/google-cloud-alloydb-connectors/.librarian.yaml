@@ -5,10 +5,16 @@ generate:
     apis:
         - path: google/cloud/alloydb/connectors/v1
           service_config: connectors_v1.yaml
+          rest_numeric_enums: false
+          transport: grpc+rest
         - path: google/cloud/alloydb/connectors/v1alpha
           service_config: connectors_v1alpha.yaml
+          rest_numeric_enums: false
+          transport: grpc+rest
         - path: google/cloud/alloydb/connectors/v1beta
           service_config: connectors_v1beta.yaml
+          rest_numeric_enums: false
+          transport: grpc+rest
 python:
     keep:
         - packages/google-cloud-alloydb-connectors/CHANGELOG.md

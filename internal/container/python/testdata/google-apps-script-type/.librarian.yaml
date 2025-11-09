@@ -4,19 +4,38 @@ generate:
     specification_format: protobuf
     apis:
         - path: google/apps/script/type
-          service_config: ""
+          rest_numeric_enums: false
+          transport: grpc
         - path: google/apps/script/type/gmail
-          service_config: ""
+          rest_numeric_enums: false
+          transport: grpc
+          opt_args:
+            - google.apps.script.type
         - path: google/apps/script/type/docs
-          service_config: ""
+          rest_numeric_enums: false
+          transport: grpc
+          opt_args:
+            - google.apps.script.type
         - path: google/apps/script/type/drive
-          service_config: ""
+          rest_numeric_enums: false
+          transport: grpc
+          opt_args:
+            - google.apps.script.type
         - path: google/apps/script/type/sheets
-          service_config: ""
+          rest_numeric_enums: false
+          transport: grpc
+          opt_args:
+            - google.apps.script.type
         - path: google/apps/script/type/calendar
-          service_config: ""
+          rest_numeric_enums: false
+          transport: grpc
+          opt_args:
+            - google.apps.script.type
         - path: google/apps/script/type/slides
-          service_config: ""
+          rest_numeric_enums: false
+          transport: grpc
+          opt_args:
+            - google.apps.script.type
 python:
     keep:
         - packages/google-apps-script-type/CHANGELOG.md

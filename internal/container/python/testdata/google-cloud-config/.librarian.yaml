@@ -16,6 +16,11 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-config/
+    py_gapic_library:
+        google/cloud/config/v1:
+            grpc_service_config: config_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Infrastructure Manager API
         description: Infrastructure Manager API

@@ -16,6 +16,13 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-life-sciences/
+    py_gapic_library:
+        google/cloud/lifesciences/v2beta:
+            grpc_service_config: lifesciences_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - warehouse-package-name=google-cloud-life-sciences
     metadata:
         name_pretty: Cloud Life Sciences
         description: is a suite of services and tools for managing, processing, and transforming life sciences data.

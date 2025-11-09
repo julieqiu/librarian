@@ -16,6 +16,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-contact-center-insights/
+    py_gapic_library:
+        google/cloud/contactcenterinsights/v1:
+            grpc_service_config: contactcenterinsights_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google-cloud-contact-center-insights
+                - google.cloud
+                - contact_center_insights
     metadata:
         name_pretty: Contact Center AI Insights
         description: ' helps users detect and visualize patterns in their contact center data.'

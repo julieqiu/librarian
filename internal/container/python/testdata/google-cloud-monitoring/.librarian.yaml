@@ -21,6 +21,13 @@ python:
         - tests/unit/test_query.py
     remove:
         - packages/google-cloud-monitoring
+    py_gapic_library:
+        google/monitoring/v3:
+            grpc_service_config: monitoring_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc
+            opt_args:
+                - python-gapic-namespace=google.cloud
     metadata:
         name_pretty: Stackdriver Monitoring
         description: collects metrics, events, and metadata from Google Cloud, Amazon Web Services (AWS), hosted uptime probes, and application instrumentation. Using the BindPlane service, you can also collect this data from over 150 common application components, on-premise systems, and hybrid cloud systems. Stackdriver ingests that data and generates insights via dashboards, charts, and alerts. BindPlane is included with your Google Cloud project at no additional cost.

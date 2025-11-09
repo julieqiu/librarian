@@ -5,6 +5,9 @@ generate:
     apis:
         - path: google/ads/admanager/v1
           service_config: admanager_v1.yaml
+          grpc_service_config: admanager_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: rest
 python:
     keep:
         - packages/google-ads-admanager/CHANGELOG.md

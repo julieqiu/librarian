@@ -18,6 +18,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-billing-budgets/
+    py_gapic_library:
+        google/cloud/billing/budgets/v1:
+            grpc_service_config: billingbudgets_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/billing/budgets/v1beta1:
+            grpc_service_config: billingbudgets_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc
     metadata:
         name_pretty: Cloud Billing Budget
         description: The Cloud Billing Budget API stores Cloud Billing budgets, which define a budget plan and the rules to execute as spend is tracked against that plan.

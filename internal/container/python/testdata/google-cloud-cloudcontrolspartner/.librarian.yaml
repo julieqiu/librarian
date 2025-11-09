@@ -18,6 +18,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-cloudcontrolspartner/
+    py_gapic_library:
+        google/cloud/cloudcontrolspartner/v1:
+            grpc_service_config: cloudcontrolspartner_v1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/cloudcontrolspartner/v1beta:
+            grpc_service_config: cloudcontrolspartner_v1beta_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Cloud Controls Partner API
         description: Provides insights about your customers and their Assured Workloads based on your Sovereign Controls by Partners offering.

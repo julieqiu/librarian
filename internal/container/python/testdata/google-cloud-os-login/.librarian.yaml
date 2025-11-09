@@ -18,6 +18,14 @@ python:
         - docs/oslogin_v1/common/types.rst
     remove:
         - packages/google-cloud-os-login
+    py_gapic_library:
+        google/cloud/oslogin/v1:
+            grpc_service_config: oslogin_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google-cloud-os-login
+                - google.cloud.oslogin.common
     metadata:
         name_pretty: Google Cloud OS Login
         distribution_name: google-cloud-os-login

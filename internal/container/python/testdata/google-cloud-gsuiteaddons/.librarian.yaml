@@ -16,6 +16,13 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-gsuiteaddons
+    py_gapic_library:
+        google/cloud/gsuiteaddons/v1:
+            grpc_service_config: gsuiteaddons_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - \
     metadata:
         name_pretty: Google Workspace Add-ons API
         description: Add-ons are customized applications that integrate with Google Workspace applications.

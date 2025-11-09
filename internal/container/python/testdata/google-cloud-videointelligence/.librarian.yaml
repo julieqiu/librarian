@@ -24,6 +24,27 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-videointelligence/
+    py_gapic_library:
+        google/cloud/videointelligence/v1:
+            grpc_service_config: videointelligence_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/videointelligence/v1beta2:
+            grpc_service_config: videointelligence_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/videointelligence/v1p1beta1:
+            grpc_service_config: videointelligence_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/videointelligence/v1p2beta1:
+            grpc_service_config: videointelligence_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/videointelligence/v1p3beta1:
+            grpc_service_config: videointelligence_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc
     metadata:
         name_pretty: Video Intelligence
         description: makes videos searchable, and discoverable, by extracting metadata with an easy to use API. You can now search every moment of every video file in your catalog and find every occurrence as well as its significance. It quickly annotates videos stored in Google Cloud Storage, and helps you identify key nouns entities of your video, and when they occur within the video. Separate signal from noise, by retrieving relevant information at the video, shot or per frame.

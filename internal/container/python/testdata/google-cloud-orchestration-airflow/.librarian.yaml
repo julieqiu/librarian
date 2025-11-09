@@ -18,6 +18,17 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-orchestration-airflow/
+    py_gapic_library:
+        google/cloud/orchestration/airflow/service/v1:
+            grpc_service_config: composer_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - warehouse-package-name=google-cloud-orchestration-airflow
+        google/cloud/orchestration/airflow/service/v1beta1:
+            grpc_service_config: composer_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Cloud Composer
         description: is a managed Apache Airflow service that helps you create, schedule, monitor and manage workflows. Cloud Composer automation helps you create Airflow environments quickly and use Airflow-native tools, such as the powerful Airflow web interface and command line tools, so you can focus on your workflows and not your infrastructure.

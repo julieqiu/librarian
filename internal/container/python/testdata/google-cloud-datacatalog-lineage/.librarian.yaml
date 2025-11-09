@@ -16,6 +16,14 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-datacatalog-lineage/
+    py_gapic_library:
+        google/cloud/datacatalog/lineage/v1:
+            grpc_service_config: lineage_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google.cloud
+                - datacatalog_lineage
     metadata:
         name_pretty: Data Lineage API
         description: 'Data lineage is a Dataplex feature that lets you track how data moves through your systems: where it comes from, where it is passed to, and what transformations are applied to it.'

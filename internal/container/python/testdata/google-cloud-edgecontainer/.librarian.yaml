@@ -16,6 +16,11 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-edgecontainer/
+    py_gapic_library:
+        google/cloud/edgecontainer/v1:
+            grpc_service_config: edgecontainer_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Distributed Cloud Edge Container
         description: Google Distributed Cloud Edge allows you to run Kubernetes clusters on dedicated hardware provided and maintained by Google that is separate from the Google Cloud data center.

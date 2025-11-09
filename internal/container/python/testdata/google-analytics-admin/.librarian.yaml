@@ -5,8 +5,16 @@ generate:
     apis:
         - path: google/analytics/admin/v1beta
           service_config: analyticsadmin_v1beta.yaml
+          grpc_service_config: admin_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
         - path: google/analytics/admin/v1alpha
           service_config: analyticsadmin_v1alpha.yaml
+          grpc_service_config: admin_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          opt_args:
+            - autogen-snippets=False
 python:
     keep:
         - packages/google-analytics-admin/CHANGELOG.md

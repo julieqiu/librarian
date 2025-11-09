@@ -18,6 +18,21 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-bigquery-biglake/
+    py_gapic_library:
+        google/cloud/bigquery/biglake/v1:
+            grpc_service_config: biglake_v1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google.cloud
+                - bigquery_biglake
+        google/cloud/bigquery/biglake/v1alpha1:
+            grpc_service_config: biglake_v1alpha1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google.cloud
+                - bigquery_biglake
     metadata:
         name_pretty: BigLake API
         description: BigLake API

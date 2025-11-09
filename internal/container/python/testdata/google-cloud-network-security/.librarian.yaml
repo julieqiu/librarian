@@ -20,6 +20,31 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-network-security
+    py_gapic_library:
+        google/cloud/networksecurity/v1:
+            grpc_service_config: networksecurity_v1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google-cloud-network-security
+                - google.cloud
+                - network_security
+        google/cloud/networksecurity/v1alpha1:
+            grpc_service_config: networksecurity_v1alpha1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google-cloud-network-security
+                - google.cloud
+                - network_security
+        google/cloud/networksecurity/v1beta1:
+            grpc_service_config: networksecurity_v1beta1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google-cloud-network-security
+                - google.cloud
+                - network_security
     metadata:
         name_pretty: Network Security
         distribution_name: google-cloud-network-security

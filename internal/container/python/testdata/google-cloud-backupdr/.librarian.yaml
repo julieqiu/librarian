@@ -16,6 +16,11 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-backupdr/
+    py_gapic_library:
+        google/cloud/backupdr/v1:
+            grpc_service_config: backupdr_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Backup and DR Service API
         description: Backup and DR Service ensures that your data is managed, protected, and accessible using both hybrid and cloud-based backup/recovery appliances that are managed using the Backup and DR management console.

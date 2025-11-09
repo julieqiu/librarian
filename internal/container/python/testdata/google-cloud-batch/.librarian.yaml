@@ -18,6 +18,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-batch/
+    py_gapic_library:
+        google/cloud/batch/v1:
+            grpc_service_config: batch_v1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/batch/v1alpha:
+            grpc_service_config: batch_v1alpha_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Cloud Batch
         distribution_name: google-cloud-batch

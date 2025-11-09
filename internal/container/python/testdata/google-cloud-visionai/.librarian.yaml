@@ -18,6 +18,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-visionai/
+    py_gapic_library:
+        google/cloud/visionai/v1:
+            grpc_service_config: visionai_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/visionai/v1alpha1:
+            grpc_service_config: visionai_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Vision AI API
         description: Easily build and deploy Vertex AI Vision applications using a single platform.

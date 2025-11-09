@@ -16,6 +16,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-service-management/
+    py_gapic_library:
+        google/api/servicemanagement/v1:
+            grpc_service_config: servicemanagement_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - servicemanagement
+                - google.cloud
+                - google-cloud-service-management
     metadata:
         name_pretty: Service Management
         description: is a foundational platform for creating, managing, securing, and consuming APIs and services across organizations. It is used by Google APIs, Cloud APIs, Cloud Endpoints, and API Gateway. Service Infrastructure provides a wide range of features to service consumers and service producers, including authentication, authorization, auditing, rate limiting, analytics, billing, logging, and monitoring.

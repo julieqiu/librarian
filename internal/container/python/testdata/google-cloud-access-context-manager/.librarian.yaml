@@ -5,8 +5,10 @@ generate:
     apis:
         - path: google/identity/accesscontextmanager/v1
           service_config: accesscontextmanager_v1.yaml
+          grpc_service_config: accesscontextmanager_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
         - path: google/identity/accesscontextmanager/type
-          service_config: ""
 python:
     remove:
         - packages/google-cloud-access-context-manager/google/identity/accesscontextmanager/v1/access_context_manager_pb2.py

@@ -16,6 +16,14 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-policytroubleshooter-iam/
+    py_gapic_library:
+        google/cloud/policytroubleshooter/iam/v3:
+            grpc_service_config: policytroubleshooter_v3_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google.cloud
+                - policytroubleshooter_iam
     metadata:
         name_pretty: Policy Troubleshooter API
         distribution_name: google-cloud-policytroubleshooter-iam

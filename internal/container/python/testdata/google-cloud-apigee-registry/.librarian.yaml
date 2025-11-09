@@ -5,6 +5,13 @@ generate:
     apis:
         - path: google/cloud/apigeeregistry/v1
           service_config: apigeeregistry_v1.yaml
+          grpc_service_config: apigeeregistry_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          opt_args:
+            - google-cloud-apigee-registry
+            - google.cloud
+            - apigee_registry
 python:
     keep:
         - packages/google-cloud-apigee-registry/CHANGELOG.md

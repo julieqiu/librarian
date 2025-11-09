@@ -20,6 +20,19 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-retail/
+    py_gapic_library:
+        google/cloud/retail/v2:
+            grpc_service_config: retail_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/retail/v2alpha:
+            grpc_service_config: retail_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/retail/v2beta:
+            grpc_service_config: retail_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Retail
         description: Cloud Retail service enables customers to build end-to-end personalized recommendation systems without requiring a high level of expertise in machine learning, recommendation system, or Google Cloud.

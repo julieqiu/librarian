@@ -16,6 +16,11 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-parametermanager/
+    py_gapic_library:
+        google/cloud/parametermanager/v1:
+            grpc_service_config: parametermanager_v1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Parameter Manager API
         description: '(Public Preview) Parameter Manager is a single source of truth to store, access and manage the lifecycle of your workload parameters. Parameter Manager aims to make management of sensitive application parameters effortless for customers without diminishing focus on security. '

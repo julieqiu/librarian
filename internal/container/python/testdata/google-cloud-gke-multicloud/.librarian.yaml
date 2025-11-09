@@ -16,6 +16,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-gke-multicloud
+    py_gapic_library:
+        google/cloud/gkemulticloud/v1:
+            grpc_service_config: gkemulticloud_grpc_service_config.json
+            rest_numeric_enums: false
+            transport: grpc+rest
+            opt_args:
+                - gke_multicloud
+                - google.cloud
+                - google-cloud-gke-multicloud
     metadata:
         name_pretty: Anthos Multicloud
         description: An API for provisioning and managing GKE clusters running on AWS and Azure infrastructure through a centralized Google Cloud backed control plane.

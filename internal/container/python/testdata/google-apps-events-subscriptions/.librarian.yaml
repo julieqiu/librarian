@@ -5,8 +5,20 @@ generate:
     apis:
         - path: google/apps/events/subscriptions/v1
           service_config: workspaceevents_v1.yaml
+          grpc_service_config: subscriptions_v1_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          opt_args:
+            - google.apps
+            - events_subscriptions
         - path: google/apps/events/subscriptions/v1beta
           service_config: workspaceevents_v1beta.yaml
+          grpc_service_config: subscriptions_v1beta_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          opt_args:
+            - google.apps
+            - events_subscriptions
 python:
     keep:
         - packages/google-apps-events-subscriptions/CHANGELOG.md

@@ -18,6 +18,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-geminidataanalytics/
+    py_gapic_library:
+        google/cloud/geminidataanalytics/v1alpha:
+            grpc_service_config: geminidataanalytics_v1alpha_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/geminidataanalytics/v1beta:
+            grpc_service_config: geminidataanalytics_v1beta_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Data Analytics API with Gemini
         description: Developers can use the Conversational Analytics API, accessed through geminidataanalytics.googleapis.com, to build an artificial intelligence (AI)-powered chat interface, or data agent, that answers questions about structured data in BigQuery, Looker, and Looker Studio using natural language.

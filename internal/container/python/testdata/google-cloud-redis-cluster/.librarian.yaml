@@ -18,6 +18,21 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-redis-cluster/
+    py_gapic_library:
+        google/cloud/redis/cluster/v1:
+            grpc_service_config: redis_cluster_v1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - redis_cluster
+                - google.cloud
+        google/cloud/redis/cluster/v1beta1:
+            grpc_service_config: redis_cluster_v1beta1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - redis_cluster
+                - google.cloud
     metadata:
         name_pretty: Google Cloud Memorystore for Redis API
         description: Creates and manages Redis instances on the Google Cloud Platform.

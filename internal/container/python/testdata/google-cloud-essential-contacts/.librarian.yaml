@@ -16,6 +16,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-essential-contacts/
+    py_gapic_library:
+        google/cloud/essentialcontacts/v1:
+            grpc_service_config: essentialcontacts_v1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google-cloud-essential-contacts
+                - google.cloud
+                - essential_contacts
     metadata:
         name_pretty: Essential Contacts
         description: helps you customize who receives notifications by providing your own list of contacts in many Google Cloud services.

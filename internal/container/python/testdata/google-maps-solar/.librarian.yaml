@@ -16,6 +16,11 @@ python:
         - tests/system
     remove:
         - packages/google-maps-solar
+    py_gapic_library:
+        google/maps/solar/v1:
+            grpc_service_config: solar_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Solar API
         description: The Google Maps Platform Solar API is a service focused on helping accelerate solar and energy system installations.

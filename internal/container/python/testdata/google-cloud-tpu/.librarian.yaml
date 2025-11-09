@@ -20,6 +20,19 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-tpu/
+    py_gapic_library:
+        google/cloud/tpu/v1:
+            grpc_service_config: tpu_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc
+        google/cloud/tpu/v2:
+            grpc_service_config: tpu_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/tpu/v2alpha1:
+            grpc_service_config: tpu_grpc_service_config.json
+            rest_numeric_enums: false
+            transport: grpc
     metadata:
         name_pretty: Cloud TPU
         description: Cloud Tensor Processing Units (TPUs) are Google's custom-developed application-specific integrated circuits (ASICs) used to accelerate machine learning workloads.

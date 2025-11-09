@@ -20,6 +20,19 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-websecurityscanner/
+    py_gapic_library:
+        google/cloud/websecurityscanner/v1:
+            grpc_service_config: websecurityscanner_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/websecurityscanner/v1alpha:
+            grpc_service_config: websecurityscanner_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/websecurityscanner/v1beta:
+            grpc_service_config: websecurityscanner_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Cloud Security Scanner
         description: identifies security vulnerabilities in your App Engine, Compute Engine, and Google Kubernetes Engine web applications. It crawls your application, following all links within the scope of your starting URLs, and attempts to exercise as many user inputs and event handlers as possible.

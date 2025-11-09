@@ -16,6 +16,11 @@ python:
         - tests/system
     remove:
         - packages/google-maps-areainsights
+    py_gapic_library:
+        google/maps/areainsights/v1:
+            grpc_service_config: areainsights_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Places Insights API
         description: 'Places Insights API. '

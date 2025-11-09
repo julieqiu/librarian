@@ -18,6 +18,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-dialogflow/
+    py_gapic_library:
+        google/cloud/dialogflow/v2:
+            grpc_service_config: dialogflow_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/dialogflow/v2beta1:
+            grpc_service_config: dialogflow_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Dialogflow
         description: is an end-to-end, build-once deploy-everywhere development suite for creating conversational interfaces for websites, mobile applications, popular messaging platforms, and IoT devices. You can use it to build interfaces (such as chatbots and conversational IVR) that enable natural and rich interactions between your users and your business. Dialogflow Enterprise Edition users have access to Google Cloud Support and a service level agreement (SLA) for production deployments.

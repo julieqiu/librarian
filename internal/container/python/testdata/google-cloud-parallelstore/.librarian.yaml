@@ -18,6 +18,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-parallelstore/
+    py_gapic_library:
+        google/cloud/parallelstore/v1:
+            grpc_service_config: parallelstore_v1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/parallelstore/v1beta:
+            grpc_service_config: parallelstore_v1beta_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Parallelstore API
         description: Parallelstore is based on Intel DAOS and delivers up to 6.3x greater read throughput performance compared to competitive Lustre scratch offerings.

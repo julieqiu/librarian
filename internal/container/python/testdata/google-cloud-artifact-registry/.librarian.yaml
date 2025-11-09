@@ -18,6 +18,23 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-artifact-registry/
+    py_gapic_library:
+        google/devtools/artifactregistry/v1:
+            grpc_service_config: artifactregistry_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - artifactregistry
+                - google.cloud
+                - google-cloud-artifact-registry
+        google/devtools/artifactregistry/v1beta2:
+            grpc_service_config: artifactregistry_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - artifactregistry
+                - google.cloud
+                - google-cloud-artifact-registry
     metadata:
         name_pretty: Artifact Registry
         description: provides a single place for your organization to manage container images and language packages (such as Maven and npm). It is fully integrated with Google Cloud's tooling and runtimes and comes with support for native artifact protocols. This makes it simple to integrate it with your CI/CD tooling to set up automated pipelines.

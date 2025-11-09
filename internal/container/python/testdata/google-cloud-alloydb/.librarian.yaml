@@ -5,10 +5,19 @@ generate:
     apis:
         - path: google/cloud/alloydb/v1beta
           service_config: alloydb_v1beta.yaml
+          grpc_service_config: alloydb_v1beta_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
         - path: google/cloud/alloydb/v1
           service_config: alloydb_v1.yaml
+          grpc_service_config: alloydb_v1_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
         - path: google/cloud/alloydb/v1alpha
           service_config: alloydb_v1alpha.yaml
+          grpc_service_config: alloydb_v1alpha_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
 python:
     keep:
         - packages/google-cloud-alloydb/CHANGELOG.md

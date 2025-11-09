@@ -16,6 +16,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-network-management/
+    py_gapic_library:
+        google/cloud/networkmanagement/v1:
+            grpc_service_config: networkmanagement_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - network_management
+                - google.cloud
+                - google-cloud-network-management
     metadata:
         name_pretty: Network Management
         description: provides a collection of network performance monitoring and diagnostic capabilities.

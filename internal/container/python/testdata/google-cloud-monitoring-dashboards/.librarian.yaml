@@ -18,6 +18,15 @@ python:
         - tests/unit/gapic/dashboard_v1
     remove:
         - packages/google-cloud-monitoring-dashboards
+    py_gapic_library:
+        google/monitoring/dashboard/v1:
+            grpc_service_config: dashboards_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - monitoring_dashboard
+                - google.cloud
+                - google-cloud-monitoring-dashboards
     metadata:
         name_pretty: Monitoring Dashboards
         description: are one way for you to view and analyze metric data. The Cloud Console provides predefined dashboards that require no setup or configuration. You can also define custom dashboards. With custom dashboards, you have complete control over the charts that are displayed and their configuration.

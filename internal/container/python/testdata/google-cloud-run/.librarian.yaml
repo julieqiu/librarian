@@ -16,6 +16,11 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-run/
+    py_gapic_library:
+        google/cloud/run/v2:
+            grpc_service_config: run_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Cloud Run
         description: is a managed compute platform that enables you to run containers that are invocable via requests or events.

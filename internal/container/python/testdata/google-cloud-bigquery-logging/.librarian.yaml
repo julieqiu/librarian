@@ -4,7 +4,6 @@ generate:
     specification_format: protobuf
     apis:
         - path: google/cloud/bigquery/logging/v1
-          service_config: ""
 python:
     keep:
         - packages/google-cloud-bigquery-logging/CHANGELOG.md
@@ -17,6 +16,14 @@ python:
         - tests/unit/gapic/bigquery_logging_v1/test_bigquery_logging_v1.py
     remove:
         - packages/google-cloud-bigquery-logging/
+    py_gapic_library:
+        google/cloud/bigquery/logging/v1:
+            rest_numeric_enums: false
+            transport: grpc
+            opt_args:
+                - google-cloud-bigquery-logging
+                - google.cloud
+                - bigquery_logging
     metadata:
         name_pretty: BigQuery Logging Protos
         distribution_name: google-cloud-bigquery-logging

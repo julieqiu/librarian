@@ -16,6 +16,13 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-filestore/
+    py_gapic_library:
+        google/cloud/filestore/v1:
+            grpc_service_config: file_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - proto-plus-deps=google.cloud.common
     metadata:
         name_pretty: Filestore
         description: Filestore instances are fully managed NFS file servers on Google Cloud for use with applications running on Compute Engine virtual machines (VMs) instances or Google Kubernetes Engine clusters.

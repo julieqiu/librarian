@@ -18,6 +18,21 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-container/
+    py_gapic_library:
+        google/container/v1:
+            grpc_service_config: container_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google.cloud
+                - google-cloud-container
+        google/container/v1beta1:
+            grpc_service_config: container_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc
+            opt_args:
+                - google.cloud
+                - google-cloud-container
     metadata:
         name_pretty: Kubernetes Engine
         description: The Google Kubernetes Engine API is used for building and managing container based applications, powered by the open source Kubernetes technology.

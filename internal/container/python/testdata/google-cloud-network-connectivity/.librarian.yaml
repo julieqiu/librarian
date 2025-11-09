@@ -18,6 +18,19 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-network-connectivity/
+    py_gapic_library:
+        google/cloud/networkconnectivity/v1:
+            grpc_service_config: networkconnectivity_v1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc
+            opt_args:
+                - warehouse-package-name=google-cloud-network-connectivity
+        google/cloud/networkconnectivity/v1alpha1:
+            grpc_service_config: networkconnectivity_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc
+            opt_args:
+                - warehouse-package-name=google-cloud-network-connectivity
     metadata:
         name_pretty: Network Connectivity Center
         description: The Network Connectivity API will be home to various services which provide information pertaining to network connectivity.  This includes information like interconnects, VPNs, VPCs, routing information, ip address details, etc. This information will help customers verify their network configurations and helps them to discover misconfigurations, inconsistencies, etc.

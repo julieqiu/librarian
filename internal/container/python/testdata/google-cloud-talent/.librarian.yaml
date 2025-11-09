@@ -18,6 +18,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-talent/
+    py_gapic_library:
+        google/cloud/talent/v4:
+            grpc_service_config: talent_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+        google/cloud/talent/v4beta1:
+            grpc_service_config: talent_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Talent Solution
         description: Cloud Talent Solution provides the capability to create, read, update, and delete job postings, as well as search jobs based on keywords and filters.

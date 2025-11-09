@@ -16,6 +16,11 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-managedkafka/
+    py_gapic_library:
+        google/cloud/managedkafka/v1:
+            grpc_service_config: managedkafka_v1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Managed Service for Apache Kafka
         description: Managed Service for Apache Kafka API is a managed cloud service that lets you ingest Kafka streams directly into Google Cloud.

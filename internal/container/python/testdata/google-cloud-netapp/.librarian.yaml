@@ -16,6 +16,11 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-netapp/
+    py_gapic_library:
+        google/cloud/netapp/v1:
+            grpc_service_config: netapp_v1_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: NetApp API
         description: NetApp API

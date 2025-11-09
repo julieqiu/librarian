@@ -17,6 +17,10 @@ python:
         - tests/unit/gapic/common/test_common.py
     remove:
         - packages/google-cloud-common/
+    py_gapic_library:
+        google/cloud/common:
+            rest_numeric_enums: false
+            transport: grpc
     metadata:
         name_pretty: Google Cloud Common
         description: This package contains generated Python types for google.cloud.common

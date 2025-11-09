@@ -16,6 +16,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-appengine-admin/
+    py_gapic_library:
+        google/appengine/v1:
+            grpc_service_config: appengine_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - google-cloud-appengine-admin
+                - google.cloud
+                - appengine_admin
     metadata:
         name_pretty: App Engine Admin
         description: allows you to manage your App Engine applications.

@@ -5,8 +5,14 @@ generate:
     apis:
         - path: google/analytics/data/v1alpha
           service_config: analyticsdata_v1alpha.yaml
+          grpc_service_config: analytics_data_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
         - path: google/analytics/data/v1beta
           service_config: analyticsdata_v1beta.yaml
+          grpc_service_config: analytics_data_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
 python:
     keep:
         - packages/google-analytics-data/CHANGELOG.md

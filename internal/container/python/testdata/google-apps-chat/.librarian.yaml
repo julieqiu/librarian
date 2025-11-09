@@ -5,6 +5,13 @@ generate:
     apis:
         - path: google/chat/v1
           service_config: chat_v1.yaml
+          grpc_service_config: chat_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          opt_args:
+            - google.apps.card.v1
+            - google.apps
+            - google-apps-chat
 python:
     keep:
         - packages/google-apps-chat/CHANGELOG.md

@@ -16,6 +16,15 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-dataflow-client/
+    py_gapic_library:
+        google/dataflow/v1beta3:
+            grpc_service_config: dataflow_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - dataflow
+                - google.cloud
+                - google-cloud-dataflow-client
     metadata:
         name_pretty: Dataflow
         description: Unified stream and batch data processing that's serverless, fast, and cost-effective.

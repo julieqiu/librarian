@@ -4,7 +4,8 @@ generate:
     specification_format: protobuf
     apis:
         - path: google/apps/card/v1
-          service_config: ""
+          rest_numeric_enums: false
+          transport: grpc+rest
 python:
     keep:
         - packages/google-apps-card/CHANGELOG.md

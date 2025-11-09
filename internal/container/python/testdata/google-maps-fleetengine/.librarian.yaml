@@ -16,6 +16,14 @@ python:
         - tests/system
     remove:
         - packages/google-maps-fleetengine
+    py_gapic_library:
+        google/maps/fleetengine/v1:
+            grpc_service_config: fleetengine_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc
+            opt_args:
+                - google.maps
+                - google.geo.type
     metadata:
         name_pretty: Local Rides and Deliveries API
         description: Enables Fleet Engine for access to the On Demand Rides and Deliveries and Last Mile Fleet Solution APIs.  Customer's use of Google Maps Content in the Cloud Logging Services is subject to the Google Maps Platform Terms of Service located at https://cloud.google.com/maps-platform/terms.

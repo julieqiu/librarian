@@ -16,6 +16,11 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-ids/
+    py_gapic_library:
+        google/cloud/ids/v1:
+            grpc_service_config: ids_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
     metadata:
         name_pretty: Cloud IDS
         description: Cloud IDS is an intrusion detection service that provides threat detection for intrusions, malware, spyware, and command-and-control attacks on your network. Cloud IDS works by creating a Google-managed peered network with mirrored VMs. Traffic in the peered network is mirrored, and then inspected by Palo Alto Networks threat protection technologies to provide advanced threat detection.

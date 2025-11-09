@@ -18,6 +18,19 @@ python:
         - tests/system
     remove:
         - packages/google-cloud-assured-workloads/
+    py_gapic_library:
+        google/cloud/assuredworkloads/v1:
+            grpc_service_config: assuredworkloads_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - warehouse-package-name=google-cloud-assured-workloads
+        google/cloud/assuredworkloads/v1beta1:
+            grpc_service_config: assuredworkloads_grpc_service_config.json
+            rest_numeric_enums: true
+            transport: grpc+rest
+            opt_args:
+                - warehouse-package-name=google-cloud-assured-workloads
     metadata:
         name_pretty: Assured Workloads for Government
         description: allows you to secure your government workloads and accelerate your path to running compliant workloads on Google Cloud with Assured Workloads for Government.
