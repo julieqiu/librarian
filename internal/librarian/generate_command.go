@@ -38,7 +38,6 @@ type generateRunner struct {
 	commit            bool
 	generateUnchanged bool
 	containerClient   ContainerClient
-	ghClient          GitHubClient
 	hostMount         string
 	image             string
 	library           string
@@ -61,7 +60,6 @@ func newGenerateRunner(cfg *config.Config) (*generateRunner, error) {
 		commit:            cfg.Commit,
 		containerClient:   runner.containerClient,
 		generateUnchanged: cfg.GenerateUnchanged,
-		ghClient:          runner.ghClient,
 		hostMount:         cfg.HostMount,
 		image:             runner.image,
 		library:           cfg.Library,

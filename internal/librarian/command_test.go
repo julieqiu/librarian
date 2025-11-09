@@ -1294,9 +1294,7 @@ func TestCommitAndPush(t *testing.T) {
 				}
 			},
 			setupMockClient: func(t *testing.T) GitHubClient {
-				return &mockGitHubClient{
-					createdPR: &github.PullRequestMetadata{Number: 123, Repo: &github.Repository{Owner: "test-owner", Name: "test-repo"}},
-				}
+				return nil
 			},
 			state:  &config.LibrarianState{},
 			prType: pullRequestRelease,
@@ -1322,9 +1320,7 @@ func TestCommitAndPush(t *testing.T) {
 				}
 			},
 			setupMockClient: func(t *testing.T) GitHubClient {
-				return &mockGitHubClient{
-					createdPR: &github.PullRequestMetadata{Number: 123, Repo: &github.Repository{Owner: "test-owner", Name: "test-repo"}},
-				}
+				return nil
 			},
 			state:  &config.LibrarianState{},
 			prType: pullRequestGenerate,
@@ -1343,9 +1339,7 @@ func TestCommitAndPush(t *testing.T) {
 				}
 			},
 			setupMockClient: func(t *testing.T) GitHubClient {
-				return &mockGitHubClient{
-					createdPR: &github.PullRequestMetadata{Number: 123, Repo: &github.Repository{Owner: "test-owner", Name: "test-repo"}},
-				}
+				return nil
 			},
 			state:  &config.LibrarianState{},
 			prType: pullRequestRelease,
@@ -1465,7 +1459,7 @@ func TestCommitAndPush(t *testing.T) {
 				}
 			},
 			setupMockClient: func(t *testing.T) GitHubClient {
-				return &mockGitHubClient{}
+				return nil
 			},
 			state:          &config.LibrarianState{},
 			prType:         100,
@@ -1487,9 +1481,7 @@ func TestCommitAndPush(t *testing.T) {
 				}
 			},
 			setupMockClient: func(t *testing.T) GitHubClient {
-				return &mockGitHubClient{
-					createPullRequestErr: errors.New("create pull request error"),
-				}
+				return nil
 			},
 			state:          &config.LibrarianState{},
 			prType:         pullRequestGenerate,
@@ -1529,10 +1521,7 @@ func TestCommitAndPush(t *testing.T) {
 				}
 			},
 			setupMockClient: func(t *testing.T) GitHubClient {
-				return &mockGitHubClient{
-					createdPR:      &github.PullRequestMetadata{Number: 123, Repo: &github.Repository{Owner: "test-owner", Name: "test-repo"}},
-					createIssueErr: errors.New("simulate comment creation error"),
-				}
+				return nil
 			},
 			state:             &config.LibrarianState{},
 			prType:            pullRequestGenerate,
@@ -1554,7 +1543,6 @@ func TestCommitAndPush(t *testing.T) {
 			commitInfo := &commitInfo{
 				commit:            test.commit,
 				commitMessage:     "",
-				ghClient:          client,
 				prType:            test.prType,
 				push:              test.push,
 				languageRepo:      repo,
@@ -1708,7 +1696,6 @@ func TestAddLabelsToPullRequest(t *testing.T) {
 	for _, test := range []struct {
 		name                  string
 		setupMockRepo         func(t *testing.T) gitrepo.Repository
-		mockGithubClient      *mockGitHubClient
 		prMetadata            github.PullRequestMetadata
 		wantPullRequestLabels []string
 		wantErr               bool
@@ -1719,7 +1706,6 @@ func TestAddLabelsToPullRequest(t *testing.T) {
 			setupMockRepo: func(t *testing.T) gitrepo.Repository {
 				return &MockRepository{}
 			},
-			mockGithubClient: &mockGitHubClient{},
 			prMetadata: github.PullRequestMetadata{
 				Repo:   &github.Repository{Owner: "test-owner", Name: "test-repo"},
 				Number: 7,
@@ -1731,9 +1717,6 @@ func TestAddLabelsToPullRequest(t *testing.T) {
 			setupMockRepo: func(t *testing.T) gitrepo.Repository {
 				return &MockRepository{}
 			},
-			mockGithubClient: &mockGitHubClient{
-				addLabelsToIssuesErr: errors.New("Can't add labels"),
-			},
 			prMetadata: github.PullRequestMetadata{
 				Repo:   &github.Repository{Owner: "test-owner", Name: "test-repo"},
 				Number: 7,
@@ -1744,7 +1727,7 @@ func TestAddLabelsToPullRequest(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			client := test.mockGithubClient
+			client := nil
 			prMetadata := test.prMetadata
 			err := addLabelsToPullRequest(t.Context(), client, test.wantPullRequestLabels, &prMetadata)
 

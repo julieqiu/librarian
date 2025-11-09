@@ -46,17 +46,6 @@ var globalPreservePatterns = []string{
 	fmt.Sprintf(`^%s(/.*)?$`, regexp.QuoteMeta(config.GeneratorInputDir)), // Preserve the generator-input directory and its contents.
 }
 
-// GitHubClient is an abstraction over the GitHub client.
-type GitHubClient interface {
-	GetRawContent(ctx context.Context, path, ref string) ([]byte, error)
-	GetLabels(ctx context.Context, number int) ([]string, error)
-	ReplaceLabels(ctx context.Context, number int, labels []string) error
-	SearchPullRequests(ctx context.Context, query string) ([]*github.PullRequest, error)
-	GetPullRequest(ctx context.Context, number int) (*github.PullRequest, error)
-	CreateRelease(ctx context.Context, tagName, name, body, commitish string) (*github.RepositoryRelease, error)
-	CreateTag(ctx context.Context, tag, commitish string) error
-}
-
 // ContainerClient is an abstraction over the Docker client.
 type ContainerClient interface {
 	Build(ctx context.Context, request *docker.BuildRequest) error
@@ -64,11 +53,10 @@ type ContainerClient interface {
 	ReleaseStage(ctx context.Context, request *docker.ReleaseStageRequest) error
 }
 
-type commandRunner struct{
+type commandRunner struct {
 	repo            gitrepo.Repository
 	sourceRepo      gitrepo.Repository
 	state           *config.LibrarianState
-	ghClient        GitHubClient
 	containerClient ContainerClient
 	image           string
 	workRoot        string
@@ -100,12 +88,6 @@ func newCommandRunner(cfg *config.Config) (*commandRunner, error) {
 
 	image := deriveImage(cfg.Image, state)
 
-	gitHubRepo, err := GetGitHubRepository(cfg, languageRepo)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get GitHub repository: %w", err)
-	}
-
-	ghClient := github.NewClient(cfg.GitHubToken, gitHubRepo)
 	container, err := docker.New(cfg.WorkRoot, image, &docker.DockerOptions{
 		UserUID:   cfg.UserUID,
 		UserGID:   cfg.UserGID,
@@ -120,7 +102,6 @@ func newCommandRunner(cfg *config.Config) (*commandRunner, error) {
 		sourceRepo:      sourceRepo,
 		state:           state,
 		image:           image,
-		ghClient:        ghClient,
 		containerClient: container,
 	}, nil
 }

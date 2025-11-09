@@ -24,98 +24,8 @@ import (
 
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/docker"
-	"github.com/googleapis/librarian/internal/github"
 	"github.com/googleapis/librarian/internal/gitrepo"
-	"gopkg.in/yaml.v3"
 )
-
-// mockGitHubClient is a mock implementation of the GitHubClient interface for testing.
-type mockGitHubClient struct {
-	GitHubClient
-	rawContent              []byte
-	rawErr                  error
-	createPullRequestCalls  int
-	addLabelsToIssuesCalls  int
-	getLabelsCalls          int
-	replaceLabelsCalls      int
-	searchPullRequestsCalls int
-	getPullRequestCalls     int
-	createReleaseCalls      int
-	createIssueCalls        int
-	createTagCalls          int
-	createPullRequestErr    error
-	addLabelsToIssuesErr    error
-	getLabelsErr            error
-	replaceLabelsErr        error
-	searchPullRequestsErr   error
-	getPullRequestErr       error
-	createReleaseErr        error
-	createIssueErr          error
-	createTagErr            error
-	createdPR               *github.PullRequestMetadata
-	labels                  []string
-	pullRequests            []*github.PullRequest
-	pullRequest             *github.PullRequest
-	createdRelease          *github.RepositoryRelease
-	librarianState          *config.LibrarianState
-}
-
-func (m *mockGitHubClient) GetRawContent(ctx context.Context, path, ref string) ([]byte, error) {
-	if path == ".librarian/state.yaml" && m.librarianState != nil {
-		return yaml.Marshal(m.librarianState)
-	}
-
-	return m.rawContent, m.rawErr
-}
-
-func (m *mockGitHubClient) CreatePullRequest(ctx context.Context, repo *github.Repository, remoteBranch, remoteBase, title, body string, isDraft bool) (*github.PullRequestMetadata, error) {
-	m.createPullRequestCalls++
-	if m.createPullRequestErr != nil {
-		return nil, m.createPullRequestErr
-	}
-	return m.createdPR, nil
-}
-
-func (m *mockGitHubClient) AddLabelsToIssue(ctx context.Context, repo *github.Repository, number int, labels []string) error {
-	m.addLabelsToIssuesCalls++
-	m.labels = append(m.labels, labels...)
-	return m.addLabelsToIssuesErr
-}
-
-func (m *mockGitHubClient) GetLabels(ctx context.Context, number int) ([]string, error) {
-	m.getLabelsCalls++
-	return m.labels, m.getLabelsErr
-}
-
-func (m *mockGitHubClient) ReplaceLabels(ctx context.Context, number int, labels []string) error {
-	m.replaceLabelsCalls++
-	return m.replaceLabelsErr
-}
-
-func (m *mockGitHubClient) SearchPullRequests(ctx context.Context, query string) ([]*github.PullRequest, error) {
-	m.searchPullRequestsCalls++
-	return m.pullRequests, m.searchPullRequestsErr
-}
-
-func (m *mockGitHubClient) GetPullRequest(ctx context.Context, number int) (*github.PullRequest, error) {
-	m.getPullRequestCalls++
-	return m.pullRequest, m.getPullRequestErr
-}
-
-func (m *mockGitHubClient) CreateRelease(ctx context.Context, tagName, releaseName, body, commitish string) (*github.RepositoryRelease, error) {
-	m.createReleaseCalls++
-	return m.createdRelease, m.createReleaseErr
-}
-
-func (m *mockGitHubClient) CreateIssueComment(ctx context.Context, number int, comment string) error {
-	m.createIssueCalls++
-	return m.createIssueErr
-}
-
-func (m *mockGitHubClient) CreateTag(ctx context.Context, tagName, commitish string) error {
-	m.createTagCalls++
-	return m.createTagErr
-}
 
 // mockContainerClient is a mock implementation of the ContainerClient interface for testing.
 type mockContainerClient struct {
@@ -182,59 +92,6 @@ func (m *mockContainerClient) Build(ctx context.Context, request *docker.BuildRe
 	}
 
 	return m.buildErr
-}
-
-func (m *mockContainerClient) Configure(ctx context.Context, request *docker.ConfigureRequest) (string, error) {
-	m.configureCalls++
-
-	if m.noConfigureResponse {
-		return "", m.configureErr
-	}
-
-	// Write a configure-response.json unless we're configured not to.
-	if err := os.MkdirAll(filepath.Join(request.RepoDir, config.LibrarianDir), 0755); err != nil {
-		return "", err
-	}
-	for _, library := range request.State.Libraries {
-		needConfigure := false
-		for _, oneApi := range library.APIs {
-			if oneApi.Status == "new" {
-				needConfigure = true
-			}
-		}
-
-		if !needConfigure {
-			continue
-		}
-
-		if !m.noInitVersion {
-			library.Version = "0.1.0"
-		}
-
-		// Configure source root and remove regex.
-		if len(m.configureLibraryPaths) != 0 {
-			library.SourceRoots = make([]string, len(m.configureLibraryPaths))
-			copy(library.SourceRoots, m.configureLibraryPaths)
-
-			library.RemoveRegex = make([]string, len(m.configureLibraryPaths))
-			copy(library.RemoveRegex, m.configureLibraryPaths)
-		}
-
-		if m.wantErrorMsg {
-			library.ErrorMessage = "simulated error message"
-		}
-
-		b, err := json.Marshal(library)
-		if err != nil {
-			return "", err
-		}
-
-		if err := os.WriteFile(filepath.Join(request.RepoDir, config.LibrarianDir, config.ConfigureResponse), b, 0755); err != nil {
-			return "", err
-		}
-	}
-
-	return "", m.configureErr
 }
 
 func (m *mockContainerClient) Generate(ctx context.Context, request *docker.GenerateRequest) error {

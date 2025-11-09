@@ -33,7 +33,6 @@ type stageRunner struct {
 	branch          string
 	commit          bool
 	containerClient ContainerClient
-	ghClient        GitHubClient
 	image           string
 	library         string
 	libraryVersion  string
@@ -53,7 +52,6 @@ func newStageRunner(cfg *config.Config) (*stageRunner, error) {
 		branch:          cfg.Branch,
 		commit:          cfg.Commit,
 		containerClient: runner.containerClient,
-		ghClient:        runner.ghClient,
 		image:           runner.image,
 		library:         cfg.Library,
 		libraryVersion:  cfg.LibraryVersion,

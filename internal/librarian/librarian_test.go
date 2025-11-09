@@ -137,7 +137,6 @@ func TestGenerate_DefaultBehavior(t *testing.T) {
 	mockContainer := &mockContainerClient{
 		wantLibraryGen: true,
 	}
-	mockGH := &mockGitHubClient{}
 
 	// 3. Call librarian.Run
 	cfg := config.New("generate")
@@ -149,7 +148,6 @@ func TestGenerate_DefaultBehavior(t *testing.T) {
 		t.Fatalf("newGenerateRunner() failed: %v", err)
 	}
 
-	runner.ghClient = mockGH
 	runner.containerClient = mockContainer
 	if err := runner.run(ctx); err != nil {
 		t.Fatalf("runner.run() failed: %v", err)

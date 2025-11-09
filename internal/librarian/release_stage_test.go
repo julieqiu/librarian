@@ -791,7 +791,6 @@ func TestStageRun(t *testing.T) {
 							},
 						},
 					},
-					ghClient:        &mockGitHubClient{},
 					librarianConfig: &config.OldLibrarianConfig{},
 				}
 			},
@@ -840,7 +839,6 @@ func TestStageRun(t *testing.T) {
 							},
 						},
 					},
-					ghClient:        &mockGitHubClient{},
 					librarianConfig: &config.OldLibrarianConfig{},
 				}
 			},
@@ -911,7 +909,6 @@ func TestStageRun(t *testing.T) {
 							},
 						},
 					},
-					ghClient:        &mockGitHubClient{},
 					librarianConfig: &config.OldLibrarianConfig{},
 				}
 			},
@@ -975,7 +972,6 @@ func TestStageRun(t *testing.T) {
 							},
 						},
 					},
-					ghClient:        &mockGitHubClient{},
 					librarianConfig: &config.OldLibrarianConfig{},
 				}
 			},

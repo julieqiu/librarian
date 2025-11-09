@@ -50,17 +50,6 @@ func loadRepoState(repo *gitrepo.LocalRepository, source string) (*config.Librar
 	return parseLibrarianState(path, source)
 }
 
-func loadRepoStateFromGitHub(ctx context.Context, ghClient GitHubClient, branch string) (*config.LibrarianState, error) {
-	content, err := ghClient.GetRawContent(ctx, path.Join(config.LibrarianDir, config.LibrarianStateFile), branch)
-	if err != nil {
-		return nil, err
-	}
-	state, err := loadLibrarianStateFromBytes(content, "")
-	if err != nil {
-		return nil, err
-	}
-	return state, nil
-}
 
 func parseLibrarianState(path, source string) (*config.LibrarianState, error) {
 	bytes, err := os.ReadFile(path)

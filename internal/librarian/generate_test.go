@@ -30,16 +30,14 @@ func TestGenerateSingleLibrary(t *testing.T) {
 		repo              gitrepo.Repository
 		state             *config.LibrarianState
 		container         *mockContainerClient
-		ghClient          GitHubClient
 		wantLibraryID     string
 		wantErr           bool
 		wantGenerateCalls int
 	}{
 		{
-			name:     "works",
-			api:      "some/api",
-			repo:     newTestGitRepo(t),
-			ghClient: &mockGitHubClient{},
+			name: "works",
+			api:  "some/api",
+			repo: newTestGitRepo(t),
 			state: &config.LibrarianState{
 				Libraries: []*config.LibraryState{
 					{
@@ -53,10 +51,9 @@ func TestGenerateSingleLibrary(t *testing.T) {
 			wantGenerateCalls: 1,
 		},
 		{
-			name:     "works with no response",
-			api:      "some/api",
-			repo:     newTestGitRepo(t),
-			ghClient: &mockGitHubClient{},
+			name: "works with no response",
+			api:  "some/api",
+			repo: newTestGitRepo(t),
 			state: &config.LibrarianState{
 				Libraries: []*config.LibraryState{
 					{

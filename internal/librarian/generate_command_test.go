@@ -168,9 +168,6 @@ func TestNewGenerateRunner(t *testing.T) {
 				t.Errorf("newGenerateRunner() branch is not set")
 			}
 
-			if r.ghClient == nil {
-				t.Errorf("newGenerateRunner() ghClient is nil")
-			}
 			if r.containerClient == nil {
 				t.Errorf("newGenerateRunner() containerClient is nil")
 			}
@@ -391,7 +388,6 @@ func TestGenerateScenarios(t *testing.T) {
 		state                    *config.LibrarianState
 		librarianConfig          *config.OldLibrarianConfig
 		container                *mockContainerClient
-		ghClient                 GitHubClient
 		build                    bool
 		forceShouldGenerateError bool
 		wantErr                  bool
@@ -413,7 +409,6 @@ func TestGenerateScenarios(t *testing.T) {
 					"src/a",
 				},
 			},
-			ghClient:           &mockGitHubClient{},
 			build:              true,
 			wantGenerateCalls:  1,
 			wantBuildCalls:     1,
@@ -440,7 +435,6 @@ func TestGenerateScenarios(t *testing.T) {
 					},
 				},
 			},
-			ghClient:           &mockGitHubClient{},
 			build:              true,
 			wantGenerateCalls:  1,
 			wantBuildCalls:     1,
@@ -464,7 +458,6 @@ func TestGenerateScenarios(t *testing.T) {
 			container: &mockContainerClient{
 				wantLibraryGen: true,
 			},
-			ghClient:           &mockGitHubClient{},
 			build:              true,
 			wantGenerateCalls:  1,
 			wantBuildCalls:     1,
@@ -488,7 +481,6 @@ func TestGenerateScenarios(t *testing.T) {
 			container: &mockContainerClient{
 				wantLibraryGen: true,
 			},
-			ghClient:           &mockGitHubClient{},
 			build:              true,
 			wantGenerateCalls:  1,
 			wantBuildCalls:     1,
@@ -513,7 +505,6 @@ func TestGenerateScenarios(t *testing.T) {
 			container: &mockContainerClient{
 				wantLibraryGen: true,
 			},
-			ghClient:           &mockGitHubClient{},
 			build:              true,
 			wantGenerateCalls:  1,
 			wantBuildCalls:     1,
@@ -532,7 +523,6 @@ func TestGenerateScenarios(t *testing.T) {
 				},
 			},
 			container:  &mockContainerClient{},
-			ghClient:   &mockGitHubClient{},
 			build:      true,
 			wantErr:    true,
 			wantErrMsg: "not configured yet, generation stopped",
@@ -553,7 +543,6 @@ func TestGenerateScenarios(t *testing.T) {
 			container: &mockContainerClient{
 				wantErrorMsg: true,
 			},
-			ghClient:           &mockGitHubClient{},
 			wantGenerateCalls:  1,
 			wantConfigureCalls: 0,
 			wantErr:            true,
@@ -583,7 +572,6 @@ func TestGenerateScenarios(t *testing.T) {
 			container: &mockContainerClient{
 				wantLibraryGen: true,
 			},
-			ghClient:          &mockGitHubClient{},
 			build:             true,
 			wantGenerateCalls: 2,
 			wantBuildCalls:    2,
@@ -601,7 +589,6 @@ func TestGenerateScenarios(t *testing.T) {
 				},
 			},
 			container:  &mockContainerClient{},
-			ghClient:   &mockGitHubClient{},
 			build:      true,
 			wantErr:    true,
 			wantErrMsg: "not configured yet, generation stopped",
@@ -637,7 +624,6 @@ func TestGenerateScenarios(t *testing.T) {
 				},
 			},
 			container:  &mockContainerClient{generateErr: errors.New("generate error")},
-			ghClient:   &mockGitHubClient{},
 			build:      true,
 			wantErr:    true,
 			wantErrMsg: "generate error",
@@ -661,7 +647,6 @@ func TestGenerateScenarios(t *testing.T) {
 				buildErr:       errors.New("build error"),
 				wantLibraryGen: true,
 			},
-			ghClient:   &mockGitHubClient{},
 			build:      true,
 			wantErr:    true,
 			wantErrMsg: "build error",
@@ -692,7 +677,6 @@ func TestGenerateScenarios(t *testing.T) {
 				failGenerateForID: "lib1",
 				generateErrForID:  errors.New("generate error"),
 			},
-			ghClient:          &mockGitHubClient{},
 			build:             true,
 			wantGenerateCalls: 2,
 			wantBuildCalls:    1,
@@ -721,7 +705,6 @@ func TestGenerateScenarios(t *testing.T) {
 			container: &mockContainerClient{
 				wantLibraryGen: true,
 			},
-			ghClient:          &mockGitHubClient{},
 			build:             true,
 			wantGenerateCalls: 1,
 			wantBuildCalls:    1,
@@ -751,7 +734,6 @@ func TestGenerateScenarios(t *testing.T) {
 			container: &mockContainerClient{
 				wantLibraryGen: true,
 			},
-			ghClient:          &mockGitHubClient{},
 			build:             true,
 			wantGenerateCalls: 1,
 			wantBuildCalls:    1,
@@ -778,7 +760,6 @@ func TestGenerateScenarios(t *testing.T) {
 				},
 			},
 			container:  &mockContainerClient{generateErr: errors.New("generate error")},
-			ghClient:   &mockGitHubClient{},
 			build:      true,
 			wantErr:    true,
 			wantErrMsg: "all 1 libraries failed to generate (skipped: 1)",
@@ -801,7 +782,6 @@ func TestGenerateScenarios(t *testing.T) {
 				failGenerateForID: "lib1",
 				generateErrForID:  errors.New("generate error"),
 			},
-			ghClient:          &mockGitHubClient{},
 			build:             true,
 			wantErr:           true,
 			wantErrMsg:        "all 1 libraries failed to generate",
@@ -819,7 +799,6 @@ func TestGenerateScenarios(t *testing.T) {
 				},
 			},
 			container:          &mockContainerClient{},
-			ghClient:           &mockGitHubClient{},
 			build:              true,
 			wantGenerateCalls:  0,
 			wantBuildCalls:     0,
@@ -867,7 +846,6 @@ func TestGenerateScenarios(t *testing.T) {
 			container: &mockContainerClient{
 				wantLibraryGen: true,
 			},
-			ghClient:           &mockGitHubClient{},
 			build:              true,
 			wantGenerateCalls:  2,
 			wantBuildCalls:     2,
@@ -908,7 +886,6 @@ func TestGenerateScenarios(t *testing.T) {
 				state:           test.state,
 				librarianConfig: test.librarianConfig,
 				containerClient: test.container,
-				ghClient:        test.ghClient,
 				workRoot:        t.TempDir(),
 			}
 
@@ -984,7 +961,6 @@ func TestGenerateSingleLibraryCommand(t *testing.T) {
 		library    string
 		state      *config.LibrarianState
 		container  *mockContainerClient
-		ghClient   GitHubClient
 		build      bool
 		wantErr    bool
 		wantErrMsg string
@@ -1003,7 +979,6 @@ func TestGenerateSingleLibraryCommand(t *testing.T) {
 					"src/a",
 				},
 			},
-			ghClient:   &mockGitHubClient{},
 			build:      true,
 			wantPRType: pullRequestOnboard,
 		},
@@ -1025,7 +1000,6 @@ func TestGenerateSingleLibraryCommand(t *testing.T) {
 			container: &mockContainerClient{
 				wantLibraryGen: true,
 			},
-			ghClient:   &mockGitHubClient{},
 			build:      true,
 			wantPRType: pullRequestGenerate,
 		},
@@ -1041,7 +1015,6 @@ func TestGenerateSingleLibraryCommand(t *testing.T) {
 				sourceRepo:      sourceRepo,
 				state:           test.state,
 				containerClient: test.container,
-				ghClient:        test.ghClient,
 				workRoot:        t.TempDir(),
 			}
 
