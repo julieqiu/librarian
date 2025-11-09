@@ -87,33 +87,6 @@ func (r *stageRunner) run(ctx context.Context) error {
 		return err
 	}
 
-	prBodyBuilder := func() (string, error) {
-		gitHubRepo, err := GetGitHubRepositoryFromGitRepo(r.repo)
-		if err != nil {
-			return "", fmt.Errorf("failed to get GitHub repository: %w", err)
-		}
-		return formatReleaseNotes(r.state, gitHubRepo)
-	}
-	commitInfo := &commitInfo{
-		branch:        r.branch,
-		commit:        r.commit,
-		commitMessage: "chore: create a release",
-		ghClient:      r.ghClient,
-		prType:        pullRequestRelease,
-		// Newly created PRs from the `release stage` command should have a
-		// `release:pending` GitHub tab to be tracked for release.
-		pullRequestLabels: []string{"release:pending"},
-		push:              r.push,
-		languageRepo:      r.repo,
-		sourceRepo:        r.sourceRepo,
-		state:             r.state,
-		workRoot:          r.workRoot,
-		prBodyBuilder:     prBodyBuilder,
-	}
-	if err := commitAndPush(ctx, commitInfo); err != nil {
-		return fmt.Errorf("failed to commit and push: %w", err)
-	}
-
 	return nil
 }
 

@@ -38,41 +38,9 @@ import (
 )
 
 const (
-	defaultAPISourceBranch  = "master"
-	prBodyFile              = "pr-body.txt"
-	timingFile              = "timing.txt"
-	failedGenerationComment = `One or more libraries have failed to generate, please review PR description for a list of failed libraries.
-For each failed library, open a ticket in that library’s repository and then you may resolve this comment and merge.
-`
+	defaultAPISourceBranch = "master"
+	timingFile             = "timing.txt"
 )
-
-var errBuilderNotProvided = fmt.Errorf("no prBodyBuilder provided")
-
-type pullRequestType int
-
-const (
-	pullRequestUnspecified pullRequestType = iota
-	pullRequestOnboard
-	pullRequestGenerate
-	pullRequestRelease
-	pullRequestUpdateImage
-)
-
-// String returns the string representation of a pullRequestType.
-// It returns unknown if the type is not a recognized constant.
-func (t pullRequestType) String() string {
-	names := map[pullRequestType]string{
-		pullRequestUnspecified: "unspecified",
-		pullRequestOnboard:     "onboard",
-		pullRequestGenerate:    "generate",
-		pullRequestRelease:     "release",
-		pullRequestUpdateImage: "update image",
-	}
-	if name, ok := names[t]; ok {
-		return name
-	}
-	return "unspecified"
-}
 
 var globalPreservePatterns = []string{
 	fmt.Sprintf(`^%s(/.*)?$`, regexp.QuoteMeta(config.GeneratorInputDir)), // Preserve the generator-input directory and its contents.
@@ -81,14 +49,11 @@ var globalPreservePatterns = []string{
 // GitHubClient is an abstraction over the GitHub client.
 type GitHubClient interface {
 	GetRawContent(ctx context.Context, path, ref string) ([]byte, error)
-	CreatePullRequest(ctx context.Context, repo *github.Repository, remoteBranch, remoteBase, title, body string, isDraft bool) (*github.PullRequestMetadata, error)
-	AddLabelsToIssue(ctx context.Context, repo *github.Repository, number int, labels []string) error
 	GetLabels(ctx context.Context, number int) ([]string, error)
 	ReplaceLabels(ctx context.Context, number int, labels []string) error
 	SearchPullRequests(ctx context.Context, query string) ([]*github.PullRequest, error)
 	GetPullRequest(ctx context.Context, number int) (*github.PullRequest, error)
 	CreateRelease(ctx context.Context, tagName, name, body, commitish string) (*github.RepositoryRelease, error)
-	CreateIssueComment(ctx context.Context, number int, comment string) error
 	CreateTag(ctx context.Context, tag, commitish string) error
 }
 
@@ -99,42 +64,7 @@ type ContainerClient interface {
 	ReleaseStage(ctx context.Context, request *docker.ReleaseStageRequest) error
 }
 
-type commitInfo struct {
-	// branch is the base branch of the created pull request.
-	branch string
-	// commit declares whether to create a commit.
-	commit bool
-	// commitMessage is used as the message on the actual git commit.
-	commitMessage string
-	// ghClient is used to interact with the GitHub API.
-	ghClient GitHubClient
-	// prType is an enum for which type of librarian pull request we are creating.
-	prType pullRequestType
-	// pullRequestLabels is a list of labels to add to the created pull request.
-	pullRequestLabels []string
-	// push declares whether to push the commits to GitHub.
-	push bool
-	// languageRepo is the git repository containing the language-specific libraries.
-	languageRepo gitrepo.Repository
-	// sourceRepo is the git repository containing the source protos.
-	sourceRepo gitrepo.Repository
-	// state is the librarian state.yaml contents.
-	state *config.LibrarianState
-	// workRoot is the directory that we stage code changes in.
-	workRoot string
-	// failedGenerations is the number of generations that failed.
-	failedGenerations int
-	// api is the api path of a library, only set this value during api onboarding.
-	api string
-	// library is the ID of a library, only set this value during api onboarding.
-	library string
-	// prBodyBuilder is a callback function for building the pull request body
-	prBodyBuilder func() (string, error)
-	// isDraft declares whether to create the pull request as a draft.
-	isDraft bool
-}
-
-type commandRunner struct {
+type commandRunner struct{
 	repo            gitrepo.Repository
 	sourceRepo      gitrepo.Repository
 	state           *config.LibrarianState
@@ -363,119 +293,6 @@ func getDirectoryFilenames(dir string) ([]string, error) {
 	}
 	return fileNames, nil
 }
-
-// commitAndPush creates a commit and push request to GitHub for the generated changes.
-// It uses the GitHub client to create a PR with the specified branch, title, and
-// description to the repository.
-func commitAndPush(ctx context.Context, info *commitInfo) error {
-	if !info.push && !info.commit {
-		slog.Info("push flag and commit flag are not specified, skipping committing")
-		return writePRBody(info)
-	}
-
-	repo := info.languageRepo
-	if err := repo.AddAll(); err != nil {
-		return fmt.Errorf("failed to add all files to git: %w", err)
-	}
-	isClean, err := repo.IsClean()
-	if err != nil {
-		return fmt.Errorf("failed to check if repo is clean: %w", err)
-	}
-
-	if isClean {
-		slog.Info("no changes to commit, skipping commit and push.")
-		return nil
-	}
-
-	datetimeNow := formatTimestamp(time.Now())
-	branch := fmt.Sprintf("librarian-%s", datetimeNow)
-	if err := repo.CreateBranchAndCheckout(branch); err != nil {
-		return fmt.Errorf("failed to create branch and checkout: %w", err)
-	}
-
-	if err := repo.Commit(info.commitMessage); err != nil {
-		return fmt.Errorf("failed to commit: %w", err)
-	}
-
-	if !info.push {
-		slog.Info("push flag is not specified, skipping pull request creation")
-		return writePRBody(info)
-	}
-
-	if err := repo.Push(branch); err != nil {
-		return fmt.Errorf("failed to push: %w", err)
-	}
-
-	gitHubRepo, err := GetGitHubRepositoryFromGitRepo(info.languageRepo)
-	if err != nil {
-		return fmt.Errorf("failed to get GitHub repository: %w", err)
-	}
-
-	title := fmt.Sprintf("chore: librarian %s pull request: %s", info.prType, datetimeNow)
-	prBody, err := info.prBodyBuilder()
-	if err != nil {
-		return fmt.Errorf("failed to create pull request body: %w", err)
-	}
-
-	pullRequestMetadata, err := info.ghClient.CreatePullRequest(ctx, gitHubRepo, branch, info.branch, title, prBody, info.isDraft)
-	if err != nil {
-		return fmt.Errorf("failed to create pull request: %w", err)
-	}
-
-	if info.failedGenerations != 0 {
-		if err := info.ghClient.CreateIssueComment(ctx, pullRequestMetadata.Number, failedGenerationComment); err != nil {
-			return fmt.Errorf("failed to add pull request comment: %w", err)
-		}
-	}
-
-	return addLabelsToPullRequest(ctx, info.ghClient, info.pullRequestLabels, pullRequestMetadata)
-}
-
-// writePRBody attempts to log the body of a PR that would have been created if the
-// -push flag had been specified. This logs any errors and returns them to the
-// caller.
-func writePRBody(info *commitInfo) error {
-	if info.prBodyBuilder == nil {
-		return errBuilderNotProvided
-	}
-
-	prBody, err := info.prBodyBuilder()
-	if err != nil {
-		slog.Warn("unable to create PR body", "error", err)
-		return err
-	}
-	// Note: we can't accurately predict whether a PR would have been created,
-	// as we're not checking whether the repo is clean or not. The intention is to be
-	// as light-touch as possible.
-	fullPath := filepath.Join(info.workRoot, prBodyFile)
-	// Ensure that "cat [path-to-pr-body.txt]" gives useful output.
-	prBody = prBody + "\n"
-	err = os.WriteFile(fullPath, []byte(prBody), 0644)
-	if err != nil {
-		slog.Warn("unable to save PR body", "error", err)
-		return err
-	}
-	slog.Info("wrote body of pull request that might have been created", "file", fullPath)
-	return nil
-}
-
-// addLabelsToPullRequest adds a list of labels to a single pull request (specified by the id number).
-// Should only be called on a valid Github pull request.
-// Passing in `nil` for labels will no-op and an empty list for labels will clear all labels on the PR.
-// TODO: Consolidate the params to a potential PullRequestInfo struct.
-func addLabelsToPullRequest(ctx context.Context, ghClient GitHubClient, pullRequestLabels []string, prMetadata *github.PullRequestMetadata) error {
-	// Do not update if there aren't labels provided
-	if pullRequestLabels == nil {
-		return nil
-	}
-	// GitHub API treats Issues and Pull Request the same
-	// https://docs.github.com/en/rest/issues/labels#add-labels-to-an-issue
-	if err := ghClient.AddLabelsToIssue(ctx, prMetadata.Repo, prMetadata.Number, pullRequestLabels); err != nil {
-		return fmt.Errorf("failed to add labels to pull request: %w", err)
-	}
-	return nil
-}
-
 
 func copyFile(dst, src string) (err error) {
 	lstat, err := os.Lstat(src)

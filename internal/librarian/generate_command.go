@@ -49,13 +49,6 @@ type generateRunner struct {
 	workRoot          string
 }
 
-// generationStatus represents the result of a single library generation.
-type generationStatus struct {
-	// oldCommit is the SHA of the previously generated version of the library.
-	oldCommit string
-	prType    pullRequestType
-}
-
 func newGenerateRunner(cfg *config.Config) (*generateRunner, error) {
 	runner, err := newCommandRunner(cfg)
 	if err != nil {
@@ -92,22 +85,16 @@ func (r *generateRunner) run(ctx context.Context) error {
 		return fmt.Errorf("failed to make output directory, %s: %w", outputDir, err)
 	}
 	// The last generated commit is changed after library generation,
-	// use this map to keep the mapping from library id to commit sha before the
-	// generation since we need these commits to create pull request body.
-	idToCommits := make(map[string]string)
 	var failedLibraries []string
-	prType := pullRequestGenerate
 	if r.api != "" || r.library != "" {
 		libraryID := r.library
 		if libraryID == "" {
 			libraryID = findLibraryIDByAPIPath(r.state, r.api)
 		}
-		status, err := r.generateSingleLibrary(ctx, libraryID, outputDir)
+		_, err := r.generateSingleLibrary(ctx, libraryID, outputDir)
 		if err != nil {
 			return err
 		}
-		idToCommits[libraryID] = status.oldCommit
-		prType = status.prType
 	} else {
 		var succeededGenerations int
 		var skippedGenerations int
@@ -125,14 +112,11 @@ func (r *generateRunner) run(ctx context.Context) error {
 				skippedGenerations++
 				continue
 			}
-			status, err := r.generateSingleLibrary(ctx, library.ID, outputDir)
+			_, err := r.generateSingleLibrary(ctx, library.ID, outputDir)
 			if err != nil {
 				slog.Error("failed to generate library", "id", library.ID, "err", err)
 				failedLibraries = append(failedLibraries, library.ID)
 			} else {
-				// Only add the mapping if library generation is successful so that
-				// failed library will not appear in generation PR body.
-				idToCommits[library.ID] = status.oldCommit
 				succeededGenerations++
 			}
 		}
@@ -153,53 +137,6 @@ func (r *generateRunner) run(ctx context.Context) error {
 		return err
 	}
 
-	var prBodyBuilder func() (string, error)
-	switch prType {
-	case pullRequestGenerate:
-		prBodyBuilder = func() (string, error) {
-			req := &generationPRRequest{
-				sourceRepo:      r.sourceRepo,
-				languageRepo:    r.repo,
-				state:           r.state,
-				idToCommits:     idToCommits,
-				failedLibraries: failedLibraries,
-			}
-			return formatGenerationPRBody(req)
-		}
-	case pullRequestOnboard:
-		prBodyBuilder = func() (string, error) {
-			req := &onboardPRRequest{
-				sourceRepo: r.sourceRepo,
-				state:      r.state,
-				api:        r.api,
-				library:    r.library,
-			}
-			return formatOnboardPRBody(req)
-		}
-	default:
-		return fmt.Errorf("unexpected prType %s", prType)
-	}
-
-	commitInfo := &commitInfo{
-		branch:            r.branch,
-		commit:            r.commit,
-		commitMessage:     "feat: generate libraries",
-		ghClient:          r.ghClient,
-		prType:            prType,
-		push:              r.push,
-		languageRepo:      r.repo,
-		sourceRepo:        r.sourceRepo,
-		state:             r.state,
-		workRoot:          r.workRoot,
-		api:               r.api,
-		library:           r.library,
-		failedGenerations: len(failedLibraries),
-		prBodyBuilder:     prBodyBuilder,
-	}
-
-	if err := commitAndPush(ctx, commitInfo); err != nil {
-		return fmt.Errorf("failed to commit and push changes: %w", err)
-	}
 	return nil
 }
 
@@ -214,43 +151,35 @@ func (r *generateRunner) run(ctx context.Context) error {
 // 3. Build the library.
 //
 // 4. Update the last generated commit or initial piper id if the library needs configure.
-func (r *generateRunner) generateSingleLibrary(ctx context.Context, libraryID, outputDir string) (*generationStatus, error) {
+func (r *generateRunner) generateSingleLibrary(ctx context.Context, libraryID, outputDir string) error {
 	safeLibraryDirectory := getSafeDirectoryName(libraryID)
-	prType := pullRequestGenerate
 
 	// At this point, we should have a library in the state.
 	libraryState := r.state.LibraryByID(libraryID)
 	if libraryState == nil {
-		return nil, fmt.Errorf("library %q not configured yet, generation stopped", libraryID)
+		return fmt.Errorf("library %q not configured yet, generation stopped", libraryID)
 	}
-	lastGenCommit := libraryState.LastGeneratedCommit
 
 	if len(libraryState.APIs) == 0 {
 		slog.Info("library has no APIs; skipping generation", "library", libraryID)
-		return &generationStatus{
-			oldCommit: "",
-			prType:    prType,
-		}, nil
+		return nil
 	}
 
 	if err := generateSingleLibrary(ctx, r.containerClient, r.state, libraryState, r.repo, r.sourceRepo, outputDir); err != nil {
-		return nil, err
+		return err
 	}
 
 	if r.build {
 		if err := buildSingleLibrary(ctx, r.containerClient, r.state, libraryState, r.repo); err != nil {
-			return nil, err
+			return err
 		}
 	}
 
 	if err := r.updateLastGeneratedCommitState(libraryID); err != nil {
-		return nil, err
+		return err
 	}
 
-	return &generationStatus{
-		oldCommit: lastGenCommit,
-		prType:    prType,
-	}, nil
+	return nil
 }
 
 func (r *generateRunner) updateLastGeneratedCommitState(libraryID string) error {
