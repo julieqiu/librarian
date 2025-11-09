@@ -32,8 +32,9 @@ release:
 
 **What this enables:**
 - `librarian add <path>` - Track handwritten code for release
-- `librarian prepare <path>` - Prepare releases
-- `librarian release <path>` - Publish releases
+- `librarian release prepare` - Prepare releases
+- `librarian release tag` - Create git tags
+- `librarian release publish` - Publish to registries
 
 ### Example: Repository with code generation
 
@@ -61,8 +62,9 @@ release:
 **What this enables:**
 - `librarian add <path> <api>` - Generate code from API definitions
 - `librarian generate <path>` - Regenerate code
-- `librarian prepare <path>` - Prepare releases
-- `librarian release <path>` - Publish releases
+- `librarian release prepare` - Prepare releases
+- `librarian release tag` - Create git tags
+- `librarian release publish` - Publish to registries
 
 ### Configuration Fields
 
@@ -227,11 +229,11 @@ language:
 
 #### `release` section (optional)
 
-When present, this artifact can be released with `librarian prepare` and `librarian release`.
+When present, this artifact can be released with `librarian release prepare`, `librarian release tag`, and `librarian release publish`.
 
 - `version` - Current released version (null if never released)
-- `prepared.version` - Next version being prepared (present only when a release is prepared)
-- `prepared.commit` - Commit SHA at which the release was prepared
+
+**Note**: Version detection is done via git diff, comparing version files at HEAD against the last git tag. No prepared state is tracked in the configuration.
 
 ## How Configuration Works
 
@@ -285,101 +287,94 @@ This:
 3. Ensures googleapis is available:
    - If `googleapis.path` is a local directory → uses it directly
    - If `googleapis.path` is a URL → downloads tarball, verifies SHA256, caches by SHA256
-4. Prepares generate-request.json with API configurations from `.librarian.yaml`
-5. Runs generator container with appropriate mounts
-6. Applies keep/remove/exclude rules to the output
+4. Builds commands.json files from API configurations in `.librarian.yaml`
+5. Runs generator container multiple times with different commands.json files
+6. Applies keep/remove/exclude rules between container invocations
+7. Copies final output to artifact directory
 
 **No generation state** is written to the artifact's `.librarian.yaml`. The repository config already contains the googleapis path/SHA256, which serves as the single source of truth for what was used.
 
 ## Container Interface
 
-### What the container receives
-
 The generator container is a Docker image that implements the Librarian container
-contract. The container receives:
+contract using a **command-based architecture**.
+
+### What the container receives
 
 **Mounts:**
 
-- `/request` - Contains generate-request.json (derived from the artifact's `.librarian.yaml`)
-- `/output` - Empty directory where container writes generated code
-- `/source` - Read-only googleapis repository at specified commit
+- `/commands` - Contains commands.json (read-only)
+- `/config` - Contains language-specific dependency files (requirements.txt, go.mod, etc.) (read-only)
+- `/source` - Read-only googleapis repository
+- `/output` - Directory where container writes generated code
 
-**Command arguments:**
+**Container execution:**
+
+The librarian CLI invokes the container multiple times during generation, each time
+with a different commands.json file. The container reads the commands and executes
+them sequentially.
+
+**Example invocation:**
 
 ```bash
 docker run \
-  -v /path/to/artifact/.librarian:/request \
-  -v /tmp/output:/output \
+  -v /path/to/commands:/commands:ro \
+  -v /path/to/librarian/internal/container/python/config:/config:ro \
   -v /path/to/googleapis:/source:ro \
+  -v /path/to/output:/output \
   python-generator:latest \
-  generate \
-  --request=/request \
-  --output=/output \
-  --source=/source
+  generate --language=python
 ```
 
-Note: `/path/to/artifact/.librarian` is the `.librarian` directory inside the specific artifact being generated (e.g., `packages/google-cloud-secret-manager/.librarian`), not the repository-level `.librarian` directory.
+### commands.json
 
-### generate-request.json
+The container reads `/commands/commands.json` which contains explicit commands to execute.
 
-The container reads `/request/generate-request.json` which contains the library
-configuration.
-
-**Example (Python):**
+**Example (Python code generation):**
 
 ```json
 {
-  "id": "packages/google-cloud-secret-manager",
-  "version": "1.0.0",
-  "apis": [
+  "commands": [
     {
-      "path": "google/cloud/secretmanager/v1",
-      "service_config": "secretmanager_grpc_service_config.json"
-    },
-    {
-      "path": "google/cloud/secretmanager/v1beta2",
-      "service_config": "secretmanager_grpc_service_config.json"
+      "command": "python3",
+      "args": [
+        "-m", "grpc_tools.protoc",
+        "--proto_path=/source",
+        "--python_gapic_out=/output",
+        "--python_gapic_opt=service-config=/source/google/cloud/secretmanager/v1/secretmanager_v1.yaml",
+        "--python_gapic_opt=retry-config=/source/google/cloud/secretmanager/v1/secretmanager_grpc_service_config.json",
+        "--python_gapic_opt=transport=grpc+rest",
+        "--python_gapic_opt=rest-numeric-enums",
+        "--python_gapic_opt=warehouse-package-name=google-cloud-secret-manager",
+        "/source/google/cloud/secretmanager/v1/resources.proto",
+        "/source/google/cloud/secretmanager/v1/service.proto"
+      ]
     }
-  ],
-  "metadata": {
-    "name_pretty": "Secret Manager",
-    "product_documentation": "https://cloud.google.com/secret-manager/docs",
-    "release_level": "stable",
-    "api_description": "Store and manage secrets"
-  },
-  "language": {
-    "python": {
-      "package": "google-cloud-secret-manager"
-    }
-  }
+  ]
 }
 ```
 
-**Example (Go):**
+**Example (Go code generation):**
 
 ```json
 {
-  "id": "packages/secretmanager",
-  "version": "1.0.0",
-  "apis": [
+  "commands": [
     {
-      "path": "google/cloud/secretmanager/v1",
-      "service_config": "secretmanager_grpc_service_config.json"
+      "command": "protoc",
+      "args": [
+        "--proto_path=/source",
+        "--go_out=/output",
+        "--go-grpc_out=/output",
+        "--go_gapic_out=/output",
+        "--go_gapic_opt=go-gapic-package=cloud.google.com/go/secretmanager/apiv1;secretmanager",
+        "--go_gapic_opt=grpc-service-config=/source/google/cloud/secretmanager/v1/secretmanager_grpc_service_config.json",
+        "--go_gapic_opt=api-service-config=/source/google/cloud/secretmanager/v1/secretmanager_v1.yaml",
+        "--go_gapic_opt=transport=grpc+rest",
+        "/source/google/cloud/secretmanager/v1/resources.proto",
+        "/source/google/cloud/secretmanager/v1/service.proto"
+      ]
     }
-  ],
-  "source_roots": ["packages/secretmanager"],
-  "preserve_regex": ["README\\.md", "docs/"],
-  "remove_regex": ["temp\\.txt"],
-  "metadata": {
-    "name_pretty": "Secret Manager",
-    "product_documentation": "https://cloud.google.com/secret-manager/docs",
-    "release_level": "stable"
-  },
-  "language": {
-    "go": {
-      "module": "cloud.google.com/go/secretmanager"
-    }
-  }
+  ]
 }
 ```
 
@@ -387,20 +382,29 @@ configuration.
 
 The container must:
 
-1. Read `/request/generate-request.json`
-2. Parse API configurations
-3. Execute protoc with language-specific plugins using provided configurations
-4. Run post-processors (formatting, templates, etc.)
-5. Run validation and tests
-6. Write generated code to `/output`
+1. Read `/commands/commands.json`
+2. Execute each command sequentially
+3. Exit when all commands complete
 
 The container does NOT:
 
 - Parse BUILD.bazel files (already done by librarian CLI)
 - Clone googleapis (already mounted at `/source`)
-- Read from `/input` (no longer needed - all data is in generate-request.json)
+- Parse `.librarian.yaml` files (already done by librarian CLI - commands are pre-built)
 - Apply keep/remove/exclude rules (done by librarian CLI after container exits)
 - Update `.librarian.yaml` (done by librarian CLI after container exits)
+
+### Multiple invocations
+
+The host CLI calls the container multiple times during generation, each with different commands:
+
+1. **Code generation** - Run protoc/generators
+2. **Post-processing** - Run formatters, templates
+3. **Testing** - Run tests and validation
+
+Between invocations, the host applies file filtering rules and manages staging directories.
+
+See [doc/generate.md](generate.md) for detailed generation flows for Python, Go, and Rust.
 
 ## Key Design Decisions
 
@@ -434,11 +438,15 @@ Regex patterns provide:
 - **Simplicity** - Single pattern can match many files
 - **Familiarity** - Developers understand regex
 
-### Why mount /request instead of /librarian?
+### Why use a command-based architecture?
 
-The mount contains the request data (`generate-request.json`) that tells the container
-what to generate. The name `/request` clearly indicates this is the input request for
-the generation operation, and avoids confusion with the CLI tool name.
+The command-based architecture provides:
+
+- **Simplicity** - Container just executes commands, no parsing/interpretation needed
+- **Language-agnostic container code** - Same Go code runs in all language containers
+- **Explicit control** - Host decides exactly what commands to run
+- **Debuggability** - Commands are transparent and can be inspected
+- **Flexibility** - Easy to add new commands or change execution order
 
 ## Migration from Old System
 
@@ -474,26 +482,17 @@ librarian generate packages/google-cloud-secret-manager
 
 ## Completed Improvements
 
-### ✅ Eliminated /input mount
+### ✅ Adopted command-based architecture
 
-The `/input` mount has been removed. Previously, it was mounted to `.librarian/generator-input/`
-which contained files like `repo-config.yaml` (Go) or `.repo-metadata.json` (Python).
-All necessary data is now in `generate-request.json`, making the container interface simpler.
+The container interface now uses a command-based architecture:
+- `/commands` mount contains `commands.json` with explicit shell commands
+- Container executes commands sequentially without parsing configuration
+- Language-agnostic container code (same Go code for all languages)
+- Host builds commands from `.librarian.yaml` configuration
 
-### ✅ Renamed ApiRoot to GoogleapisDir
+This eliminates the need for:
+- `/input` mount (previously contained `repo-config.yaml` or `.repo-metadata.json`)
+- `/request` mount (previously contained `generate-request.json`)
+- Container-side configuration parsing
 
-The current field name `ApiRoot` in the Go code is confusing - it sounds like the
-root of a single API, but it's actually the root of the googleapis repository.
-Renaming to `GoogleapisDir` would be clearer:
-
-```go
-// Before
-type GenerateRequest struct {
-    ApiRoot string  // Confusing - root of what?
-}
-
-// After
-type GenerateRequest struct {
-    GoogleapisDir string  // Clear - googleapis directory
-}
-```
+All configuration parsing happens in the host CLI, making the container simple and stateless.

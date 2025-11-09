@@ -29,8 +29,9 @@ provides commands to regenerate and release the code in a repeatable way.
 - [librarian edit](#editing-artifact-configuration): Edit artifact configuration (metadata, keep, remove, exclude)
 - [librarian remove](#removing-a-directory): Stop tracking a directory
 - [librarian generate](#generating-a-client-library): Generate or regenerate code for tracked directories
-- [librarian prepare](#preparing-a-release): Prepare a release with version updates and notes
-- [librarian release](#publishing-a-release): Tag and publish a prepared release
+- [librarian release prepare](#preparing-a-release): Prepare a release with version updates and notes
+- [librarian release tag](#tagging-a-release): Create git tags for prepared releases
+- [librarian release publish](#publishing-a-release): Publish tagged releases to package registries
 
 **Configuration commands**
 
@@ -49,8 +50,9 @@ provides commands to regenerate and release the code in a repeatable way.
 **Automation commands**
 
 - [librarianops generate](#automate-code-generation): Automate code generation workflow
-- [librarianops prepare](#automate-release-preparation): Automate release preparation workflow
-- [librarianops release](#automate-release-publishing): Automate release publishing workflow
+- [librarianops release prepare](#automate-release-preparation): Automate release preparation workflow
+- [librarianops release tag](#automate-release-tagging): Automate release tagging workflow
+- [librarianops release publish](#automate-release-publishing): Automate release publishing workflow
 
 ## Repository Setup
 
@@ -84,8 +86,9 @@ release:
 
 **What this enables:**
 - `librarian add <path>` - Track handwritten code for release
-- `librarian prepare <path>` - Prepare releases
-- `librarian release <path>` - Publish releases
+- `librarian release prepare` - Prepare releases
+- `librarian release tag` - Create git tags
+- `librarian release publish` - Publish to registries
 
 **Example: Repository with code generation and releases**
 
@@ -119,8 +122,9 @@ release:
 **What this enables:**
 - `librarian add <path> <api>` - Generate code from API definitions
 - `librarian generate <path>` - Regenerate code
-- `librarian prepare <path>` - Prepare releases
-- `librarian release <path>` - Publish releases
+- `librarian release prepare` - Prepare releases
+- `librarian release tag` - Create git tags
+- `librarian release publish` - Publish to registries
 
 **Configuration fields:**
 
@@ -388,61 +392,89 @@ and only affects artifacts that have a `generate` section in their `.librarian.y
 
 ## Releasing
 
+The release process has three phases: prepare, tag, and publish. See [doc/release.md](doc/release.md) for detailed documentation.
+
 ### Preparing a Release
 
-For artifacts with a `release` section in their `.librarian.yaml`:
-
 ```bash
-librarian prepare <path>
+librarian release prepare
 ```
 
-Determines the next version, updates metadata, and prepares release notes.
-Does not tag or publish.
+Detects libraries with changes since their last release and:
+1. Analyzes conventional commits to determine version bump type (major/minor/patch)
+2. Updates version files with the new version
+3. Updates CHANGELOG.md files
+4. Creates a commit with all version bumps
+
+**Flags:**
+- `--library=<name>` - Prepare specific library only
+- `--dry-run` - Show what would be prepared without making changes
+
+**Example output:**
+
+```
+Detected 2 libraries with pending releases:
+  - secretmanager: 1.11.0 → 1.12.0 (minor)
+  - pubsub: 2.5.0 → 2.5.1 (patch)
+
+Updated files:
+  secretmanager/internal/version.go
+  secretmanager/CHANGELOG.md
+  pubsub/internal/version.go
+  pubsub/CHANGELOG.md
+
+Created commit: chore(release): prepare secretmanager v1.12.0, pubsub v2.5.1
+```
+
+### Tagging a Release
+
+```bash
+librarian release tag
+```
+
+Creates git tags for prepared releases and optionally creates GitHub releases.
+
+**Flags:**
+- `--library=<name>` - Tag specific library only
+- `--no-push` - Create tags locally but don't push to remote
+- `--no-github-release` - Skip GitHub release creation
+
+**Example output:**
+
+```
+Creating tags for 2 libraries:
+
+secretmanager/v1.12.0
+  Tag created: secretmanager/v1.12.0
+  Pushed to origin
+  GitHub release created: https://github.com/googleapis/google-cloud-go/releases/tag/secretmanager%2Fv1.12.0
+
+pubsub/v2.5.1
+  Tag created: pubsub/v2.5.1
+  Pushed to origin
+  GitHub release created: https://github.com/googleapis/google-cloud-go/releases/tag/pubsub%2Fv2.5.1
+```
+
+### Publishing a Release
+
+```bash
+librarian release publish
+```
+
+Publishes tagged releases to package registries:
+- **Go**: No action needed (pkg.go.dev indexes automatically)
+- **Python**: Uploads to PyPI with `twine upload`
+- **Rust**: Publishes to crates.io with `cargo publish`
+
+**Flags:**
+- `--library=<name>` - Publish specific library only
+- `--dry-run` - Show what would be published without uploading
 
 **Example** `packages/google-cloud-secret-manager/.librarian.yaml`:
 
 ```yaml
 release:
-  version: v1.2.0
-  prepared:
-    version: v1.3.0
-    commit: e4d5c6b7a8f9e0d1c2b3a4f5e6d7c8b9a0f1e2d3
-```
-
-Prepare all artifacts that have a `release` section:
-
-```bash
-librarian prepare --all
-```
-
-`--commit` writes a standard commit message for the change.
-
-**Note**: This command only works in repositories that have a `release`
-section in `.librarian/config.yaml`,
-and only affects artifacts that have a `release` section in their `.librarian.yaml`.
-
-### Publishing a Release
-
-For artifacts with a `release` section and a prepared release:
-
-```bash
-librarian release <path>
-```
-
-Tags the prepared version and updates recorded release state. If no prepared
-release exists, the command does nothing.
-
-Release all prepared artifacts:
-
-```bash
-librarian release --all
-```
-
-**Example** `packages/google-cloud-secret-manager/.librarian.yaml` after release:
-
-```yaml
-release:
-  version: v1.3.0
+  version: v1.12.0
 ```
 
 ## Configuration
@@ -573,22 +605,32 @@ This runs:
 ### Automate Release Preparation
 
 ```bash
-librarianops prepare
+librarianops release prepare
 ```
 
 This runs:
-1. `librarian prepare --all --commit` - Prepare all artifacts
+1. `librarian release prepare` - Prepare all libraries with changes
 2. `gh pr create --with-token=$(fetch token) --fill` - Create pull request
+
+### Automate Release Tagging
+
+```bash
+librarianops release tag
+```
+
+This runs:
+1. `librarian release tag` - Create tags for all prepared releases
+2. Tags are pushed to remote repository
+3. GitHub releases are created automatically
 
 ### Automate Release Publishing
 
 ```bash
-librarianops release
+librarianops release publish
 ```
 
 This runs:
-1. `librarian release --all` - Release all prepared artifacts
-2. `gh release create --with-token=$(fetch token) --notes-from-tag` - Create GitHub releases
+1. `librarian release publish` - Publish all tagged releases to package registries (PyPI, crates.io, etc.)
 
 ## Architecture
 
