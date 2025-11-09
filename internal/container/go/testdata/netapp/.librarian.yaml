@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/cloud/netapp/v1
           service_config: netapp_v1.yaml
+          grpc_service_config: netapp_v1_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/netapp/apiv1;netapp
+          release_level: ga
 go:
     source_roots:
         - netapp

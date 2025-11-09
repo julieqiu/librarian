@@ -5,10 +5,25 @@ generate:
     apis:
         - path: google/cloud/discoveryengine/v1
           service_config: discoveryengine_v1.yaml
+          grpc_service_config: discoveryengine_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/discoveryengine/apiv1;discoveryengine
+          release_level: ga
         - path: google/cloud/discoveryengine/v1beta
           service_config: discoveryengine_v1beta.yaml
+          grpc_service_config: discoveryengine_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/discoveryengine/apiv1beta;discoveryengine
+          release_level: beta
         - path: google/cloud/discoveryengine/v1alpha
           service_config: discoveryengine_v1alpha.yaml
+          grpc_service_config: discoveryengine_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/discoveryengine/apiv1alpha;discoveryengine
+          release_level: beta
 go:
     source_roots:
         - discoveryengine

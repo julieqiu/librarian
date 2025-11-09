@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/cloud/essentialcontacts/v1
           service_config: essentialcontacts_v1.yaml
+          grpc_service_config: essentialcontacts_v1_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/essentialcontacts/apiv1;essentialcontacts
+          release_level: ga
 go:
     source_roots:
         - essentialcontacts

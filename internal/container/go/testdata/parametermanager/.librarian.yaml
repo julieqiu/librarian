@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/cloud/parametermanager/v1
           service_config: parametermanager_v1.yaml
+          grpc_service_config: parametermanager_v1_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/parametermanager/apiv1;parametermanager
+          release_level: beta
 go:
     source_roots:
         - parametermanager

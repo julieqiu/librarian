@@ -5,10 +5,25 @@ generate:
     apis:
         - path: google/cloud/billing/budgets/v1
           service_config: billingbudgets.yaml
+          grpc_service_config: billingbudgets_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/billing/budgets/apiv1;budgets
+          release_level: ga
         - path: google/cloud/billing/budgets/v1beta1
           service_config: billingbudgets.yaml
+          grpc_service_config: billingbudgets_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/billing/budgets/apiv1beta1;budgets
+          release_level: beta
         - path: google/cloud/billing/v1
           service_config: cloudbilling_v1.yaml
+          grpc_service_config: cloud_billing_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/billing/apiv1;billing
+          release_level: ga
 go:
     source_roots:
         - billing

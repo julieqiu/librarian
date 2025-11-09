@@ -5,14 +5,34 @@ generate:
     apis:
         - path: google/cloud/beyondcorp/appconnections/v1
           service_config: beyondcorp_v1.yaml
+          grpc_service_config: beyondcorp-appconnections_grpc_service_config.json
+          rest_numeric_enums: true
+          importpath: cloud.google.com/go/beyondcorp/appconnections/apiv1;appconnections
+          release_level: ga
         - path: google/cloud/beyondcorp/appconnectors/v1
           service_config: beyondcorp_v1.yaml
+          grpc_service_config: beyondcorp-appconnectors_grpc_service_config.json
+          rest_numeric_enums: true
+          importpath: cloud.google.com/go/beyondcorp/appconnectors/apiv1;appconnectors
+          release_level: ga
         - path: google/cloud/beyondcorp/appgateways/v1
           service_config: beyondcorp_v1.yaml
+          grpc_service_config: beyondcorp-appgateways_grpc_service_config.json
+          rest_numeric_enums: true
+          importpath: cloud.google.com/go/beyondcorp/appgateways/apiv1;appgateways
+          release_level: ga
         - path: google/cloud/beyondcorp/clientconnectorservices/v1
           service_config: beyondcorp_v1.yaml
+          grpc_service_config: beyondcorp-clientconnectorservices_grpc_service_config.json
+          rest_numeric_enums: true
+          importpath: cloud.google.com/go/beyondcorp/clientconnectorservices/apiv1;clientconnectorservices
+          release_level: ga
         - path: google/cloud/beyondcorp/clientgateways/v1
           service_config: beyondcorp_v1.yaml
+          grpc_service_config: beyondcorp-clientgateways_grpc_service_config.json
+          rest_numeric_enums: true
+          importpath: cloud.google.com/go/beyondcorp/clientgateways/apiv1;clientgateways
+          release_level: ga
 go:
     source_roots:
         - beyondcorp

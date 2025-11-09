@@ -5,11 +5,26 @@ generate:
     apis:
         - path: google/monitoring/dashboard/v1
           service_config: monitoring.yaml
+          grpc_service_config: dashboards_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/monitoring/dashboard/apiv1;dashboard
+          release_level: ga
         - path: google/monitoring/metricsscope/v1
           service_config: monitoring.yaml
+          grpc_service_config: metricsscopes_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc
+          importpath: cloud.google.com/go/monitoring/metricsscope/apiv1;metricsscope
+          release_level: ga
         - path: google/monitoring/v3
           service_config: monitoring.yaml
           client_directory: apiv3/v2
+          grpc_service_config: monitoring_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc
+          importpath: cloud.google.com/go/monitoring/apiv3/v2;monitoring
+          release_level: beta
 go:
     source_roots:
         - monitoring

@@ -5,8 +5,18 @@ generate:
     apis:
         - path: google/cloud/cloudcontrolspartner/v1
           service_config: cloudcontrolspartner_v1.yaml
+          grpc_service_config: cloudcontrolspartner_v1_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/cloudcontrolspartner/apiv1;cloudcontrolspartner
+          release_level: ga
         - path: google/cloud/cloudcontrolspartner/v1beta
           service_config: cloudcontrolspartner_v1beta.yaml
+          grpc_service_config: cloudcontrolspartner_v1beta_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/cloudcontrolspartner/apiv1beta;cloudcontrolspartner
+          release_level: beta
 go:
     source_roots:
         - cloudcontrolspartner

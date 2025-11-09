@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/cloud/telcoautomation/v1
           service_config: telcoautomation_v1.yaml
+          grpc_service_config: telcoautomation_v1_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/telcoautomation/apiv1;telcoautomation
+          release_level: ga
 go:
     source_roots:
         - telcoautomation

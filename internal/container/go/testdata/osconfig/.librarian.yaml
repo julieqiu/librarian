@@ -5,14 +5,39 @@ generate:
     apis:
         - path: google/cloud/osconfig/agentendpoint/v1
           service_config: osconfig_v1.yaml
+          grpc_service_config: agentendpoint_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/osconfig/agentendpoint/apiv1;agentendpoint
+          release_level: ga
         - path: google/cloud/osconfig/agentendpoint/v1beta
           service_config: osconfig_v1beta.yaml
+          grpc_service_config: agentendpoint_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/osconfig/agentendpoint/apiv1beta;agentendpoint
+          release_level: beta
         - path: google/cloud/osconfig/v1
           service_config: osconfig_v1.yaml
+          grpc_service_config: osconfig_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/osconfig/apiv1;osconfig
+          release_level: ga
         - path: google/cloud/osconfig/v1alpha
           service_config: osconfig_v1alpha.yaml
+          grpc_service_config: osconfig_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/osconfig/apiv1alpha;osconfig
+          release_level: alpha
         - path: google/cloud/osconfig/v1beta
           service_config: osconfig_v1beta.yaml
+          grpc_service_config: osconfig_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/osconfig/apiv1beta;osconfig
+          release_level: beta
 go:
     source_roots:
         - osconfig

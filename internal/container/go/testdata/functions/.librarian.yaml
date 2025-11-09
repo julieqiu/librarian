@@ -5,10 +5,25 @@ generate:
     apis:
         - path: google/cloud/functions/v1
           service_config: cloudfunctions_v1.yaml
+          grpc_service_config: functions_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/functions/apiv1;functions
+          release_level: ga
         - path: google/cloud/functions/v2
           service_config: cloudfunctions_v2.yaml
+          grpc_service_config: functions_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/functions/apiv2;functions
+          release_level: ga
         - path: google/cloud/functions/v2beta
           service_config: cloudfunctions_v2beta.yaml
+          grpc_service_config: functions_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/functions/apiv2beta;functions
+          release_level: beta
 go:
     source_roots:
         - functions

@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/cloud/dataproc/v1
           service_config: dataproc_v1.yaml
+          grpc_service_config: dataproc_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/dataproc/v2/apiv1;dataproc
+          release_level: ga
 go:
     source_roots:
         - dataproc

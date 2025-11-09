@@ -5,58 +5,181 @@ generate:
     apis:
         - path: google/shopping/css/v1
           service_config: css_v1.yaml
+          grpc_service_config: css_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: 'cloud.google.com/go/shopping/css/apiv1;css",  # Manual fix'
+          release_level: beta
         - path: google/shopping/merchant/accounts/v1
           service_config: merchantapi_v1.yaml
+          grpc_service_config: accounts_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/accounts/apiv1;accounts
         - path: google/shopping/merchant/accounts/v1beta
           service_config: merchantapi_v1beta.yaml
+          grpc_service_config: accounts_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/accounts/apiv1beta;accounts
+          release_level: beta
         - path: google/shopping/merchant/conversions/v1
           service_config: merchantapi_v1.yaml
+          grpc_service_config: conversions_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/conversions/apiv1;conversions
         - path: google/shopping/merchant/conversions/v1beta
           service_config: merchantapi_v1beta.yaml
+          grpc_service_config: conversions_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/conversions/apiv1beta;conversions
+          release_level: beta
         - path: google/shopping/merchant/datasources/v1
           service_config: merchantapi_v1.yaml
+          grpc_service_config: datasources_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/datasources/apiv1;datasources
         - path: google/shopping/merchant/datasources/v1beta
           service_config: merchantapi_v1beta.yaml
+          grpc_service_config: datasources_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/datasources/apiv1beta;datasources
+          release_level: beta
         - path: google/shopping/merchant/notifications/v1
           service_config: merchantapi_v1.yaml
+          grpc_service_config: notifications_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/notifications/apiv1;notifications
         - path: google/shopping/merchant/notifications/v1beta
           service_config: merchantapi_v1beta.yaml
+          grpc_service_config: notifications_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/notifications/apiv1beta;notifications
+          release_level: beta
         - path: google/shopping/merchant/ordertracking/v1
           service_config: merchantapi_v1.yaml
+          grpc_service_config: ordertracking_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/ordertracking/apiv1;ordertracking
         - path: google/shopping/merchant/ordertracking/v1beta
           service_config: merchantapi_v1beta.yaml
+          grpc_service_config: ordertracking_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/ordertracking/apiv1beta;ordertracking
+          release_level: beta
         - path: google/shopping/merchant/products/v1
           service_config: merchantapi_v1.yaml
+          grpc_service_config: products_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/products/apiv1;products
         - path: google/shopping/merchant/products/v1beta
           service_config: merchantapi_v1beta.yaml
+          grpc_service_config: products_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/products/apiv1beta;products
+          release_level: beta
         - path: google/shopping/merchant/productstudio/v1alpha
           service_config: merchantapi_v1alpha.yaml
+          grpc_service_config: productstudio_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/productstudio/apiv1alpha;productstudio
+          release_level: beta
         - path: google/shopping/merchant/promotions/v1
           service_config: merchantapi_v1.yaml
+          grpc_service_config: promotions_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/promotions/apiv1;promotions
         - path: google/shopping/merchant/promotions/v1beta
           service_config: merchantapi_v1beta.yaml
+          grpc_service_config: promotions_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/promotions/apiv1beta;promotions
+          release_level: beta
         - path: google/shopping/merchant/quota/v1
           service_config: merchantapi_v1.yaml
+          grpc_service_config: quota_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/quota/apiv1;quota
         - path: google/shopping/merchant/quota/v1beta
           service_config: merchantapi_v1beta.yaml
+          grpc_service_config: quota_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/quota/apiv1beta;quota
+          release_level: beta
         - path: google/shopping/merchant/inventories/v1
           service_config: merchantapi_v1.yaml
+          grpc_service_config: inventories_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/inventories/apiv1;inventories
         - path: google/shopping/merchant/inventories/v1beta
           service_config: merchantapi_v1beta.yaml
+          grpc_service_config: inventories_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/inventories/apiv1beta;inventories
+          release_level: beta
         - path: google/shopping/merchant/issueresolution/v1
           service_config: merchantapi_v1.yaml
+          grpc_service_config: issueresolution_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/issueresolution/apiv1;issueresolution
         - path: google/shopping/merchant/issueresolution/v1beta
           service_config: merchantapi_v1beta.yaml
+          grpc_service_config: issueresolution_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/issueresolution/apiv1beta;issueresolution
+          release_level: beta
         - path: google/shopping/merchant/lfp/v1
           service_config: merchantapi_v1.yaml
+          grpc_service_config: lfp_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/lfp/apiv1;lfp
         - path: google/shopping/merchant/lfp/v1beta
           service_config: merchantapi_v1beta.yaml
+          grpc_service_config: lfp_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/lfp/apiv1beta;lfp
+          release_level: beta
         - path: google/shopping/merchant/reports/v1
           service_config: merchantapi_v1.yaml
+          grpc_service_config: reports_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/reports/apiv1;reports
         - path: google/shopping/merchant/reports/v1beta
           service_config: merchantapi_v1beta.yaml
+          grpc_service_config: reports_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/reports/apiv1beta;reports
+          release_level: beta
         - path: google/shopping/merchant/reviews/v1beta
           service_config: merchantapi_v1beta.yaml
+          grpc_service_config: reviews_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/shopping/merchant/reviews/apiv1beta;reviews
+          release_level: beta
         - path: google/shopping/type
 go:
     source_roots:

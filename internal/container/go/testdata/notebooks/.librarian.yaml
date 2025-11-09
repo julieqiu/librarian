@@ -5,10 +5,25 @@ generate:
     apis:
         - path: google/cloud/notebooks/v1
           service_config: notebooks_v1.yaml
+          grpc_service_config: notebooks_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc
+          importpath: cloud.google.com/go/notebooks/apiv1;notebooks
+          release_level: ga
         - path: google/cloud/notebooks/v1beta1
           service_config: notebooks_v1beta1.yaml
+          grpc_service_config: notebooks_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/notebooks/apiv1beta1;notebooks
+          release_level: beta
         - path: google/cloud/notebooks/v2
           service_config: notebooks_v2.yaml
+          grpc_service_config: notebooks_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/notebooks/apiv2;notebooks
+          release_level: ga
 go:
     source_roots:
         - notebooks

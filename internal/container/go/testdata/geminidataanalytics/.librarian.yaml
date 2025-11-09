@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/cloud/geminidataanalytics/v1beta
           service_config: geminidataanalytics_v1beta.yaml
+          grpc_service_config: geminidataanalytics_v1beta_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/geminidataanalytics/apiv1beta;geminidataanalytics
+          release_level: beta
 go:
     source_roots:
         - geminidataanalytics

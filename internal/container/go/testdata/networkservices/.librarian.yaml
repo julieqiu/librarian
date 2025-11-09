@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/cloud/networkservices/v1
           service_config: networkservices_v1.yaml
+          grpc_service_config: networkservices_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/networkservices/apiv1;networkservices
+          release_level: ga
 go:
     source_roots:
         - networkservices

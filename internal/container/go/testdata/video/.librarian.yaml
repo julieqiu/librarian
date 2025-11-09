@@ -5,10 +5,25 @@ generate:
     apis:
         - path: google/cloud/video/livestream/v1
           service_config: livestream_v1.yaml
+          grpc_service_config: livestream_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/video/livestream/apiv1;livestream
+          release_level: ga
         - path: google/cloud/video/transcoder/v1
           service_config: transcoder_v1.yaml
+          grpc_service_config: transcoder_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/video/transcoder/apiv1;transcoder
+          release_level: ga
         - path: google/cloud/video/stitcher/v1
           service_config: videostitcher_v1.yaml
+          grpc_service_config: videostitcher_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc
+          importpath: cloud.google.com/go/video/stitcher/apiv1;stitcher
+          release_level: ga
 go:
     source_roots:
         - video

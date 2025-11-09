@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/cloud/devicestreaming/v1
           service_config: devicestreaming_v1.yaml
+          grpc_service_config: devicestreaming_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/devicestreaming/apiv1;devicestreaming
+          release_level: beta
 go:
     source_roots:
         - devicestreaming

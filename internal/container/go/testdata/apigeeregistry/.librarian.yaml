@@ -5,6 +5,10 @@ generate:
     apis:
         - path: google/cloud/apigeeregistry/v1
           service_config: apigeeregistry_v1.yaml
+          grpc_service_config: apigeeregistry_grpc_service_config.json
+          rest_numeric_enums: true
+          importpath: cloud.google.com/go/apigeeregistry/apiv1;apigeeregistry
+          release_level: ga
 go:
     source_roots:
         - apigeeregistry

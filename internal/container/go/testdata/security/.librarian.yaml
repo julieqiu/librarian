@@ -5,10 +5,25 @@ generate:
     apis:
         - path: google/cloud/security/privateca/v1
           service_config: privateca_v1.yaml
+          grpc_service_config: privateca_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/security/privateca/apiv1;privateca
+          release_level: ga
         - path: google/cloud/security/publicca/v1beta1
           service_config: publicca_v1beta1.yaml
+          grpc_service_config: publicca_v1beta1_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/security/publicca/apiv1beta1;publicca
+          release_level: beta
         - path: google/cloud/security/publicca/v1
           service_config: publicca_v1.yaml
+          grpc_service_config: publicca_v1_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/security/publicca/apiv1;publicca
+          release_level: beta
 go:
     source_roots:
         - security

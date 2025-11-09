@@ -5,8 +5,18 @@ generate:
     apis:
         - path: google/cloud/parallelstore/v1
           service_config: parallelstore_v1.yaml
+          grpc_service_config: parallelstore_v1_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/parallelstore/apiv1;parallelstore
+          release_level: beta
         - path: google/cloud/parallelstore/v1beta
           service_config: parallelstore_v1beta.yaml
+          grpc_service_config: parallelstore_v1beta_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/parallelstore/apiv1beta;parallelstore
+          release_level: beta
 go:
     source_roots:
         - parallelstore

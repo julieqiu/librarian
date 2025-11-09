@@ -5,10 +5,25 @@ generate:
     apis:
         - path: google/cloud/metastore/v1
           service_config: metastore_v1.yaml
+          grpc_service_config: metastore_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/metastore/apiv1;metastore
+          release_level: ga
         - path: google/cloud/metastore/v1alpha
           service_config: metastore_v1alpha.yaml
+          grpc_service_config: metastore_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/metastore/apiv1alpha;metastore
+          release_level: alpha
         - path: google/cloud/metastore/v1beta
           service_config: metastore_v1beta.yaml
+          grpc_service_config: metastore_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/metastore/apiv1beta;metastore
+          release_level: beta
 go:
     source_roots:
         - metastore

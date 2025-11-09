@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/logging/v2
           service_config: logging_v2.yaml
+          grpc_service_config: logging_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/logging/apiv2;logging
+          release_level: ga
 go:
     source_roots:
         - logging

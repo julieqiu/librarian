@@ -5,8 +5,18 @@ generate:
     apis:
         - path: google/cloud/recaptchaenterprise/v1
           service_config: recaptchaenterprise_v1.yaml
+          grpc_service_config: recaptchaenterprise_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc
+          importpath: cloud.google.com/go/recaptchaenterprise/v2/apiv1;recaptchaenterprise
+          release_level: ga
         - path: google/cloud/recaptchaenterprise/v1beta1
           service_config: recaptchaenterprise_v1beta1.yaml
+          grpc_service_config: recaptchaenterprise_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/recaptchaenterprise/v2/apiv1beta1;recaptchaenterprise
+          release_level: beta
 go:
     source_roots:
         - recaptchaenterprise

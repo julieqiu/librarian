@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/cloud/privilegedaccessmanager/v1
           service_config: privilegedaccessmanager_v1.yaml
+          grpc_service_config: None
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/privilegedaccessmanager/apiv1;privilegedaccessmanager
+          release_level: beta
 go:
     source_roots:
         - privilegedaccessmanager

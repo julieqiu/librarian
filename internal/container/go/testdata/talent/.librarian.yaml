@@ -5,8 +5,18 @@ generate:
     apis:
         - path: google/cloud/talent/v4
           service_config: jobs_v4.yaml
+          grpc_service_config: talent_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/talent/apiv4;talent
+          release_level: ga
         - path: google/cloud/talent/v4beta1
           service_config: jobs_v4beta1.yaml
+          grpc_service_config: talent_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/talent/apiv4beta1;talent
+          release_level: beta
 go:
     source_roots:
         - talent

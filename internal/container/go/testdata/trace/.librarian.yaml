@@ -6,9 +6,18 @@ generate:
         - path: google/devtools/cloudtrace/v1
           service_config: cloudtrace_v1.yaml
           client_directory: apiv1
+          grpc_service_config: cloudtrace_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/trace/apiv1;trace
         - path: google/devtools/cloudtrace/v2
           service_config: cloudtrace_v2.yaml
           client_directory: apiv2
+          grpc_service_config: cloudtrace_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/trace/apiv2;trace
+          release_level: beta
 go:
     source_roots:
         - trace

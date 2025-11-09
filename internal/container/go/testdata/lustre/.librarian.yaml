@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/cloud/lustre/v1
           service_config: lustre_v1.yaml
+          grpc_service_config: lustre_v1_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/lustre/apiv1;lustre
+          release_level: beta
 go:
     source_roots:
         - lustre

@@ -6,8 +6,18 @@ generate:
         - path: google/firestore/admin/v1
           service_config: firestore_v1.yaml
           client_directory: apiv1/admin
+          grpc_service_config: firestore_admin_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/firestore/apiv1/admin;apiv1
+          release_level: ga
         - path: google/firestore/v1
           service_config: firestore_v1.yaml
+          grpc_service_config: firestore_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/firestore/apiv1;firestore
+          release_level: ga
 go:
     source_roots:
         - firestore

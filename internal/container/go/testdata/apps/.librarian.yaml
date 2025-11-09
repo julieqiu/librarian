@@ -5,12 +5,32 @@ generate:
     apis:
         - path: google/apps/events/subscriptions/v1
           service_config: workspaceevents_v1.yaml
+          grpc_service_config: subscriptions_v1_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/apps/events/subscriptions/apiv1;subscriptions
+          release_level: beta
         - path: google/apps/events/subscriptions/v1beta
           service_config: workspaceevents_v1beta.yaml
+          grpc_service_config: subscriptions_v1beta_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/apps/events/subscriptions/apiv1beta;subscriptions
+          release_level: beta
         - path: google/apps/meet/v2
           service_config: meet_v2.yaml
+          grpc_service_config: meet_v2_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/apps/meet/apiv2;meet
+          release_level: beta
         - path: google/apps/meet/v2beta
           service_config: meet_v2beta.yaml
+          grpc_service_config: meet_v2beta_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/apps/meet/apiv2beta;meet
+          release_level: beta
 go:
     source_roots:
         - apps

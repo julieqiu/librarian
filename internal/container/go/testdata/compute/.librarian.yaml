@@ -5,8 +5,18 @@ generate:
     apis:
         - path: google/cloud/compute/v1
           service_config: compute_v1.yaml
+          grpc_service_config: compute_grpc_service_config.json
+          rest_numeric_enums: false
+          transport: rest
+          importpath: cloud.google.com/go/compute/apiv1;compute
+          release_level: ga
         - path: google/cloud/compute/v1beta
           service_config: compute_v1beta.yaml
+          grpc_service_config: compute_grpc_service_config.json
+          rest_numeric_enums: false
+          transport: rest
+          importpath: cloud.google.com/go/compute/apiv1beta;compute
+          release_level: ga
 go:
     source_roots:
         - compute

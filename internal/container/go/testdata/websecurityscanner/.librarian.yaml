@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/cloud/websecurityscanner/v1
           service_config: websecurityscanner_v1.yaml
+          grpc_service_config: websecurityscanner_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/websecurityscanner/apiv1;websecurityscanner
+          release_level: ga
 go:
     source_roots:
         - websecurityscanner

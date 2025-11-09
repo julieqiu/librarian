@@ -5,8 +5,18 @@ generate:
     apis:
         - path: google/api/cloudquotas/v1
           service_config: cloudquotas_v1.yaml
+          grpc_service_config: cloudquotas_v1_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/cloudquotas/apiv1;cloudquotas
+          release_level: ga
         - path: google/api/cloudquotas/v1beta
           service_config: cloudquotas_v1beta.yaml
+          grpc_service_config: cloudquotas_v1beta_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/cloudquotas/apiv1beta;cloudquotas
+          release_level: beta
 go:
     source_roots:
         - cloudquotas

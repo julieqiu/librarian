@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/cloud/filestore/v1
           service_config: file_v1.yaml
+          grpc_service_config: file_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/filestore/apiv1;filestore
+          release_level: ga
 go:
     source_roots:
         - filestore

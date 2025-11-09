@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/cloud/gkemulticloud/v1
           service_config: gkemulticloud_v1.yaml
+          grpc_service_config: gkemulticloud_grpc_service_config.json
+          rest_numeric_enums: false
+          transport: grpc
+          importpath: cloud.google.com/go/gkemulticloud/apiv1;gkemulticloud
+          release_level: ga
 go:
     source_roots:
         - gkemulticloud

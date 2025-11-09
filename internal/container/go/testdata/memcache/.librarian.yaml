@@ -5,8 +5,18 @@ generate:
     apis:
         - path: google/cloud/memcache/v1
           service_config: memcache_v1.yaml
+          grpc_service_config: memcache_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/memcache/apiv1;memcache
+          release_level: ga
         - path: google/cloud/memcache/v1beta2
           service_config: memcache_v1beta2.yaml
+          grpc_service_config: memcache_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/memcache/apiv1beta2;memcache
+          release_level: beta
 go:
     source_roots:
         - memcache

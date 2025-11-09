@@ -6,12 +6,27 @@ generate:
         - path: google/cloud/tasks/v2
           service_config: cloudtasks_v2.yaml
           client_directory: apiv2
+          grpc_service_config: cloudtasks_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/cloudtasks/apiv2;cloudtasks
+          release_level: ga
         - path: google/cloud/tasks/v2beta2
           service_config: cloudtasks_v2beta2.yaml
           client_directory: apiv2beta2
+          grpc_service_config: cloudtasks_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/cloudtasks/apiv2beta2;cloudtasks
+          release_level: beta
         - path: google/cloud/tasks/v2beta3
           service_config: cloudtasks_v2beta3.yaml
           client_directory: apiv2beta3
+          grpc_service_config: cloudtasks_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/cloudtasks/apiv2beta3;cloudtasks
+          release_level: beta
 go:
     source_roots:
         - cloudtasks

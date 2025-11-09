@@ -5,8 +5,18 @@ generate:
     apis:
         - path: google/cloud/datastream/v1
           service_config: datastream_v1.yaml
+          grpc_service_config: datastream_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/datastream/apiv1;datastream
+          release_level: ga
         - path: google/cloud/datastream/v1alpha1
           service_config: datastream_v1alpha1.yaml
+          grpc_service_config: datastream_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/datastream/apiv1alpha1;datastream
+          release_level: alpha
 go:
     source_roots:
         - datastream

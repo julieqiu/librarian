@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/cloud/storagebatchoperations/v1
           service_config: storagebatchoperations_v1.yaml
+          grpc_service_config: storagebatchoperations_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/storagebatchoperations/apiv1;storagebatchoperations
+          release_level: beta
 go:
     source_roots:
         - storagebatchoperations

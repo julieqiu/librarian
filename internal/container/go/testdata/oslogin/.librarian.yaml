@@ -5,8 +5,18 @@ generate:
     apis:
         - path: google/cloud/oslogin/v1
           service_config: oslogin_v1.yaml
+          grpc_service_config: oslogin_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/oslogin/apiv1;oslogin
+          release_level: ga
         - path: google/cloud/oslogin/v1beta
           service_config: oslogin_v1beta.yaml
+          grpc_service_config: oslogin_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/oslogin/apiv1beta;oslogin
+          release_level: beta
         - path: google/cloud/oslogin/common
 go:
     source_roots:

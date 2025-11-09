@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/api/serviceusage/v1
           service_config: serviceusage_v1.yaml
+          grpc_service_config: serviceusage_grpc_service_config.json
+          rest_numeric_enums: false
+          transport: grpc+rest
+          importpath: cloud.google.com/go/serviceusage/apiv1;serviceusage
+          release_level: ga
 go:
     source_roots:
         - serviceusage

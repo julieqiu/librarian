@@ -5,8 +5,17 @@ generate:
     apis:
         - path: google/storage/control/v2
           service_config: storage_v2.yaml
+          grpc_service_config: storage_control_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/storage/control/apiv2;control
+          release_level: ga
         - path: google/storage/v2
           service_config: storage_v2.yaml
+          grpc_service_config: storage_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc
+          importpath: cloud.google.com/go/storage/internal/apiv2;storage
 go:
     source_roots:
         - storage

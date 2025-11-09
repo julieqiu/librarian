@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/cloud/apigateway/v1
           service_config: apigateway_v1.yaml
+          grpc_service_config: apigateway_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/apigateway/apiv1;apigateway
+          release_level: ga
 go:
     source_roots:
         - apigateway

@@ -5,6 +5,10 @@ generate:
     apis:
         - path: google/cloud/apigeeconnect/v1
           service_config: apigeeconnect_v1.yaml
+          grpc_service_config: connection_grpc_service_config.json
+          rest_numeric_enums: true
+          importpath: cloud.google.com/go/apigeeconnect/apiv1;apigeeconnect
+          release_level: ga
 go:
     source_roots:
         - apigeeconnect

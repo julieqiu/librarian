@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/cloud/backupdr/v1
           service_config: backupdr_v1.yaml
+          grpc_service_config: backupdr_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/backupdr/apiv1;backupdr
+          release_level: ga
 go:
     source_roots:
         - backupdr

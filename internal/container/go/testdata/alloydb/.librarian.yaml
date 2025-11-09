@@ -5,10 +5,25 @@ generate:
     apis:
         - path: google/cloud/alloydb/v1
           service_config: alloydb_v1.yaml
+          grpc_service_config: alloydb_v1_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/alloydb/apiv1;alloydb
+          release_level: ga
         - path: google/cloud/alloydb/v1alpha
           service_config: alloydb_v1alpha.yaml
+          grpc_service_config: alloydb_v1alpha_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/alloydb/apiv1alpha;alloydb
+          release_level: beta
         - path: google/cloud/alloydb/v1beta
           service_config: alloydb_v1beta.yaml
+          grpc_service_config: alloydb_v1beta_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/alloydb/apiv1beta;alloydb
+          release_level: beta
         - path: google/cloud/alloydb/connectors/v1
           service_config: connectors_v1.yaml
         - path: google/cloud/alloydb/connectors/v1alpha

@@ -5,8 +5,18 @@ generate:
     apis:
         - path: google/cloud/memorystore/v1
           service_config: memorystore_v1.yaml
+          grpc_service_config: memorystore_v1_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: rest
+          importpath: cloud.google.com/go/memorystore/apiv1;memorystore
+          release_level: beta
         - path: google/cloud/memorystore/v1beta
           service_config: memorystore_v1beta.yaml
+          grpc_service_config: memorystore_v1beta_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: rest
+          importpath: cloud.google.com/go/memorystore/apiv1beta;memorystore
+          release_level: beta
 go:
     source_roots:
         - memorystore

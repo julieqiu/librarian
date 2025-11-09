@@ -5,22 +5,59 @@ generate:
     apis:
         - path: google/maps/addressvalidation/v1
           service_config: addressvalidation_v1.yaml
+          grpc_service_config: addressvalidation_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/maps/addressvalidation/apiv1;addressvalidation
+          release_level: ga
         - path: google/maps/areainsights/v1
           service_config: areainsights_v1.yaml
+          grpc_service_config: areainsights_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/maps/areainsights/apiv1;areainsights
+          release_level: beta
         - path: google/maps/fleetengine/v1
           service_config: fleetengine_v1.yaml
           proto_package: maps.fleetengine.v1
+          grpc_service_config: fleetengine_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc
+          importpath: cloud.google.com/go/maps/fleetengine/apiv1;fleetengine
         - path: google/maps/fleetengine/delivery/v1
           service_config: fleetengine_v1.yaml
           proto_package: maps.fleetengine.delivery.v1
+          grpc_service_config: fleetengine_delivery_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/maps/fleetengine/delivery/apiv1;delivery
         - path: google/maps/places/v1
           service_config: places_v1.yaml
+          grpc_service_config: places_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/maps/places/apiv1;places
+          release_level: beta
         - path: google/maps/routeoptimization/v1
           service_config: routeoptimization_v1.yaml
+          grpc_service_config: routeoptimization_v1_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/maps/routeoptimization/apiv1;routeoptimization
+          release_level: beta
         - path: google/maps/routing/v2
           service_config: routes_v2.yaml
+          grpc_service_config: library_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/maps/routing/apiv2;routing
+          release_level: ga
         - path: google/maps/solar/v1
           service_config: solar_v1.yaml
+          grpc_service_config: solar_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/maps/solar/apiv1;solar
 go:
     source_roots:
         - maps

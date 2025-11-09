@@ -6,8 +6,18 @@ generate:
         - path: google/devtools/cloudbuild/v1
           service_config: cloudbuild_v1.yaml
           client_directory: apiv1/v2
+          grpc_service_config: cloudbuild_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/cloudbuild/apiv1/v2;cloudbuild
+          release_level: ga
         - path: google/devtools/cloudbuild/v2
           service_config: cloudbuild_v2.yaml
+          grpc_service_config: cloudbuild_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/cloudbuild/apiv2;cloudbuild
+          release_level: ga
 go:
     source_roots:
         - cloudbuild

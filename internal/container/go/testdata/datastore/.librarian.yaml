@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/datastore/admin/v1
           service_config: datastore_v1.yaml
+          grpc_service_config: datastore_admin_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/datastore/admin/apiv1;admin
+          release_level: ga
         - path: google/datastore/v1
           service_config: datastore_v1.yaml
           disable_gapic: true

@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/cloud/gkerecommender/v1
           service_config: gkerecommender_v1.yaml
+          grpc_service_config: gkerecommender_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/gkerecommender/apiv1;gkerecommender
+          release_level: beta
 go:
     source_roots:
         - gkerecommender

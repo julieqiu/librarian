@@ -5,14 +5,38 @@ generate:
     apis:
         - path: google/spanner/adapter/v1
           service_config: spanner.yaml
+          grpc_service_config: spanner_adapter_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/spanner/adapter/apiv1;adapter
+          release_level: beta
         - path: google/spanner/admin/database/v1
           service_config: spanner.yaml
+          grpc_service_config: spanner_admin_database_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/spanner/admin/database/apiv1;database
+          release_level: ga
         - path: google/spanner/admin/instance/v1
           service_config: spanner.yaml
+          grpc_service_config: spanner_admin_instance_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/spanner/admin/instance/apiv1;instance
+          release_level: ga
         - path: google/spanner/v1
           service_config: spanner.yaml
+          grpc_service_config: spanner_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/spanner/apiv1;spanner
+          release_level: ga
         - path: google/spanner/executor/v1
           service_config: spanner_cloud_executor.yaml
+          grpc_service_config: spanner_cloud_executor_grpc_service_config.json
+          transport: grpc
+          importpath: cloud.google.com/go/spanner/executor/apiv1;executor
+          release_level: beta
 go:
     source_roots:
         - spanner

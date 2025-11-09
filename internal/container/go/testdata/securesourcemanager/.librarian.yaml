@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/cloud/securesourcemanager/v1
           service_config: securesourcemanager_v1.yaml
+          grpc_service_config: securesourcemanager_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/securesourcemanager/apiv1;securesourcemanager
+          release_level: ga
 go:
     source_roots:
         - securesourcemanager

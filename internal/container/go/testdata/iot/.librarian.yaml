@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/cloud/iot/v1
           service_config: cloudiot_v1.yaml
+          grpc_service_config: cloudiot_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/iot/apiv1;iot
+          release_level: ga
 go:
     source_roots:
         - iot

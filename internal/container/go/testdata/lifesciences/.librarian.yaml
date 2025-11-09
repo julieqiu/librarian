@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/cloud/lifesciences/v2beta
           service_config: lifesciences_v2beta.yaml
+          grpc_service_config: lifesciences_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/lifesciences/apiv2beta;lifesciences
+          release_level: beta
 go:
     source_roots:
         - lifesciences

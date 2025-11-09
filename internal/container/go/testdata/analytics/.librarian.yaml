@@ -5,6 +5,11 @@ generate:
     apis:
         - path: google/analytics/admin/v1alpha
           service_config: analyticsadmin_v1alpha.yaml
+          grpc_service_config: admin_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/analytics/admin/apiv1alpha;admin
+          release_level: alpha
 go:
     source_roots:
         - analytics

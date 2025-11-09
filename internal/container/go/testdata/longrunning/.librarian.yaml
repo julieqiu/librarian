@@ -6,6 +6,11 @@ generate:
         - path: google/longrunning
           service_config: longrunning.yaml
           client_directory: autogen
+          grpc_service_config: longrunning_grpc_service_config.json
+          rest_numeric_enums: false
+          transport: grpc+rest
+          importpath: cloud.google.com/go/longrunning/autogen;longrunning
+          release_level: ga
 go:
     source_roots:
         - longrunning

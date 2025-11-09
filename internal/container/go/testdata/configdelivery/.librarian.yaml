@@ -5,8 +5,18 @@ generate:
     apis:
         - path: google/cloud/configdelivery/v1
           service_config: configdelivery_v1.yaml
+          grpc_service_config: configdelivery_v1_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/configdelivery/apiv1;configdelivery
+          release_level: beta
         - path: google/cloud/configdelivery/v1beta
           service_config: configdelivery_v1beta.yaml
+          grpc_service_config: configdelivery_v1beta_grpc_service_config.json
+          rest_numeric_enums: true
+          transport: grpc+rest
+          importpath: cloud.google.com/go/configdelivery/apiv1beta;configdelivery
+          release_level: beta
 go:
     source_roots:
         - configdelivery
