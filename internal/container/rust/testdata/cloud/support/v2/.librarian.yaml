@@ -1,0 +1,10 @@
+name: cloud-support-v2
+version: 1.1.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/support/v2
+          service_config: google/cloud/support/v2/cloudsupport_v2.yaml
+rust:
+    codec:
+        copyright_year: "2025"

@@ -1,0 +1,11 @@
+name: cloud-discoveryengine-v1
+version: 2.1.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/discoveryengine/v1
+          service_config: google/cloud/discoveryengine/v1/discoveryengine_v1.yaml
+rust:
+    codec:
+        copyright_year: "2025"
+        per_service_features: true

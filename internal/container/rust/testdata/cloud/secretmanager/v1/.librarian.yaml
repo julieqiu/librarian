@@ -1,0 +1,10 @@
+name: cloud-secretmanager-v1
+version: 1.1.1
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/secretmanager/v1
+          service_config: google/cloud/secretmanager/v1/secretmanager_v1.yaml
+rust:
+    codec:
+        copyright_year: "2024"

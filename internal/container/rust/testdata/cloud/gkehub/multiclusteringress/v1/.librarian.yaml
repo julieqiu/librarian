@@ -1,0 +1,11 @@
+name: cloud-gkehub-multiclusteringress-v1
+version: 1.1.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/gkehub/v1/multiclusteringress
+rust:
+    source:
+        title_override: GKE Hub Types
+    codec:
+        copyright_year: "2025"

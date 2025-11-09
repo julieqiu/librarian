@@ -1,0 +1,10 @@
+name: cloud-essentialcontacts-v1
+version: 1.1.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/essentialcontacts/v1
+          service_config: google/cloud/essentialcontacts/v1/essentialcontacts_v1.yaml
+rust:
+    codec:
+        copyright_year: "2025"

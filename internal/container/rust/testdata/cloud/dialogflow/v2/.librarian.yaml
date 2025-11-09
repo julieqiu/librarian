@@ -1,0 +1,27 @@
+name: cloud-dialogflow-v2
+version: 1.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/dialogflow/v2
+          service_config: google/cloud/dialogflow/v2/dialogflow_v2.yaml
+rust:
+    codec:
+        copyright_year: "2025"
+        per_service_features: true
+    documentation_overrides:
+        - id: .google.cloud.dialogflow.v2.HumanAgentAssistantConfig.ConversationModelConfig.baseline_model_version
+          match: |-
+            Valid versions are:
+              Article Suggestion baseline model:
+                - 0.9
+                - 1.0 (default)
+              Summarization baseline model:
+                - 1.0
+          replace: |-
+            Valid versions are:
+            - Article Suggestion baseline model:
+              - 0.9
+              - 1.0 (default)
+            - Summarization baseline model:
+              - 1.0

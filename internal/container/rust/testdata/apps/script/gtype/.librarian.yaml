@@ -1,0 +1,11 @@
+name: apps-script-gtype
+version: 1.1.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/apps/script/type
+rust:
+    source:
+        title_override: Google Apps Script Types
+    codec:
+        copyright_year: "2025"

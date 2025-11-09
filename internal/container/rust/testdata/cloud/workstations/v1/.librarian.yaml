@@ -1,0 +1,10 @@
+name: cloud-workstations-v1
+version: 1.1.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/workstations/v1
+          service_config: google/cloud/workstations/v1/workstations_v1.yaml
+rust:
+    codec:
+        copyright_year: "2025"

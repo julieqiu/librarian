@@ -1,0 +1,10 @@
+name: cloud-bigquery-migration-v2
+version: 1.1.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/bigquery/migration/v2
+          service_config: google/cloud/bigquery/migration/v2/bigquerymigration_v2.yaml
+rust:
+    codec:
+        copyright_year: "2025"

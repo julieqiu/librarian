@@ -1,0 +1,11 @@
+name: openapi-validation
+version: ""
+generate:
+    specification_format: openapi
+    apis:
+        - path: testdata/secretmanager_openapi_v1.json
+          service_config: google/cloud/secretmanager/v1/secretmanager_v1.yaml
+rust:
+    codec:
+        copyright_year: "2024"
+        package_name_override: secretmanager-openapi-v1

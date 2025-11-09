@@ -1,0 +1,14 @@
+name: cloud-networkservices-v1
+version: 1.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/networkservices/v1
+          service_config: google/cloud/networkservices/v1/networkservices_v1.yaml
+rust:
+    codec:
+        copyright_year: "2025"
+    documentation_overrides:
+        - id: .google.cloud.networkservices.v1.WasmPlugin.LogConfig.min_log_level
+          match: Specificies
+          replace: Specifies

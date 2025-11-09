@@ -1,0 +1,10 @@
+name: appengine-v1
+version: 1.1.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/appengine/v1
+          service_config: google/appengine/v1/appengine_v1.yaml
+rust:
+    codec:
+        copyright_year: "2025"

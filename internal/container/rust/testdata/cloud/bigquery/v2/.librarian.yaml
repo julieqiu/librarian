@@ -1,0 +1,11 @@
+name: cloud-bigquery-v2
+version: ""
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/bigquery/v2
+          service_config: google/cloud/bigquery/v2/bigquery_v2.yaml
+rust:
+    codec:
+        copyright_year: "2025"
+        package_name_override: google-cloud-bigquery-v2

@@ -1,0 +1,10 @@
+name: spanner-admin-instance-v1
+version: 1.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/spanner/admin/instance/v1
+          service_config: google/spanner/admin/instance/v1/spanner.yaml
+rust:
+    codec:
+        copyright_year: "2025"

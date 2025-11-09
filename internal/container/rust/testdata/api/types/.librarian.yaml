@@ -1,0 +1,72 @@
+name: api-types
+version: 1.1.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/api
+          service_config: google/api/serviceconfig.yaml
+rust:
+    codec:
+        copyright_year: "2025"
+        package_name_override: google-cloud-api
+    documentation_overrides:
+        - id: .google.api.ProjectProperties
+          match: |4-
+               project_properties:
+                 properties:
+                 - name: NO_WATERMARK
+                   type: BOOL
+                   description: Allows usage of the API without watermarks.
+                 - name: EXTENDED_TILE_CACHE_PERIOD
+                   type: INT64
+          replace: |4-
+                project_properties:
+                  properties:
+                  - name: NO_WATERMARK
+                    type: BOOL
+                    description: Allows usage of the API without watermarks.
+                  - name: EXTENDED_TILE_CACHE_PERIOD
+                    type: INT64
+        - id: .google.api.MethodSettings.selector
+          match: |4-
+               publishing:
+                 method_settings:
+                 - selector: google.storage.control.v2.StorageControl.CreateFolder
+                   # method settings for CreateFolder...
+          replace: |4-
+                publishing:
+                  method_settings:
+                  - selector: google.storage.control.v2.StorageControl.CreateFolder
+                    # method settings for CreateFolder...
+        - id: .google.api.MethodSettings.long_running
+          match: |4-
+               publishing:
+                 method_settings:
+                 - selector: google.cloud.speech.v2.Speech.BatchRecognize
+                   long_running:
+                     initial_poll_delay: 60s # 1 minute
+                     poll_delay_multiplier: 1.5
+                     max_poll_delay: 360s # 6 minutes
+                     total_poll_timeout: 54000s # 90 minutes
+          replace: |4-
+                publishing:
+                  method_settings:
+                  - selector: google.cloud.speech.v2.Speech.BatchRecognize
+                    long_running:
+                      initial_poll_delay: 60s # 1 minute
+                      poll_delay_multiplier: 1.5
+                      max_poll_delay: 360s # 6 minutes
+                      total_poll_timeout: 54000s # 90 minutes
+        - id: .google.api.MethodSettings.auto_populated_fields
+          match: |4-
+               publishing:
+                 method_settings:
+                 - selector: google.example.v1.ExampleService.CreateExample
+                   auto_populated_fields:
+                   - request_id
+          replace: |4-
+                publishing:
+                  method_settings:
+                  - selector: google.example.v1.ExampleService.CreateExample
+                    auto_populated_fields:
+                    - request_id

@@ -1,0 +1,11 @@
+name: apps-script-gmail
+version: 1.1.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/apps/script/type/gmail
+rust:
+    source:
+        title_override: Google Apps Script Types
+    codec:
+        copyright_year: "2025"

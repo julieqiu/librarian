@@ -1,0 +1,10 @@
+name: cloud-gkebackup-v1
+version: 1.1.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/gkebackup/v1
+          service_config: google/cloud/gkebackup/v1/gkebackup_v1.yaml
+rust:
+    codec:
+        copyright_year: "2025"

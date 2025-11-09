@@ -1,0 +1,27 @@
+name: cloud-compute-v1
+version: 0.2.1
+generate:
+    specification_format: disco
+    apis:
+        - path: discoveries/compute.v1.json
+          service_config: google/cloud/compute/v1/compute_v1.yaml
+rust:
+    source:
+        roots: discovery,googleapis
+    codec:
+        copyright_year: "2025"
+        package_name_override: google-cloud-compute-v1
+        per_service_features: true
+        disabled_rustdoc_warnings: bare_urls,broken_intra_doc_links,redundant_explicit_links
+        disabled_clippy_warnings: doc_lazy_continuation
+    discovery:
+        operation_id: .google.cloud.compute.v1.Operation
+        pollers:
+            - prefix: compute/v1/projects/{project}/zones/{zone}
+              method_id: .google.cloud.compute.v1.zoneOperations.get
+            - prefix: compute/v1/projects/{project}/regions/{region}
+              method_id: .google.cloud.compute.v1.regionOperations.get
+            - prefix: compute/v1/projects/{project}
+              method_id: .google.cloud.compute.v1.globalOperations.get
+            - prefix: compute/v1/
+              method_id: .google.cloud.compute.v1.globalOrganizationOperations.get

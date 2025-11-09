@@ -1,0 +1,20 @@
+name: cloud-orgpolicy-v1
+version: 1.1.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/orgpolicy/v1
+rust:
+    source:
+        title_override: Organization Policy Types
+    codec:
+        copyright_year: "2025"
+    documentation_overrides:
+        - id: .google.cloud.orgpolicy.v1.Policy.ListPolicy
+          match: 'Ancestry subtrees must be in one of the following formats:'
+          replace: |4-
+            Ancestry subtrees must be in one of the following formats:
+        - id: .google.cloud.orgpolicy.v1.Policy.ListPolicy
+          match: The `supports_under` field of the associated `Constraint`  defines whether
+          replace: |4-
+            The `supports_under` field of the associated `Constraint`  defines whether

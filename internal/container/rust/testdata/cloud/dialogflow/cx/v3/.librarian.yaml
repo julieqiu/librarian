@@ -1,0 +1,11 @@
+name: cloud-dialogflow-cx-v3
+version: 1.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/dialogflow/cx/v3
+          service_config: google/cloud/dialogflow/cx/v3/dialogflow_v3.yaml
+rust:
+    codec:
+        copyright_year: "2025"
+        per_service_features: true

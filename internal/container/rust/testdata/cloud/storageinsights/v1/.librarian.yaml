@@ -1,0 +1,10 @@
+name: cloud-storageinsights-v1
+version: 1.1.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/storageinsights/v1
+          service_config: google/cloud/storageinsights/v1/storageinsights_v1.yaml
+rust:
+    codec:
+        copyright_year: "2025"

@@ -1,0 +1,11 @@
+name: rpc-types
+version: 1.1.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/rpc
+          service_config: google/rpc/rpc_publish.yaml
+rust:
+    codec:
+        copyright_year: "2024"
+        package_name_override: google-cloud-rpc

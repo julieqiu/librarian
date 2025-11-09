@@ -1,0 +1,10 @@
+name: cloud-locationfinder-v1
+version: ""
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/locationfinder/v1
+          service_config: google/cloud/locationfinder/v1/cloudlocationfinder_v1.yaml
+rust:
+    codec:
+        copyright_year: "2025"

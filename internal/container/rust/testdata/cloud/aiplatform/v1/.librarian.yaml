@@ -1,0 +1,12 @@
+name: cloud-aiplatform-v1
+version: 1.3.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/aiplatform/v1
+          service_config: google/cloud/aiplatform/v1/aiplatform_v1.yaml
+rust:
+    codec:
+        copyright_year: "2025"
+        per_service_features: true
+        disabled_rustdoc_warnings: redundant_explicit_links,broken_intra_doc_links,invalid_html_tags

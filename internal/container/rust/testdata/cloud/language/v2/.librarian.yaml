@@ -1,0 +1,10 @@
+name: cloud-language-v2
+version: 1.1.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/language/v2
+          service_config: google/cloud/language/v2/language_v2.yaml
+rust:
+    codec:
+        copyright_year: "2025"

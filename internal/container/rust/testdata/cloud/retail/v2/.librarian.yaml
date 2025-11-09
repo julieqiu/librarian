@@ -1,0 +1,14 @@
+name: cloud-retail-v2
+version: 2.0.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/retail/v2
+          service_config: google/cloud/retail/v2/retail_v2.yaml
+rust:
+    codec:
+        copyright_year: "2025"
+    documentation_overrides:
+        - id: .google.cloud.retail.v2.SearchRequest.user_attributes
+          match: Duplcate
+          replace: Duplicate

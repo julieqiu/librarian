@@ -1,0 +1,13 @@
+name: cloud-sql-v1
+version: 1.2.0
+generate:
+    specification_format: protobuf
+    apis:
+        - path: google/cloud/sql/v1
+          service_config: google/cloud/sql/v1/sqladmin_v1.yaml
+rust:
+    codec:
+        copyright_year: "2025"
+    pagination_overrides:
+        - id: .google.cloud.sql.v1.SqlInstancesService.List
+          item_field: items
