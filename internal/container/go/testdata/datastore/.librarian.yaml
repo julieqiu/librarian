@@ -7,6 +7,7 @@ generate:
           service_config: datastore_v1.yaml
         - path: google/datastore/v1
           service_config: datastore_v1.yaml
+          disable_gapic: true
 go:
     source_roots:
         - datastore

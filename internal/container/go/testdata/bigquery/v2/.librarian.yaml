@@ -5,6 +5,7 @@ generate:
     apis:
         - path: google/cloud/bigquery/v2
           service_config: bigquery_v2.yaml
+          client_directory: v2/apiv2
 go:
     source_roots:
         - bigquery/v2

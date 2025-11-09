@@ -9,6 +9,7 @@ generate:
           service_config: monitoring.yaml
         - path: google/monitoring/v3
           service_config: monitoring.yaml
+          client_directory: apiv3/v2
 go:
     source_roots:
         - monitoring

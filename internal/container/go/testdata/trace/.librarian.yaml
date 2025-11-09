@@ -5,8 +5,10 @@ generate:
     apis:
         - path: google/devtools/cloudtrace/v1
           service_config: cloudtrace_v1.yaml
+          client_directory: apiv1
         - path: google/devtools/cloudtrace/v2
           service_config: cloudtrace_v2.yaml
+          client_directory: apiv2
 go:
     source_roots:
         - trace

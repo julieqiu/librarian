@@ -5,6 +5,8 @@ generate:
     apis:
         - path: google/devtools/containeranalysis/v1beta1
           service_config: containeranalysis_v1beta1.yaml
+          nested_protos:
+            - grafeas/grafeas.proto
 go:
     source_roots:
         - containeranalysis

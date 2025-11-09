@@ -24,3 +24,4 @@ go:
     release_exclude_paths:
         - internal/generated/snippets/dataproc/
     tag_format: '{id}/v{version}'
+    module_path_version: v2

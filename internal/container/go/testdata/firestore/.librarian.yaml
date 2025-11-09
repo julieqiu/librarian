@@ -5,6 +5,7 @@ generate:
     apis:
         - path: google/firestore/admin/v1
           service_config: firestore_v1.yaml
+          client_directory: apiv1/admin
         - path: google/firestore/v1
           service_config: firestore_v1.yaml
 go:

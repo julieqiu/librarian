@@ -5,6 +5,7 @@ generate:
     apis:
         - path: google/devtools/clouderrorreporting/v1beta1
           service_config: clouderrorreporting_v1beta1.yaml
+          client_directory: apiv1beta1
 go:
     source_roots:
         - errorreporting

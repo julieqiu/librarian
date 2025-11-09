@@ -5,6 +5,7 @@ generate:
     apis:
         - path: google/pubsub/v1
           service_config: pubsub_v1.yaml
+          client_directory: apiv1
 go:
     source_roots:
         - pubsub/v2

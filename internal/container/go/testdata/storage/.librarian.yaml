@@ -38,3 +38,5 @@ go:
         - storage/internal/benchmarks
         - storage/internal/test
     tag_format: '{id}/v{version}'
+    delete_generation_output_paths:
+        - internal/generated/snippets/storage/internal

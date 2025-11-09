@@ -5,8 +5,10 @@ generate:
     apis:
         - path: google/bigtable/admin/v2
           service_config: bigtableadmin_v2.yaml
+          disable_gapic: true
         - path: google/bigtable/v2
           service_config: bigtable_v2.yaml
+          disable_gapic: true
 go:
     source_roots:
         - bigtable

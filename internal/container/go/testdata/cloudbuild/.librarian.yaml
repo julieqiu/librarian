@@ -5,6 +5,7 @@ generate:
     apis:
         - path: google/devtools/cloudbuild/v1
           service_config: cloudbuild_v1.yaml
+          client_directory: apiv1/v2
         - path: google/devtools/cloudbuild/v2
           service_config: cloudbuild_v2.yaml
 go:

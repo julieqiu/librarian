@@ -5,6 +5,7 @@ generate:
     apis:
         - path: google/longrunning
           service_config: longrunning.yaml
+          client_directory: autogen
 go:
     source_roots:
         - longrunning

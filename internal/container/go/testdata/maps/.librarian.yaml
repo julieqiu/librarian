@@ -9,8 +9,10 @@ generate:
           service_config: areainsights_v1.yaml
         - path: google/maps/fleetengine/v1
           service_config: fleetengine_v1.yaml
+          proto_package: maps.fleetengine.v1
         - path: google/maps/fleetengine/delivery/v1
           service_config: fleetengine_v1.yaml
+          proto_package: maps.fleetengine.delivery.v1
         - path: google/maps/places/v1
           service_config: places_v1.yaml
         - path: google/maps/routeoptimization/v1

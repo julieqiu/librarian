@@ -5,10 +5,13 @@ generate:
     apis:
         - path: google/cloud/tasks/v2
           service_config: cloudtasks_v2.yaml
+          client_directory: apiv2
         - path: google/cloud/tasks/v2beta2
           service_config: cloudtasks_v2beta2.yaml
+          client_directory: apiv2beta2
         - path: google/cloud/tasks/v2beta3
           service_config: cloudtasks_v2beta3.yaml
+          client_directory: apiv2beta3
 go:
     source_roots:
         - cloudtasks

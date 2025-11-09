@@ -5,6 +5,7 @@ generate:
     apis:
         - path: google/cloud/translate/v3
           service_config: translate_v3.yaml
+          proto_package: google.cloud.translation.v3
 go:
     source_roots:
         - translate
