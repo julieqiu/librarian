@@ -87,13 +87,12 @@ type Sidekick struct {
 // Librarian YAML structures
 type LibrarianGenerate struct {
 	SpecificationFormat string `yaml:"specification_format,omitempty"`
-	SpecificationSource string `yaml:"specification_source,omitempty"`
-	ServiceConfig       string `yaml:"service_config,omitempty"`
+	APIs                []API  `yaml:"apis,omitempty"`
 }
 
-type LibrarianMetadata struct {
-	Name    string `yaml:"name,omitempty"`
-	Version string `yaml:"version,omitempty"`
+type API struct {
+	Path          string `yaml:"path"`
+	ServiceConfig string `yaml:"service_config,omitempty"`
 }
 
 type RustSource struct {
@@ -159,8 +158,9 @@ type Rust struct {
 }
 
 type Librarian struct {
+	Name     string            `yaml:"name"`
+	Version  string            `yaml:"version"`
 	Generate LibrarianGenerate `yaml:"generate"`
-	Metadata LibrarianMetadata `yaml:"metadata"`
 	Rust     *Rust             `yaml:"rust,omitempty"`
 }
 
@@ -187,14 +187,22 @@ func convertSidekick(sidekickPath string) (*Librarian, error) {
 		return nil, err
 	}
 
+	// Derive name from path
+	dir := filepath.Dir(sidekickPath)
+	relPath, _ := filepath.Rel("/Users/julieqiu/code/googleapis/google-cloud-rust", dir)
+	name := strings.ReplaceAll(strings.TrimPrefix(relPath, "src/generated/"), "/", "-")
+
 	librarian := &Librarian{
+		Name:    name,
+		Version: sidekick.Codec.Version,
 		Generate: LibrarianGenerate{
 			SpecificationFormat: sidekick.General.SpecificationFormat,
-			SpecificationSource: sidekick.General.SpecificationSource,
-			ServiceConfig:       sidekick.General.ServiceConfig,
-		},
-		Metadata: LibrarianMetadata{
-			Version: sidekick.Codec.Version,
+			APIs: []API{
+				{
+					Path:          sidekick.General.SpecificationSource,
+					ServiceConfig: sidekick.General.ServiceConfig,
+				},
+			},
 		},
 	}
 
@@ -202,12 +210,6 @@ func convertSidekick(sidekickPath string) (*Librarian, error) {
 	if librarian.Generate.SpecificationFormat == "" {
 		librarian.Generate.SpecificationFormat = "protobuf"
 	}
-
-	// Derive name from path
-	dir := filepath.Dir(sidekickPath)
-	relPath, _ := filepath.Rel("/Users/julieqiu/code/googleapis/google-cloud-rust", dir)
-	name := strings.ReplaceAll(strings.TrimPrefix(relPath, "src/generated/"), "/", "-")
-	librarian.Metadata.Name = name
 
 	// Build rust section
 	rust := &Rust{}
@@ -455,8 +457,10 @@ func main() {
 			continue
 		}
 
-		// Create output path in testdata
+		// Create output path in testdata (flatten src/generated)
 		relPath, _ := filepath.Rel(rustRepo, filepath.Dir(sidekickPath))
+		// Remove src/generated/ prefix
+		relPath = strings.TrimPrefix(relPath, "src/generated/")
 		outputDir := filepath.Join(testdataDir, relPath)
 		if err := os.MkdirAll(outputDir, 0755); err != nil {
 			fmt.Printf("✗ %s: %v\n", sidekickPath, err)
