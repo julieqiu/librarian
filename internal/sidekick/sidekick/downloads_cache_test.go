@@ -36,7 +36,7 @@ func TestExistingDirectory(t *testing.T) {
 			"googleapis-root": tmp,
 		},
 	}
-	root, err := makeSourceRoot(&rootConfig, "googleapis")
+	root, err := MakeSourceRoot(&rootConfig, "googleapis")
 	if err != nil {
 		t.Error(err)
 	}

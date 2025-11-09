@@ -52,7 +52,7 @@ func overrideSources(rootConfig *config.Config) (*config.Config, error) {
 		if _, ok := rootConfig.Source[root]; !ok {
 			continue
 		}
-		source, err := makeSourceRoot(rootConfig, configPrefix)
+		source, err := MakeSourceRoot(rootConfig, configPrefix)
 		if err != nil {
 			return nil, err
 		}

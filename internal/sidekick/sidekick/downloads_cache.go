@@ -31,7 +31,11 @@ import (
 	"github.com/googleapis/librarian/internal/sidekick/external"
 )
 
-func makeSourceRoot(rootConfig *config.Config, configPrefix string) (string, error) {
+// MakeSourceRoot ensures a source repository is available.
+// It checks if the path is a local directory, and if not, downloads and caches
+// the tarball using SHA256 verification.
+// configPrefix is typically "googleapis" or "discovery".
+func MakeSourceRoot(rootConfig *config.Config, configPrefix string) (string, error) {
 	sourceRoot, ok := rootConfig.Source[fmt.Sprintf("%s-root", configPrefix)]
 	if !ok {
 		return "", nil
