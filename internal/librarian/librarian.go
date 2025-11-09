@@ -187,7 +187,13 @@ func newCmdAdd() *cli.Command {
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			setupLogger(verbose)
 			slog.Debug("add command verbose logging")
-			return fmt.Errorf("add command not yet implemented")
+
+			args := cmd.Flags.Args()
+			runner, err := newAddRunner(args, commit)
+			if err != nil {
+				return err
+			}
+			return runner.run(ctx)
 		},
 	}
 	cmdAdd.Init()
@@ -210,7 +216,13 @@ func newCmdEdit() *cli.Command {
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			setupLogger(verbose)
 			slog.Debug("edit command verbose logging")
-			return fmt.Errorf("edit command not yet implemented")
+
+			args := cmd.Flags.Args()
+			runner, err := newEditRunner(args, metadata, language, keep, remove, exclude)
+			if err != nil {
+				return err
+			}
+			return runner.run(ctx)
 		},
 	}
 	cmdEdit.Init()
@@ -232,7 +244,13 @@ func newCmdRemove() *cli.Command {
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			setupLogger(verbose)
 			slog.Debug("remove command verbose logging")
-			return fmt.Errorf("remove command not yet implemented")
+
+			args := cmd.Flags.Args()
+			runner, err := newRemoveRunner(args)
+			if err != nil {
+				return err
+			}
+			return runner.run(ctx)
 		},
 	}
 	cmdRemove.Init()

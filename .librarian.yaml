@@ -1,0 +1,14 @@
+librarian:
+    version: not available
+    language: python
+generate:
+    container:
+        image: us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-prod/python-librarian-generator
+        tag: latest
+    googleapis:
+        repo: github.com/googleapis/googleapis
+    discovery:
+        repo: github.com/googleapis/discovery-artifact-manager
+    dir: packages/
+release:
+    tag_format: '{name}-v{version}'
