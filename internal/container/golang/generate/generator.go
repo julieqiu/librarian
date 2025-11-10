@@ -18,11 +18,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
 	"os"
 	"path/filepath"
 
 	"github.com/googleapis/librarian/internal/config"
+	"github.com/googleapis/librarian/internal/container/go/request"
 	"github.com/googleapis/librarian/internal/container/golang/execv"
 )
 
@@ -84,23 +84,16 @@ func (c *Config) Validate() error {
 // true during development to inspect the "raw" protoc output before any
 // post-processing is applied.
 func Generate(ctx context.Context, artifact *config.ArtifactState, googleapisDir string, outDir string) error {
-	slog.Debug("librariangen: generate command started")
-
 	if artifact.Generate == nil {
 		return errors.New("librariangen: artifact has no generate configuration")
 	}
-
 	if len(artifact.Generate.APIs) == 0 {
 		return errors.New("librariangen: no APIs in artifact configuration")
 	}
 
 	// Phase 1: Code Generation
-	slog.Info("librariangen: phase 1 - code generation")
 	for _, api := range artifact.Generate.APIs {
 		apiServiceDir := filepath.Join(googleapisDir, api.Path)
-		slog.Info("processing api", "service_dir", apiServiceDir)
-
-		// Build protoc command
 		args, err := buildProtocCommand(&api, googleapisDir, outDir)
 		if err != nil {
 			return fmt.Errorf("librariangen: failed to build protoc command for api %q: %w", api.Path, err)
@@ -118,14 +111,17 @@ func Generate(ctx context.Context, artifact *config.ArtifactState, googleapisDir
 	}
 
 	// Phase 2: Formatting and Build
-	slog.Info("librariangen: phase 2 - formatting and build")
 	if err := formatAndBuild(ctx, outDir); err != nil {
 		return fmt.Errorf("librariangen: formatting and build failed: %w", err)
 	}
 
 	// Phase 3: Testing is handled by the Build command (see builder.go)
-
-	slog.Debug("librariangen: generate command finished")
+	if err := goBuild(ctx, moduleDir); err != nil {
+		return fmt.Errorf("librariangen: failed to run 'go build': %w", err)
+	}
+	if err := goTest(ctx, moduleDir); err != nil {
+		return fmt.Errorf("librariangen: failed to run 'go test': %w", err)
+	}
 	return nil
 }
 
@@ -199,7 +195,6 @@ func formatAndBuild(ctx context.Context, outDir string) error {
 // flattenOutput moves the contents of /output/cloud.google.com/go/ to the top
 // level of /output.
 func flattenOutput(outputDir string) error {
-	slog.Debug("librariangen: flattening output directory", "dir", outputDir)
 	goDir := filepath.Join(outputDir, "cloud.google.com", "go")
 	if _, err := os.Stat(goDir); os.IsNotExist(err) {
 		// Directory doesn't exist, nothing to flatten
@@ -214,7 +209,6 @@ func flattenOutput(outputDir string) error {
 	for _, f := range files {
 		oldPath := filepath.Join(goDir, f.Name())
 		newPath := filepath.Join(outputDir, f.Name())
-		slog.Debug("librariangen: moving file", "from", oldPath, "to", newPath)
 		if err := os.Rename(oldPath, newPath); err != nil {
 			return fmt.Errorf("librariangen: failed to move %s to %s: %w", oldPath, newPath, err)
 		}
@@ -226,3 +220,27 @@ func flattenOutput(outputDir string) error {
 	}
 	return nil
 }
+
+// goBuild builds all the code under the specified directory
+func goBuild(ctx context.Context, dir, module string) error {
+	args := []string{"go", "build", "./..."}
+	return execvRun(ctx, args, dir)
+}
+
+// goTest builds all the code under the specified directory
+func goTest(ctx context.Context, dir, module string) error {
+	args := []string{"go", "test", "./...", "-short"}
+	return execvRun(ctx, args, dir)
+}
+
+// readBuildReq reads generate-request.json from the librarian-tool input directory.
+// The request file tells librariangen which library and APIs to generate.
+// It is prepared by the Librarian tool and mounted at /librarian.
+func readBuildReq(librarianDir string) (*request.Library, error) {
+	reqPath := filepath.Join(librarianDir, "build-request.json")
+
+	buildReq, err := requestParse(reqPath)
+	if err != nil {
+		return nil, err
+	}
+	return buildReq, nil
