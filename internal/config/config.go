@@ -194,6 +194,9 @@ type Config struct {
 	// Requires the --library flag to be specified.
 	LibraryVersion string
 
+	// Project is the ID of the Google Cloud project to use.
+	Project string
+
 	// PullRequest to target and operate one in the context of a release.
 	//
 	// The pull request should be in the format `https://github.com/{owner}/{repo}/pull/{number}`.
