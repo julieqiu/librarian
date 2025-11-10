@@ -24,9 +24,9 @@ import (
 	"time"
 )
 
-// GenerateScaffolding creates the initial scaffolding files for a new Go library.
+// Configure creates the initial scaffolding files for a new Go library.
 // This should be called by librarian generate on first-time generation only.
-func GenerateScaffolding(repoRoot, googleapisRoot, libraryID string, apis []API) error {
+func Configure(repoRoot, googleapisRoot, libraryID string, apis []API) error {
 	libraryPath := filepath.Join(repoRoot, libraryID)
 
 	// Check if this is first-time generation
