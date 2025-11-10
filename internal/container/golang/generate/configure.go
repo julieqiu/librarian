@@ -53,68 +53,57 @@ var (
 	responseSave = saveResponse
 )
 
-// Config holds the internal librariangen configuration for the configure command.
-type Config struct {
-	// LibrarianDir is the path to the librarian-tool input directory.
-	// It is expected to contain the configure-request.json file.
-	LibrarianDir string
-	// InputDir is the path to the .librarian/generator-input directory from the
-	// language repository.
-	InputDir string
-	// OutputDir is the path to the empty directory where librariangen writes
-	// its output for global files.
-	OutputDir string
-	// SourceDir is the path to a complete checkout of the googleapis repository.
-	SourceDir string
-	// RepoDir is the path to a read-only mount of existing relevant (global or library-specific)
-	// files in the language repository.
-	RepoDir string
-}
+// Configure configures a new library by generating initial files.
+// This includes README.md, CHANGES.md, version files, and go.mod updates.
+//
+// This function is called by `librarian generate` the first time a library
+// is generated. It should only create configuration files, not generated code.
+//
+// Parameters:
+//   - outputDir: Directory where files will be written (e.g., the library root)
+//   - sourceDir: Path to the googleapis repository for reading service YAML files
+//   - libraryID: Library name (e.g., "secretmanager")
+//   - modulePath: Go module path (e.g., "cloud.google.com/go/secretmanager")
+//   - firstAPIPath: Path to the first API (e.g., "google/cloud/secretmanager/v1")
+//   - firstAPIServiceConfig: Service config file for the first API (e.g., "secretmanager_v1.yaml")
+//   - clientDir: Client directory (e.g., "apiv1")
+//   - snippetsGoModPath: Path to internal/generated/snippets/go.mod (optional, can be empty)
+func Configure(ctx context.Context, outputDir, sourceDir, libraryID, modulePath, firstAPIPath, firstAPIServiceConfig, clientDir, snippetsGoModPath string) error {
+	slog.Debug("librariangen: configuring new library", "library", libraryID)
 
-// Validate ensures that the configuration is valid.
-func (c *Config) Validate() error {
-	if c.LibrarianDir == "" {
-		return errors.New("librariangen: librarian directory must be set")
-	}
-	if c.InputDir == "" {
-		return errors.New("librariangen: input directory must be set")
-	}
-	if c.OutputDir == "" {
-		return errors.New("librariangen: output directory must be set")
-	}
-	if c.SourceDir == "" {
-		return errors.New("librariangen: source directory must be set")
-	}
-	if c.RepoDir == "" {
-		return errors.New("librariangen: repo directory must be set")
-	}
-	return nil
-}
-
-// Configure configures a new library, or a new API within an existing library.
-// This is effectively the entry point of the "configure" container command.
-func Configure(ctx context.Context, cfg *Config) error {
-	if err := cfg.Validate(); err != nil {
-		return fmt.Errorf("librariangen: invalid configuration: %w", err)
-	}
-	slog.Debug("librariangen: configure command started")
-	configureReq, err := readConfigureReq(cfg.LibrarianDir)
-	if err != nil {
-		return fmt.Errorf("librariangen: failed to read request: %w", err)
-	}
-	library, api, err := findLibraryAndAPIToConfigure(configureReq)
-	if err != nil {
-		return err
+	// Create library directory
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return fmt.Errorf("librariangen: failed to create library directory: %w", err)
 	}
 
-	response, err := configureLibrary(ctx, cfg, library, api)
-	if err != nil {
-		return err
-	}
-	if err := saveConfigureResp(response, cfg.LibrarianDir); err != nil {
-		return fmt.Errorf("librariangen: failed to save response: %w", err)
+	// Generate README.md
+	if err := createReadme(outputDir, sourceDir, libraryID, modulePath, firstAPIPath, firstAPIServiceConfig); err != nil {
+		return fmt.Errorf("librariangen: failed to generate README: %w", err)
 	}
 
+	// Generate CHANGES.md
+	if err := createChanges(outputDir); err != nil {
+		return fmt.Errorf("librariangen: failed to generate CHANGES: %w", err)
+	}
+
+	// Generate internal/version.go
+	if err := module.GenerateInternalVersionFile(outputDir, "0.0.0"); err != nil {
+		return fmt.Errorf("librariangen: failed to generate internal version file: %w", err)
+	}
+
+	// Generate client version file (e.g., apiv1/version.go)
+	if err := createClientVersionFile(outputDir, modulePath, clientDir); err != nil {
+		return fmt.Errorf("librariangen: failed to generate client version file: %w", err)
+	}
+
+	// Update snippets go.mod with replace directive
+	if snippetsGoModPath != "" {
+		if err := updateSnippetsGoMod(ctx, snippetsGoModPath, modulePath, libraryID); err != nil {
+			return fmt.Errorf("librariangen: failed to update snippets go.mod: %w", err)
+		}
+	}
+
+	slog.Debug("librariangen: configuration complete", "library", libraryID)
 	return nil
 }
 
@@ -212,10 +201,10 @@ func configureLibrary(ctx context.Context, cfg *Config, library *request.Library
 		library.RemoveRegex = []string{"^internal/generated/snippets/" + library.ID + "/"}
 		library.TagFormat = "{id}/v{version}"
 		library.Version = "0.0.0"
-		if err := generateReadme(cfg, library); err != nil {
+		if err := createReadme(cfg, library); err != nil {
 			return nil, err
 		}
-		if err := generateChanges(cfg, library); err != nil {
+		if err := createChanges(cfg, library); err != nil {
 			return nil, err
 		}
 		if err := module.GenerateInternalVersionFile(moduleRoot, library.Version); err != nil {
@@ -230,7 +219,7 @@ func configureLibrary(ctx context.Context, cfg *Config, library *request.Library
 	}
 
 	// Whether it's a new library or not, generate a version file for the new client directory.
-	if err := generateClientVersionFile(cfg, moduleConfig, api.Path); err != nil {
+	if err := createClientVersionFile(cfg, moduleConfig, api.Path); err != nil {
 		return nil, err
 	}
 
@@ -243,12 +232,12 @@ func configureLibrary(ctx context.Context, cfg *Config, library *request.Library
 	return library, nil
 }
 
-// generateReadme generates a README.md file in the module's root directory,
+// createReadme generates a README.md file in the module's root directory,
 // using the service config for the first API in the library to obtain the
 // service's title.
-func generateReadme(cfg *Config, library *request.Library) error {
-	readmePath := filepath.Join(cfg.OutputDir, library.ID, "README.md")
-	serviceYAMLPath := filepath.Join(cfg.SourceDir, library.APIs[0].Path, library.APIs[0].ServiceConfig)
+func createReadme(outputDir, sourceDir, libraryID, modulePath, firstAPIPath, firstAPIServiceConfig string) error {
+	readmePath := filepath.Join(outputDir, "README.md")
+	serviceYAMLPath := filepath.Join(sourceDir, firstAPIPath, firstAPIServiceConfig)
 	title, err := readTitleFromServiceYAML(serviceYAMLPath)
 	if err != nil {
 		return fmt.Errorf("librariangen: failed to read title from service yaml: %w", err)
@@ -266,28 +255,22 @@ func generateReadme(cfg *Config, library *request.Library) error {
 		ModulePath string
 	}{
 		Name:       title,
-		ModulePath: "cloud.google.com/go/" + library.ID,
+		ModulePath: modulePath,
 	}
 	return t.Execute(readmeFile, readmeData)
 }
 
-// generateChanges generates a CHANGES.md file at the root of the module.
-func generateChanges(cfg *Config, library *request.Library) error {
-	changesPath := filepath.Join(cfg.OutputDir, library.ID, "CHANGES.md")
+// createChanges generates a CHANGES.md file at the root of the module.
+func createChanges(outputDir string) error {
+	changesPath := filepath.Join(outputDir, "CHANGES.md")
 	slog.Info("librariangen: creating file", "path", changesPath)
 	content := "# Changes\n"
 	return os.WriteFile(changesPath, []byte(content), 0644)
 }
 
-// generateClientVersionFile creates a version.go file for a client.
-func generateClientVersionFile(cfg *Config, moduleConfig *config.ModuleConfig, apiPath string) error {
-	var apiConfig = moduleConfig.GetAPIConfig(apiPath)
-	clientDir, err := apiConfig.GetClientDirectory()
-	if err != nil {
-		return err
-	}
-
-	fullClientDir := filepath.Join(cfg.OutputDir, moduleConfig.Name, clientDir)
+// createClientVersionFile creates a version.go file for a client.
+func createClientVersionFile(outputDir, modulePath, clientDir string) error {
+	fullClientDir := filepath.Join(outputDir, clientDir)
 	if err := os.MkdirAll(fullClientDir, 0755); err != nil {
 		return err
 	}
@@ -299,10 +282,9 @@ func generateClientVersionFile(cfg *Config, moduleConfig *config.ModuleConfig, a
 		Package            string
 		ModuleRootInternal string
 	}{
-		Year:    time.Now().Year(),
-		Package: filepath.Base(filepath.Dir(fullClientDir)), // The package name is the name of the directory containing the client directory (e.g. `apiv1beta1`).
-
-		ModuleRootInternal: moduleConfig.GetModulePath() + "/internal",
+		Year:               time.Now().Year(),
+		Package:            filepath.Base(clientDir), // The package name is the client directory name (e.g. `apiv1`).
+		ModuleRootInternal: modulePath + "/internal",
 	}
 	f, err := os.Create(versionPath)
 	if err != nil {
@@ -312,32 +294,15 @@ func generateClientVersionFile(cfg *Config, moduleConfig *config.ModuleConfig, a
 	return t.Execute(f, versionData)
 }
 
-// goModEditReplaceInSnippets copies internal/generated/snippets/go.mod from
-// cfg.RepoDir to cfg.OutputDir, then runs go mod edit to replace the specified
-// modulePath with relativeDir which is expected to the location of the module
-// relative to internal/generated/snippets
-func goModEditReplaceInSnippets(ctx context.Context, cfg *Config, modulePath, relativeDir string) error {
-	outputSnippetsDir := filepath.Join(cfg.OutputDir, "internal", "generated", "snippets")
-	if err := os.MkdirAll(outputSnippetsDir, 0755); err != nil {
-		return err
-	}
-	copyRepoFileToOutput(cfg, "internal/generated/snippets/go.mod")
+// updateSnippetsGoMod updates internal/generated/snippets/go.mod with a replace directive
+// to point to the local module.
+func updateSnippetsGoMod(ctx context.Context, snippetsGoModPath, modulePath, libraryID string) error {
+	snippetsDir := filepath.Dir(snippetsGoModPath)
+	relativeDir := "../../../" + libraryID
 	replaceStr := fmt.Sprintf("%s=%s", modulePath, relativeDir)
 	args := []string{"go", "mod", "edit", "-replace", replaceStr}
-	slog.Info("librariangen: running go mod edit -replace", "replace", replaceStr, "directory", outputSnippetsDir)
-	return execvRun(ctx, args, outputSnippetsDir)
-}
-
-// copyRepoFileToOutput copies a single file (identified via path)
-// from cfg.RepoDir to cfg.OutputDir.
-func copyRepoFileToOutput(cfg *Config, path string) error {
-	src := filepath.Join(cfg.RepoDir, path)
-	dst := filepath.Join(cfg.OutputDir, path)
-	data, err := os.ReadFile(src)
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(dst, data, 0644)
+	slog.Info("librariangen: running go mod edit -replace", "replace", replaceStr, "directory", snippetsDir)
+	return execvRun(ctx, args, snippetsDir)
 }
 
 // updateLibraryState updates the library to add any required removal/preservation
