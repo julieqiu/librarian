@@ -18,24 +18,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/fs"
 	"log/slog"
 	"os"
 	"path/filepath"
-	"strings"
 
-	"github.com/googleapis/librarian/internal/container/go/config"
-	"github.com/googleapis/librarian/internal/container/go/execv"
-	"github.com/googleapis/librarian/internal/container/go/postprocessor"
-	"github.com/googleapis/librarian/internal/container/go/protoc"
-	"github.com/googleapis/librarian/internal/container/go/request"
+	"github.com/googleapis/librarian/internal/config"
+	"github.com/googleapis/librarian/internal/container/golang/execv"
 )
 
 // Test substitution vars.
 var (
-	postProcess  = postprocessor.PostProcess
-	execvRun     = execv.Run
-	requestParse = request.ParseLibrary
+	execvRun = execv.Run
 )
 
 // Config holds the internal librariangen configuration for the generate command.
@@ -90,114 +83,117 @@ func (c *Config) Validate() error {
 // The `DisablePostProcessor` flag should always be false in production. It can be
 // true during development to inspect the "raw" protoc output before any
 // post-processing is applied.
-func Generate(ctx context.Context, cfg *Config) error {
-	if err := cfg.Validate(); err != nil {
-		return fmt.Errorf("librariangen: invalid configuration: %w", err)
-	}
+func Generate(ctx context.Context, artifact *config.ArtifactState, googleapisDir string, outDir string) error {
 	slog.Debug("librariangen: generate command started")
 
-	generateReq, err := readGenerateReq(cfg.LibrarianDir)
-	if err != nil {
-		return fmt.Errorf("librariangen: failed to read request: %w", err)
+	if artifact.Generate == nil {
+		return errors.New("librariangen: artifact has no generate configuration")
 	}
-	repoConfig, err := config.LoadRepoConfig(cfg.LibrarianDir)
-	if err != nil {
-		return fmt.Errorf("librariangen: failed to load repo config: %w", err)
-	}
-	moduleConfig := repoConfig.GetModuleConfig(generateReq.ID)
 
-	if err := invokeProtoc(ctx, cfg, generateReq, moduleConfig); err != nil {
-		return fmt.Errorf("librariangen: gapic generation failed: %w", err)
+	if len(artifact.Generate.APIs) == 0 {
+		return errors.New("librariangen: no APIs in artifact configuration")
 	}
-	if err := fixPermissions(cfg.OutputDir); err != nil {
-		return fmt.Errorf("librariangen: failed to fix permissions: %w", err)
+
+	// Phase 1: Code Generation
+	slog.Info("librariangen: phase 1 - code generation")
+	for _, api := range artifact.Generate.APIs {
+		apiServiceDir := filepath.Join(googleapisDir, api.Path)
+		slog.Info("processing api", "service_dir", apiServiceDir)
+
+		// Build protoc command
+		args, err := buildProtocCommand(&api, googleapisDir, outDir)
+		if err != nil {
+			return fmt.Errorf("librariangen: failed to build protoc command for api %q: %w", api.Path, err)
+		}
+
+		// Run protoc
+		if err := execvRun(ctx, args, outDir); err != nil {
+			return fmt.Errorf("librariangen: protoc failed for api %q: %w", api.Path, err)
+		}
 	}
-	if err := flattenOutput(cfg.OutputDir); err != nil {
+
+	// Flatten output directory structure
+	if err := flattenOutput(outDir); err != nil {
 		return fmt.Errorf("librariangen: failed to flatten output: %w", err)
 	}
 
-	if err := applyModuleVersion(cfg.OutputDir, generateReq.ID, moduleConfig.GetModulePath()); err != nil {
-		return fmt.Errorf("librariangen: failed to apply module version to output directories: %w", err)
+	// Phase 2: Formatting and Build
+	slog.Info("librariangen: phase 2 - formatting and build")
+	if err := formatAndBuild(ctx, outDir); err != nil {
+		return fmt.Errorf("librariangen: formatting and build failed: %w", err)
 	}
 
-	if !cfg.DisablePostProcessor {
-		slog.Debug("librariangen: post-processor enabled")
-		if len(generateReq.APIs) == 0 {
-			return errors.New("librariangen: no APIs in request")
-		}
-		moduleDir := filepath.Join(cfg.OutputDir, generateReq.ID)
-		if err := postProcess(ctx, generateReq, cfg.OutputDir, moduleDir, moduleConfig); err != nil {
-			return fmt.Errorf("librariangen: post-processing failed: %w", err)
-		}
-	}
-	if err := deleteOutputPaths(cfg.OutputDir, moduleConfig.DeleteGenerationOutputPaths); err != nil {
-		return fmt.Errorf("librariangen: failed to delete paths specified in delete_generation_output_paths: %w", err)
-	}
+	// Phase 3: Testing is handled by the Build command (see builder.go)
 
 	slog.Debug("librariangen: generate command finished")
 	return nil
 }
 
-// invokeProtoc handles the protoc GAPIC generation logic for the 'generate' CLI command.
-// It reads a request file, and for each API specified, it invokes protoc
-// to generate the client library and its corresponding .repo-metadata.json file.
-func invokeProtoc(ctx context.Context, cfg *Config, generateReq *request.Library, moduleConfig *config.ModuleConfig) error {
-	for _, api := range generateReq.APIs {
-		apiServiceDir := filepath.Join(cfg.SourceDir, api.Path)
-		slog.Info("processing api", "service_dir", apiServiceDir)
-		bazelConfig, err := bazelParse(apiServiceDir)
-		apiConfig := moduleConfig.GetAPIConfig(api.Path)
-		if apiConfig.HasDisableGAPIC() {
-			bazelConfig.DisableGAPIC()
-		}
-		if err != nil {
-			return fmt.Errorf("librariangen: failed to parse BUILD.bazel for %s: %w", apiServiceDir, err)
-		}
-		args, err := protoc.Build(generateReq, &api, bazelConfig, cfg.SourceDir, cfg.OutputDir, apiConfig.NestedProtos)
-		if err != nil {
-			return fmt.Errorf("librariangen: failed to build protoc command for api %q in library %q: %w", api.Path, generateReq.ID, err)
-		}
-		if err := execvRun(ctx, args, cfg.OutputDir); err != nil {
-			return fmt.Errorf("librariangen: protoc failed for api %q in library %q: %w", api.Path, generateReq.ID, err)
-		}
-		// Generate the .repo-metadata.json file for this API.
-		if err := generateRepoMetadata(ctx, cfg, generateReq, &api, moduleConfig, bazelConfig); err != nil {
-			return fmt.Errorf("librariangen: failed to generate .repo-metadata.json for api %q in library %q: %w", api.Path, generateReq.ID, err)
-		}
+// buildProtocCommand constructs the protoc command arguments for a given API.
+func buildProtocCommand(api *config.APIConfig, googleapisDir string, outDir string) ([]string, error) {
+	args := []string{
+		"protoc",
+		"--proto_path=" + googleapisDir,
+		"--go_out=" + outDir,
+		"--go-grpc_out=" + outDir,
+		"--go_gapic_out=" + outDir,
 	}
+
+	// Add GAPIC import path if specified
+	if api.GAPICImportPath != "" {
+		args = append(args, "--go_gapic_opt=go-gapic-package="+api.GAPICImportPath)
+	}
+
+	// Add gRPC service config if specified
+	if api.GRPCServiceConfig != "" {
+		configPath := filepath.Join(googleapisDir, api.Path, api.GRPCServiceConfig)
+		args = append(args, "--go_gapic_opt=grpc-service-config="+configPath)
+	}
+
+	// Add service YAML if specified
+	if api.ServiceYAML != "" {
+		yamlPath := filepath.Join(googleapisDir, api.Path, api.ServiceYAML)
+		args = append(args, "--go_gapic_opt=api-service-config="+yamlPath)
+	}
+
+	// Add transport option if specified
+	if api.Transport != "" {
+		args = append(args, "--go_gapic_opt=transport="+api.Transport)
+	}
+
+	// Add rest-numeric-enums if specified
+	if api.RestNumericEnums {
+		args = append(args, "--go_gapic_opt=rest-numeric-enums")
+	}
+
+	// Add any additional optional arguments
+	for _, optArg := range api.OptArgs {
+		args = append(args, "--go_gapic_opt="+optArg)
+	}
+
+	// Add the proto files for this API
+	// TODO: Find all .proto files in the API path
+	protoFiles := filepath.Join(googleapisDir, api.Path, "*.proto")
+	args = append(args, protoFiles)
+
+	return args, nil
+}
+
+// formatAndBuild runs formatting tools and initializes go modules.
+func formatAndBuild(ctx context.Context, outDir string) error {
+	// Run goimports to format code
+	goimportsArgs := []string{"goimports", "-w", "."}
+	if err := execvRun(ctx, goimportsArgs, outDir); err != nil {
+		return fmt.Errorf("goimports failed: %w", err)
+	}
+
+	// Run go mod tidy
+	goModTidyArgs := []string{"go", "mod", "tidy"}
+	if err := execvRun(ctx, goModTidyArgs, outDir); err != nil {
+		return fmt.Errorf("go mod tidy failed: %w", err)
+	}
+
 	return nil
-}
-
-// readGenerateReq reads generate-request.json from the librarian-tool input directory.
-// The request file tells librariangen which library and APIs to generate.
-// It is prepared by the Librarian tool and mounted at /librarian.
-func readGenerateReq(librarianDir string) (*request.Library, error) {
-	reqPath := filepath.Join(librarianDir, "generate-request.json")
-	slog.Debug("librariangen: reading generate request", "path", reqPath)
-
-	generateReq, err := requestParse(reqPath)
-	if err != nil {
-		return nil, err
-	}
-	slog.Debug("librariangen: successfully unmarshalled request", "library_id", generateReq.ID)
-	return generateReq, nil
-}
-
-// fixPermissions recursively finds all .go files in the given directory and sets
-// their permissions to 0644.
-func fixPermissions(dir string) error {
-	slog.Debug("librariangen: changing file permissions to 644", "dir", dir)
-	return filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if !d.IsDir() && strings.HasSuffix(path, ".go") {
-			if err := os.Chmod(path, 0644); err != nil {
-				return fmt.Errorf("librariangen: failed to chmod %s: %w", path, err)
-			}
-		}
-		return nil
-	})
 }
 
 // flattenOutput moves the contents of /output/cloud.google.com/go/ to the top
@@ -206,99 +202,27 @@ func flattenOutput(outputDir string) error {
 	slog.Debug("librariangen: flattening output directory", "dir", outputDir)
 	goDir := filepath.Join(outputDir, "cloud.google.com", "go")
 	if _, err := os.Stat(goDir); os.IsNotExist(err) {
-		return fmt.Errorf("librariangen: go directory does not exist in path: %s", goDir)
-	}
-	if err := moveFiles(goDir, outputDir); err != nil {
-		return err
-	}
-	// Remove the now-empty cloud.google.com directory.
-	if err := os.RemoveAll(filepath.Join(outputDir, "cloud.google.com")); err != nil {
-		return fmt.Errorf("librariangen: failed to remove cloud.google.com: %w", err)
-	}
-	return nil
-}
-
-// applyModuleVersion reorganizes the (already flattened) output directory
-// appropriately for versioned modules. For a module path of the form
-// cloud.google.com/go/{module-id}/{version}, we expect to find
-// /output/{id}/{version} and /output/internal/generated/snippets/{module-id}/{version}.
-// In most cases, we only support a single major version of the module, rooted at
-// /{module-id} in the repository, so the content of these directories are moved into
-// /output/{module-id} and /output/internal/generated/snippets/{id}.
-//
-// However, when we need to support multiple major versions, we use {module-id}/{version}
-// as the *library* ID (in the state file etc). That indicates that the module is rooted
-// in that versioned directory (e.g. "pubsub/v2"). In that case, the flattened code is
-// already in the right place, so this function doesn't need to do anything.
-func applyModuleVersion(outputDir, libraryID, modulePath string) error {
-	parts := strings.Split(modulePath, "/")
-	// Just cloud.google.com/go/xyz
-	if len(parts) == 3 {
-		return nil
-	}
-	if len(parts) != 4 {
-		return fmt.Errorf("librariangen: unexpected module path format: %s", modulePath)
-	}
-	// e.g. dataproc
-	id := parts[2]
-	// e.g. v2
-	version := parts[3]
-
-	if libraryID == id+"/"+version {
+		// Directory doesn't exist, nothing to flatten
 		return nil
 	}
 
-	srcDir := filepath.Join(outputDir, id)
-	srcVersionDir := filepath.Join(srcDir, version)
-	snippetsDir := filepath.Join(outputDir, "internal", "generated", "snippets", id)
-	snippetsVersionDir := filepath.Join(snippetsDir, version)
-
-	if err := moveFiles(srcVersionDir, srcDir); err != nil {
-		return err
-	}
-	if err := os.RemoveAll(srcVersionDir); err != nil {
-		return fmt.Errorf("librariangen: failed to remove %s: %w", srcVersionDir, err)
-	}
-
-	if err := moveFiles(snippetsVersionDir, snippetsDir); err != nil {
-		return err
-	}
-	if err := os.RemoveAll(snippetsVersionDir); err != nil {
-		return fmt.Errorf("librariangen: failed to remove %s: %w", snippetsVersionDir, err)
-	}
-	return nil
-}
-
-// moveFiles moves all files (and directories) from sourceDir to targetDir.
-func moveFiles(sourceDir, targetDir string) error {
-	files, err := os.ReadDir(sourceDir)
+	files, err := os.ReadDir(goDir)
 	if err != nil {
-		return fmt.Errorf("librariangen: failed to read dir %s: %w", sourceDir, err)
+		return fmt.Errorf("librariangen: failed to read dir %s: %w", goDir, err)
 	}
+
 	for _, f := range files {
-		oldPath := filepath.Join(sourceDir, f.Name())
-		newPath := filepath.Join(targetDir, f.Name())
+		oldPath := filepath.Join(goDir, f.Name())
+		newPath := filepath.Join(outputDir, f.Name())
 		slog.Debug("librariangen: moving file", "from", oldPath, "to", newPath)
 		if err := os.Rename(oldPath, newPath); err != nil {
 			return fmt.Errorf("librariangen: failed to move %s to %s: %w", oldPath, newPath, err)
 		}
 	}
-	return nil
-}
 
-// deleteOutputPaths deletes the specified paths, which may be files
-// or directories, relative to the output directory. This is an emergency
-// escape hatch for situations where files are generated that we don't want
-// to include, such as the internal/generated/snippets/storage/internal directory.
-// This is configured in repo-config.yaml at the library level, with the key
-// delete_generation_output_paths.
-func deleteOutputPaths(outputDir string, pathsToDelete []string) error {
-	for _, path := range pathsToDelete {
-		// This is so rare that it's useful to be able to validate it easily.
-		slog.Info("deleting output path", "path", path)
-		if err := os.RemoveAll(filepath.Join(outputDir, path)); err != nil {
-			return err
-		}
+	// Remove the now-empty cloud.google.com directory.
+	if err := os.RemoveAll(filepath.Join(outputDir, "cloud.google.com")); err != nil {
+		return fmt.Errorf("librariangen: failed to remove cloud.google.com: %w", err)
 	}
 	return nil
 }
