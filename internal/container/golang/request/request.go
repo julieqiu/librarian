@@ -53,6 +53,10 @@ type API struct {
 	ServiceConfig string `json:"service_config,omitempty"`
 	// Status is the status of the API: "new" or "existing". This is only used in the configure command.
 	Status string `json:"status,omitempty"`
+	// GAPICImportPath is the Go import path for the GAPIC client (e.g. cloud.google.com/go/secretmanager/apiv1)
+	GAPICImportPath string `json:"gapic_import_path,omitempty"`
+	// ReleaseLevel is the release level for the API (e.g. "stable", "preview")
+	ReleaseLevel string `json:"release_level,omitempty"`
 }
 
 // Change represents a single commit change for a library.

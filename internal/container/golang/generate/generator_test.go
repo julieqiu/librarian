@@ -79,23 +79,6 @@ func (e *testEnv) writeRequestFile(t *testing.T, content string) {
 	}
 }
 
-// writeBazelFile writes a BUILD.bazel file.
-func (e *testEnv) writeBazelFile(t *testing.T, apiPath, content string) {
-	t.Helper()
-	apiDir := filepath.Join(e.sourceDir, apiPath)
-	if err := os.MkdirAll(apiDir, 0755); err != nil {
-		t.Fatalf("failed to create api dir: %v", err)
-	}
-	// Create a fake .proto file, which is required by the protoc command builder.
-	if err := os.WriteFile(filepath.Join(apiDir, "fake.proto"), nil, 0644); err != nil {
-		t.Fatalf("failed to write fake proto file: %v", err)
-	}
-	p := filepath.Join(apiDir, "BUILD.bazel")
-	if err := os.WriteFile(p, []byte(content), 0644); err != nil {
-		t.Fatalf("failed to write bazel file: %v", err)
-	}
-}
-
 // writeServiceYAML writes a service.yaml file.
 func (e *testEnv) writeServiceYAML(t *testing.T, apiPath, title string) {
 	t.Helper()

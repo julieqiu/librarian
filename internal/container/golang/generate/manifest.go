@@ -23,7 +23,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/googleapis/librarian/internal/container/go/bazel"
 	"github.com/googleapis/librarian/internal/container/go/config"
 	"github.com/googleapis/librarian/internal/container/go/request"
 	"gopkg.in/yaml.v3"
@@ -44,10 +43,10 @@ type manifestEntry struct {
 const gapicAutoLibraryType = "GAPIC_AUTO"
 
 // generateRepoMetadata generates a .repo-metadata.json file for a given API.
-// It gathers metadata from the service YAML, Bazel configuration, and Go module information.
+// It gathers metadata from the service YAML and artifact configuration.
 // The generated file is written to the appropriate location within the output directory,
 // following the expected structure for .repo-metadata.json files.
-func generateRepoMetadata(ctx context.Context, cfg *Config, lib *request.Library, api *request.API, moduleConfig *config.ModuleConfig, bazelConfig *bazel.Config) error {
+func generateRepoMetadata(ctx context.Context, cfg *Config, lib *request.Library, api *request.API, moduleConfig *config.ModuleConfig) error {
 	if api.ServiceConfig == "" {
 		slog.Info("librariangen: no service config for API, skipping .repo-metadata.json generation", "api_path", api.Path)
 		return nil
@@ -69,7 +68,8 @@ func generateRepoMetadata(ctx context.Context, cfg *Config, lib *request.Library
 		return fmt.Errorf("librariangen: failed to decode service YAML: %w", err)
 	}
 
-	importPath := bazelConfig.GAPICImportPath()
+	// Use the GAPIC import path from the API configuration
+	importPath := api.GAPICImportPath
 	if i := strings.Index(importPath, ";"); i != -1 {
 		importPath = importPath[:i]
 	}
@@ -79,9 +79,10 @@ func generateRepoMetadata(ctx context.Context, cfg *Config, lib *request.Library
 		return fmt.Errorf("librariangen: unable to build docs URL: %w", err)
 	}
 
-	releaseLevel, err := releaseLevel(importPath, bazelConfig)
-	if err != nil {
-		return fmt.Errorf("librariangen: unable to calculate release level for %v: %w", api.Path, err)
+	// Use the release level from the API configuration, defaulting to "stable" if not set
+	releaseLevel := api.ReleaseLevel
+	if releaseLevel == "" {
+		releaseLevel = "stable"
 	}
 
 	apiShortname := apiShortname(yamlConfig.NameFull)
@@ -126,34 +127,4 @@ func apiShortname(nameFull string) string {
 func docURL(modulePath, importPath string) (string, error) {
 	pkgPath := strings.TrimPrefix(strings.TrimPrefix(importPath, modulePath), "/")
 	return "https://cloud.google.com/go/docs/reference/" + modulePath + "/latest/" + pkgPath, nil
-}
-
-// releaseLevel determines the release level of a library. It prioritizes the
-// import path for "alpha" or "beta" suffixes. If not present, it falls back
-// to checking the release_level specified in the BUILD.bazel file for "alpha"
-// or "beta" , and finally defaults to returning "stable", per the behavior of
-// the [go_gapic_opt protoc plugin option
-// flag](https://github.com/googleapis/gapic-generator-go?tab=readme-ov-file#invocation):
-// - `release-level`: the client library release level.
-//   - Defaults to empty, which is essentially the GA release level.
-//   - Acceptable values are `alpha` and `beta`.
-func releaseLevel(importPath string, bazelConfig *bazel.Config) (string, error) {
-	// 1. Scan import path
-	i := strings.LastIndex(importPath, "/")
-	lastElm := importPath[i+1:]
-	if strings.Contains(lastElm, "alpha") {
-		return "preview", nil
-	} else if strings.Contains(lastElm, "beta") {
-		return "preview", nil
-	}
-
-	// 2. Read release_level attribute, if present, from go_gapic_library rule in BUILD.bazel.
-	if bazelConfig.ReleaseLevel() == "alpha" {
-		return "preview", nil
-	} else if bazelConfig.ReleaseLevel() == "beta" {
-		return "preview", nil
-	}
-
-	// 3. If alpha or beta are not found in path or build file, default is `stable`.
-	return "stable", nil
 }

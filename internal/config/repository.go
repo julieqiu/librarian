@@ -178,6 +178,8 @@ type APIConfig struct {
 	Transport         string   `yaml:"transport,omitempty"`
 	RestNumericEnums  bool     `yaml:"rest_numeric_enums,omitempty"`
 	OptArgs           []string `yaml:"opt_args,omitempty"`
+	GAPICImportPath   string   `yaml:"gapic_import_path,omitempty"`
+	ReleaseLevel      string   `yaml:"release_level,omitempty"`
 }
 
 // ArtifactMetadata contains library metadata used for documentation and packaging.

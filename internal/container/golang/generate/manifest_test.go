@@ -21,10 +21,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/googleapis/librarian/internal/container/go/bazel"
+	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/librarian/internal/container/go/config"
 	"github.com/googleapis/librarian/internal/container/go/request"
-	"github.com/google/go-cmp/cmp"
 )
 
 func TestApiShortname(t *testing.T) {
@@ -45,55 +44,6 @@ func TestDocURL(t *testing.T) {
 	}
 	if got != want {
 		t.Errorf("docURL() = %v, want %v", got, want)
-	}
-}
-
-func TestReleaseLevel(t *testing.T) {
-	tests := []struct {
-		name         string
-		bazelRL      string
-		docGoContent string
-		want         string
-	}{
-		{"bazel_ga", "ga", "", "stable"},
-		{"bazel_alpha", "alpha", "", "preview"},
-		{"bazel_beta", "beta", "", "preview"},
-		{"import_path_alpha", "", "", "preview"},
-		{"import_path_beta", "", "", "preview"},
-		{"default_stable", "", "", "stable"},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			tmpDir := t.TempDir()
-			docGoPath := filepath.Join(tmpDir, "doc.go")
-			if tt.docGoContent != "" {
-				if err := os.WriteFile(docGoPath, []byte(tt.docGoContent), 0644); err != nil {
-					t.Fatalf("writing doc.go: %v", err)
-				}
-			}
-
-			bazelConfig, err := bazel.Parse(createFakeBazelFile(t, tt.bazelRL))
-			if err != nil {
-				t.Fatalf("bazel.Parse() failed: %v", err)
-			}
-
-			importPath := "cloud.google.com/go/foo/apiv1"
-			if tt.name == "import_path_alpha" {
-				importPath = "cloud.google.com/go/foo/apiv1alpha1"
-			}
-			if tt.name == "import_path_beta" {
-				importPath = "cloud.google.com/go/foo/apiv1beta"
-			}
-
-			got, err := releaseLevel(importPath, bazelConfig)
-			if err != nil {
-				t.Fatalf("releaseLevel() failed: %v", err)
-			}
-			if got != tt.want {
-				t.Errorf("releaseLevel() = %q, want %q", got, tt.want)
-			}
-		})
 	}
 }
 
@@ -138,7 +88,6 @@ func TestGenerateRepoMetadata(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			bazelPath := createFakeBazelFile(t, "ga")
 			if err := os.WriteFile(filepath.Join(sourceDir, "google/cloud/testlib/v1", "testlib_v1.yaml"), []byte("name: test.googleapis.com\ntitle: Test API"), 0644); err != nil {
 				t.Fatal(err)
 			}
@@ -151,18 +100,16 @@ func TestGenerateRepoMetadata(t *testing.T) {
 				ID: "testlib",
 			}
 			api := &request.API{
-				Path:          "google/cloud/testlib/v1",
-				ServiceConfig: tc.serviceConfig,
+				Path:            "google/cloud/testlib/v1",
+				ServiceConfig:   tc.serviceConfig,
+				GAPICImportPath: "cloud.google.com/go/testlib/apiv1",
+				ReleaseLevel:    "stable",
 			}
 			moduleConfig := &config.ModuleConfig{
 				Name: "testlib",
 			}
-			bazelConfig, err := bazel.Parse(bazelPath)
-			if err != nil {
-				t.Fatalf("bazel.Parse() failed: %v", err)
-			}
 
-			if err := generateRepoMetadata(context.Background(), cfg, lib, api, moduleConfig, bazelConfig); err != nil {
+			if err := generateRepoMetadata(context.Background(), cfg, lib, api, moduleConfig); err != nil {
 				t.Fatalf("generateRepoMetadata() failed: %v", err)
 			}
 
@@ -189,21 +136,4 @@ func TestGenerateRepoMetadata(t *testing.T) {
 			}
 		})
 	}
-}
-
-func createFakeBazelFile(t *testing.T, releaseLevel string) string {
-	t.Helper()
-	dir := t.TempDir()
-	content := `
-go_gapic_library(
-    name = "testlib_go_gapic",
-    importpath = "cloud.google.com/go/testlib/apiv1;testlib",
-    service_yaml = "testlib_v1.yaml",
-    release_level = "` + releaseLevel + `",
-)
-`
-	if err := os.WriteFile(filepath.Join(dir, "BUILD.bazel"), []byte(content), 0644); err != nil {
-		t.Fatalf("writing fake BUILD.bazel: %v", err)
-	}
-	return dir
 }

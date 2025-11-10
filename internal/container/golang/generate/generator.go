@@ -24,7 +24,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/googleapis/librarian/internal/container/go/bazel"
 	"github.com/googleapis/librarian/internal/container/go/config"
 	"github.com/googleapis/librarian/internal/container/go/execv"
 	"github.com/googleapis/librarian/internal/container/go/postprocessor"
@@ -35,7 +34,6 @@ import (
 // Test substitution vars.
 var (
 	postProcess  = postprocessor.PostProcess
-	bazelParse   = bazel.Parse
 	execvRun     = execv.Run
 	requestParse = request.ParseLibrary
 )
