@@ -65,13 +65,11 @@ func TestGetRawContentSystem(t *testing.T) {
 		},
 		{
 			name:    "without credentials, existing file",
-			token:   "",
 			path:    ".librarian/state.yaml",
 			wantErr: false,
 		},
 		{
 			name:          "without credentials, missing file",
-			token:         "",
 			path:          "not-a-real-file.txt",
 			wantErr:       true,
 			wantErrSubstr: "no file named",

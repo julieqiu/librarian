@@ -172,9 +172,8 @@ func TestIsValid(t *testing.T) {
 		{
 			name: "Invalid config - Push true, token missing",
 			cfg: Config{
-				Push:        true,
-				GitHubToken: "",
-				Repo:        "/tmp/some/repo",
+				Push: true,
+				Repo: "/tmp/some/repo",
 			},
 			wantErr:    true,
 			wantErrMsg: "no GitHub token supplied for push",
