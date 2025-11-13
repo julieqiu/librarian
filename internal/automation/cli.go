@@ -19,7 +19,6 @@ package automation
 import (
 	"context"
 	"flag"
-	"log/slog"
 )
 
 // runCommandFn is a function type that matches RunCommand, for mocking in tests.
@@ -27,20 +26,19 @@ var runCommandFn = RunCommand
 
 // Run parses the command line arguments and triggers the specified command.
 func Run(ctx context.Context, args []string) error {
-	if len(args) == 0 || args[0] == publishCmdName {
+	// TODO(https://github.com/googleapis/librarian/issues/2889) refactor this function after all commands are migrated.
+	if len(args) == 0 || args[0] == "version" || args[0] == generateCmdName || args[0] == publishCmdName {
 		cmd := newAutomationCommand()
 		return cmd.Run(ctx, args)
 	}
 
 	options, err := parseFlags(args)
 	if err != nil {
-		slog.Error("error parsing command", slog.Any("err", err))
 		return err
 	}
 
 	err = runCommandFn(ctx, options.Command, options.ProjectId, options.Push, options.Build)
 	if err != nil {
-		slog.Error("error running command", slog.Any("err", err))
 		return err
 	}
 	return nil

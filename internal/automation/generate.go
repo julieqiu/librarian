@@ -21,19 +21,24 @@ import (
 )
 
 const (
-	publishCmdName = "publish-release"
+	generateCmdName = "generate"
 )
 
-type publishRunner struct {
+type generateRunner struct {
+	build     bool
 	projectID string
+	push      bool
 }
 
-func newPublishRunner(cfg *config.Config) *publishRunner {
-	return &publishRunner{
+func newGenerateRunner(cfg *config.Config) *generateRunner {
+	return &generateRunner{
+		build:     cfg.Build,
 		projectID: cfg.Project,
+		push:      cfg.Push,
 	}
 }
 
-func (r *publishRunner) run(ctx context.Context) error {
-	return runCommandFn(ctx, publishCmdName, r.projectID, false, false)
+func (r *generateRunner) run(ctx context.Context) error {
+	// TODO(https://github.com/googleapis/librarian/issues/2890): refactor this function after all commands are migrated.
+	return runCommandFn(ctx, generateCmdName, r.projectID, r.push, r.build)
 }

@@ -22,7 +22,7 @@ import (
 	"github.com/googleapis/librarian/internal/config"
 )
 
-func TestNewPublishRunner(t *testing.T) {
+func TestNewGenerateRunner(t *testing.T) {
 	t.Parallel()
 	for _, test := range []struct {
 		name string
@@ -31,24 +31,35 @@ func TestNewPublishRunner(t *testing.T) {
 		{
 			name: "create_a_runner",
 			cfg: &config.Config{
+				Build:   true,
 				Project: "example-project",
+				Push:    true,
 			},
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
-			runner := newPublishRunner(test.cfg)
+			runner := newGenerateRunner(test.cfg)
+			if runner.build != test.cfg.Build {
+				t.Errorf("newGenerateRunner() build is not set")
+			}
 			if runner.projectID != test.cfg.Project {
-				t.Errorf("newPublishRunner() projectID is not set")
+				t.Errorf("newGenerateRunner() projectID is not set")
+			}
+			if runner.push != test.cfg.Push {
+				t.Errorf("newGenerateRunner() push is not set")
 			}
 		})
 	}
 }
 
-func TestPublishRunnerRun(t *testing.T) {
+func TestGenerateRunnerRun(t *testing.T) {
+	originalRunCommandFn := runCommandFn
+	defer func() { runCommandFn = originalRunCommandFn }()
+
 	tests := []struct {
 		name          string
-		runner        *publishRunner
+		runner        *generateRunner
 		runCommandErr error
 		wantErr       bool
 		wantCmd       string
@@ -58,18 +69,22 @@ func TestPublishRunnerRun(t *testing.T) {
 	}{
 		{
 			name: "success",
-			runner: &publishRunner{
+			runner: &generateRunner{
+				build:     true,
 				projectID: "test-project",
+				push:      true,
 			},
-			wantCmd:       publishCmdName,
+			wantCmd:       generateCmdName,
 			wantProjectID: "test-project",
+			wantPush:      true,
+			wantBuild:     true,
 		},
 		{
 			name:          "error from RunCommand",
-			runner:        &publishRunner{},
+			runner:        &generateRunner{},
 			runCommandErr: errors.New("run command failed"),
 			wantErr:       true,
-			wantCmd:       publishCmdName,
+			wantCmd:       generateCmdName,
 		},
 	}
 	for _, test := range tests {
@@ -82,6 +97,12 @@ func TestPublishRunnerRun(t *testing.T) {
 				if test.runCommandErr == nil {
 					if projectId != test.wantProjectID {
 						t.Errorf("runCommandFn() projectId = %v, want %v", projectId, test.wantProjectID)
+					}
+					if push != test.wantPush {
+						t.Errorf("runCommandFn() push = %v, want %v", push, test.wantPush)
+					}
+					if build != test.wantBuild {
+						t.Errorf("runCommandFn() build = %v, want %v", build, test.wantBuild)
 					}
 				}
 				return test.runCommandErr
