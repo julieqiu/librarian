@@ -21,18 +21,16 @@ import (
 )
 
 func newAutomationCommand() *cli.Command {
-	cmd := &cli.Command{
-		Short:     "automation manages Cloud Build resources to run Librarian CLI.",
-		UsageLine: "automation <command> [arguments]",
-		Long:      automationLongHelp,
-		Commands: []*cli.Command{
-			newCmdGenerate(),
-			newCmdPublishRelease(),
-		},
+	commands := []*cli.Command{
+		newCmdGenerate(),
+		newCmdPublishRelease(),
 	}
 
-	cmd.Init()
-	return cmd
+	return cli.NewCommandSet(
+		commands,
+		"automation manages Cloud Build resources to run Librarian CLI.",
+		"automation <command> [arguments]",
+		automationLongHelp)
 }
 
 func newCmdGenerate() *cli.Command {
