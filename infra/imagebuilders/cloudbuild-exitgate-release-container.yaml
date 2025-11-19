@@ -24,16 +24,10 @@ steps:
     waitFor: ['-']
     args:
       - 'build'
+      - '-f'
+      - 'infra/imagebuilders/container/Dockerfile'
       - '-t'
-      - 'us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-dev/librarian'
+      - 'us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-dev/librarian-release-container'
       - '.'
-  - id: structure-test
-    name: gcr.io/gcp-runtimes/structure_test
-    args:
-      - '-i'
-      - 'us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-dev/librarian'
-      - '--config'
-      - '/workspace/container-structure-test.yaml'
-      - '-v'
 images:
-  - 'us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-dev/librarian'
+  - 'us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-dev/librarian-release-container'

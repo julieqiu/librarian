@@ -21,6 +21,21 @@
 # published to the 'images-prod' repository.
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'us-central1-docker.pkg.dev/cloud-sdk-production-pipeline/images-dev/librarian', '.']
+    waitFor: ['-']
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-dev/librarian'
+      - '.'
+      - '-f'
+      - 'infra/imagebuilders/cli/Dockerfile'
+  - id: structure-test
+    name: gcr.io/gcp-runtimes/structure_test
+    args:
+      - '-i'
+      - 'us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-dev/librarian'
+      - '--config'
+      - '/workspace/infra/imagebuilders/container-structure-test.yaml'
+      - '-v'
 images:
-  - 'us-central1-docker.pkg.dev/cloud-sdk-production-pipeline/images-dev/librarian'
+  - 'us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-dev/librarian'
