@@ -29,6 +29,7 @@ func TestRepositoriesConfig_Validate(t *testing.T) {
 		{
 			name: "valid state",
 			config: &RepositoriesConfig{
+				ImageSHA: "example-sha",
 				Repositories: []*RepositoryConfig{
 					{
 						Name:              "google-cloud-foo",
@@ -37,11 +38,11 @@ func TestRepositoriesConfig_Validate(t *testing.T) {
 					},
 				},
 			},
-			wantErr: false,
 		},
 		{
 			name: "valid full name",
 			config: &RepositoriesConfig{
+				ImageSHA: "example-sha",
 				Repositories: []*RepositoryConfig{
 					{
 						FullName:          "https://github.com/googleapis/google-cloud-foo",
@@ -50,11 +51,11 @@ func TestRepositoriesConfig_Validate(t *testing.T) {
 					},
 				},
 			},
-			wantErr: false,
 		},
 		{
 			name: "missing name",
 			config: &RepositoriesConfig{
+				ImageSHA: "example-sha",
 				Repositories: []*RepositoryConfig{
 					{
 						SecretName:        "google-cloud-foo-github-token",
@@ -67,6 +68,7 @@ func TestRepositoriesConfig_Validate(t *testing.T) {
 		{
 			name: "missing secret name",
 			config: &RepositoriesConfig{
+				ImageSHA: "example-sha",
 				Repositories: []*RepositoryConfig{
 					{
 						Name:              "google-cloud-foo",
@@ -79,6 +81,7 @@ func TestRepositoriesConfig_Validate(t *testing.T) {
 		{
 			name: "missing commands",
 			config: &RepositoriesConfig{
+				ImageSHA: "example-sha",
 				Repositories: []*RepositoryConfig{
 					{
 						Name:       "google-cloud-foo",
@@ -91,6 +94,7 @@ func TestRepositoriesConfig_Validate(t *testing.T) {
 		{
 			name: "empty commands",
 			config: &RepositoriesConfig{
+				ImageSHA: "example-sha",
 				Repositories: []*RepositoryConfig{
 					{
 						Name:              "google-cloud-foo",
@@ -104,6 +108,7 @@ func TestRepositoriesConfig_Validate(t *testing.T) {
 		{
 			name: "invalid command",
 			config: &RepositoriesConfig{
+				ImageSHA: "example-sha",
 				Repositories: []*RepositoryConfig{
 					{
 						Name:              "google-cloud-foo",
@@ -112,6 +117,11 @@ func TestRepositoriesConfig_Validate(t *testing.T) {
 					},
 				},
 			},
+			wantErr: true,
+		},
+		{
+			name:    "empty image sha",
+			config:  &RepositoriesConfig{},
 			wantErr: true,
 		},
 	} {
@@ -132,7 +142,8 @@ func TestParseRepositoriesConfig(t *testing.T) {
 	}{
 		{
 			name: "valid state",
-			content: `repositories:
+			content: `librarian-image-sha: example-sha
+repositories:
   - name: google-cloud-python
     github-token-secret-name: google-cloud-python-github-token
     supported-commands:
@@ -140,6 +151,7 @@ func TestParseRepositoriesConfig(t *testing.T) {
       - stage-release
 `,
 			want: &RepositoriesConfig{
+				ImageSHA: "example-sha",
 				Repositories: []*RepositoryConfig{
 					{
 						Name:              "google-cloud-python",
@@ -151,7 +163,8 @@ func TestParseRepositoriesConfig(t *testing.T) {
 		},
 		{
 			name: "valid state with full name",
-			content: `repositories:
+			content: `librarian-image-sha: example-sha
+repositories:
   - name: google-cloud-python
     full-name: https://github.com/some-org/google-cloud-python
     github-token-secret-name: google-cloud-python-github-token
@@ -160,6 +173,7 @@ func TestParseRepositoriesConfig(t *testing.T) {
       - stage-release
 `,
 			want: &RepositoriesConfig{
+				ImageSHA: "example-sha",
 				Repositories: []*RepositoryConfig{
 					{
 						Name:              "google-cloud-python",
@@ -172,7 +186,8 @@ func TestParseRepositoriesConfig(t *testing.T) {
 		},
 		{
 			name: "valid state with branch",
-			content: `repositories:
+			content: `librarian-image-sha: example-sha
+repositories:
   - name: google-cloud-python
     branch: preview
     github-token-secret-name: google-cloud-python-github-token
@@ -181,6 +196,7 @@ func TestParseRepositoriesConfig(t *testing.T) {
       - stage-release
 `,
 			want: &RepositoriesConfig{
+				ImageSHA: "example-sha",
 				Repositories: []*RepositoryConfig{
 					{
 						Name:              "google-cloud-python",
@@ -193,7 +209,8 @@ func TestParseRepositoriesConfig(t *testing.T) {
 		},
 		{
 			name: "invalid yaml",
-			content: `repositories:
+			content: `librarian-image-sha: example-sha
+repositories:
   - name: google-cloud-python
       github-token-secret-name: google-cloud-python-github-token # bad indent
     supported-commands:
@@ -205,7 +222,8 @@ func TestParseRepositoriesConfig(t *testing.T) {
 		},
 		{
 			name: "validation error",
-			content: `repositories:
+			content: `librarian-image-sha: example-sha
+repositories:
   - name: google-cloud-python
     github-token-secret-name: google-cloud-python-github-token
 		# missing supported-commands

@@ -51,8 +51,6 @@ func TestRunCommandWithClient(t *testing.T) {
 			name:    "runs generate trigger",
 			command: "generate",
 			push:    true,
-			build:   false,
-			wantErr: false,
 			buildTriggers: []*cloudbuildpb.BuildTrigger{
 				{
 					Name: "generate",
@@ -69,8 +67,6 @@ func TestRunCommandWithClient(t *testing.T) {
 			name:    "runs prepare-release trigger",
 			command: "stage-release",
 			push:    true,
-			build:   false,
-			wantErr: false,
 			buildTriggers: []*cloudbuildpb.BuildTrigger{
 				{
 					Name: "generate",
@@ -87,7 +83,6 @@ func TestRunCommandWithClient(t *testing.T) {
 			name:    "invalid command",
 			command: "invalid-command",
 			push:    true,
-			build:   false,
 			wantErr: true,
 			buildTriggers: []*cloudbuildpb.BuildTrigger{
 				{
@@ -105,7 +100,6 @@ func TestRunCommandWithClient(t *testing.T) {
 			name:     "error triggering",
 			command:  "generate",
 			push:     true,
-			build:    false,
 			runError: fmt.Errorf("some-error"),
 			wantErr:  true,
 			buildTriggers: []*cloudbuildpb.BuildTrigger{
@@ -124,8 +118,6 @@ func TestRunCommandWithClient(t *testing.T) {
 			name:    "runs publish-release trigger",
 			command: "publish-release",
 			push:    true,
-			build:   false,
-			wantErr: false,
 			buildTriggers: []*cloudbuildpb.BuildTrigger{
 				{
 					Name: "publish-release",
@@ -139,8 +131,6 @@ func TestRunCommandWithClient(t *testing.T) {
 			name:    "skips publish-release with no PRs",
 			command: "publish-release",
 			push:    true,
-			build:   false,
-			wantErr: false,
 			buildTriggers: []*cloudbuildpb.BuildTrigger{
 				{
 					Name: "publish-release",
@@ -154,7 +144,6 @@ func TestRunCommandWithClient(t *testing.T) {
 			name:    "error finding PRs for publish-release",
 			command: "publish-release",
 			push:    true,
-			build:   false,
 			wantErr: true,
 			buildTriggers: []*cloudbuildpb.BuildTrigger{
 				{
@@ -228,6 +217,7 @@ func TestRunCommandWithConfig(t *testing.T) {
 			name:    "runs generate trigger with name",
 			command: "generate",
 			config: &RepositoriesConfig{
+				ImageSHA: "test-sha",
 				Repositories: []*RepositoryConfig{
 					{
 						Name:              "google-cloud-python",
@@ -242,6 +232,7 @@ func TestRunCommandWithConfig(t *testing.T) {
 				"_REPOSITORY":               "google-cloud-python",
 				"_FULL_REPOSITORY":          "https://github.com/googleapis/google-cloud-python",
 				"_GITHUB_TOKEN_SECRET_NAME": "foo",
+				"_IMAGE_SHA":                "test-sha",
 				"_PUSH":                     "true",
 				"_BUILD":                    "true",
 			}},
@@ -250,6 +241,8 @@ func TestRunCommandWithConfig(t *testing.T) {
 			name:    "runs generate trigger with full name",
 			command: "generate",
 			config: &RepositoriesConfig{
+				ImageSHA: "test-sha",
+
 				Repositories: []*RepositoryConfig{
 					{
 						Name:              "google-cloud-python",
@@ -265,6 +258,7 @@ func TestRunCommandWithConfig(t *testing.T) {
 				"_REPOSITORY":               "google-cloud-python",
 				"_FULL_REPOSITORY":          "https://github.com/googleapis/google-cloud-python",
 				"_GITHUB_TOKEN_SECRET_NAME": "bar",
+				"_IMAGE_SHA":                "test-sha",
 				"_PUSH":                     "true",
 				"_BUILD":                    "true",
 			}},
@@ -286,6 +280,7 @@ func TestRunCommandWithConfig(t *testing.T) {
 			name:    "runs stage-release trigger",
 			command: "stage-release",
 			config: &RepositoriesConfig{
+				ImageSHA: "test-sha",
 				Repositories: []*RepositoryConfig{
 					{
 						Name:              "google-cloud-python",
@@ -294,12 +289,12 @@ func TestRunCommandWithConfig(t *testing.T) {
 					},
 				},
 			},
-			wantErr:         false,
 			wantTriggersRun: []string{"stage-release-trigger-id"},
 			wantSubstitutions: []map[string]string{{
 				"_REPOSITORY":               "google-cloud-python",
 				"_FULL_REPOSITORY":          "https://github.com/googleapis/google-cloud-python",
 				"_GITHUB_TOKEN_SECRET_NAME": "baz",
+				"_IMAGE_SHA":                "test-sha",
 				"_PUSH":                     "true",
 			}},
 		},
@@ -307,6 +302,7 @@ func TestRunCommandWithConfig(t *testing.T) {
 			name:    "runs publish-release trigger",
 			command: "publish-release",
 			config: &RepositoriesConfig{
+				ImageSHA: "test-sha",
 				Repositories: []*RepositoryConfig{
 					{
 						Name:              "google-cloud-python",
@@ -316,12 +312,12 @@ func TestRunCommandWithConfig(t *testing.T) {
 				},
 			},
 			ghPRs:           []*github.PullRequest{{HTMLURL: github.Ptr("https://github.com/googleapis/google-cloud-python/pull/42")}},
-			wantErr:         false,
 			wantTriggersRun: []string{"publish-release-trigger-id"},
 			wantSubstitutions: []map[string]string{{
 				"_REPOSITORY":               "google-cloud-python",
 				"_FULL_REPOSITORY":          "https://github.com/googleapis/google-cloud-python",
 				"_GITHUB_TOKEN_SECRET_NAME": "qux",
+				"_IMAGE_SHA":                "test-sha",
 				"_PUSH":                     "true",
 				"_PR":                       "https://github.com/googleapis/google-cloud-python/pull/42",
 			}},
@@ -330,6 +326,7 @@ func TestRunCommandWithConfig(t *testing.T) {
 			name:    "runs update-image trigger",
 			command: "update-image",
 			config: &RepositoriesConfig{
+				ImageSHA: "test-sha",
 				Repositories: []*RepositoryConfig{
 					{
 						Name:              "google-cloud-python",
@@ -338,12 +335,12 @@ func TestRunCommandWithConfig(t *testing.T) {
 					},
 				},
 			},
-			wantErr:         false,
 			wantTriggersRun: []string{"update-image-trigger-id"},
 			wantSubstitutions: []map[string]string{{
 				"_REPOSITORY":               "google-cloud-python",
 				"_FULL_REPOSITORY":          "https://github.com/googleapis/google-cloud-python",
 				"_GITHUB_TOKEN_SECRET_NAME": "quux",
+				"_IMAGE_SHA":                "test-sha",
 				"_PUSH":                     "true",
 				"_BUILD":                    "true",
 			}},
@@ -352,6 +349,7 @@ func TestRunCommandWithConfig(t *testing.T) {
 			name:    "runs generate trigger on branch",
 			command: "generate",
 			config: &RepositoriesConfig{
+				ImageSHA: "test-sha",
 				Repositories: []*RepositoryConfig{
 					{
 						Name:              "google-cloud-python",
@@ -361,13 +359,13 @@ func TestRunCommandWithConfig(t *testing.T) {
 					},
 				},
 			},
-			wantErr:         false,
 			wantTriggersRun: []string{"generate-trigger-id"},
 			wantSubstitutions: []map[string]string{{
 				"_REPOSITORY":               "google-cloud-python",
 				"_FULL_REPOSITORY":          "https://github.com/googleapis/google-cloud-python",
 				"_GITHUB_TOKEN_SECRET_NAME": "foo",
 				"_PUSH":                     "true",
+				"_IMAGE_SHA":                "test-sha",
 				"_BRANCH":                   "preview",
 				"_BUILD":                    "true",
 			}},
