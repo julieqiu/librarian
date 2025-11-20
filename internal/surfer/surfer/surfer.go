@@ -19,7 +19,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/googleapis/librarian/internal/cli"
+	"github.com/googleapis/librarian/internal/legacylibrarian/cli"
 	"github.com/googleapis/librarian/internal/surfer/gcloud"
 )
 
