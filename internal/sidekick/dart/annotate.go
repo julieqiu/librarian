@@ -349,23 +349,16 @@ func (annotate *annotateModel) annotateModel(options map[string]string) error {
 	// Remove our package self-reference.
 	delete(annotate.imports, model.PackageName)
 
-	// Add a dev dependency on package:lints.
-	devDependencies = append(devDependencies, "lints")
-
 	// Add the import for ServiceClient and related functionality.
 	if len(model.Services) > 0 {
 		annotate.imports[serviceClientImport] = true
 	}
 
-	// `google.protobuf` defines `JsonEncodable`, which is needed by any package that defines a
-	// `message` or `enum`, i.e., all of them.
-	protobufPrefix = annotate.packagePrefixes["google.protobuf"]
-	if protobufPrefix == "" {
-		annotate.imports[protobufImport] = true
-	} else {
-		annotate.imports[protobufImport+" as "+protobufPrefix] = true
-		protobufPrefix += "."
-	}
+	// `protobuf.dart` defines `JsonEncodable`, which is needed by any API that defines an `enum` or `message`.
+	annotate.imports[protobufImport] = true
+	// `encoding.dart` defines primitive JSON encoding/decode methods, which are needed by any API that defines
+	// an `enum` or `message`.
+	annotate.imports[encodingImport] = true
 
 	if len(model.Services) > 0 && len(apiKeyEnvironmentVariables) == 0 {
 		return errors.New("all packages that define a service must define 'api-keys-environment-variables'")
@@ -386,11 +379,16 @@ func (annotate *annotateModel) annotateModel(options map[string]string) error {
 		return err
 	}
 
+	mainFileName := strcase.ToSnake(model.Name)
+	mainFileNameWithExtension := mainFileName + ".dart"
+
+	slices.Sort(devDependencies)
+
 	ann := &modelAnnotations{
 		Parent:         model,
 		PackageName:    pkgName,
 		PackageVersion: packageVersion,
-		MainFileName:   strcase.ToSnake(model.Name),
+		MainFileName:   mainFileName,
 		CopyrightYear:  generationYear,
 		BoilerPlate: append(license.LicenseHeaderBulk(),
 			"",
@@ -402,7 +400,7 @@ func (annotate *annotateModel) annotateModel(options map[string]string) error {
 			return ""
 		}(),
 		DocLines:                   formatDocComments(model.Description, model.State),
-		Imports:                    calculateImports(annotate.imports),
+		Imports:                    calculateImports(annotate.imports, pkgName, mainFileNameWithExtension),
 		PartFileReference:          partFileReference,
 		PackageDependencies:        packageDependencies,
 		DevDependencies:            devDependencies,
@@ -456,36 +454,79 @@ func calculateDependencies(packages map[string]bool, constraints map[string]stri
 	return deps, nil
 }
 
-func calculateImports(imports map[string]bool) []string {
+// calculateImports generates Dart import statements given a set of imports.
+//
+// For example:
+// `{"dart:io": true, "package:http/http.dart as http": true}` to
+// `{"import 'dart:io';", "", "import 'package:http/http.dart' as http;"}`.
+func calculateImports(imports map[string]bool, curPkgName string, curFileName string) []string {
 	var dartImports []string
+	var packageImports []string
+	var localImports []string
+
+	sortedImports := make([]string, 0, len(imports))
 	for imp := range imports {
-		dartImports = append(dartImports, imp)
+		sortedImports = append(sortedImports, imp)
 	}
-	sort.Strings(dartImports)
+	sort.Strings(sortedImports)
 
-	previousImportType := ""
-	var results []string
-
-	for _, imp := range dartImports {
-		// Emit a blank line when changing between 'dart:' and 'package:' imports.
-		importType := strings.Split(imp, ":")[0]
-		if previousImportType != "" && previousImportType != importType {
-			results = append(results, "")
+	for _, imp := range sortedImports {
+		parts := strings.SplitN(imp, ":", 2)
+		if len(parts) != 2 {
+			continue
 		}
-		previousImportType = importType
+		scheme := parts[0]
+		body := parts[1]
 
-		// Wrap the first part of the import (or the whole import) in single quotes.
-		index := strings.IndexAny(imp, " ")
-		if index != -1 {
-			imp = "'" + imp[0:index] + "'" + imp[index:]
+		if scheme == "dart" {
+			dartImports = append(dartImports, formatImport(imp))
+			continue
+		} else if scheme == "package" {
+			if strings.HasPrefix(body, curPkgName+"/") {
+				pathAndAlias := strings.TrimPrefix(body, curPkgName+"/")
+
+				pathOnly := strings.Split(pathAndAlias, " ")[0]
+				if pathOnly == curFileName {
+					continue
+				}
+
+				localImports = append(localImports, formatImport(pathAndAlias))
+			} else {
+				packageImports = append(packageImports, formatImport(imp))
+			}
 		} else {
-			imp = "'" + imp + "'"
+			panic("unknown import scheme: " + imp)
 		}
-
-		results = append(results, fmt.Sprintf("import %s;", imp))
 	}
 
-	return results
+	var result []string
+	if len(dartImports) > 0 {
+		result = append(result, dartImports...)
+	}
+
+	if len(packageImports) > 0 {
+		if len(result) > 0 {
+			result = append(result, "")
+		}
+		result = append(result, packageImports...)
+	}
+
+	if len(localImports) > 0 {
+		if len(result) > 0 {
+			result = append(result, "")
+		}
+		result = append(result, localImports...)
+	}
+
+	return result
+}
+
+func formatImport(imp string) string {
+	index := strings.IndexAny(imp, " ")
+	if index != -1 {
+		return fmt.Sprintf("import '%s'%s;", imp[0:index], imp[index:])
+	}
+	return fmt.Sprintf("import '%s';", imp)
 }
 
 func (annotate *annotateModel) annotateService(s *api.Service) {
@@ -512,10 +553,6 @@ func (annotate *annotateModel) annotateService(s *api.Service) {
 }
 
 func (annotate *annotateModel) annotateMessage(m *api.Message) {
-	// Add the import for the common JSON helpers.
-
-	annotate.imports[encodingImport] = true
-
 	for _, f := range m.Fields {
 		annotate.annotateField(f)
 	}
