@@ -46,6 +46,7 @@ func updateManifest(config *config.Release, lastTag, manifest string) ([]string,
 	if !needsBump {
 		return nil, nil
 	}
+
 	contents, err := os.ReadFile(manifest)
 	if err != nil {
 		return nil, err
@@ -61,15 +62,14 @@ func updateManifest(config *config.Release, lastTag, manifest string) ([]string,
 	if !info.Package.Publish {
 		return nil, nil
 	}
+
 	newVersion, err := BumpPackageVersion(info.Package.Version)
 	if err != nil {
 		return nil, err
 	}
-
 	if err := UpdateCargoVersion(manifest, newVersion); err != nil {
 		return nil, err
 	}
-
 	if err := updateSidekickConfig(manifest, newVersion); err != nil {
 		return nil, err
 	}
@@ -91,30 +91,24 @@ func UpdateCargoVersion(path, newVersion string) error {
 	if err := toml.Unmarshal(contents, &info); err != nil {
 		return err
 	}
-
 	if info.Package == nil {
 		return nil
 	}
-
 	if info.Package.Version == "" {
 		return fmt.Errorf("no version found in %s", path)
 	}
 
 	info.Package.Version = newVersion
-
 	updated, err := toml.Marshal(&info)
 	if err != nil {
 		return err
 	}
-
 	if err := os.WriteFile(path, updated, 0644); err != nil {
 		return err
 	}
-
 	if err := command.Run("taplo", "fmt", path); err != nil {
 		return fmt.Errorf("failed to format %s: %w", path, err)
 	}
-
 	return nil
 }
 
