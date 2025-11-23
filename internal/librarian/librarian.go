@@ -24,13 +24,14 @@ import (
 )
 
 // Run executes the librarian command with the given arguments.
-func Run(ctx context.Context, args ...string) error {
+func Run(ctx context.Context, args []string) error {
 	cmd := &cli.Command{
 		Name:      "librarian",
 		Usage:     "manage Google Cloud client libraries",
 		UsageText: "librarian [command]",
 		Version:   Version(),
 		Commands: []*cli.Command{
+			generateCommand(),
 			versionCommand(),
 		},
 	}

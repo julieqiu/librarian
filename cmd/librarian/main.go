@@ -16,16 +16,14 @@ package main
 
 import (
 	"context"
-	"log/slog"
+	"log"
 	"os"
 
-	"github.com/googleapis/librarian/internal/legacylibrarian/legacylibrarian"
+	"github.com/googleapis/librarian/internal/librarian"
 )
 
 func main() {
-	ctx := context.Background()
-	if err := legacylibrarian.Run(ctx, os.Args[1:]...); err != nil {
-		slog.Error("librarian command failed", "err", err)
-		os.Exit(1)
+	if err := librarian.Run(context.Background(), os.Args); err != nil {
+		log.Fatalf("librarian: %v", err)
 	}
 }
