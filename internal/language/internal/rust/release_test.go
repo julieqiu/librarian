@@ -21,10 +21,12 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/googleapis/librarian/internal/sideflip/config"
+	cmdtest "github.com/googleapis/librarian/internal/command"
+	"github.com/googleapis/librarian/internal/config"
 )
 
 func TestBumpVersions(t *testing.T) {
+	cmdtest.RequireCommand(t, "cargo")
 	tmpDir := t.TempDir()
 	t.Chdir(tmpDir)
 
@@ -44,17 +46,17 @@ func TestBumpVersions(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := BumpVersions(t.Context(), cfg, configPath); err != nil {
+	updatedCfg, err := BumpVersions(t.Context(), cfg, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := updatedCfg.Write(configPath); err != nil {
 		t.Fatal(err)
 	}
 
 	checkCargoVersion(t, "src/storage/Cargo.toml", "1.1.0")
 	checkCargoVersion(t, "src/secretmanager/Cargo.toml", "1.6.0")
-
-	updatedCfg, err := config.Read(configPath)
-	if err != nil {
-		t.Fatal(err)
-	}
 
 	wantVersions := map[string]string{
 		"google-cloud-storage":          "1.1.0",

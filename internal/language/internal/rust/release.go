@@ -17,11 +17,12 @@ package rust
 
 import (
 	"context"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
 
-	"github.com/googleapis/librarian/internal/sideflip/config"
+	"github.com/googleapis/librarian/internal/config"
 	rustrelease "github.com/googleapis/librarian/internal/sidekick/rust_release"
 	"github.com/pelletier/go-toml/v2"
 )
@@ -36,11 +37,13 @@ type cargoManifest struct {
 }
 
 // BumpVersions bumps versions for all Cargo.toml files and updates
-// librarian.yaml.
-func BumpVersions(ctx context.Context, cfg *config.Config, configPath string) error {
+// librarian.yaml. If name is non-empty, only bumps the version for that library.
+func BumpVersions(ctx context.Context, cfg *config.Config, name string) (*config.Config, error) {
 	if cfg.Versions == nil {
 		cfg.Versions = make(map[string]string)
 	}
+
+	var found bool
 	err := filepath.WalkDir(".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -62,6 +65,11 @@ func BumpVersions(ctx context.Context, cfg *config.Config, configPath string) er
 			return nil
 		}
 
+		if name != "" && manifest.Package.Name != name {
+			return nil
+		}
+
+		found = true
 		newVersion, err := rustrelease.BumpPackageVersion(manifest.Package.Version)
 		if err != nil {
 			return err
@@ -74,7 +82,10 @@ func BumpVersions(ctx context.Context, cfg *config.Config, configPath string) er
 	})
 
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return cfg.Write(configPath)
+	if name != "" && !found {
+		return nil, fmt.Errorf("library %q not found", name)
+	}
+	return cfg, nil
 }
