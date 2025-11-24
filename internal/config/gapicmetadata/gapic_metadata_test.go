@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package legacylibrarian
+package gapicmetadata
 
 import (
 	"os"
@@ -20,7 +20,6 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/googleapis/librarian/internal/legacylibrarian/legacyconfig"
 	gapic "google.golang.org/genproto/googleapis/gapic/metadata"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/testing/protocmp"
@@ -67,19 +66,17 @@ func TestReadGapicMetadata(t *testing.T) {
 	}
 
 	for _, test := range []struct {
-		name    string
-		files   map[string][]byte
-		library *legacyconfig.LibraryState
-		want    map[string]*gapic.GapicMetadata
+		name        string
+		files       map[string][]byte
+		sourceRoots []string
+		want        map[string]*gapic.GapicMetadata
 	}{
 		{
 			name: "single metadata file",
 			files: map[string][]byte{
 				"src/v1/gapic_metadata.json": libv1JSON,
 			},
-			library: &legacyconfig.LibraryState{
-				SourceRoots: []string{"src"},
-			},
+			sourceRoots: []string{"src"},
 			want: map[string]*gapic.GapicMetadata{
 				"cloud.google.com/go/library/apiv1": libv1Metadata,
 			},
@@ -90,9 +87,7 @@ func TestReadGapicMetadata(t *testing.T) {
 				"src/v1/gapic_metadata.json": libv1JSON,
 				"src/v2/gapic_metadata.json": libv2JSON,
 			},
-			library: &legacyconfig.LibraryState{
-				SourceRoots: []string{"src"},
-			},
+			sourceRoots: []string{"src"},
 			want: map[string]*gapic.GapicMetadata{
 				"cloud.google.com/go/library/apiv1": libv1Metadata,
 				"cloud.google.com/go/library/apiv2": libv2Metadata,
@@ -105,9 +100,7 @@ func TestReadGapicMetadata(t *testing.T) {
 				"src/v2/gapic_metadata.json":   libv2JSON,
 				"tests/v2/gapic_metadata.json": libTestJSON,
 			},
-			library: &legacyconfig.LibraryState{
-				SourceRoots: []string{"src"},
-			},
+			sourceRoots: []string{"src"},
 			want: map[string]*gapic.GapicMetadata{
 				"cloud.google.com/go/library/apiv1": libv1Metadata,
 				"cloud.google.com/go/library/apiv2": libv2Metadata,
@@ -119,9 +112,7 @@ func TestReadGapicMetadata(t *testing.T) {
 				"src1/v1/gapic_metadata.json": libv1JSON,
 				"src2/v2/gapic_metadata.json": libv2JSON,
 			},
-			library: &legacyconfig.LibraryState{
-				SourceRoots: []string{"src1", "src2"},
-			},
+			sourceRoots: []string{"src1", "src2"},
 			want: map[string]*gapic.GapicMetadata{
 				"cloud.google.com/go/library/apiv1": libv1Metadata,
 				"cloud.google.com/go/library/apiv2": libv2Metadata,
@@ -132,10 +123,8 @@ func TestReadGapicMetadata(t *testing.T) {
 			files: map[string][]byte{
 				"src/v1/README.md": []byte("Hello, World!"),
 			},
-			library: &legacyconfig.LibraryState{
-				SourceRoots: []string{"src"},
-			},
-			want: map[string]*gapic.GapicMetadata{},
+			sourceRoots: []string{"src"},
+			want:        map[string]*gapic.GapicMetadata{},
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -150,7 +139,7 @@ func TestReadGapicMetadata(t *testing.T) {
 				}
 			}
 
-			got, err := readGapicMetadata(tmpDir, test.library)
+			got, err := readGapicMetadata(tmpDir, test.sourceRoots)
 			if err != nil {
 				t.Fatalf("readGapicMetadata() failed: %v", err)
 			}

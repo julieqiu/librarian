@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package legacylibrarian
+// Package gapicmetadata parses gapic_metadata.json files and extracts API
+// version information for generated library packages.
+package gapicmetadata
 
 import (
 	"bytes"
@@ -25,7 +27,6 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/googleapis/librarian/internal/legacylibrarian/legacyconfig"
 	gapic "google.golang.org/genproto/googleapis/gapic/metadata"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -71,8 +72,7 @@ type serviceVersion struct {
 // "SpaceShipService" with ApiVersion values therein of "2025-09-14" and
 // "2025-04-04" respectively.
 //
-// There can be zero or more libraryPackageAPIVersions per
-// [legacyconfig.LibraryState]. They constructed by [extractAPIVersions] following a
+// libraryPackageAPIVersions are constructed by [extractAPIVersions] following a
 // [readGapicMetadata] call.
 type libraryPackageAPIVersions struct {
 	// LibraryPackage is the language-specific, generated library package name
@@ -158,15 +158,15 @@ func extractAPIVersions(metadataDocuments map[string]*gapic.GapicMetadata) []*li
 	return result
 }
 
-// readGapicMetadata traverses the [legacyconfig.LibraryState] SourceRoots under the
-// provided directory, parses any "gapic_metadata.json" file it finds, and
-// stores it in a map keyed by the [gapic.GapicMetadata] LibraryPackage.
+// readGapicMetadata traverses the source roots under the provided directory,
+// parses any "gapic_metadata.json" file it finds, and stores it in a map keyed
+// by the [gapic.GapicMetadata] LibraryPackage.
 // There should be at most one "gapic_metadta.json" file per generated library
-// package under SourceRoots, typically one per APIs entry, each with a unique
+// package under source roots, typically one per APIs entry, each with a unique
 // library package name.
-func readGapicMetadata(dir string, library *legacyconfig.LibraryState) (map[string]*gapic.GapicMetadata, error) {
+func readGapicMetadata(dir string, sourceRoots []string) (map[string]*gapic.GapicMetadata, error) {
 	mds := make(map[string]*gapic.GapicMetadata)
-	for _, root := range library.SourceRoots {
+	for _, root := range sourceRoots {
 		sr := filepath.Join(dir, root)
 		err := filepath.WalkDir(sr, func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
