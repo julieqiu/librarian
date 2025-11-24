@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package legacysemver provides functionality for parsing, comparing, and manipulating
+// Package semver provides functionality for parsing, comparing, and manipulating
 // semantic version strings according to the SemVer 2.0.0 spec.
-package legacysemver
+package semver
 
 import (
 	"fmt"

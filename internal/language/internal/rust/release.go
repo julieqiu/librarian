@@ -23,6 +23,7 @@ import (
 	"path/filepath"
 
 	"github.com/googleapis/librarian/internal/config"
+	"github.com/googleapis/librarian/internal/semver"
 	rustrelease "github.com/googleapis/librarian/internal/sidekick/rust_release"
 	"github.com/pelletier/go-toml/v2"
 )
@@ -69,7 +70,7 @@ func BumpVersions(ctx context.Context, cfg *config.Config, name string) (*config
 		}
 
 		found = true
-		newVersion, err := rustrelease.BumpPackageVersion(manifest.Package.Version)
+		newVersion, err := semver.BumpMinorPreservingPrerelease(manifest.Package.Version)
 		if err != nil {
 			return err
 		}
