@@ -19,6 +19,7 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -27,6 +28,8 @@ import (
 	"strings"
 	"time"
 )
+
+var errChecksumMismatch = errors.New("checksum mismatch")
 
 // Endpoints defines the endpoints used to access GitHub.
 type Endpoints struct {
@@ -113,28 +116,13 @@ func TarballLink(githubDownload string, repo *Repo, sha string) string {
 	return fmt.Sprintf("%s/%s/%s/archive/%s.tar.gz", githubDownload, repo.Org, repo.Repo, sha)
 }
 
-// DownloadTarball downloads a tarball from the given source URL to the target path,
-// verifying its SHA256 checksum matches expectedSha256. It retries up to 3 times
-// with exponential backoff on failure.
-func DownloadTarball(target, source, expectedSha256 string) error {
+// DownloadTarball downloads a tarball from the given url to the target
+// path, verifying its SHA256 checksum matches expectedSha256. It retries up to
+// 3 times with exponential backoff on failure.
+func DownloadTarball(target, url, expectedSha256 string) error {
 	if fileExists(target) {
 		return nil
 	}
-	var err error
-	backoff := 10 * time.Second
-	for i := range 3 {
-		if i != 0 {
-			time.Sleep(backoff)
-			backoff = 2 * backoff
-		}
-		if err = downloadAttempt(target, source, expectedSha256); err == nil {
-			return nil
-		}
-	}
-	return fmt.Errorf("download failed after 3 attempts, last error=%w", err)
-}
-
-func downloadAttempt(target, source, expectedSha256 string) (err error) {
 	if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil {
 		return err
 	}
@@ -142,18 +130,63 @@ func downloadAttempt(target, source, expectedSha256 string) (err error) {
 	if err != nil {
 		return err
 	}
+	tempPath := tempFile.Name()
 	defer func() {
-		cerr := tempFile.Close()
+		tempFile.Close()
+		cerr := os.Remove(tempPath)
+		if err == nil && cerr != nil && !os.IsNotExist(cerr) {
+			err = cerr
+		}
+	}()
+
+	if err := downloadTarball(tempPath, url); err != nil {
+		return err
+	}
+
+	sha, err := computeSHA256(tempPath)
+	if err != nil {
+		return err
+	}
+	if sha != expectedSha256 {
+		return fmt.Errorf("%w: expected=%s, got=%s", errChecksumMismatch, expectedSha256, sha)
+	}
+	if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil {
+		return err
+	}
+	return os.Rename(tempPath, target)
+}
+
+// downloadTarball downloads a tarball from the given source URL to the target
+// path. It retries up to 3 times with exponential backoff on failure.
+func downloadTarball(target, source string) error {
+	var err error
+	backoff := 10 * time.Second
+	for i := range 3 {
+		if i != 0 {
+			time.Sleep(backoff)
+			backoff = 2 * backoff
+		}
+		if err = downloadAttempt(target, source); err == nil {
+			return nil
+		}
+	}
+	return fmt.Errorf("download failed after 3 attempts, last error=%w", err)
+}
+
+func downloadAttempt(target, source string) (err error) {
+	file, err := os.Create(target)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		cerr := file.Close()
 		if err == nil {
 			err = cerr
 		}
 		if err != nil {
-			os.Remove(tempFile.Name())
+			os.Remove(target)
 		}
 	}()
-
-	hasher := sha256.New()
-	writer := io.MultiWriter(tempFile, hasher)
 
 	client := http.Client{Timeout: 60 * time.Second}
 	response, err := client.Get(source)
@@ -165,15 +198,11 @@ func downloadAttempt(target, source, expectedSha256 string) (err error) {
 		return fmt.Errorf("http error in download %s", response.Status)
 	}
 
-	if _, err := io.Copy(writer, response.Body); err != nil {
+	if _, err := io.Copy(file, response.Body); err != nil {
 		return err
 	}
 
-	got := fmt.Sprintf("%x", hasher.Sum(nil))
-	if expectedSha256 != got {
-		return fmt.Errorf("mismatched hash on download, expected=%s, got=%s", expectedSha256, got)
-	}
-	return os.Rename(tempFile.Name(), target)
+	return nil
 }
 
 func fileExists(name string) bool {
