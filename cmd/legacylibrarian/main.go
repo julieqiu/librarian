@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Command sideflip creates, generates, and release client libraries.
 package main
 
 import (
@@ -20,12 +19,12 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/googleapis/librarian/internal/librarian"
+	"github.com/googleapis/librarian/internal/legacylibrarian/legacylibrarian"
 )
 
 func main() {
 	ctx := context.Background()
-	if err := librarian.Run(ctx, os.Args[1:]...); err != nil {
+	if err := legacylibrarian.Run(ctx, os.Args[1:]...); err != nil {
 		slog.Error("librarian command failed", "err", err)
 		os.Exit(1)
 	}
