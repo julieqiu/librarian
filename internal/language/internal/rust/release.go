@@ -16,7 +16,6 @@
 package rust
 
 import (
-	"context"
 	"fmt"
 	"io/fs"
 	"os"
@@ -36,12 +35,30 @@ type cargoManifest struct {
 	Package *cargoPackage `toml:"package"`
 }
 
-// BumpVersions bumps versions for all Cargo.toml files and updates
-// librarian.yaml. If name is non-empty, only bumps the version for that
-// library.
-func BumpVersions(ctx context.Context, cfg *config.Config, name string) (*config.Config, error) {
+// ReleaseAll bumps versions for all Cargo.toml files and updates librarian.yaml.
+func ReleaseAll(cfg *config.Config) (*config.Config, error) {
+	return release(cfg, "")
+}
+
+// ReleaseLibrary bumps the version for a specific library and updates librarian.yaml.
+func ReleaseLibrary(cfg *config.Config, name string) (*config.Config, error) {
+	return release(cfg, name)
+}
+
+func release(cfg *config.Config, name string) (*config.Config, error) {
 	if cfg.Versions == nil {
 		cfg.Versions = make(map[string]string)
+	}
+
+	shouldRelease := func(pkgName string) bool {
+		// If name is the empty string, release everything.
+		if name == "" {
+			return true
+		}
+		if name == pkgName {
+			return true
+		}
+		return false
 	}
 
 	var found bool
@@ -64,7 +81,7 @@ func BumpVersions(ctx context.Context, cfg *config.Config, name string) (*config
 		if manifest.Package == nil {
 			return nil
 		}
-		if name != "" && manifest.Package.Name != name {
+		if !shouldRelease(manifest.Package.Name) {
 			return nil
 		}
 
@@ -82,7 +99,6 @@ func BumpVersions(ctx context.Context, cfg *config.Config, name string) (*config
 	if err != nil {
 		return nil, err
 	}
-
 	if name != "" && !found {
 		return nil, fmt.Errorf("library %q not found", name)
 	}

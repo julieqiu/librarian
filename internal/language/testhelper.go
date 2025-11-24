@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package language provides language implementations for testing the librarian
-// CLI logic, without calling any language-specific implementation or tooling.
 package language
 
 import (
@@ -24,11 +22,32 @@ import (
 	"github.com/googleapis/librarian/internal/config"
 )
 
+// TestReleaseVersion is the version that libraries are always released at
+// when using the testhelper language implementation.
+const TestReleaseVersion = "1.2.3"
+
+func testReleaseAll(cfg *config.Config) (*config.Config, error) {
+	if cfg.Versions == nil {
+		cfg.Versions = make(map[string]string)
+	}
+	for k := range cfg.Versions {
+		cfg.Versions[k] = TestReleaseVersion
+	}
+	return cfg, nil
+}
+
+func testReleaseLibrary(cfg *config.Config, name string) (*config.Config, error) {
+	if cfg.Versions == nil {
+		cfg.Versions = make(map[string]string)
+	}
+	cfg.Versions[name] = TestReleaseVersion
+	return cfg, nil
+}
+
 func testGenerate(library *config.Library) error {
 	if err := os.MkdirAll(library.Output, 0755); err != nil {
 		return err
 	}
-
 	content := fmt.Sprintf("# %s\n\nGenerated library\n", library.Name)
 	readmePath := filepath.Join(library.Output, "README.md")
 	return os.WriteFile(readmePath, []byte(content), 0644)
