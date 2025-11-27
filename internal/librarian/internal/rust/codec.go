@@ -36,6 +36,12 @@ func toSidekickConfig(library *config.Library, serviceConfig, googleapisDir, dis
 	if library.Rust != nil && library.Rust.TitleOverride != "" {
 		source["title-override"] = library.Rust.TitleOverride
 	}
+	if library.Rust != nil && library.Rust.DescriptionOverride != "" {
+		source["description-override"] = library.Rust.DescriptionOverride
+	}
+	if library.Rust != nil && len(library.Rust.SkippedIds) > 0 {
+		source["skipped-ids"] = strings.Join(library.Rust.SkippedIds, ",")
+	}
 	sidekickCfg := &sidekickconfig.Config{
 		General: sidekickconfig.GeneralConfig{
 			Language:            "rust",
@@ -65,6 +71,17 @@ func toSidekickConfig(library *config.Library, serviceConfig, googleapisDir, dis
 					ID:        override.ID,
 					ItemField: override.ItemField,
 				}
+			}
+		}
+		if library.Rust.Discovery != nil {
+			sidekickCfg.Discovery = &sidekickconfig.Discovery{
+				OperationID: library.Rust.Discovery.OperationID,
+			}
+			for _, poller := range library.Rust.Discovery.Pollers {
+				sidekickCfg.Discovery.Pollers = append(sidekickCfg.Discovery.Pollers, &sidekickconfig.Poller{
+					Prefix:   poller.Prefix,
+					MethodID: poller.MethodID,
+				})
 			}
 		}
 	}
@@ -129,6 +146,9 @@ func buildCodec(library *config.Library) map[string]string {
 	if rust.GenerateSetterSamples {
 		codec["generate-setter-samples"] = "true"
 	}
+	if rust.NameOverrides != "" {
+		codec["name-overrides"] = rust.NameOverrides
+	}
 
 	for _, dep := range rust.PackageDependencies {
 		codec["package:"+dep.Name] = formatPackageDependency(dep)
@@ -138,6 +158,9 @@ func buildCodec(library *config.Library) map[string]string {
 
 func formatPackageDependency(dep config.RustPackageDependency) string {
 	var parts []string
+	if dep.Ignore {
+		parts = append(parts, "ignore=true")
+	}
 	if dep.Package != "" {
 		parts = append(parts, "package="+dep.Package)
 	}

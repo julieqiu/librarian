@@ -298,9 +298,9 @@ func TestToSidekickConfig(t *testing.T) {
 		{
 			name: "with discovery format",
 			library: &config.Library{
-				Channel:             "discoveries/compute.v1.json",
 				Name:                "google-cloud-compute-v1",
 				SpecificationFormat: "discovery",
+				SpecificationSource: "discoveries/compute.v1.json",
 			},
 			googleapisDir: "/tmp/googleapis",
 			discoveryDir:  "/tmp/discovery-artifact-manager",

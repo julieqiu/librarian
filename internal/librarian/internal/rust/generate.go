@@ -59,6 +59,13 @@ func Generate(ctx context.Context, library *config.Library, sources *config.Sour
 	if err := command.Run("taplo", "fmt", filepath.Join(library.Output, "Cargo.toml")); err != nil {
 		return err
 	}
+	// Create stub files for extra_modules if they don't exist.
+	// This is needed because rustfmt resolves module declarations and will fail
+	// if the corresponding .rs files don't exist. Extra modules are handwritten
+	// files that may not exist yet in a fresh output directory.
+	if err := createExtraModuleStubs(library.Output, extraModules); err != nil {
+		return err
+	}
 	rsFiles, err := filepath.Glob(filepath.Join(library.Output, "src", "*.rs"))
 	if err != nil {
 		return err
@@ -67,6 +74,22 @@ func Generate(ctx context.Context, library *config.Library, sources *config.Sour
 		args := append([]string{"--edition", "2024"}, rsFiles...)
 		if err := command.Run("rustfmt", args...); err != nil {
 			return err
+		}
+	}
+	return nil
+}
+
+// createExtraModuleStubs creates empty stub files for extra_modules if they don't exist.
+// This allows rustfmt to succeed even when the handwritten module files are missing.
+func createExtraModuleStubs(dir string, extraModules []string) error {
+	srcDir := filepath.Join(dir, "src")
+	for _, mod := range extraModules {
+		modFile := filepath.Join(srcDir, mod+".rs")
+		if _, err := os.Stat(modFile); os.IsNotExist(err) {
+			// Create an empty stub file.
+			if err := os.WriteFile(modFile, []byte("// TODO: implement this module\n"), 0644); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
