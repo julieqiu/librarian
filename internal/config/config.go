@@ -69,7 +69,7 @@ type Source struct {
 
 	// Dir is a local directory path to use instead of fetching.
 	// This is useful for testing. If set, Commit and SHA256 are ignored.
-	Dir string `yaml:"-"`
+	Dir string `yaml:"dir,omitempty"`
 }
 
 // Default contains default generation settings.

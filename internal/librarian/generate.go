@@ -20,9 +20,12 @@ import (
 	"fmt"
 
 	"github.com/googleapis/librarian/internal/config"
+	"github.com/googleapis/librarian/internal/fetch"
 	"github.com/googleapis/librarian/internal/language"
 	"github.com/urfave/cli/v3"
 )
+
+const googleapisRepo = "github.com/googleapis/googleapis"
 
 var (
 	errMissingLibraryOrAllFlag = errors.New("must specify library name or use --all flag")
@@ -70,6 +73,40 @@ func runGenerate(ctx context.Context, all bool, libraryName string) error {
 }
 
 func generateAll(ctx context.Context, cfg *config.Config) error {
+	googleapisDir, err := googleapisDir(cfg.Sources.Googleapis)
+	if err != nil {
+		return err
+	}
+
+	// Populate service configs for existing libraries.
+	for _, lib := range cfg.Libraries {
+		if lib.Channel != "" && lib.ServiceConfig == "" {
+			serviceConfig, err := config.ServiceConfig(googleapisDir, lib.Channel)
+			if err != nil {
+				return err
+			}
+			lib.ServiceConfig = serviceConfig
+		}
+		for _, ch := range lib.Channels {
+			if lib.APIServiceConfigs == nil {
+				lib.APIServiceConfigs = make(map[string]string)
+			}
+			if lib.APIServiceConfigs[ch] == "" {
+				serviceConfig, err := config.ServiceConfig(googleapisDir, ch)
+				if err != nil {
+					return err
+				}
+				lib.APIServiceConfigs[ch] = serviceConfig
+			}
+		}
+	}
+
+	// Discover and add libraries for uncovered channels.
+	if err := cfg.Discover(googleapisDir); err != nil {
+		return err
+	}
+
+	// Generate all libraries.
 	var errs []error
 	for _, lib := range cfg.Libraries {
 		if err := language.Generate(ctx, cfg.Language, lib, cfg.Sources); err != nil {
@@ -93,5 +130,41 @@ func generateLibrary(ctx context.Context, cfg *config.Config, libraryName string
 	if library == nil {
 		return fmt.Errorf("library %q not found", libraryName)
 	}
+
+	googleapisDir, err := googleapisDir(cfg.Sources.Googleapis)
+	if err != nil {
+		return err
+	}
+
+	if library.Channel == "" {
+		library.Channel = deriveChannelPath(library.Name)
+	}
+
+	if library.ServiceConfig == "" {
+		serviceConfig, err := config.ServiceConfig(googleapisDir, library.Channel)
+		if err != nil {
+			return err
+		}
+		library.ServiceConfig = serviceConfig
+	}
+
 	return language.Generate(ctx, cfg.Language, library, cfg.Sources)
+}
+
+// googleapisDir returns the local directory path for the googleapis repository.
+func googleapisDir(source *config.Source) (string, error) {
+	if source == nil {
+		return "", errors.New("googleapis source is required")
+	}
+	if source.Dir != "" {
+		return source.Dir, nil
+	}
+	return fetch.RepoDir(googleapisRepo, source.Commit, source.SHA256)
+}
+
+// deriveChannelPath derives the channel path from a library name.
+// TODO(https://github.com/googleapis/librarian/issues/XXX): implement proper derivation logic.
+func deriveChannelPath(libraryName string) string {
+	// For now, return empty string - libraries should have Channel set in config.
+	return ""
 }
