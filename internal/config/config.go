@@ -169,6 +169,9 @@ type Library struct {
 	// Valid values are "protobuf" (default) or "discovery".
 	SpecificationFormat string `yaml:"specification_format,omitempty"`
 
+	// SpecificationSource is the path to the specification file (for Discovery APIs).
+	SpecificationSource string `yaml:"specification_source,omitempty"`
+
 	// ServiceConfig is the path to the service config file.
 	ServiceConfig string `yaml:"-"`
 
@@ -179,9 +182,16 @@ type Library struct {
 	Version string `yaml:"version,omitempty"`
 }
 
+// isDiscoveryAPI returns true if the library uses the Discovery API format.
+func (lib *Library) isDiscoveryAPI() bool {
+	return lib.SpecificationFormat == "discovery"
+}
+
 // Fill fills empty fields with default values.
 func (lib *Library) Fill(d *Default) {
-	if lib.Channel == "" && lib.Name != "" {
+	// Only derive channel from name for protobuf APIs.
+	// Discovery APIs don't have a googleapis channel path.
+	if lib.Channel == "" && lib.Name != "" && !lib.isDiscoveryAPI() {
 		lib.Channel = strings.ReplaceAll(lib.Name, "-", "/")
 	}
 	if d == nil {

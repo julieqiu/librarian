@@ -26,17 +26,22 @@ func toSidekickConfig(library *config.Library, serviceConfig, googleapisDir, dis
 		"googleapis-root": googleapisDir,
 	}
 	specFormat := "protobuf"
+	specSource := library.Channel
 	if library.SpecificationFormat == "discovery" {
 		specFormat = "disco"
+		specSource = library.SpecificationSource
 		source["discovery-root"] = discoveryDir
 		source["roots"] = "discovery,googleapis"
+	}
+	if library.Rust != nil && library.Rust.TitleOverride != "" {
+		source["title-override"] = library.Rust.TitleOverride
 	}
 	sidekickCfg := &sidekickconfig.Config{
 		General: sidekickconfig.GeneralConfig{
 			Language:            "rust",
 			SpecificationFormat: specFormat,
 			ServiceConfig:       serviceConfig,
-			SpecificationSource: library.Channel,
+			SpecificationSource: specSource,
 		},
 		Source: source,
 		Codec:  buildCodec(library),
