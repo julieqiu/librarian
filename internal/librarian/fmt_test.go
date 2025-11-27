@@ -110,8 +110,8 @@ func TestValidateLibrary(t *testing.T) {
 			},
 		},
 		{
-			name: "invalid name derivation",
-			lib:  &config.Library{Name: "my-custom-library"},
+			name:    "invalid name derivation",
+			lib:     &config.Library{Name: "my-custom-library"},
 			wantErr: `library "my-custom-library": name cannot be derived into a valid channel`,
 		},
 		{

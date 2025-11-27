@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/googleapis/librarian/internal/config"
+	configcli "github.com/googleapis/librarian/internal/config/cli"
 	"github.com/urfave/cli/v3"
 )
 
@@ -42,12 +43,14 @@ func fmtCommand() *cli.Command {
 			if write && path == "" {
 				return errors.New("path required when using -w flag (use '.' for current directory)")
 			}
-			return runFmt(write, path)
+			return RunFmt(write, path)
 		},
 	}
 }
 
-func runFmt(write bool, path string) error {
+// RunFmt formats and validates a librarian.yaml file.
+// If write is true, the formatted config is written back to the file.
+func RunFmt(write bool, path string) error {
 	// Determine the config file path.
 	configPath := librarianConfigPath
 	if path != "" && path != "." {
@@ -207,11 +210,87 @@ func formatConfig(cfg *config.Config) {
 		return strings.Compare(a.Name, b.Name)
 	})
 
+	// Remove redundant fields that can be derived from other fields.
+	removeRedundantFields(cfg.Libraries)
+
+	// Remove default libraries (no overrides, will be filled in by config.Fill).
+	cfg.Libraries = removeDefaultLibraries(cfg.Libraries)
+
 	// Remove duplicate ignored patterns.
 	cfg.Ignored = removeDuplicateStrings(cfg.Ignored)
 
 	// Sort ignored patterns.
 	slices.Sort(cfg.Ignored)
+}
+
+// removeRedundantFields clears fields that can be derived from other fields:
+// - channel: cleared if it matches what would be derived from name
+// - output: cleared if it matches what would be derived from channel
+// - service_config: cleared if it's in the channel directory (can be discovered at runtime)
+func removeRedundantFields(libs []*config.Library) {
+	for _, lib := range libs {
+		if isDiscoveryAPI(lib) {
+			continue
+		}
+
+		// Get the channel that would be derived from name.
+		derivedChannel := ""
+		if lib.Name != "" {
+			derivedChannel = strings.ReplaceAll(lib.Name, "-", "/")
+		}
+
+		// Remove channel if it matches what would be derived from name.
+		if lib.Channel != "" && lib.Channel == derivedChannel {
+			lib.Channel = ""
+		}
+
+		// Get the effective channel for output and service_config checks.
+		channel := lib.Channel
+		if channel == "" {
+			channel = derivedChannel
+		}
+		if channel == "" {
+			continue
+		}
+
+		// Remove output if it matches what would be derived from channel.
+		// Output is derived as: "src/generated" + channel (without "google/" prefix)
+		if lib.Output != "" {
+			derivedOutput := "src/generated/" + strings.TrimPrefix(channel, "google/")
+			if lib.Output == derivedOutput {
+				lib.Output = ""
+			}
+		}
+
+		// Remove service_config if it can be auto-discovered or is in the hardcoded map.
+		if lib.ServiceConfig != "" {
+			// Check if it's in the hardcoded map.
+			if configcli.ServiceConfigs[channel] == lib.ServiceConfig {
+				lib.ServiceConfig = ""
+			} else {
+				// Check if it's in the channel directory (auto-discoverable).
+				lastSlash := strings.LastIndex(lib.ServiceConfig, "/")
+				if lastSlash != -1 {
+					serviceConfigDir := lib.ServiceConfig[:lastSlash]
+					if serviceConfigDir == channel {
+						lib.ServiceConfig = ""
+					}
+				}
+			}
+		}
+	}
+}
+
+// removeDefaultLibraries removes libraries that have no overrides.
+// These are default libraries that will be filled in by config.Fill.
+func removeDefaultLibraries(libs []*config.Library) []*config.Library {
+	result := make([]*config.Library, 0, len(libs))
+	for _, lib := range libs {
+		if !isDefaultLibrary(lib) {
+			result = append(result, lib)
+		}
+	}
+	return result
 }
 
 // removeDuplicateLibraries removes duplicate libraries by name, keeping the first occurrence.
@@ -245,4 +324,29 @@ func removeDuplicateStrings(strs []string) []string {
 // isDiscoveryAPI checks if a library uses the Discovery API format.
 func isDiscoveryAPI(lib *config.Library) bool {
 	return lib.SpecificationFormat == "discovery"
+}
+
+// isDefaultLibrary returns true if the library has only a name field and no other
+// meaningful configuration. Such libraries will be filled in by config.Fill
+// and don't need explicit entries in librarian.yaml.
+func isDefaultLibrary(lib *config.Library) bool {
+	if lib.Name == "" {
+		return false
+	}
+	// Check if any field other than Name is set.
+	return lib.Channel == "" &&
+		len(lib.Channels) == 0 &&
+		lib.Output == "" &&
+		lib.SpecificationFormat == "" &&
+		lib.SpecificationSource == "" &&
+		lib.Version == "" &&
+		lib.CopyrightYear == "" &&
+		lib.ReleaseLevel == "" &&
+		lib.Transport == "" &&
+		lib.Generate == nil &&
+		lib.Release == nil &&
+		lib.Publish == nil &&
+		lib.Rust == nil &&
+		len(lib.Keep) == 0 &&
+		lib.ServiceConfig == ""
 }
