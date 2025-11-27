@@ -33,7 +33,11 @@ const (
 
 // Generate generates a Rust client library.
 func Generate(ctx context.Context, library *config.Library, sources *config.Sources) error {
-	if err := cleanOutput(library.Output); err != nil {
+	var extraModules []string
+	if library.Rust != nil {
+		extraModules = library.Rust.ExtraModules
+	}
+	if err := cleanOutput(library.Output, extraModules); err != nil {
 		return err
 	}
 	googleapisDir, err := sourceDir(sources.Googleapis, googleapisRepo)
@@ -68,8 +72,9 @@ func Generate(ctx context.Context, library *config.Library, sources *config.Sour
 	return nil
 }
 
-// cleanOutput removes all files and directories in the output directory except Cargo.toml.
-func cleanOutput(dir string) error {
+// cleanOutput removes all files and directories in the output directory except
+// Cargo.toml and files corresponding to extraModules (e.g., "errors" -> "src/errors.rs").
+func cleanOutput(dir string, extraModules []string) error {
 	entries, err := os.ReadDir(dir)
 	if os.IsNotExist(err) {
 		return nil
@@ -77,11 +82,42 @@ func cleanOutput(dir string) error {
 	if err != nil {
 		return err
 	}
+
+	// Build a set of extra module filenames to keep.
+	keepFiles := make(map[string]bool)
+	for _, mod := range extraModules {
+		keepFiles[mod+".rs"] = true
+	}
+
 	for _, entry := range entries {
 		if entry.Name() == "Cargo.toml" {
 			continue
 		}
+		// Keep the src directory but clean its contents selectively.
+		if entry.Name() == "src" && entry.IsDir() {
+			if err := cleanSrcDir(filepath.Join(dir, "src"), keepFiles); err != nil {
+				return err
+			}
+			continue
+		}
 		if err := os.RemoveAll(filepath.Join(dir, entry.Name())); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// cleanSrcDir removes all files in the src directory except those in keepFiles.
+func cleanSrcDir(srcDir string, keepFiles map[string]bool) error {
+	entries, err := os.ReadDir(srcDir)
+	if err != nil {
+		return err
+	}
+	for _, entry := range entries {
+		if keepFiles[entry.Name()] {
+			continue
+		}
+		if err := os.RemoveAll(filepath.Join(srcDir, entry.Name())); err != nil {
 			return err
 		}
 	}
