@@ -12,53 +12,43 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package language
+package librarian
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/librarian/internal/config"
 )
 
-func TestReleaseAll(t *testing.T) {
-	cfg := &config.Config{
-		Language: "testhelper",
-		Versions: map[string]string{
-			"lib1": "0.1.0",
-			"lib2": "0.2.0",
-		},
-	}
-	cfg, err := ReleaseAll(cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-	want := map[string]string{
-		"lib1": TestReleaseVersion,
-		"lib2": TestReleaseVersion,
-	}
-	if diff := cmp.Diff(want, cfg.Versions); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-}
+func TestGenerate(t *testing.T) {
+	const (
+		libraryName = "test-library"
+		outputDir   = "output"
+	)
 
-func TestReleaseLibrary(t *testing.T) {
-	cfg := &config.Config{
-		Language: "testhelper",
-		Versions: map[string]string{
-			"lib1": "0.1.0",
-			"lib2": "0.2.0",
-		},
+	tempDir := t.TempDir()
+	t.Chdir(tempDir)
+
+	library := &config.Library{
+		Name:   libraryName,
+		Output: outputDir,
 	}
-	cfg, err := ReleaseLibrary(cfg, "lib1")
+
+	if err := generate(t.Context(), "testhelper", library, nil); err != nil {
+		t.Fatal(err)
+	}
+
+	readmePath := filepath.Join(outputDir, "README.md")
+	content, err := os.ReadFile(readmePath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := map[string]string{
-		"lib1": TestReleaseVersion,
-		"lib2": "0.2.0",
-	}
-	if diff := cmp.Diff(want, cfg.Versions); diff != "" {
+
+	want := "# test-library\n\nGenerated library\n"
+	if diff := cmp.Diff(want, string(content)); diff != "" {
 		t.Errorf("mismatch (-want +got):\n%s", diff)
 	}
 }

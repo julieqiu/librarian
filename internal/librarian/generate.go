@@ -21,7 +21,7 @@ import (
 
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/fetch"
-	"github.com/googleapis/librarian/internal/language"
+	"github.com/googleapis/librarian/internal/librarian/internal/rust"
 	"github.com/urfave/cli/v3"
 )
 
@@ -109,7 +109,7 @@ func generateAll(ctx context.Context, cfg *config.Config) error {
 	// Generate all libraries.
 	var errs []error
 	for _, lib := range cfg.Libraries {
-		if err := language.Generate(ctx, cfg.Language, lib, cfg.Sources); err != nil {
+		if err := generate(ctx, cfg.Language, lib, cfg.Sources); err != nil {
 			errs = append(errs, err)
 		}
 	}
@@ -148,7 +148,26 @@ func generateLibrary(ctx context.Context, cfg *config.Config, libraryName string
 		library.ServiceConfig = serviceConfig
 	}
 
-	return language.Generate(ctx, cfg.Language, library, cfg.Sources)
+	return generate(ctx, cfg.Language, library, cfg.Sources)
+}
+
+func generate(ctx context.Context, language string, library *config.Library, sources *config.Sources) error {
+	var err error
+	switch language {
+	case "testhelper":
+		err = testGenerate(library)
+	case "rust":
+		err = rust.Generate(ctx, library, sources)
+	default:
+		err = fmt.Errorf("generate not implemented for %q", language)
+	}
+
+	if err != nil {
+		fmt.Printf("✗ Error generating %s: %v\n", library.Name, err)
+		return err
+	}
+	fmt.Printf("✓ Successfully generated %s\n", library.Name)
+	return nil
 }
 
 // googleapisDir returns the local directory path for the googleapis repository.

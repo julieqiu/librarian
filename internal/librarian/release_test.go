@@ -23,7 +23,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/librarian/internal/config"
-	"github.com/googleapis/librarian/internal/language"
 )
 
 func TestReleaseCommand(t *testing.T) {
@@ -49,14 +48,14 @@ func TestReleaseCommand(t *testing.T) {
 			name: "library name",
 			args: []string{"librarian", "release", testlib},
 			wantVersions: map[string]string{
-				testlib: language.TestReleaseVersion,
+				testlib: testReleaseVersion,
 			},
 		},
 		{
 			name: "all flag",
 			args: []string{"librarian", "release", "--all"},
 			wantVersions: map[string]string{
-				testlib: language.TestReleaseVersion,
+				testlib: testReleaseVersion,
 			},
 		},
 	} {
@@ -91,5 +90,47 @@ versions:
 				}
 			}
 		})
+	}
+}
+
+func TestReleaseAll(t *testing.T) {
+	cfg := &config.Config{
+		Language: "testhelper",
+		Versions: map[string]string{
+			"lib1": "0.1.0",
+			"lib2": "0.2.0",
+		},
+	}
+	cfg, err := releaseAll(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]string{
+		"lib1": testReleaseVersion,
+		"lib2": testReleaseVersion,
+	}
+	if diff := cmp.Diff(want, cfg.Versions); diff != "" {
+		t.Errorf("mismatch (-want +got):\n%s", diff)
+	}
+}
+
+func TestReleaseLibrary(t *testing.T) {
+	cfg := &config.Config{
+		Language: "testhelper",
+		Versions: map[string]string{
+			"lib1": "0.1.0",
+			"lib2": "0.2.0",
+		},
+	}
+	cfg, err := releaseLibrary(cfg, "lib1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]string{
+		"lib1": testReleaseVersion,
+		"lib2": "0.2.0",
+	}
+	if diff := cmp.Diff(want, cfg.Versions); diff != "" {
+		t.Errorf("mismatch (-want +got):\n%s", diff)
 	}
 }

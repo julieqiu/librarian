@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package language
+package librarian
 
 import (
 	"fmt"
@@ -22,16 +22,16 @@ import (
 	"github.com/googleapis/librarian/internal/config"
 )
 
-// TestReleaseVersion is the version that libraries are always released at
-// when using the testhelper language implementation.
-const TestReleaseVersion = "1.2.3"
+// testReleaseVersion is the version that libraries are always released at when
+// using the testhelper language implementation.
+const testReleaseVersion = "1.2.3"
 
 func testReleaseAll(cfg *config.Config) (*config.Config, error) {
 	if cfg.Versions == nil {
 		cfg.Versions = make(map[string]string)
 	}
 	for k := range cfg.Versions {
-		cfg.Versions[k] = TestReleaseVersion
+		cfg.Versions[k] = testReleaseVersion
 	}
 	return cfg, nil
 }
@@ -40,7 +40,7 @@ func testReleaseLibrary(cfg *config.Config, name string) (*config.Config, error)
 	if cfg.Versions == nil {
 		cfg.Versions = make(map[string]string)
 	}
-	cfg.Versions[name] = TestReleaseVersion
+	cfg.Versions[name] = testReleaseVersion
 	return cfg, nil
 }
 
