@@ -43,10 +43,13 @@ func Generate(ctx context.Context, library *config.Library, sources *config.Sour
 	if err := cleanOutput(library.Output, extraModules); err != nil {
 		return err
 	}
-	// Read copyright year from existing Cargo.toml if not set in config.
-	// This avoids storing the year in librarian.yaml while preserving existing years.
+	// Read copyright year and version from existing Cargo.toml if not set in config.
+	// This avoids storing these values in librarian.yaml while preserving existing ones.
 	if library.CopyrightYear == "" {
 		library.CopyrightYear = readCopyrightYear(library.Output)
+	}
+	if library.Version == "" {
+		library.Version = readVersion(library.Output)
 	}
 	googleapisDir, err := sourceDir(sources.Googleapis, googleapisRepo)
 	if err != nil {
@@ -190,4 +193,26 @@ func readCopyrightYear(dir string) string {
 
 func currentYear() string {
 	return time.Now().Format("2006")
+}
+
+// versionRegex matches 'version = "X.Y.Z"' in Cargo.toml.
+var versionRegex = regexp.MustCompile(`^version\s*=\s*"([^"]+)"`)
+
+// readVersion reads the version from an existing Cargo.toml.
+// Returns the version as a string, or empty string if not found.
+func readVersion(dir string) string {
+	cargoPath := filepath.Join(dir, "Cargo.toml")
+	f, err := os.Open(cargoPath)
+	if err != nil {
+		return ""
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		if matches := versionRegex.FindStringSubmatch(scanner.Text()); len(matches) == 2 {
+			return matches[1]
+		}
+	}
+	return ""
 }
