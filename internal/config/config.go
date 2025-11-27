@@ -138,7 +138,7 @@ type API struct {
 	Format string `yaml:"format,omitempty"`
 }
 
-// Read reads a [Config] from the file at path.
+// Read reads the configuration from a file.
 func Read(path string) (*Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -168,4 +168,49 @@ func (c *Config) Write(path string) error {
 		return fmt.Errorf("failed to close encoder: %w", err)
 	}
 	return nil
+}
+
+// Fill populates empty library fields from the provided defaults.
+func (lib *Library) Fill(d *Default) {
+	if d == nil {
+		return
+	}
+	if lib.Output == "" {
+		lib.Output = d.Output
+	}
+	if lib.ReleaseLevel == "" {
+		lib.ReleaseLevel = d.ReleaseLevel
+	}
+	if d.Rust == nil {
+		return
+	}
+	if lib.Rust == nil {
+		lib.Rust = &RustCrate{}
+	}
+	lib.Rust.PackageDependencies = mergePackageDependencies(
+		d.Rust.PackageDependencies,
+		lib.Rust.PackageDependencies,
+	)
+	if len(lib.Rust.DisabledRustdocWarnings) == 0 {
+		lib.Rust.DisabledRustdocWarnings = d.Rust.DisabledRustdocWarnings
+	}
+}
+
+// mergePackageDependencies merges default and library package dependencies,
+// with library dependencies taking precedence for duplicates.
+func mergePackageDependencies(defaults, lib []*RustPackageDependency) []*RustPackageDependency {
+	seen := make(map[string]bool)
+	var result []*RustPackageDependency
+	for _, dep := range lib {
+		seen[dep.Name] = true
+		result = append(result, dep)
+	}
+	for _, dep := range defaults {
+		if seen[dep.Name] {
+			continue
+		}
+		copied := *dep
+		result = append(result, &copied)
+	}
+	return result
 }
