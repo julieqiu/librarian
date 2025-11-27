@@ -107,17 +107,13 @@ func generateAll(ctx context.Context, cfg *config.Config) error {
 		}
 	}
 
-	var errs []error
 	for _, lib := range cfg.Libraries {
 		if lib.Generate != nil && lib.Generate.Disabled {
 			continue
 		}
 		if err := generate(ctx, cfg.Language, lib, cfg.Sources); err != nil {
-			errs = append(errs, err)
+			return err
 		}
-	}
-	if len(errs) > 0 {
-		return errors.Join(errs...)
 	}
 	return nil
 }
