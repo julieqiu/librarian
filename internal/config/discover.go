@@ -69,11 +69,16 @@ func hasProtoFiles(dir string) bool {
 }
 
 // ServiceConfig finds the service config file for a channel path.
-// It looks for YAML files containing "type: google.api.Service", skipping
-// any files ending in _gapic.yaml.
+// It first checks the hardcoded map for exceptional cases, then scans
+// the channel directory for YAML files containing "type: google.api.Service".
 // The channelPath should be relative to googleapisDir (e.g., "google/cloud/secretmanager/v1").
 // Returns the service config path relative to googleapisDir, or empty string if not found.
 func ServiceConfig(googleapisDir, channelPath string) (string, error) {
+	// Check hardcoded map first for exceptional cases.
+	if sc, ok := cli.ServiceConfigs[channelPath]; ok {
+		return sc, nil
+	}
+
 	dir := filepath.Join(googleapisDir, channelPath)
 	entries, err := os.ReadDir(dir)
 	if err != nil {
