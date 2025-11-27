@@ -129,8 +129,13 @@ func (cfg *Config) Discover(googleapisDir string) error {
 
 	covered := make(map[string]bool)
 	for _, lib := range cfg.Libraries {
-		if lib.Channel != "" {
-			covered[lib.Channel] = true
+		channel := lib.Channel
+		if channel == "" && lib.Name != "" {
+			// Derive channel from name: google-cloud-foo-v1 -> google/cloud/foo/v1
+			channel = strings.ReplaceAll(lib.Name, "-", "/")
+		}
+		if channel != "" {
+			covered[channel] = true
 		}
 		for _, ch := range lib.Channels {
 			covered[ch] = true
