@@ -20,6 +20,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/googleapis/librarian/internal/config/cli"
 )
 
 // channels scans the googleapis directory and returns all API channel paths.
@@ -146,6 +148,9 @@ func (cfg *Config) Discover(googleapisDir string) error {
 		if covered[channelPath] {
 			continue
 		}
+		if isIgnored(channelPath, cfg.Language) {
+			continue
+		}
 		serviceConfig, err := ServiceConfig(googleapisDir, channelPath)
 		if err != nil {
 			return err
@@ -156,4 +161,26 @@ func (cfg *Config) Discover(googleapisDir string) error {
 		})
 	}
 	return nil
+}
+
+// isIgnored returns true if channelPath starts with any excluded API prefix.
+// It checks both the universal exclusions (cli.ExcludedAPIs.All) and
+// language-specific exclusions based on the language parameter.
+func isIgnored(channelPath, language string) bool {
+	for _, prefix := range cli.ExcludedAPIs.All {
+		if strings.HasPrefix(channelPath, prefix) {
+			return true
+		}
+	}
+	var langExcluded []string
+	switch language {
+	case "rust":
+		langExcluded = cli.ExcludedAPIs.Rust
+	}
+	for _, prefix := range langExcluded {
+		if strings.HasPrefix(channelPath, prefix) {
+			return true
+		}
+	}
+	return false
 }

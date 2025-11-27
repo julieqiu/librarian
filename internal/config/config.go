@@ -49,6 +49,10 @@ type Config struct {
 	// This is the source of truth for release versions.
 	// Key is library name, value is version string.
 	Versions map[string]string `yaml:"versions,omitempty"`
+
+	// Ignored is a list of channel prefixes to skip during auto-discovery.
+	// Any channel starting with one of these prefixes will not be generated.
+	Ignored []string `yaml:"ignored,omitempty"`
 }
 
 // Sources contains references to external source repositories.
