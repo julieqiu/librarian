@@ -203,8 +203,13 @@ func (lib *Library) Fill(d *Default) {
 		// e.g., "src/generated/" + "google/cloud/shell/v1" -> "src/generated/cloud/shell/v1"
 		lib.Output = filepath.Join(d.Output, strings.TrimPrefix(lib.Channel, "google/"))
 	}
-	if lib.ReleaseLevel == "" && d.Generate != nil {
-		lib.ReleaseLevel = d.Generate.ReleaseLevel
+	if d.Generate != nil {
+		if lib.ReleaseLevel == "" {
+			lib.ReleaseLevel = d.Generate.ReleaseLevel
+		}
+		if lib.Transport == "" {
+			lib.Transport = d.Generate.Transport
+		}
 	}
 	if d.Rust != nil {
 		if lib.Rust == nil {
