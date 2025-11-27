@@ -163,22 +163,36 @@ func (cfg *Config) Discover(googleapisDir string) error {
 	return nil
 }
 
-// isIgnored returns true if channelPath starts with any excluded API prefix.
-// It checks both the universal exclusions (cli.ExcludedAPIs.All) and
-// language-specific exclusions based on the language parameter.
+// isIgnored returns true if channelPath matches any excluded API.
+// It checks prefix matches from cli.ExcludedAPIs and exact matches from cli.ExactExcludedAPIs.
+// Both universal exclusions and language-specific exclusions are checked.
 func isIgnored(channelPath, language string) bool {
+	// Check prefix matches
 	for _, prefix := range cli.ExcludedAPIs.All {
 		if strings.HasPrefix(channelPath, prefix) {
 			return true
 		}
 	}
+	// Check exact matches
+	for _, exact := range cli.ExactExcludedAPIs.All {
+		if channelPath == exact {
+			return true
+		}
+	}
 	var langExcluded []string
+	var langExactExcluded []string
 	switch language {
 	case "rust":
 		langExcluded = cli.ExcludedAPIs.Rust
+		langExactExcluded = cli.ExactExcludedAPIs.Rust
 	}
 	for _, prefix := range langExcluded {
 		if strings.HasPrefix(channelPath, prefix) {
+			return true
+		}
+	}
+	for _, exact := range langExactExcluded {
+		if channelPath == exact {
 			return true
 		}
 	}

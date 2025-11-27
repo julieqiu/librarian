@@ -17,6 +17,7 @@ package cli
 // ExcludedAPIs lists API paths that should not be generated.
 // The "All" list applies to all languages; language-specific lists
 // contain additional exclusions for that language only.
+// Paths are matched as prefixes (e.g., "google/cloud/foo" matches "google/cloud/foo/v1").
 var ExcludedAPIs = struct {
 	All  []string
 	Rust []string
@@ -27,7 +28,18 @@ var ExcludedAPIs = struct {
 		"google/assistant", // Google Assistant
 		"google/chromeos",  // ChromeOS
 
+		// Internal/Infrastructure APIs
+		"gapic",             // GAPIC metadata (internal)
+		"google/bytestream", // ByteStream API (internal)
+		"google/gapic",      // GAPIC metadata (internal)
+
+		// Nested types that shouldn't be separate libraries
+		"google/compute/logging",
+		"google/iam/v1/logging",
+		"google/iam/v2/logging",
+
 		// AI & Machine Learning (beta/alpha versions and specialized APIs)
+		"google/cloud/aiplatform/logging", // Logging types only
 		"google/cloud/aiplatform/v1beta1",
 
 		// API Infrastructure (internal/specialized)
@@ -40,6 +52,7 @@ var ExcludedAPIs = struct {
 
 		// Beta/Alpha versions and specialized Cloud services
 		"google/cloud/abuseevent",
+		"google/cloud/audit", // Audit logging types only
 		"google/cloud/asset/v1p7beta1",
 		"google/cloud/assuredworkloads/regulatoryintercept",
 		"google/cloud/backupdr/logging",
@@ -49,10 +62,13 @@ var ExcludedAPIs = struct {
 		"google/cloud/clouddms/logging",
 		"google/cloud/cloudsetup",
 		"google/cloud/confidentialcomputing/v1alpha1",
+		"google/cloud/databasecenter",  // Internal database center
 		"google/cloud/dataform/logging",
 		"google/cloud/datafusion/v1beta1",
 		"google/cloud/datapipelines",
+		"google/cloud/dataproc/logging", // Logging types only
 		"google/cloud/datastream/logging",
+		"google/cloud/discoveryengine/logging", // Logging types only
 		"google/cloud/domains/v1alpha2",
 		"google/cloud/eventarc/logging",
 		"google/cloud/filer",
@@ -65,12 +81,14 @@ var ExcludedAPIs = struct {
 		"google/cloud/gkehub/v1alpha",
 		"google/cloud/gkehub/v1beta",
 		"google/cloud/gsuiteaddons/logging",
+		"google/cloud/healthcare", // Healthcare API (specialized)
 		"google/cloud/iap/v1beta1",
 		"google/cloud/identitytoolkit",
 		"google/cloud/ids/logging",
 		"google/cloud/integrations",
 		"google/cloud/iot",
 		"google/cloud/kms/logging",
+		"google/cloud/kubernetes", // Kubernetes types (internal)
 		"google/cloud/language/v1beta1",
 		"google/cloud/managedidentities/v1beta1",
 		"google/cloud/metastore/logging",
@@ -79,6 +97,7 @@ var ExcludedAPIs = struct {
 		"google/cloud/networkservices/v1beta1",
 		"google/cloud/notebooks/logging",
 		"google/cloud/osconfig/agentendpoint",
+		"google/cloud/osconfig/logging", // Logging types only
 		"google/cloud/osconfig/v1beta",
 		"google/cloud/oslogin/v1alpha",
 		"google/cloud/oslogin/v1beta",
@@ -88,6 +107,7 @@ var ExcludedAPIs = struct {
 		"google/cloud/recaptchaenterprise/v1beta1",
 		"google/cloud/recommender/logging/v1beta1",
 		"google/cloud/resourcemanager/v2",
+		"google/cloud/retail/logging", // Logging types only
 		"google/cloud/runtimeconfig",
 		"google/cloud/saasaccelerator",
 		"google/cloud/secretmanager/logging",
@@ -100,6 +120,7 @@ var ExcludedAPIs = struct {
 		"google/cloud/universalledger",
 		"google/cloud/vectorsearch",
 		"google/cloud/video/livestream/logging",
+		"google/cloud/workflows/type", // Workflow types (internal)
 		"google/cloud/workstations/logging",
 
 		// Other Google APIs (non-cloud)
@@ -119,6 +140,7 @@ var ExcludedAPIs = struct {
 		"google/firebase",
 		"google/firestore/admin/v1beta1",
 		"google/firestore/admin/v1beta2",
+		"google/firestore/bundle", // Bundle format types (internal)
 		"google/firestore/v1",
 		"google/firestore/v1beta1",
 		"google/genomics",
@@ -286,4 +308,16 @@ var ExcludedAPIs = struct {
 		"google/shopping",
 		"google/storage",
 	},
+}
+
+// ExactExcludedAPIs lists API paths that should be excluded only when they match exactly.
+// Unlike ExcludedAPIs, these are not prefix matches - the channel path must match exactly.
+var ExactExcludedAPIs = struct {
+	All  []string
+	Rust []string
+}{
+	All: []string{
+		"google/cloud", // Root cloud directory (common_resources.proto, extended_operations.proto)
+	},
+	Rust: []string{},
 }
