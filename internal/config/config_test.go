@@ -22,6 +22,66 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func TestFill(t *testing.T) {
+	defaults := &Default{
+		Output: "src/generated/",
+		Generate: &DefaultGenerate{
+			ReleaseLevel: "stable",
+		},
+	}
+
+	for _, test := range []struct {
+		name string
+		lib  *Library
+		want *Library
+	}{
+		{
+			name: "fills empty fields",
+			lib:  &Library{},
+			want: &Library{
+				Output:       "src/generated/",
+				ReleaseLevel: "stable",
+			},
+		},
+		{
+			name: "preserves existing values",
+			lib: &Library{
+				Output:       "custom/output/",
+				ReleaseLevel: "preview",
+			},
+			want: &Library{
+				Output:       "custom/output/",
+				ReleaseLevel: "preview",
+			},
+		},
+		{
+			name: "partial fill",
+			lib: &Library{
+				Output: "custom/output/",
+			},
+			want: &Library{
+				Output:       "custom/output/",
+				ReleaseLevel: "stable",
+			},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			test.lib.Fill(defaults)
+			if diff := cmp.Diff(test.want, test.lib); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestFill_NoDefault(t *testing.T) {
+	lib := &Library{Output: "foo/"}
+	lib.Fill(nil)
+	if lib.Output != "foo/" {
+		t.Errorf("got %q, want %q", lib.Output, "foo/")
+	}
+}
+
 func TestReadWrite(t *testing.T) {
 	cfg, err := Read("testdata/rust/librarian.yaml")
 	if err != nil {

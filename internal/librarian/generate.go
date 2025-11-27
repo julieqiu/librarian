@@ -78,7 +78,6 @@ func generateAll(ctx context.Context, cfg *config.Config) error {
 		return err
 	}
 
-	// Populate service configs for existing libraries.
 	for _, lib := range cfg.Libraries {
 		if lib.Channel != "" && lib.ServiceConfig == "" {
 			serviceConfig, err := config.ServiceConfig(googleapisDir, lib.Channel)
@@ -100,13 +99,13 @@ func generateAll(ctx context.Context, cfg *config.Config) error {
 			}
 		}
 	}
-
-	// Discover and add libraries for uncovered channels.
 	if err := cfg.Discover(googleapisDir); err != nil {
 		return err
 	}
+	for _, lib := range cfg.Libraries {
+		lib.Fill(cfg.Default)
+	}
 
-	// Generate all libraries.
 	var errs []error
 	for _, lib := range cfg.Libraries {
 		if err := language.Generate(ctx, cfg.Language, lib, cfg.Sources); err != nil {
@@ -148,6 +147,7 @@ func generateLibrary(ctx context.Context, cfg *config.Config, libraryName string
 		library.ServiceConfig = serviceConfig
 	}
 
+	library.Fill(cfg.Default)
 	return language.Generate(ctx, cfg.Language, library, cfg.Sources)
 }
 

@@ -177,6 +177,19 @@ type Library struct {
 	Version string `yaml:"version,omitempty"`
 }
 
+// Fill fills empty fields with default values.
+func (lib *Library) Fill(d *Default) {
+	if d == nil {
+		return
+	}
+	if lib.Output == "" {
+		lib.Output = d.Output
+	}
+	if lib.ReleaseLevel == "" && d.Generate != nil {
+		lib.ReleaseLevel = d.Generate.ReleaseLevel
+	}
+}
+
 // LibraryGenerate contains per-library generate configuration.
 type LibraryGenerate struct {
 	// Disabled prevents library generation.
