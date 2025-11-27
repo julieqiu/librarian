@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -122,11 +123,10 @@ type DefaultRelease struct {
 }
 
 // Library represents a single library configuration entry.
+// Field order determines YAML serialization order.
 type Library struct {
-	// APIServiceConfigs maps API paths to their service config file paths (runtime only, not serialized).
-	// For single-API libraries: map[API]serviceConfigPath
-	// For multi-API libraries: map[APIs[0]]path1, map[APIs[1]]path2, etc.
-	APIServiceConfigs map[string]string `yaml:"-"`
+	// Name is the library name (e.g., "secretmanager", "storage").
+	Name string `yaml:"name,omitempty"`
 
 	// Channel specifies which googleapis Channel to generate from (for generated libraries).
 	// Can be a string (protobuf Channel path) or an APIObject (for discovery APIs).
@@ -137,34 +137,10 @@ type Library struct {
 	// Alternative to API field for libraries that bundle multiple versions.
 	Channels []string `yaml:"channels,omitempty"`
 
-	// CopyrightYear is the copyright year for the library.
-	CopyrightYear string `yaml:"copyright_year,omitempty"`
-
-	// Generate contains per-library generate configuration.
-	Generate *LibraryGenerate `yaml:"generate,omitempty"`
-
-	// Keep lists files/directories to preserve during regeneration.
-	Keep []string `yaml:"keep,omitempty"`
-
-	// Name is the library name (e.g., "secretmanager", "storage").
-	Name string `yaml:"name,omitempty"`
-
 	// Output specifies the filesystem location (overrides computed location from defaults.output).
 	// For generated libraries: overrides where code is generated to.
 	// For handwritten libraries: specifies the source directory.
 	Output string `yaml:"output,omitempty"`
-
-	// Publish contains per-library publish configuration.
-	Publish *LibraryPublish `yaml:"publish,omitempty"`
-
-	// Release contains per-library release configuration.
-	Release *LibraryRelease `yaml:"release,omitempty"`
-
-	// ReleaseLevel overrides the default release level.
-	ReleaseLevel string `yaml:"release_level,omitempty"`
-
-	// Rust contains Rust-specific library configuration.
-	Rust *RustCrate `yaml:"rust,omitempty"`
 
 	// SpecificationFormat specifies the API specification format.
 	// Valid values are "protobuf" (default) or "discovery".
@@ -173,14 +149,41 @@ type Library struct {
 	// SpecificationSource is the path to the specification file (for Discovery APIs).
 	SpecificationSource string `yaml:"specification_source,omitempty"`
 
-	// ServiceConfig is the path to the service config file.
-	ServiceConfig string `yaml:"-"`
+	// Version is the library version.
+	Version string `yaml:"version,omitempty"`
+
+	// CopyrightYear is the copyright year for the library.
+	CopyrightYear string `yaml:"copyright_year,omitempty"`
+
+	// ReleaseLevel overrides the default release level.
+	ReleaseLevel string `yaml:"release_level,omitempty"`
 
 	// Transport overrides the default transport.
 	Transport string `yaml:"transport,omitempty"`
 
-	// Version is the library version.
-	Version string `yaml:"version,omitempty"`
+	// Generate contains per-library generate configuration.
+	Generate *LibraryGenerate `yaml:"generate,omitempty"`
+
+	// Release contains per-library release configuration.
+	Release *LibraryRelease `yaml:"release,omitempty"`
+
+	// Publish contains per-library publish configuration.
+	Publish *LibraryPublish `yaml:"publish,omitempty"`
+
+	// Rust contains Rust-specific library configuration.
+	Rust *RustCrate `yaml:"rust,omitempty"`
+
+	// Keep lists files/directories to preserve during regeneration.
+	Keep []string `yaml:"keep,omitempty"`
+
+	// APIServiceConfigs maps API paths to their service config file paths (runtime only, not serialized).
+	// For single-API libraries: map[API]serviceConfigPath
+	// For multi-API libraries: map[APIs[0]]path1, map[APIs[1]]path2, etc.
+	APIServiceConfigs map[string]string `yaml:"-"`
+
+	// ServiceConfig is the path to the service config file.
+	// If empty, it will be discovered from the channel directory.
+	ServiceConfig string `yaml:"service_config,omitempty"`
 }
 
 // isDiscoveryAPI returns true if the library uses the Discovery API format.
@@ -258,6 +261,20 @@ func Read(path string) (*Config, error) {
 
 // Write writes the configuration to a file.
 func (c *Config) Write(path string) error {
+	// Sort package dependencies by name before writing.
+	if c.Default != nil && c.Default.Rust != nil {
+		slices.SortFunc(c.Default.Rust.PackageDependencies, func(a, b *RustPackageDependency) int {
+			return strings.Compare(a.Name, b.Name)
+		})
+	}
+	for _, lib := range c.Libraries {
+		if lib.Rust != nil {
+			slices.SortFunc(lib.Rust.PackageDependencies, func(a, b RustPackageDependency) int {
+				return strings.Compare(a.Name, b.Name)
+			})
+		}
+	}
+
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to open config file: %w", err)

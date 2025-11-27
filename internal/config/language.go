@@ -21,6 +21,9 @@ type RustDefault struct {
 
 	// DisabledRustdocWarnings is a list of rustdoc warnings to disable.
 	DisabledRustdocWarnings []string `yaml:"disabled_rustdoc_warnings,omitempty"`
+
+	// DocumentationOverrides contains overrides for element documentation.
+	DocumentationOverrides []RustDocumentationOverride `yaml:"documentation_overrides,omitempty"`
 }
 
 // RustCrate contains Rust-specific library configuration.

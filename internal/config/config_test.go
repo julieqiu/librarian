@@ -39,7 +39,8 @@ func TestFill(t *testing.T) {
 			name: "fills empty fields",
 			lib:  &Library{},
 			want: &Library{
-				Output:       "src/generated/",
+				// Output is not filled because Channel is empty.
+				// Output is derived from channel, not directly from default.output.
 				ReleaseLevel: "stable",
 			},
 		},
@@ -112,7 +113,7 @@ func TestFill_Rust(t *testing.T) {
 			},
 		},
 		{
-			name: "preserves existing rust values",
+			name: "merges rust defaults with existing values",
 			lib: &Library{
 				Rust: &RustCrate{
 					PackageDependencies: []RustPackageDependency{
@@ -123,9 +124,13 @@ func TestFill_Rust(t *testing.T) {
 			},
 			want: &Library{
 				Rust: &RustCrate{
+					// Default deps are prepended to custom deps.
 					PackageDependencies: []RustPackageDependency{
+						{Name: "wkt", Package: "google-cloud-wkt", Source: "google.protobuf"},
+						{Name: "iam_v1", Package: "google-cloud-iam-v1", Source: "google.iam.v1"},
 						{Name: "custom", Package: "custom-pkg"},
 					},
+					// Custom warnings are preserved (not overwritten by defaults).
 					DisabledRustdocWarnings: []string{"custom_warning"},
 				},
 			},
