@@ -15,9 +15,12 @@
 package rust
 
 import (
+	"bufio"
 	"context"
 	"os"
 	"path/filepath"
+	"regexp"
+	"time"
 
 	"github.com/googleapis/librarian/internal/command"
 	"github.com/googleapis/librarian/internal/config"
@@ -39,6 +42,11 @@ func Generate(ctx context.Context, library *config.Library, sources *config.Sour
 	}
 	if err := cleanOutput(library.Output, extraModules); err != nil {
 		return err
+	}
+	// Read copyright year from existing Cargo.toml if not set in config.
+	// This avoids storing the year in librarian.yaml while preserving existing years.
+	if library.CopyrightYear == "" {
+		library.CopyrightYear = readCopyrightYear(library.Output)
 	}
 	googleapisDir, err := sourceDir(sources.Googleapis, googleapisRepo)
 	if err != nil {
@@ -155,4 +163,31 @@ func sourceDir(source *config.Source, repo string) (string, error) {
 		return source.Dir, nil
 	}
 	return fetch.RepoDir(repo, source.Commit, source.SHA256)
+}
+
+// copyrightYearRegex matches "# Copyright YYYY" at the start of Cargo.toml.
+var copyrightYearRegex = regexp.MustCompile(`^# Copyright (\d{4})`)
+
+// readCopyrightYear reads the copyright year from an existing Cargo.toml.
+// Returns the year as a string, or the current year if the file doesn't exist
+// or doesn't have a copyright header.
+func readCopyrightYear(dir string) string {
+	cargoPath := filepath.Join(dir, "Cargo.toml")
+	f, err := os.Open(cargoPath)
+	if err != nil {
+		return currentYear()
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	if scanner.Scan() {
+		if matches := copyrightYearRegex.FindStringSubmatch(scanner.Text()); len(matches) == 2 {
+			return matches[1]
+		}
+	}
+	return currentYear()
+}
+
+func currentYear() string {
+	return time.Now().Format("2006")
 }
