@@ -25,9 +25,6 @@ import (
 
 // Config represents the complete librarian.yaml configuration file.
 type Config struct {
-	// Version is the version of librarian that created this config.
-	Version string `yaml:"version"`
-
 	// Language is the primary language for this repository (go, python, rust).
 	Language string `yaml:"language"`
 
