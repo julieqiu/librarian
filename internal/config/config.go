@@ -17,6 +17,8 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -175,6 +177,38 @@ type Library struct {
 
 	// Version is the library version.
 	Version string `yaml:"version,omitempty"`
+}
+
+// Fill fills empty fields with default values.
+func (lib *Library) Fill(d *Default) {
+	if lib.Channel == "" && lib.Name != "" {
+		lib.Channel = strings.ReplaceAll(lib.Name, "-", "/")
+	}
+	if d == nil {
+		return
+	}
+	if lib.Output == "" && lib.Channel != "" {
+		// Derive output path from default output and channel.
+		// e.g., "src/generated/" + "google/cloud/shell/v1" -> "src/generated/cloud/shell/v1"
+		lib.Output = filepath.Join(d.Output, strings.TrimPrefix(lib.Channel, "google/"))
+	}
+	if lib.ReleaseLevel == "" && d.Generate != nil {
+		lib.ReleaseLevel = d.Generate.ReleaseLevel
+	}
+	if d.Rust != nil {
+		if lib.Rust == nil {
+			lib.Rust = &RustCrate{}
+		}
+		if len(lib.Rust.PackageDependencies) == 0 {
+			lib.Rust.PackageDependencies = make([]RustPackageDependency, len(d.Rust.PackageDependencies))
+			for i, dep := range d.Rust.PackageDependencies {
+				lib.Rust.PackageDependencies[i] = *dep
+			}
+		}
+		if len(lib.Rust.DisabledRustdocWarnings) == 0 {
+			lib.Rust.DisabledRustdocWarnings = d.Rust.DisabledRustdocWarnings
+		}
+	}
 }
 
 // LibraryGenerate contains per-library generate configuration.

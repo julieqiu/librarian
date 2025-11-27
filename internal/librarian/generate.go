@@ -78,7 +78,13 @@ func generateAll(ctx context.Context, cfg *config.Config) error {
 		return err
 	}
 
-	// Populate service configs for existing libraries.
+	if err := cfg.Discover(googleapisDir); err != nil {
+		return err
+	}
+	for _, lib := range cfg.Libraries {
+		lib.Fill(cfg.Default)
+	}
+
 	for _, lib := range cfg.Libraries {
 		if lib.Channel != "" && lib.ServiceConfig == "" {
 			serviceConfig, err := config.ServiceConfig(googleapisDir, lib.Channel)
@@ -101,12 +107,6 @@ func generateAll(ctx context.Context, cfg *config.Config) error {
 		}
 	}
 
-	// Discover and add libraries for uncovered channels.
-	if err := cfg.Discover(googleapisDir); err != nil {
-		return err
-	}
-
-	// Generate all libraries.
 	var errs []error
 	for _, lib := range cfg.Libraries {
 		if err := generate(ctx, cfg.Language, lib, cfg.Sources); err != nil {
@@ -128,16 +128,13 @@ func generateLibrary(ctx context.Context, cfg *config.Config, libraryName string
 		}
 	}
 	if library == nil {
-		return fmt.Errorf("library %q not found", libraryName)
+		library = &config.Library{Name: libraryName}
 	}
+	library.Fill(cfg.Default)
 
 	googleapisDir, err := googleapisDir(cfg.Sources.Googleapis)
 	if err != nil {
 		return err
-	}
-
-	if library.Channel == "" {
-		library.Channel = deriveChannelPath(library.Name)
 	}
 
 	if library.ServiceConfig == "" {
@@ -148,6 +145,7 @@ func generateLibrary(ctx context.Context, cfg *config.Config, libraryName string
 		library.ServiceConfig = serviceConfig
 	}
 
+	library.Fill(cfg.Default)
 	return generate(ctx, cfg.Language, library, cfg.Sources)
 }
 
@@ -179,11 +177,4 @@ func googleapisDir(source *config.Source) (string, error) {
 		return source.Dir, nil
 	}
 	return fetch.RepoDir(googleapisRepo, source.Commit, source.SHA256)
-}
-
-// deriveChannelPath derives the channel path from a library name.
-// TODO(https://github.com/googleapis/librarian/issues/XXX): implement proper derivation logic.
-func deriveChannelPath(libraryName string) string {
-	// For now, return empty string - libraries should have Channel set in config.
-	return ""
 }
