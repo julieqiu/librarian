@@ -199,12 +199,14 @@ func (lib *Library) Fill(d *Default) {
 		if lib.Rust == nil {
 			lib.Rust = &RustCrate{}
 		}
-		if len(lib.Rust.PackageDependencies) == 0 {
-			lib.Rust.PackageDependencies = make([]RustPackageDependency, len(d.Rust.PackageDependencies))
-			for i, dep := range d.Rust.PackageDependencies {
-				lib.Rust.PackageDependencies[i] = *dep
-			}
+		// Merge default package dependencies with library-specific ones.
+		// Library-specific dependencies take precedence (are added after defaults).
+		merged := make([]RustPackageDependency, len(d.Rust.PackageDependencies))
+		for i, dep := range d.Rust.PackageDependencies {
+			merged[i] = *dep
 		}
+		merged = append(merged, lib.Rust.PackageDependencies...)
+		lib.Rust.PackageDependencies = merged
 		if len(lib.Rust.DisabledRustdocWarnings) == 0 {
 			lib.Rust.DisabledRustdocWarnings = d.Rust.DisabledRustdocWarnings
 		}
