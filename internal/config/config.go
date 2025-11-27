@@ -173,9 +173,6 @@ type Library struct {
 	// Rust contains Rust-specific library configuration.
 	Rust *RustCrate `yaml:"rust,omitempty"`
 
-	// Keep lists files/directories to preserve during regeneration.
-	Keep []string `yaml:"keep,omitempty"`
-
 	// APIServiceConfigs maps API paths to their service config file paths (runtime only, not serialized).
 	// For single-API libraries: map[API]serviceConfigPath
 	// For multi-API libraries: map[APIs[0]]path1, map[APIs[1]]path2, etc.
@@ -231,6 +228,11 @@ func (lib *Library) Fill(d *Default) {
 type LibraryGenerate struct {
 	// Disabled prevents library generation.
 	Disabled bool `yaml:"disabled,omitempty"`
+
+	// Keep lists files to preserve during regeneration.
+	// Paths are relative to the library output directory.
+	// Example: ["src/errors.rs", "src/helper.rs"]
+	Keep []string `yaml:"keep,omitempty"`
 }
 
 // LibraryRelease contains per-library release configuration.

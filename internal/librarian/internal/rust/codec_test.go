@@ -122,8 +122,10 @@ func TestToSidekickConfig(t *testing.T) {
 					DisabledRustdocWarnings:   []string{"broken_intra_doc_links"},
 					DisabledClippyWarnings:    []string{"too_many_arguments"},
 					DefaultFeatures:           []string{"default-feature"},
-					ExtraModules:              []string{"extra-module"},
 					TemplateOverride:          "custom-template",
+				},
+				Generate: &config.LibraryGenerate{
+					Keep: []string{"src/extra-module.rs"},
 				},
 			},
 			googleapisDir: "/tmp/googleapis",

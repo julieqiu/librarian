@@ -170,9 +170,9 @@ func validateLibrary(lib *config.Library) error {
 		}
 	}
 
-	// Check that libraries with extra_modules have an output path.
-	if lib.Rust != nil && len(lib.Rust.ExtraModules) > 0 && lib.Output == "" && lib.Channel == "" {
-		errs = append(errs, fmt.Errorf("library %q: has extra_modules but no output path or channel", lib.Name))
+	// Check that libraries with generate.keep have an output path.
+	if lib.Generate != nil && len(lib.Generate.Keep) > 0 && lib.Output == "" && lib.Channel == "" {
+		errs = append(errs, fmt.Errorf("library %q: has generate.keep but no output path or channel", lib.Name))
 	}
 
 	if len(errs) > 0 {
@@ -347,6 +347,5 @@ func isDefaultLibrary(lib *config.Library) bool {
 		lib.Release == nil &&
 		lib.Publish == nil &&
 		lib.Rust == nil &&
-		len(lib.Keep) == 0 &&
 		lib.ServiceConfig == ""
 }

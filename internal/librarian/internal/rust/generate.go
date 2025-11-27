@@ -20,6 +20,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/googleapis/librarian/internal/command"
@@ -36,13 +37,6 @@ const (
 
 // Generate generates a Rust client library.
 func Generate(ctx context.Context, library *config.Library, sources *config.Sources) error {
-	var extraModules []string
-	if library.Rust != nil {
-		extraModules = library.Rust.ExtraModules
-	}
-	if err := cleanOutput(library.Output, extraModules); err != nil {
-		return err
-	}
 	// Read copyright year and version from existing Cargo.toml if not set in config.
 	// This avoids storing these values in librarian.yaml while preserving existing ones.
 	if library.CopyrightYear == "" {
@@ -70,12 +64,14 @@ func Generate(ctx context.Context, library *config.Library, sources *config.Sour
 	if err := command.Run("taplo", "fmt", filepath.Join(library.Output, "Cargo.toml")); err != nil {
 		return err
 	}
-	// Create stub files for extra_modules if they don't exist.
+	// Create stub files for kept .rs files if they don't exist.
 	// This is needed because rustfmt resolves module declarations and will fail
-	// if the corresponding .rs files don't exist. Extra modules are handwritten
+	// if the corresponding .rs files don't exist. Kept files are handwritten
 	// files that may not exist yet in a fresh output directory.
-	if err := createExtraModuleStubs(library.Output, extraModules); err != nil {
-		return err
+	if library.Generate != nil {
+		if err := createStubFiles(library.Output, library.Generate.Keep); err != nil {
+			return err
+		}
 	}
 	rsFiles, err := filepath.Glob(filepath.Join(library.Output, "src", "*.rs"))
 	if err != nil {
@@ -90,69 +86,23 @@ func Generate(ctx context.Context, library *config.Library, sources *config.Sour
 	return nil
 }
 
-// createExtraModuleStubs creates empty stub files for extra_modules if they don't exist.
+// createStubFiles creates empty stub files for .rs files in the keep list if they don't exist.
 // This allows rustfmt to succeed even when the handwritten module files are missing.
-func createExtraModuleStubs(dir string, extraModules []string) error {
-	srcDir := filepath.Join(dir, "src")
-	for _, mod := range extraModules {
-		modFile := filepath.Join(srcDir, mod+".rs")
-		if _, err := os.Stat(modFile); os.IsNotExist(err) {
+func createStubFiles(dir string, keep []string) error {
+	for _, k := range keep {
+		if !strings.HasSuffix(k, ".rs") {
+			continue
+		}
+		filePath := filepath.Join(dir, k)
+		if _, err := os.Stat(filePath); os.IsNotExist(err) {
+			// Ensure parent directory exists.
+			if err := os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
+				return err
+			}
 			// Create an empty stub file.
-			if err := os.WriteFile(modFile, []byte("// TODO: implement this module\n"), 0644); err != nil {
+			if err := os.WriteFile(filePath, []byte("// TODO: implement this module\n"), 0644); err != nil {
 				return err
 			}
-		}
-	}
-	return nil
-}
-
-// cleanOutput removes all files and directories in the output directory except
-// Cargo.toml and files corresponding to extraModules (e.g., "errors" -> "src/errors.rs").
-func cleanOutput(dir string, extraModules []string) error {
-	entries, err := os.ReadDir(dir)
-	if os.IsNotExist(err) {
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-
-	// Build a set of extra module filenames to keep.
-	keepFiles := make(map[string]bool)
-	for _, mod := range extraModules {
-		keepFiles[mod+".rs"] = true
-	}
-
-	for _, entry := range entries {
-		if entry.Name() == "Cargo.toml" {
-			continue
-		}
-		// Keep the src directory but clean its contents selectively.
-		if entry.Name() == "src" && entry.IsDir() {
-			if err := cleanSrcDir(filepath.Join(dir, "src"), keepFiles); err != nil {
-				return err
-			}
-			continue
-		}
-		if err := os.RemoveAll(filepath.Join(dir, entry.Name())); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// cleanSrcDir removes all files in the src directory except those in keepFiles.
-func cleanSrcDir(srcDir string, keepFiles map[string]bool) error {
-	entries, err := os.ReadDir(srcDir)
-	if err != nil {
-		return err
-	}
-	for _, entry := range entries {
-		if keepFiles[entry.Name()] {
-			continue
-		}
-		if err := os.RemoveAll(filepath.Join(srcDir, entry.Name())); err != nil {
-			return err
 		}
 	}
 	return nil

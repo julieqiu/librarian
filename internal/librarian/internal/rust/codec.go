@@ -145,8 +145,20 @@ func buildCodec(library *config.Library) map[string]string {
 	if rust.HasVeneer {
 		codec["has-veneer"] = "true"
 	}
-	if len(rust.ExtraModules) > 0 {
-		codec["extra-modules"] = strings.Join(rust.ExtraModules, ",")
+	// Convert generate.keep paths to extra-modules.
+	// Keep paths like "src/errors.rs" become module names like "errors".
+	if library.Generate != nil && len(library.Generate.Keep) > 0 {
+		var modules []string
+		for _, k := range library.Generate.Keep {
+			if strings.HasPrefix(k, "src/") && strings.HasSuffix(k, ".rs") {
+				mod := strings.TrimPrefix(k, "src/")
+				mod = strings.TrimSuffix(mod, ".rs")
+				modules = append(modules, mod)
+			}
+		}
+		if len(modules) > 0 {
+			codec["extra-modules"] = strings.Join(modules, ",")
+		}
 	}
 	if rust.RoutingRequired {
 		codec["routing-required"] = "true"

@@ -149,6 +149,12 @@ func generateLibrary(ctx context.Context, cfg *config.Config, libraryName string
 }
 
 func generate(ctx context.Context, language string, library *config.Library, sources *config.Sources) error {
+	// Clean output directory before generation, keeping specified files.
+	keep := keepFiles(language, library)
+	if err := CleanOutput(library.Output, keep); err != nil {
+		return err
+	}
+
 	var err error
 	switch language {
 	case "testhelper":
@@ -165,6 +171,24 @@ func generate(ctx context.Context, language string, library *config.Library, sou
 	}
 	fmt.Printf("✓ Successfully generated %s\n", library.Name)
 	return nil
+}
+
+// keepFiles returns the list of files to preserve during regeneration.
+func keepFiles(language string, library *config.Library) []string {
+	var keep []string
+
+	// Language-specific files to always keep.
+	switch language {
+	case "rust":
+		keep = append(keep, "Cargo.toml")
+	}
+
+	// Add user-specified files from generate.keep.
+	if library.Generate != nil {
+		keep = append(keep, library.Generate.Keep...)
+	}
+
+	return keep
 }
 
 // googleapisDir returns the local directory path for the googleapis repository.

@@ -191,10 +191,10 @@ func TestValidateIgnored(t *testing.T) {
 func TestFormatConfig(t *testing.T) {
 	cfg := &config.Config{
 		Libraries: []*config.Library{
-			{Name: "google-cloud-storage-v1"},
-			{Name: "google-cloud-bigquery-v1"},
-			{Name: "google-cloud-storage-v1"}, // duplicate
-			{Name: "google-cloud-secretmanager-v1"},
+			{Name: "google-cloud-storage-v1", ReleaseLevel: "stable"},
+			{Name: "google-cloud-bigquery-v1", ReleaseLevel: "stable"},
+			{Name: "google-cloud-storage-v1", ReleaseLevel: "stable"}, // duplicate
+			{Name: "google-cloud-secretmanager-v1", ReleaseLevel: "stable"},
 		},
 		Ignored: []string{
 			"google/cloud/foo/",
@@ -270,8 +270,11 @@ sources:
     commit: abc123
 libraries:
   - name: google-cloud-storage-v1
+    release_level: stable
   - name: google-cloud-bigquery-v1
+    release_level: stable
   - name: google-cloud-storage-v1
+    release_level: stable
 ignored:
   - google/cloud/foo/
   - google/cloud/bar/
@@ -359,12 +362,14 @@ func TestFmtCommandCheckOnlyWithError(t *testing.T) {
 	t.Chdir(tempDir)
 	configPath := filepath.Join(tempDir, librarianConfigPath)
 
+	// Library with invalid name that has additional fields (so it won't be removed as name-only).
 	configContent := `language: rust
 sources:
   googleapis:
     commit: abc123
 libraries:
   - name: my-invalid-library
+    release_level: stable
 `
 	if err := os.WriteFile(configPath, []byte(configContent), 0644); err != nil {
 		t.Fatal(err)
