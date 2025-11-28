@@ -14,6 +14,13 @@
 
 package config
 
+import (
+	"bufio"
+	"os"
+	"path/filepath"
+	"strings"
+)
+
 // Config represents a librarian.yaml configuration file.
 type Config struct {
 	// Language is one of "go", "python", or "rust".
@@ -174,4 +181,59 @@ func mergePackageDependencies(defaults, lib []*RustPackageDependency) []*RustPac
 		result = append(result, &copied)
 	}
 	return result
+}
+
+// FindServiceConfig finds the service config file for a channel path.  It
+// looks for YAML files containing "type: google.api.Service", skipping any
+// files ending in _gapic.yaml.
+//
+// The apiPath should be relative to googleapisDir (e.g.,
+// "google/cloud/secretmanager/v1"). Returns the service config path relative
+// to googleapisDir, or empty string if not found.
+func FindServiceConfig(googleapisDir, apiPath string) (string, error) {
+	dir := filepath.Join(googleapisDir, apiPath)
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return "", err
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		name := entry.Name()
+		if !strings.HasSuffix(name, ".yaml") {
+			continue
+		}
+		if strings.HasSuffix(name, "_gapic.yaml") {
+			continue
+		}
+
+		path := filepath.Join(dir, name)
+		isServiceConfig, err := isServiceConfigFile(path)
+		if err != nil {
+			return "", err
+		}
+		if isServiceConfig {
+			return filepath.Join(apiPath, name), nil
+		}
+	}
+	return "", nil
+}
+
+// isServiceConfigFile checks if the file contains "type: google.api.Service".
+func isServiceConfigFile(path string) (bool, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return false, err
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	for i := 0; i < 20 && scanner.Scan(); i++ {
+		if strings.TrimSpace(scanner.Text()) == "type: google.api.Service" {
+			return true, nil
+		}
+	}
+	return false, scanner.Err()
 }

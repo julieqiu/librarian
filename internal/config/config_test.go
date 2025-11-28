@@ -98,6 +98,17 @@ func TestWrite(t *testing.T) {
 	}
 }
 
+func TestFindServiceConfig(t *testing.T) {
+	got, err := FindServiceConfig("testdata/googleapis", "google/cloud/speech/v1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "google/cloud/speech/v1/speech_v1.yaml"
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
 func TestFill(t *testing.T) {
 	defaults := &Default{
 		Output:       "src/generated/",
