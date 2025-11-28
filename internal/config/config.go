@@ -14,13 +14,6 @@
 
 package config
 
-import (
-	"fmt"
-	"os"
-
-	"gopkg.in/yaml.v3"
-)
-
 // Config represents a librarian.yaml configuration file.
 type Config struct {
 	// Language is one of "go", "python", or "rust".
@@ -136,38 +129,6 @@ type API struct {
 	// Format is the API specification format, either "protobuf" (default) or
 	// "discovery".
 	Format string `yaml:"format,omitempty"`
-}
-
-// Read reads the configuration from a file.
-func Read(path string) (*Config, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read config file: %w", err)
-	}
-	var c Config
-	if err := yaml.Unmarshal(data, &c); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
-	}
-	return &c, nil
-}
-
-// Write writes c to the file at path.
-func (c *Config) Write(path string) error {
-	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
-	if err != nil {
-		return fmt.Errorf("failed to open config file: %w", err)
-	}
-	defer f.Close()
-
-	enc := yaml.NewEncoder(f)
-	enc.SetIndent(2)
-	if err := enc.Encode(c); err != nil {
-		return fmt.Errorf("failed to encode config: %w", err)
-	}
-	if err := enc.Close(); err != nil {
-		return fmt.Errorf("failed to close encoder: %w", err)
-	}
-	return nil
 }
 
 // Fill populates empty library fields from the provided defaults.

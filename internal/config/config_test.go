@@ -15,15 +15,14 @@
 package config
 
 import (
-	"bytes"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"gopkg.in/yaml.v3"
+	"github.com/googleapis/librarian/internal/yaml"
 )
 
 func TestRead(t *testing.T) {
-	got, err := Read("testdata/rust/librarian.yaml")
+	got, err := yaml.Read[Config]("testdata/rust/librarian.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -82,21 +81,19 @@ func TestRead(t *testing.T) {
 }
 
 func TestWrite(t *testing.T) {
-	want, err := Read("testdata/rust/librarian.yaml")
+	want, err := yaml.Read[Config]("testdata/rust/librarian.yaml")
 	if err != nil {
 		t.Fatal(err)
 	}
-	var buf bytes.Buffer
-	enc := yaml.NewEncoder(&buf)
-	enc.SetIndent(2)
-	if err := enc.Encode(want); err != nil {
+	data, err := yaml.Marshal(want)
+	if err != nil {
 		t.Fatal(err)
 	}
-	var got Config
-	if err := yaml.Unmarshal(buf.Bytes(), &got); err != nil {
+	got, err := yaml.Unmarshal[Config](data)
+	if err != nil {
 		t.Fatal(err)
 	}
-	if diff := cmp.Diff(want, &got); diff != "" {
+	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("mismatch (-want +got):\n%s", diff)
 	}
 }
