@@ -17,6 +17,7 @@ package rust
 import (
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -87,5 +88,69 @@ func TestGenerate(t *testing.T) {
 				t.Errorf("%q missing expected string: %q", test.path, test.want)
 			}
 		})
+	}
+}
+
+func TestCleanOutput(t *testing.T) {
+	for _, test := range []struct {
+		name  string
+		files []string
+		want  []string
+	}{
+		{
+			name:  "removes all except Cargo.toml",
+			files: []string{"Cargo.toml", "README.md", "src/lib.rs"},
+			want:  []string{"Cargo.toml"},
+		},
+		{
+			name:  "empty directory",
+			files: []string{},
+			want:  []string{},
+		},
+		{
+			name:  "only Cargo.toml",
+			files: []string{"Cargo.toml"},
+			want:  []string{"Cargo.toml"},
+		},
+		{
+			name:  "no Cargo.toml",
+			files: []string{"README.md", "src/lib.rs"},
+			want:  []string{},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			dir := t.TempDir()
+			for _, f := range test.files {
+				path := filepath.Join(dir, f)
+				if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.WriteFile(path, []byte("test"), 0644); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if err := cleanOutput(dir); err != nil {
+				t.Fatal(err)
+			}
+			entries, err := os.ReadDir(dir)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var got []string
+			for _, e := range entries {
+				got = append(got, e.Name())
+			}
+			slices.Sort(got)
+			slices.Sort(test.want)
+			if !slices.Equal(got, test.want) {
+				t.Errorf("got %v, want %v", got, test.want)
+			}
+		})
+	}
+}
+
+func TestCleanOutput_NonExistentDir(t *testing.T) {
+	if err := cleanOutput("/nonexistent/path"); err != nil {
+		t.Errorf("expected nil error for nonexistent dir, got %v", err)
 	}
 }

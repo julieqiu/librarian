@@ -16,6 +16,9 @@ package rust
 
 import (
 	"context"
+	"errors"
+	"io/fs"
+	"os"
 	"path/filepath"
 
 	"github.com/googleapis/librarian/internal/command"
@@ -32,6 +35,9 @@ const (
 
 // Generate generates a Rust client library.
 func Generate(ctx context.Context, library *config.Library, sources *config.Sources) error {
+	if err := cleanOutput(library.Output); err != nil {
+		return err
+	}
 	googleapisDir, err := sourceDir(sources.Googleapis, googleapisRepo)
 	if err != nil {
 		return err
@@ -62,6 +68,26 @@ func Generate(ctx context.Context, library *config.Library, sources *config.Sour
 		// 2024 to match the edition in Cargo.toml.
 		args := append([]string{"--edition", "2024"}, rsFiles...)
 		if err := command.Run("rustfmt", args...); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// cleanOutput removes all files and directories in dir except Cargo.toml.
+func cleanOutput(dir string) error {
+	entries, err := os.ReadDir(dir)
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	for _, e := range entries {
+		if e.Name() == "Cargo.toml" {
+			continue
+		}
+		if err := os.RemoveAll(filepath.Join(dir, e.Name())); err != nil {
 			return err
 		}
 	}
