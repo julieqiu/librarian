@@ -154,3 +154,49 @@ func TestCleanOutput_NonExistentDir(t *testing.T) {
 		t.Errorf("expected nil error for nonexistent dir, got %v", err)
 	}
 }
+
+func TestReadCopyrightYear(t *testing.T) {
+	for _, test := range []struct {
+		name    string
+		content string
+		want    string
+	}{
+		{
+			name:    "valid copyright header",
+			content: "# Copyright 2024\n[package]\nname = \"test\"",
+			want:    "2024",
+		},
+		{
+			name:    "no copyright header",
+			content: "[package]\nname = \"test\"",
+			want:    currentYear(),
+		},
+		{
+			name:    "empty file",
+			content: "",
+			want:    currentYear(),
+		},
+		{
+			name:    "copyright not on first line",
+			content: "[package]\n# Copyright 2020\nname = \"test\"",
+			want:    currentYear(),
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			dir := t.TempDir()
+			if err := os.WriteFile(filepath.Join(dir, "Cargo.toml"), []byte(test.content), 0644); err != nil {
+				t.Fatal(err)
+			}
+			if got := readCopyrightYear(dir); got != test.want {
+				t.Errorf("got %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestReadCopyrightYear_NoFile(t *testing.T) {
+	dir := t.TempDir()
+	if got, want := readCopyrightYear(dir), currentYear(); got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
