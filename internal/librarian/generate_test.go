@@ -19,9 +19,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/googleapis/librarian/internal/config"
 )
 
 func TestGenerateCommand(t *testing.T) {
@@ -135,5 +137,29 @@ libraries:
 				}
 			}
 		})
+	}
+}
+
+func TestAddLibraries(t *testing.T) {
+	cfg := &config.Config{}
+	if err := addLibraries(cfg, "testdata/googleapis"); err != nil {
+		t.Fatal(err)
+	}
+
+	var got []string
+	for _, lib := range cfg.Libraries {
+		for _, channel := range lib.Channels {
+			got = append(got, channel.Path)
+		}
+	}
+	slices.Sort(got)
+	want := []string{
+		"google/cloud/speech/v1",
+		"google/cloud/speech/v1p1beta1",
+		"google/cloud/speech/v2",
+		"grafeas/v1",
+	}
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("mismatch (-want +got):\n%s", diff)
 	}
 }
