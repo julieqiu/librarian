@@ -15,6 +15,7 @@
 package config
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -92,6 +93,31 @@ func TestWrite(t *testing.T) {
 	got, err := yaml.Unmarshal[Config](data)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("mismatch (-want +got):\n%s", diff)
+	}
+}
+
+func TestAddLibraries(t *testing.T) {
+	cfg := &Config{}
+	if err := cfg.AddLibraries("testdata/googleapis"); err != nil {
+		t.Fatal(err)
+	}
+
+	var got []string
+	for _, lib := range cfg.Libraries {
+		for _, api := range lib.APIs {
+			got = append(got, api.Path)
+		}
+	}
+	slices.Sort(got)
+
+	want := []string{
+		"google/cloud/speech/v1",
+		"google/cloud/speech/v1p1beta1",
+		"google/cloud/speech/v2",
+		"grafeas/v1",
 	}
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("mismatch (-want +got):\n%s", diff)

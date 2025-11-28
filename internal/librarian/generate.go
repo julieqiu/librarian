@@ -74,6 +74,13 @@ func runGenerate(ctx context.Context, all bool, libraryName string) error {
 }
 
 func generateAll(ctx context.Context, cfg *config.Config) error {
+	googleapisDir, err := fetchGoogleapisDir(cfg.Sources)
+	if err != nil {
+		return err
+	}
+	if err := cfg.AddLibraries(googleapisDir); err != nil {
+		return err
+	}
 	for _, lib := range cfg.Libraries {
 		if err := generateLibrary(ctx, cfg, lib.Name); err != nil {
 			return err

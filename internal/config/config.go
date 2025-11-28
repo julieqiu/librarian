@@ -16,6 +16,7 @@ package config
 
 import (
 	"bufio"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -56,9 +57,9 @@ type Source struct {
 	// SHA256 is the expected hash of the tarball for this commit.
 	SHA256 string `yaml:"sha256,omitempty"`
 
-	// Dir is a local directory path to use instead of fetching.
-	// If set, Commit and SHA256 are ignored.
-	Dir string `yaml:"-"`
+	// Dir is a local directory path to use instead of fetching. If set, Commit
+	// and SHA256 are ignored.
+	Dir string `yaml:"dir,omitempty"`
 }
 
 // Default contains default settings for all libraries.
@@ -164,6 +165,43 @@ func (lib *Library) Fill(d *Default) {
 	}
 }
 
+// AddLibraries adds library entries for APIs not covered by existing
+// libraries.
+func (cfg *Config) AddLibraries(googleapisDir string) error {
+	allAPIs, err := apis(googleapisDir)
+	if err != nil {
+		return err
+	}
+
+	covered := make(map[string]bool)
+	for _, lib := range cfg.Libraries {
+		for _, api := range lib.APIs {
+			covered[api.Path] = true
+		}
+		// If no APIs defined, derive path from name: google-cloud-foo-v1 -> google/cloud/foo/v1
+		if len(lib.APIs) == 0 && lib.Name != "" {
+			covered[strings.ReplaceAll(lib.Name, "-", "/")] = true
+		}
+	}
+
+	for _, apiPath := range allAPIs {
+		if covered[apiPath] {
+			continue
+		}
+		serviceConfig, err := FindServiceConfig(googleapisDir, apiPath)
+		if err != nil {
+			return err
+		}
+		cfg.Libraries = append(cfg.Libraries, &Library{
+			APIs: []*API{{
+				Path:          apiPath,
+				ServiceConfig: serviceConfig,
+			}},
+		})
+	}
+	return nil
+}
+
 // mergePackageDependencies merges default and library package dependencies,
 // with library dependencies taking precedence for duplicates.
 func mergePackageDependencies(defaults, lib []*RustPackageDependency) []*RustPackageDependency {
@@ -181,6 +219,47 @@ func mergePackageDependencies(defaults, lib []*RustPackageDependency) []*RustPac
 		result = append(result, &copied)
 	}
 	return result
+}
+
+// apis scans the googleapis directory and returns all API paths.
+// It finds directories containing .proto files.
+func apis(googleapisDir string) ([]string, error) {
+	var paths []string
+	err := filepath.WalkDir(googleapisDir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() {
+			return nil
+		}
+		if !hasProtoFiles(path) {
+			return nil
+		}
+		apiPath, err := filepath.Rel(googleapisDir, path)
+		if err != nil {
+			return err
+		}
+		paths = append(paths, apiPath)
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return paths, nil
+}
+
+// hasProtoFiles returns true if the directory contains any .proto files.
+func hasProtoFiles(dir string) bool {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return false
+	}
+	for _, entry := range entries {
+		if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".proto") {
+			return true
+		}
+	}
+	return false
 }
 
 // FindServiceConfig finds the service config file for a channel path.  It
