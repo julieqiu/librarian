@@ -99,14 +99,15 @@ type RustCrate struct {
 
 // RustPackageDependency represents a package dependency configuration.
 type RustPackageDependency struct {
+	// Name is the dependency name.
+	Name string `yaml:"name"`
+
 	// Feature is the feature name for the dependency.
 	Feature string `yaml:"feature,omitempty"`
 
 	// ForceUsed forces the dependency to be used even if not referenced.
 	ForceUsed bool `yaml:"force_used,omitempty"`
 
-	// Name is the dependency name.
-	Name string `yaml:"name"`
 	// Ignore prevents this package from being mapped to an external crate.
 	// When true, references to this package stay as `crate::` instead of being
 	// mapped to the external crate name. This is used for self-referencing
@@ -114,7 +115,7 @@ type RustPackageDependency struct {
 	Ignore bool `yaml:"ignore,omitempty"`
 
 	// Package is the package name.
-	Package string `yaml:"package"`
+	Package string `yaml:"package,omitempty"`
 
 	// Source is the dependency source.
 	Source string `yaml:"source,omitempty"`
