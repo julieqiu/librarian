@@ -95,6 +95,7 @@ func TestCleanOutput(t *testing.T) {
 	for _, test := range []struct {
 		name  string
 		files []string
+		keep  []string
 		want  []string
 	}{
 		{
@@ -117,6 +118,24 @@ func TestCleanOutput(t *testing.T) {
 			files: []string{"README.md", "src/lib.rs"},
 			want:  []string{},
 		},
+		{
+			name:  "keep file in subdirectory",
+			files: []string{"Cargo.toml", "src/lib.rs", "src/errors.rs", "src/other.rs"},
+			keep:  []string{"src/errors.rs"},
+			want:  []string{"Cargo.toml", "src"},
+		},
+		{
+			name:  "keep multiple files in subdirectory",
+			files: []string{"Cargo.toml", "src/lib.rs", "src/errors.rs", "src/operation.rs"},
+			keep:  []string{"src/errors.rs", "src/operation.rs"},
+			want:  []string{"Cargo.toml", "src"},
+		},
+		{
+			name:  "keep entire directory",
+			files: []string{"Cargo.toml", "src/lib.rs", "custom/file.rs"},
+			keep:  []string{"custom"},
+			want:  []string{"Cargo.toml", "custom"},
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			dir := t.TempDir()
@@ -129,7 +148,7 @@ func TestCleanOutput(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			if err := cleanOutput(dir); err != nil {
+			if err := cleanOutput(dir, test.keep); err != nil {
 				t.Fatal(err)
 			}
 			entries, err := os.ReadDir(dir)
@@ -150,8 +169,54 @@ func TestCleanOutput(t *testing.T) {
 }
 
 func TestCleanOutput_NonExistentDir(t *testing.T) {
-	if err := cleanOutput("/nonexistent/path"); err != nil {
+	if err := cleanOutput("/nonexistent/path", nil); err != nil {
 		t.Errorf("expected nil error for nonexistent dir, got %v", err)
+	}
+}
+
+func TestCleanOutput_PreservesKeptFiles(t *testing.T) {
+	dir := t.TempDir()
+	files := []string{
+		"Cargo.toml",
+		"src/lib.rs",
+		"src/errors.rs",
+		"src/operation.rs",
+		"src/other.rs",
+	}
+	for _, f := range files {
+		path := filepath.Join(dir, f)
+		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte("test content for "+f), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	keep := []string{"src/errors.rs", "src/operation.rs"}
+	if err := cleanOutput(dir, keep); err != nil {
+		t.Fatal(err)
+	}
+
+	// Verify kept files still exist with their content.
+	for _, k := range keep {
+		path := filepath.Join(dir, k)
+		content, err := os.ReadFile(path)
+		if err != nil {
+			t.Errorf("kept file %q was deleted: %v", k, err)
+			continue
+		}
+		if want := "test content for " + k; string(content) != want {
+			t.Errorf("kept file %q has wrong content: got %q, want %q", k, content, want)
+		}
+	}
+
+	// Verify deleted files are gone.
+	for _, f := range []string{"src/lib.rs", "src/other.rs"} {
+		path := filepath.Join(dir, f)
+		if _, err := os.Stat(path); err == nil {
+			t.Errorf("file %q should have been deleted but still exists", f)
+		}
 	}
 }
 
