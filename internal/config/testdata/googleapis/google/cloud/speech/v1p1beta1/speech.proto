@@ -1,2 +1,0 @@
-syntax = "proto3";
-package google.cloud.speech.v1p1beta1;

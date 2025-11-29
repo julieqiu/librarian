@@ -24,7 +24,7 @@ import (
 
 func TestAddLibraries(t *testing.T) {
 	cfg := &config.Config{}
-	if err := addLibraries(cfg, "../config/testdata/googleapis"); err != nil {
+	if err := addLibraries(cfg, "testdata/googleapis"); err != nil {
 		t.Fatal(err)
 	}
 

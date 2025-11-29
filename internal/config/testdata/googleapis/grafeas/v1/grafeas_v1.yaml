@@ -1,4 +1,0 @@
-type: google.api.Service
-config_version: 3
-name: grafeas.io
-title: Grafeas API
