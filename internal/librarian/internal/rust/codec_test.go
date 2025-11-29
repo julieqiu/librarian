@@ -460,6 +460,71 @@ func TestToSidekickConfig(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "with discovery LRO polling config",
+			library: &config.Library{
+				Name: "google-cloud-compute-v1",
+				Rust: &config.RustCrate{
+					Discovery: &config.RustDiscovery{
+						OperationID: ".google.cloud.compute.v1.Operation",
+						Pollers: []config.RustPoller{
+							{
+								Prefix:   "compute/v1/projects/{project}/zones/{zone}",
+								MethodID: ".google.cloud.compute.v1.zoneOperations.get",
+							},
+							{
+								Prefix:   "compute/v1/projects/{project}/regions/{region}",
+								MethodID: ".google.cloud.compute.v1.regionOperations.get",
+							},
+							{
+								Prefix:   "compute/v1/projects/{project}",
+								MethodID: ".google.cloud.compute.v1.globalOperations.get",
+							},
+						},
+					},
+				},
+			},
+			api: &config.API{
+				Path:          "discoveries/compute.v1.json",
+				ServiceConfig: "google/cloud/compute/v1/compute_v1.yaml",
+				Format:        "discovery",
+			},
+			googleapisDir: "/tmp/googleapis",
+			discoveryDir:  "/tmp/discovery-artifact-manager",
+			want: &sidekickconfig.Config{
+				General: sidekickconfig.GeneralConfig{
+					Language:            "rust",
+					SpecificationFormat: "disco",
+					ServiceConfig:       "google/cloud/compute/v1/compute_v1.yaml",
+					SpecificationSource: "discoveries/compute.v1.json",
+				},
+				Source: map[string]string{
+					"googleapis-root": "/tmp/googleapis",
+					"discovery-root":  "/tmp/discovery-artifact-manager",
+					"roots":           "discovery,googleapis",
+				},
+				Codec: map[string]string{
+					"package-name-override": "google-cloud-compute-v1",
+				},
+				Discovery: &sidekickconfig.Discovery{
+					OperationID: ".google.cloud.compute.v1.Operation",
+					Pollers: []*sidekickconfig.Poller{
+						{
+							Prefix:   "compute/v1/projects/{project}/zones/{zone}",
+							MethodID: ".google.cloud.compute.v1.zoneOperations.get",
+						},
+						{
+							Prefix:   "compute/v1/projects/{project}/regions/{region}",
+							MethodID: ".google.cloud.compute.v1.regionOperations.get",
+						},
+						{
+							Prefix:   "compute/v1/projects/{project}",
+							MethodID: ".google.cloud.compute.v1.globalOperations.get",
+						},
+					},
+				},
+			},
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			got := toSidekickConfig(test.library, test.api, test.googleapisDir, test.discoveryDir)

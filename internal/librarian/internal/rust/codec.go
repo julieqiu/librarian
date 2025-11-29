@@ -71,6 +71,17 @@ func toSidekickConfig(library *config.Library, api *config.API, googleapisDir, d
 				}
 			}
 		}
+		if library.Rust.Discovery != nil {
+			sidekickCfg.Discovery = &sidekickconfig.Discovery{
+				OperationID: library.Rust.Discovery.OperationID,
+			}
+			for _, poller := range library.Rust.Discovery.Pollers {
+				sidekickCfg.Discovery.Pollers = append(sidekickCfg.Discovery.Pollers, &sidekickconfig.Poller{
+					Prefix:   poller.Prefix,
+					MethodID: poller.MethodID,
+				})
+			}
+		}
 	}
 	return sidekickCfg
 }
