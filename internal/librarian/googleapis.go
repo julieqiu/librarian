@@ -186,12 +186,9 @@ func applyDefault(lib *config.Library, d *config.Default) {
 	if lib.Output == "" && d.Output != "" {
 		// Derive output path from default output and API path.
 		// e.g., "src/generated" + "cloud/accessapproval/v1" for API path "google/cloud/accessapproval/v1"
+		// or "src/generated" + "grafeas/v1" for API path "grafeas/v1"
 		apiPath := lib.APIs[0].Path
-		if strings.HasPrefix(apiPath, "google/") {
-			lib.Output = filepath.Join(d.Output, strings.TrimPrefix(apiPath, "google/"))
-		} else {
-			lib.Output = d.Output
-		}
+		lib.Output = filepath.Join(d.Output, strings.TrimPrefix(apiPath, "google/"))
 	}
 	if lib.ReleaseLevel == "" {
 		lib.ReleaseLevel = d.ReleaseLevel

@@ -76,7 +76,7 @@ func TestFill(t *testing.T) {
 			lib:      &config.Library{},
 			want: &config.Library{
 				APIs:         []*config.API{{}},
-				Output:       "src/generated/",
+				Output:       "src/generated",
 				ReleaseLevel: "stable",
 			},
 		},
@@ -117,6 +117,16 @@ func TestFill(t *testing.T) {
 				Name:         "google-cloud-speech-v1",
 				APIs:         []*config.API{{Path: "google/cloud/speech/v1"}},
 				Output:       "src/generated/cloud/speech/v1",
+				ReleaseLevel: "stable",
+			},
+		},
+		{
+			name:     "non-google API path",
+			defaults: defaults,
+			lib:      &config.Library{APIs: []*config.API{{Path: "grafeas/v1"}}},
+			want: &config.Library{
+				APIs:         []*config.API{{Path: "grafeas/v1"}},
+				Output:       "src/generated/grafeas/v1",
 				ReleaseLevel: "stable",
 			},
 		},
