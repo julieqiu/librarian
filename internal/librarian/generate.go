@@ -110,9 +110,7 @@ func generateAll(ctx context.Context, cfg *config.Config) ([]string, error) {
 	for _, lib := range cfg.Libraries {
 		applyDefault(lib, cfg.Default)
 	}
-	if err := addLibraries(cfg, googleapisDir); err != nil {
-		return nil, err
-	}
+	uncoveredAPIs := findUncoveredAPIs(cfg, googleapisDir)
 	var generatedDirs []string
 	for _, lib := range cfg.Libraries {
 		dir, err := generateLibrary(ctx, cfg, lib.Name)
@@ -120,6 +118,14 @@ func generateAll(ctx context.Context, cfg *config.Config) ([]string, error) {
 			return nil, err
 		}
 		generatedDirs = append(generatedDirs, dir)
+	}
+	// Report uncovered APIs that should be added to exclusion list or librarian.yaml.
+	if len(uncoveredAPIs) > 0 {
+		fmt.Println("\nAPIs found in googleapis but not in librarian.yaml or exclusion list:")
+		for _, api := range uncoveredAPIs {
+			fmt.Printf("  - %s\n", api)
+		}
+		fmt.Println("Add these to config.ExcludedAPIs or create library entries in librarian.yaml.")
 	}
 	return generatedDirs, nil
 }

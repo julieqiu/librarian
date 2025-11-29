@@ -24,13 +24,13 @@ import (
 	"github.com/googleapis/librarian/internal/config"
 )
 
-// addLibraries adds library entries to cfg for APIs not covered by existing
-// libraries. It expects applyDefault to have been called on all libraries first
-// to populate API paths.
-func addLibraries(cfg *config.Config, googleapisDir string) error {
+// findUncoveredAPIs returns API paths found in googleapis that are not covered
+// by existing libraries. It expects applyDefault to have been called on all
+// libraries first to populate API paths.
+func findUncoveredAPIs(cfg *config.Config, googleapisDir string) []string {
 	allAPIs, err := listAPIs(googleapisDir, cfg.Language)
 	if err != nil {
-		return err
+		return nil
 	}
 
 	covered := make(map[string]bool)
@@ -39,22 +39,13 @@ func addLibraries(cfg *config.Config, googleapisDir string) error {
 			covered[api.Path] = true
 		}
 	}
+	var uncovered []string
 	for _, apiPath := range allAPIs {
-		if covered[apiPath] {
-			continue
+		if !covered[apiPath] {
+			uncovered = append(uncovered, apiPath)
 		}
-		serviceConfig, err := findServiceConfig(googleapisDir, apiPath)
-		if err != nil {
-			return err
-		}
-		cfg.Libraries = append(cfg.Libraries, &config.Library{
-			APIs: []*config.API{{
-				Path:          apiPath,
-				ServiceConfig: serviceConfig,
-			}},
-		})
 	}
-	return nil
+	return uncovered
 }
 
 // listAPIs scans the googleapis directory and returns all API paths. It finds

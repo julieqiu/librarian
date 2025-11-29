@@ -22,29 +22,58 @@ import (
 	"github.com/googleapis/librarian/internal/config"
 )
 
-func TestAddLibraries(t *testing.T) {
-	cfg := &config.Config{}
-	if err := addLibraries(cfg, "testdata/googleapis"); err != nil {
-		t.Fatal(err)
-	}
-
-	var got []string
-	for _, lib := range cfg.Libraries {
-		for _, api := range lib.APIs {
-			got = append(got, api.Path)
-		}
-	}
-	slices.Sort(got)
-
-	want := []string{
-		"google/cloud/speech/v1",
-		"google/cloud/speech/v1p1beta1",
-		"google/cloud/speech/v2",
-		"grafeas/v1",
-		"library/two",
-	}
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
+func TestFindUncoveredAPIs(t *testing.T) {
+	for _, test := range []struct {
+		name string
+		cfg  *config.Config
+		want []string
+	}{
+		{
+			name: "all uncovered",
+			cfg:  &config.Config{},
+			want: []string{
+				"google/cloud/speech/v1",
+				"google/cloud/speech/v1p1beta1",
+				"google/cloud/speech/v2",
+				"grafeas/v1",
+				"library/two",
+			},
+		},
+		{
+			name: "some covered",
+			cfg: &config.Config{
+				Libraries: []*config.Library{
+					{APIs: []*config.API{{Path: "google/cloud/speech/v1"}}},
+					{APIs: []*config.API{{Path: "grafeas/v1"}}},
+				},
+			},
+			want: []string{
+				"google/cloud/speech/v1p1beta1",
+				"google/cloud/speech/v2",
+				"library/two",
+			},
+		},
+		{
+			name: "all covered",
+			cfg: &config.Config{
+				Libraries: []*config.Library{
+					{APIs: []*config.API{{Path: "google/cloud/speech/v1"}}},
+					{APIs: []*config.API{{Path: "google/cloud/speech/v1p1beta1"}}},
+					{APIs: []*config.API{{Path: "google/cloud/speech/v2"}}},
+					{APIs: []*config.API{{Path: "grafeas/v1"}}},
+					{APIs: []*config.API{{Path: "library/two"}}},
+				},
+			},
+			want: nil,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got := findUncoveredAPIs(test.cfg, "testdata/googleapis")
+			slices.Sort(got)
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
 	}
 }
 
