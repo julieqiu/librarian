@@ -117,6 +117,13 @@ func validateLibrary(lib *config.Library) error {
 }
 
 func formatConfig(cfg *config.Config) *config.Config {
+	// Sort default package dependencies.
+	if cfg.Default != nil && cfg.Default.Rust != nil {
+		slices.SortFunc(cfg.Default.Rust.PackageDependencies, func(a, b *config.RustPackageDependency) int {
+			return strings.Compare(a.Name, b.Name)
+		})
+	}
+
 	slices.SortFunc(cfg.Libraries, func(a, b *config.Library) int {
 		return strings.Compare(a.Name, b.Name)
 	})
@@ -126,6 +133,16 @@ func formatConfig(cfg *config.Config) *config.Config {
 	}
 	result := make([]*config.Library, 0, len(cfg.Libraries))
 	for _, lib := range cfg.Libraries {
+		// Sort APIs by path.
+		slices.SortFunc(lib.APIs, func(a, b *config.API) int {
+			return strings.Compare(a.Path, b.Path)
+		})
+		// Sort rust package dependencies.
+		if lib.Rust != nil {
+			slices.SortFunc(lib.Rust.PackageDependencies, func(a, b *config.RustPackageDependency) int {
+				return strings.Compare(a.Name, b.Name)
+			})
+		}
 		newlib := removeRedundantFields(lib, defaultOutput)
 		if !isDefaultLibrary(newlib) {
 			result = append(result, newlib)
