@@ -200,3 +200,54 @@ func TestReadCopyrightYear_NoFile(t *testing.T) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
+
+func TestReadVersion(t *testing.T) {
+	for _, test := range []struct {
+		name    string
+		content string
+		want    string
+	}{
+		{
+			name:    "standard format",
+			content: "[package]\nname = \"test\"\nversion = \"1.2.3\"",
+			want:    "1.2.3",
+		},
+		{
+			name:    "with spaces",
+			content: "[package]\nversion   =   \"2.0.0\"",
+			want:    "2.0.0",
+		},
+		{
+			name:    "no version",
+			content: "[package]\nname = \"test\"",
+			want:    "",
+		},
+		{
+			name:    "empty file",
+			content: "",
+			want:    "",
+		},
+		{
+			name:    "prerelease version",
+			content: "[package]\nversion = \"0.1.0-alpha\"",
+			want:    "0.1.0-alpha",
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			dir := t.TempDir()
+			if err := os.WriteFile(filepath.Join(dir, "Cargo.toml"), []byte(test.content), 0644); err != nil {
+				t.Fatal(err)
+			}
+			if got := readVersion(dir); got != test.want {
+				t.Errorf("got %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestReadVersion_NoFile(t *testing.T) {
+	dir := t.TempDir()
+	if got := readVersion(dir); got != "" {
+		t.Errorf("got %q, want empty string", got)
+	}
+}
