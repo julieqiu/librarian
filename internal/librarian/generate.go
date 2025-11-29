@@ -96,6 +96,10 @@ func generateAll(ctx context.Context, cfg *config.Config) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Apply defaults to populate API paths before checking coverage.
+	for _, lib := range cfg.Libraries {
+		applyDefault(lib, cfg.Default)
+	}
 	if err := addLibraries(cfg, googleapisDir); err != nil {
 		return nil, err
 	}

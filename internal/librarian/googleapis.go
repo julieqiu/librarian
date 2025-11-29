@@ -25,7 +25,8 @@ import (
 )
 
 // addLibraries adds library entries to cfg for APIs not covered by existing
-// libraries.
+// libraries. It expects applyDefault to have been called on all libraries first
+// to populate API paths.
 func addLibraries(cfg *config.Config, googleapisDir string) error {
 	allAPIs, err := listAPIs(googleapisDir)
 	if err != nil {
@@ -36,11 +37,6 @@ func addLibraries(cfg *config.Config, googleapisDir string) error {
 	for _, lib := range cfg.Libraries {
 		for _, api := range lib.APIs {
 			covered[api.Path] = true
-		}
-		// If no APIs defined, derive path from name: google-cloud-foo-v1 ->
-		// google/cloud/foo/v1.
-		if len(lib.APIs) == 0 && lib.Name != "" {
-			covered[strings.ReplaceAll(lib.Name, "-", "/")] = true
 		}
 	}
 	for _, apiPath := range allAPIs {
