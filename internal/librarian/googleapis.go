@@ -159,6 +159,14 @@ func isServiceConfigFile(path string) (bool, error) {
 
 // applyDefault populates empty library fields from the provided defaults.
 func applyDefault(lib *config.Library, d *config.Default) {
+	// Ensure each library has at least one API with a path.
+	if len(lib.APIs) == 0 {
+		lib.APIs = []*config.API{{}}
+	}
+	if lib.APIs[0].Path == "" && lib.Name != "" {
+		lib.APIs[0].Path = strings.ReplaceAll(lib.Name, "-", "/")
+	}
+
 	if d == nil {
 		return
 	}

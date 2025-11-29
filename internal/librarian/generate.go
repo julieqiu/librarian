@@ -96,6 +96,7 @@ func generateLibrary(ctx context.Context, cfg *config.Config, libraryName string
 	}
 	for _, lib := range cfg.Libraries {
 		if lib.Name == libraryName {
+			applyDefault(lib, cfg.Default)
 			for _, api := range lib.APIs {
 				if api.ServiceConfig == "" {
 					serviceConfig, err := findServiceConfig(googleapisDir, api.Path)

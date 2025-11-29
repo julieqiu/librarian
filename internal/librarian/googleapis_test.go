@@ -74,6 +74,7 @@ func TestFill(t *testing.T) {
 			defaults: defaults,
 			lib:      &config.Library{},
 			want: &config.Library{
+				APIs:         []*config.API{{}},
 				Output:       "src/generated/",
 				ReleaseLevel: "stable",
 			},
@@ -86,6 +87,7 @@ func TestFill(t *testing.T) {
 				ReleaseLevel: "preview",
 			},
 			want: &config.Library{
+				APIs:         []*config.API{{}},
 				Output:       "custom/output/",
 				ReleaseLevel: "preview",
 			},
@@ -95,6 +97,7 @@ func TestFill(t *testing.T) {
 			defaults: defaults,
 			lib:      &config.Library{Output: "custom/output/"},
 			want: &config.Library{
+				APIs:         []*config.API{{}},
 				Output:       "custom/output/",
 				ReleaseLevel: "stable",
 			},
@@ -103,7 +106,7 @@ func TestFill(t *testing.T) {
 			name:     "nil defaults",
 			defaults: nil,
 			lib:      &config.Library{Output: "foo/"},
-			want:     &config.Library{Output: "foo/"},
+			want:     &config.Library{APIs: []*config.API{{}}, Output: "foo/"},
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -134,6 +137,7 @@ func TestFill_Rust(t *testing.T) {
 			name: "fills rust defaults",
 			lib:  &config.Library{},
 			want: &config.Library{
+				APIs: []*config.API{{}},
 				Rust: &config.RustCrate{
 					RustDefault: config.RustDefault{
 						PackageDependencies: []*config.RustPackageDependency{
@@ -157,6 +161,7 @@ func TestFill_Rust(t *testing.T) {
 				},
 			},
 			want: &config.Library{
+				APIs: []*config.API{{}},
 				Rust: &config.RustCrate{
 					RustDefault: config.RustDefault{
 						PackageDependencies: []*config.RustPackageDependency{
@@ -181,6 +186,7 @@ func TestFill_Rust(t *testing.T) {
 				},
 			},
 			want: &config.Library{
+				APIs: []*config.API{{}},
 				Rust: &config.RustCrate{
 					RustDefault: config.RustDefault{
 						PackageDependencies: []*config.RustPackageDependency{
@@ -202,6 +208,7 @@ func TestFill_Rust(t *testing.T) {
 				},
 			},
 			want: &config.Library{
+				APIs: []*config.API{{}},
 				Rust: &config.RustCrate{
 					RustDefault: config.RustDefault{
 						PackageDependencies: []*config.RustPackageDependency{
