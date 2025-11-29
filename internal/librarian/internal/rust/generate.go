@@ -67,13 +67,41 @@ func Generate(ctx context.Context, library *config.Library, sources *config.Sour
 			return err
 		}
 	}
-	if err := command.Run("taplo", "fmt", filepath.Join(library.Output, "Cargo.toml")); err != nil {
-		return err
+	return nil
+}
+
+// Format formats all Cargo.toml and .rs files in the given directories.
+func Format(dirs ...string) error {
+	var tomlFiles, rsFiles []string
+	for _, dir := range dirs {
+		err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if d.IsDir() {
+				return nil
+			}
+			if d.Name() == "Cargo.toml" {
+				tomlFiles = append(tomlFiles, path)
+			} else if filepath.Ext(path) == ".rs" {
+				rsFiles = append(rsFiles, path)
+			}
+			return nil
+		})
+		if err != nil {
+			return err
+		}
 	}
-	rsFiles, err := filepath.Glob(filepath.Join(library.Output, "src", "*.rs"))
-	if err != nil {
-		return err
+
+	// Format all Cargo.toml files with taplo.
+	if len(tomlFiles) > 0 {
+		args := append([]string{"fmt"}, tomlFiles...)
+		if err := command.Run("taplo", args...); err != nil {
+			return err
+		}
 	}
+
+	// Format all .rs files with rustfmt.
 	if len(rsFiles) > 0 {
 		// rustfmt defaults to 2015 edition when run directly on files. Specify
 		// 2024 to match the edition in Cargo.toml.

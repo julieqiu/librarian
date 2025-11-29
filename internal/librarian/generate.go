@@ -67,32 +67,53 @@ func runGenerate(ctx context.Context, all bool, libraryName string) error {
 	if cfg.Sources == nil {
 		return errEmptySources
 	}
+	var generatedDirs []string
 	if all {
-		return generateAll(ctx, cfg)
+		dirs, err := generateAll(ctx, cfg)
+		if err != nil {
+			return err
+		}
+		generatedDirs = dirs
+	} else {
+		dir, err := generateLibrary(ctx, cfg, libraryName)
+		if err != nil {
+			return err
+		}
+		generatedDirs = []string{dir}
 	}
-	return generateLibrary(ctx, cfg, libraryName)
-}
-
-func generateAll(ctx context.Context, cfg *config.Config) error {
-	googleapisDir, err := fetchGoogleapisDir(cfg.Sources)
-	if err != nil {
-		return err
-	}
-	if err := addLibraries(cfg, googleapisDir); err != nil {
-		return err
-	}
-	for _, lib := range cfg.Libraries {
-		if err := generateLibrary(ctx, cfg, lib.Name); err != nil {
+	// Format generated files at the end.
+	if cfg.Language == "rust" && len(generatedDirs) > 0 {
+		fmt.Println("Formatting generated files...")
+		if err := rust.Format(generatedDirs...); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func generateLibrary(ctx context.Context, cfg *config.Config, libraryName string) error {
+func generateAll(ctx context.Context, cfg *config.Config) ([]string, error) {
 	googleapisDir, err := fetchGoogleapisDir(cfg.Sources)
 	if err != nil {
-		return err
+		return nil, err
+	}
+	if err := addLibraries(cfg, googleapisDir); err != nil {
+		return nil, err
+	}
+	var generatedDirs []string
+	for _, lib := range cfg.Libraries {
+		dir, err := generateLibrary(ctx, cfg, lib.Name)
+		if err != nil {
+			return nil, err
+		}
+		generatedDirs = append(generatedDirs, dir)
+	}
+	return generatedDirs, nil
+}
+
+func generateLibrary(ctx context.Context, cfg *config.Config, libraryName string) (string, error) {
+	googleapisDir, err := fetchGoogleapisDir(cfg.Sources)
+	if err != nil {
+		return "", err
 	}
 	for _, lib := range cfg.Libraries {
 		if lib.Name == libraryName {
@@ -101,15 +122,18 @@ func generateLibrary(ctx context.Context, cfg *config.Config, libraryName string
 				if api.ServiceConfig == "" {
 					serviceConfig, err := findServiceConfig(googleapisDir, api.Path)
 					if err != nil {
-						return err
+						return "", err
 					}
 					api.ServiceConfig = serviceConfig
 				}
 			}
-			return generate(ctx, cfg.Language, lib, cfg.Sources)
+			if err := generate(ctx, cfg.Language, lib, cfg.Sources); err != nil {
+				return "", err
+			}
+			return lib.Output, nil
 		}
 	}
-	return fmt.Errorf("library %q not found", libraryName)
+	return "", fmt.Errorf("library %q not found", libraryName)
 }
 
 func generate(ctx context.Context, language string, library *config.Library, sources *config.Sources) error {
