@@ -525,6 +525,45 @@ func TestToSidekickConfig(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "documentation override with leading newline restoration",
+			library: &config.Library{
+				Name: "google-cloud-orgpolicy-v1",
+				Rust: &config.RustCrate{
+					DocumentationOverrides: []config.RustDocumentationOverride{
+						{
+							ID:      ".google.cloud.orgpolicy.v1.Policy.ListPolicy",
+							Match:   "Ancestry subtrees must be in one of the following formats:",
+							Replace: "Ancestry subtrees must be in one of the following formats:",
+						},
+					},
+				},
+			},
+			api: &config.API{
+				Path: "google/cloud/orgpolicy/v1",
+			},
+			googleapisDir: "/tmp/googleapis",
+			want: &sidekickconfig.Config{
+				General: sidekickconfig.GeneralConfig{
+					Language:            "rust",
+					SpecificationFormat: "protobuf",
+					SpecificationSource: "google/cloud/orgpolicy/v1",
+				},
+				Source: map[string]string{
+					"googleapis-root": "/tmp/googleapis",
+				},
+				Codec: map[string]string{
+					"package-name-override": "google-cloud-orgpolicy-v1",
+				},
+				CommentOverrides: []sidekickconfig.DocumentationOverride{
+					{
+						ID:      ".google.cloud.orgpolicy.v1.Policy.ListPolicy",
+						Match:   "Ancestry subtrees must be in one of the following formats:",
+						Replace: "\nAncestry subtrees must be in one of the following formats:",
+					},
+				},
+			},
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			got := toSidekickConfig(test.library, test.api, test.googleapisDir, test.discoveryDir)

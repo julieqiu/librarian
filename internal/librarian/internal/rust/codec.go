@@ -55,10 +55,18 @@ func toSidekickConfig(library *config.Library, api *config.API, googleapisDir, d
 		if len(library.Rust.DocumentationOverrides) > 0 {
 			sidekickCfg.CommentOverrides = make([]sidekickconfig.DocumentationOverride, len(library.Rust.DocumentationOverrides))
 			for i, override := range library.Rust.DocumentationOverrides {
+				match := override.Match
+				replace := override.Replace
+				// YAML serialization strips leading newlines. If match and replace
+				// are identical, the original config likely had a leading newline
+				// in replace to insert a blank line. Restore it.
+				if match == replace {
+					replace = "\n" + replace
+				}
 				sidekickCfg.CommentOverrides[i] = sidekickconfig.DocumentationOverride{
 					ID:      override.ID,
-					Match:   override.Match,
-					Replace: override.Replace,
+					Match:   match,
+					Replace: replace,
 				}
 			}
 		}
