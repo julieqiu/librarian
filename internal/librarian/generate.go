@@ -78,7 +78,7 @@ func generateAll(ctx context.Context, cfg *config.Config) error {
 	if err != nil {
 		return err
 	}
-	if err := cfg.AddLibraries(googleapisDir); err != nil {
+	if err := addLibraries(cfg, googleapisDir); err != nil {
 		return err
 	}
 	for _, lib := range cfg.Libraries {
@@ -98,7 +98,7 @@ func generateLibrary(ctx context.Context, cfg *config.Config, libraryName string
 		if lib.Name == libraryName {
 			for _, api := range lib.APIs {
 				if api.ServiceConfig == "" {
-					serviceConfig, err := config.FindServiceConfig(googleapisDir, api.Path)
+					serviceConfig, err := findServiceConfig(googleapisDir, api.Path)
 					if err != nil {
 						return err
 					}
