@@ -61,6 +61,12 @@ func addLibraries(cfg *config.Config, googleapisDir string) error {
 	return nil
 }
 
+// excludedAPIPrefixes contains directory prefixes that should not be scanned
+// for APIs. These are typically tooling or metadata directories.
+var excludedAPIPrefixes = []string{
+	"gapic",
+}
+
 // listAPIs scans the googleapis directory and returns all API paths. It finds
 // directories containing .proto files.
 func listAPIs(googleapisDir string) ([]string, error) {
@@ -72,12 +78,18 @@ func listAPIs(googleapisDir string) ([]string, error) {
 		if !d.IsDir() {
 			return nil
 		}
-		if !hasProtoFiles(path) {
-			return nil
-		}
 		apiPath, err := filepath.Rel(googleapisDir, path)
 		if err != nil {
 			return err
+		}
+		// Skip excluded directories.
+		for _, prefix := range excludedAPIPrefixes {
+			if strings.HasPrefix(apiPath, prefix) {
+				return filepath.SkipDir
+			}
+		}
+		if !hasProtoFiles(path) {
+			return nil
 		}
 		paths = append(paths, apiPath)
 		return nil
