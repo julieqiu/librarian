@@ -41,6 +41,7 @@ func TestAddLibraries(t *testing.T) {
 		"google/cloud/speech/v1p1beta1",
 		"google/cloud/speech/v2",
 		"grafeas/v1",
+		"library/two",
 	}
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("mismatch (-want +got):\n%s", diff)
@@ -107,6 +108,17 @@ func TestFill(t *testing.T) {
 			defaults: nil,
 			lib:      &config.Library{Output: "foo/"},
 			want:     &config.Library{APIs: []*config.API{{}}, Output: "foo/"},
+		},
+		{
+			name:     "derives output from name",
+			defaults: defaults,
+			lib:      &config.Library{Name: "google-cloud-speech-v1"},
+			want: &config.Library{
+				Name:         "google-cloud-speech-v1",
+				APIs:         []*config.API{{Path: "google/cloud/speech/v1"}},
+				Output:       "src/generated/cloud/speech/v1",
+				ReleaseLevel: "stable",
+			},
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
