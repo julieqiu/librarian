@@ -28,7 +28,7 @@ import (
 // libraries. It expects applyDefault to have been called on all libraries first
 // to populate API paths.
 func addLibraries(cfg *config.Config, googleapisDir string) error {
-	allAPIs, err := listAPIs(googleapisDir)
+	allAPIs, err := listAPIs(googleapisDir, cfg.Language)
 	if err != nil {
 		return err
 	}
@@ -57,15 +57,10 @@ func addLibraries(cfg *config.Config, googleapisDir string) error {
 	return nil
 }
 
-// excludedAPIPrefixes contains directory prefixes that should not be scanned
-// for APIs. These are typically tooling or metadata directories.
-var excludedAPIPrefixes = []string{
-	"gapic",
-}
-
 // listAPIs scans the googleapis directory and returns all API paths. It finds
-// directories containing .proto files.
-func listAPIs(googleapisDir string) ([]string, error) {
+// directories containing .proto files, excluding paths in config.ExcludedAPIs.
+func listAPIs(googleapisDir, language string) ([]string, error) {
+	excluded := buildExclusionSet(language)
 	var paths []string
 	err := filepath.WalkDir(googleapisDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -79,12 +74,14 @@ func listAPIs(googleapisDir string) ([]string, error) {
 			return err
 		}
 		// Skip excluded directories.
-		for _, prefix := range excludedAPIPrefixes {
-			if strings.HasPrefix(apiPath, prefix) {
-				return filepath.SkipDir
-			}
+		if excluded.matchesPrefix(apiPath) {
+			return filepath.SkipDir
 		}
 		if !hasProtoFiles(path) {
+			return nil
+		}
+		// Skip exact matches.
+		if excluded.matchesExact(apiPath) {
 			return nil
 		}
 		paths = append(paths, apiPath)
@@ -94,6 +91,46 @@ func listAPIs(googleapisDir string) ([]string, error) {
 		return nil, err
 	}
 	return paths, nil
+}
+
+// exclusionSet holds prefix and exact match exclusions for efficient lookup.
+type exclusionSet struct {
+	prefixes []string
+	exact    map[string]bool
+}
+
+// buildExclusionSet creates an exclusion set for the given language.
+func buildExclusionSet(language string) *exclusionSet {
+	es := &exclusionSet{
+		exact: make(map[string]bool),
+	}
+	// Add "All" exclusions.
+	es.prefixes = append(es.prefixes, config.ExcludedAPIs.All...)
+	for _, p := range config.ExactExcludedAPIs.All {
+		es.exact[p] = true
+	}
+	// Add language-specific exclusions.
+	switch language {
+	case "rust":
+		es.prefixes = append(es.prefixes, config.ExcludedAPIs.Rust...)
+		for _, p := range config.ExactExcludedAPIs.Rust {
+			es.exact[p] = true
+		}
+	}
+	return es
+}
+
+func (es *exclusionSet) matchesPrefix(path string) bool {
+	for _, prefix := range es.prefixes {
+		if strings.HasPrefix(path, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
+func (es *exclusionSet) matchesExact(path string) bool {
+	return es.exact[path]
 }
 
 // hasProtoFiles returns true if the directory contains any .proto files.

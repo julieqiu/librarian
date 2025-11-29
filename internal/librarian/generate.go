@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/fetch"
@@ -83,9 +84,18 @@ func runGenerate(ctx context.Context, all bool, libraryName string) error {
 	}
 	// Format generated files at the end.
 	if cfg.Language == "rust" && len(generatedDirs) > 0 {
-		fmt.Println("Formatting generated files...")
-		if err := rust.Format(generatedDirs...); err != nil {
-			return err
+		// Filter to only directories that exist.
+		var existingDirs []string
+		for _, dir := range generatedDirs {
+			if _, err := os.Stat(dir); err == nil {
+				existingDirs = append(existingDirs, dir)
+			}
+		}
+		if len(existingDirs) > 0 {
+			fmt.Println("Formatting generated files...")
+			if err := rust.Format(existingDirs...); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
