@@ -1,0 +1,541 @@
+// Copyright 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Command migrate-librarian-go converts google-cloud-go's .librarian configuration
+// files (state.yaml, config.yaml, repo-config.yaml) to a librarian.yaml file.
+//
+// Usage:
+//
+//	go run ./devtools/cmd/migrate-librarian-go
+//
+// By default, this tool fetches the latest commit from
+// github.com/googleapis/google-cloud-go using the GitHub API, downloads
+// the tarball to $LIBRARIAN_CACHE (or $HOME/.cache/librarian if not set),
+// reads the .librarian directory, and generates a librarian.yaml file.
+//
+// Flags:
+//
+//	-repo      Override the repository path (skips downloading)
+//	-output    Output file path (default: librarian.yaml)
+package main
+
+import (
+	"flag"
+	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+	"slices"
+	"strings"
+
+	"github.com/googleapis/librarian/internal/config/bazel"
+	"github.com/googleapis/librarian/internal/fetch"
+	"gopkg.in/yaml.v3"
+)
+
+const (
+	defaultRepoOrg  = "googleapis"
+	defaultRepoName = "google-cloud-go"
+	defaultBranch   = "main"
+)
+
+// Input structures from .librarian files
+
+// StateFile represents the .librarian/state.yaml file.
+type StateFile struct {
+	Image     string          `yaml:"image"`
+	Libraries []*StateLibrary `yaml:"libraries"`
+}
+
+// StateLibrary represents a library in state.yaml.
+type StateLibrary struct {
+	ID                  string      `yaml:"id"`
+	Version             string      `yaml:"version"`
+	LastGeneratedCommit string      `yaml:"last_generated_commit"`
+	APIs                []*StateAPI `yaml:"apis"`
+	SourceRoots         []string    `yaml:"source_roots"`
+	PreserveRegex       []string    `yaml:"preserve_regex"`
+	RemoveRegex         []string    `yaml:"remove_regex"`
+	ReleaseExcludePaths []string    `yaml:"release_exclude_paths"`
+	TagFormat           string      `yaml:"tag_format"`
+}
+
+// StateAPI represents an API in state.yaml.
+type StateAPI struct {
+	Path          string `yaml:"path"`
+	ServiceConfig string `yaml:"service_config"`
+}
+
+// ConfigFile represents the .librarian/config.yaml file.
+type ConfigFile struct {
+	GlobalFilesAllowlist []AllowlistEntry `yaml:"global_files_allowlist"`
+	Libraries            []*ConfigLibrary `yaml:"libraries"`
+}
+
+// AllowlistEntry represents an entry in global_files_allowlist.
+type AllowlistEntry struct {
+	Path        string `yaml:"path"`
+	Permissions string `yaml:"permissions"`
+}
+
+// ConfigLibrary represents a library in config.yaml.
+type ConfigLibrary struct {
+	ID             string `yaml:"id"`
+	ReleaseBlocked bool   `yaml:"release_blocked"`
+}
+
+// RepoConfigFile represents the .librarian/generator-input/repo-config.yaml file.
+type RepoConfigFile struct {
+	Modules []*RepoConfigModule `yaml:"modules"`
+}
+
+// RepoConfigModule represents a module in repo-config.yaml.
+type RepoConfigModule struct {
+	Name                        string           `yaml:"name"`
+	ModulePathVersion           string           `yaml:"module_path_version,omitempty"`
+	DeleteGenerationOutputPaths []string         `yaml:"delete_generation_output_paths,omitempty"`
+	APIs                        []*RepoConfigAPI `yaml:"apis,omitempty"`
+}
+
+// RepoConfigAPI represents an API in repo-config.yaml.
+type RepoConfigAPI struct {
+	Path            string   `yaml:"path"`
+	DisableGAPIC    bool     `yaml:"disable_gapic,omitempty"`
+	ClientDirectory string   `yaml:"client_directory,omitempty"`
+	NestedProtos    []string `yaml:"nested_protos,omitempty"`
+	ProtoPackage    string   `yaml:"proto_package,omitempty"`
+}
+
+// Output structures for librarian.yaml
+
+// LibrarianConfig represents the output librarian.yaml file.
+type LibrarianConfig struct {
+	Language  string              `yaml:"language"`
+	Repo      string              `yaml:"repo,omitempty"`
+	Sources   *Sources            `yaml:"sources,omitempty"`
+	Defaults  *Defaults           `yaml:"defaults,omitempty"`
+	Libraries []*LibrarianLibrary `yaml:"libraries,omitempty"`
+}
+
+// Sources represents the sources section.
+type Sources struct {
+	Googleapis *Source `yaml:"googleapis,omitempty"`
+}
+
+// Source represents a source repository reference.
+type Source struct {
+	Commit string `yaml:"commit"`
+	SHA256 string `yaml:"sha256,omitempty"`
+}
+
+// Defaults represents default settings.
+type Defaults struct {
+	Output    string `yaml:"output,omitempty"`
+	Transport string `yaml:"transport,omitempty"`
+	TagFormat string `yaml:"tag_format,omitempty"`
+	Remote    string `yaml:"remote,omitempty"`
+	Branch    string `yaml:"branch,omitempty"`
+}
+
+// LibrarianLibrary represents a library in librarian.yaml.
+type LibrarianLibrary struct {
+	Name         string          `yaml:"name"`
+	Output       string          `yaml:"output,omitempty"`
+	SkipGenerate bool            `yaml:"skip_generate,omitempty"`
+	SkipRelease  bool            `yaml:"skip_release,omitempty"`
+	TagFormat    string          `yaml:"tag_format,omitempty"`
+	APIs         []*LibrarianAPI `yaml:"apis,omitempty"`
+	Go           *GoModule       `yaml:"go,omitempty"`
+}
+
+// LibrarianAPI represents an API in librarian.yaml.
+type LibrarianAPI struct {
+	Path              string     `yaml:"path"`
+	ServiceConfig     string     `yaml:"service_config,omitempty"`
+	GRPCServiceConfig string     `yaml:"grpc_service_config,omitempty"`
+	DisableGAPIC      bool       `yaml:"disable_gapic,omitempty"`
+	DIREGAPIC         bool       `yaml:"diregapic,omitempty"`
+	Metadata          *bool      `yaml:"metadata,omitempty"`
+	ReleaseLevel      string     `yaml:"release_level,omitempty"`
+	RESTNumericEnums  *bool      `yaml:"rest_numeric_enums,omitempty"`
+	Transport         string     `yaml:"transport,omitempty"`
+	Go                *GoPackage `yaml:"go,omitempty"`
+}
+
+// GoModule contains Go-specific library configuration.
+type GoModule struct {
+	ModulePath string `yaml:"module_path,omitempty"`
+}
+
+// GoPackage contains Go-specific API configuration.
+type GoPackage struct {
+	ImportPath      string   `yaml:"import_path,omitempty"`
+	LegacyGRPC      bool     `yaml:"legacy_grpc,omitempty"`
+	ClientDirectory string   `yaml:"client_directory,omitempty"`
+	NestedProtos    []string `yaml:"nested_protos,omitempty"`
+	ProtoPackage    string   `yaml:"proto_package,omitempty"`
+}
+
+func main() {
+	repoPath := flag.String("repo", "", "path to the google-cloud-go repository (if empty, downloads from GitHub)")
+	output := flag.String("output", "librarian.yaml", "output file path")
+	flag.Parse()
+
+	// If no repo path provided, download from GitHub.
+	path := *repoPath
+	if path == "" {
+		var err error
+		path, err = fetchRepo(defaultRepoOrg, defaultRepoName, defaultBranch)
+		if err != nil {
+			log.Fatalf("failed to fetch repository: %v", err)
+		}
+		fmt.Printf("using repository at %s\n", path)
+	}
+
+	cfg, err := migrate(path)
+	if err != nil {
+		log.Fatalf("migration failed: %v", err)
+	}
+
+	// Write output
+	f, err := os.Create(*output)
+	if err != nil {
+		log.Fatalf("failed to create output file: %v", err)
+	}
+	defer f.Close()
+
+	enc := yaml.NewEncoder(f)
+	enc.SetIndent(2)
+	if err := enc.Encode(cfg); err != nil {
+		log.Fatalf("failed to encode YAML: %v", err)
+	}
+
+	fmt.Printf("wrote %s\n", *output)
+}
+
+// fetchRepo fetches the latest commit from GitHub and downloads the repository
+// tarball to the cache directory. Returns the path to the extracted repository.
+// If the commit already exists in the cache, skips downloading.
+func fetchRepo(org, repo, branch string) (string, error) {
+	// Get the latest commit SHA from GitHub API.
+	apiURL := fmt.Sprintf("https://api.github.com/repos/%s/%s/commits/%s", org, repo, branch)
+	fmt.Printf("fetching latest commit from %s...\n", apiURL)
+
+	sha, err := fetch.LatestSha(apiURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to get latest commit SHA: %w", err)
+	}
+	fmt.Printf("latest commit: %s\n", sha)
+
+	// Check if this commit already exists in the cache.
+	repoPath := fmt.Sprintf("github.com/%s/%s", org, repo)
+	cachedDir := fetch.CachedRepoDir(repoPath, sha)
+	if cachedDir != "" {
+		fmt.Printf("using cached repository at %s\n", cachedDir)
+		return cachedDir, nil
+	}
+
+	// Get the SHA256 of the tarball.
+	tarballURL := fmt.Sprintf("https://github.com/%s/%s/archive/%s.tar.gz", org, repo, sha)
+	fmt.Printf("computing SHA256 for %s...\n", tarballURL)
+
+	checksum, err := fetch.Sha256(tarballURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to compute SHA256: %w", err)
+	}
+	fmt.Printf("SHA256: %s\n", checksum)
+
+	// Download and extract the tarball using the standard cache mechanism.
+	dir, err := fetch.RepoDir(repoPath, sha, checksum)
+	if err != nil {
+		return "", fmt.Errorf("failed to download repository: %w", err)
+	}
+
+	return dir, nil
+}
+
+// fetchGoogleapis fetches the googleapis commit used by most google-cloud-go libraries,
+// computes its SHA256, and returns the source config and the local directory path.
+func fetchGoogleapis() (*Source, string, error) {
+	// Use the googleapis commit from google-cloud-go's .librarian/state.yaml.
+	sha := "7c0dcbba70fc5dd64655a77e74dbbf8aaf04c1bf"
+	fmt.Printf("using googleapis commit: %s\n", sha)
+
+	tarballURL := fmt.Sprintf("https://github.com/googleapis/googleapis/archive/%s.tar.gz", sha)
+	fmt.Printf("computing SHA256 for %s...\n", tarballURL)
+
+	checksum, err := fetch.Sha256(tarballURL)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to compute SHA256: %w", err)
+	}
+	fmt.Printf("googleapis SHA256: %s\n", checksum)
+
+	// Download and extract googleapis to get the directory.
+	dir, err := fetch.RepoDir("github.com/googleapis/googleapis", sha, checksum)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed to download googleapis: %w", err)
+	}
+	fmt.Printf("googleapis directory: %s\n", dir)
+
+	return &Source{
+		Commit: sha,
+		SHA256: checksum,
+	}, dir, nil
+}
+
+// migrate reads the .librarian configuration files and converts them to
+// a librarian.yaml configuration.
+func migrate(repoPath string) (*LibrarianConfig, error) {
+	stateFile, err := readStateFile(filepath.Join(repoPath, ".librarian", "state.yaml"))
+	if err != nil {
+		return nil, fmt.Errorf("failed to read state.yaml: %w", err)
+	}
+
+	configFile, err := readConfigFile(filepath.Join(repoPath, ".librarian", "config.yaml"))
+	if err != nil {
+		return nil, fmt.Errorf("failed to read config.yaml: %w", err)
+	}
+
+	repoConfig, err := readRepoConfigFile(filepath.Join(repoPath, ".librarian", "generator-input", "repo-config.yaml"))
+	if err != nil {
+		return nil, fmt.Errorf("failed to read repo-config.yaml: %w", err)
+	}
+
+	// Fetch googleapis commit, sha256, and directory.
+	googleapisSrc, googleapisDir, err := fetchGoogleapis()
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch googleapis: %w", err)
+	}
+
+	// Build lookup maps
+	releaseBlocked := make(map[string]bool)
+	for _, lib := range configFile.Libraries {
+		releaseBlocked[lib.ID] = lib.ReleaseBlocked
+	}
+
+	moduleConfigs := make(map[string]*RepoConfigModule)
+	for _, mod := range repoConfig.Modules {
+		moduleConfigs[mod.Name] = mod
+	}
+
+	// Build output config
+	output := &LibrarianConfig{
+		Language: "go",
+		Repo:     "googleapis/google-cloud-go",
+		Sources: &Sources{
+			Googleapis: googleapisSrc,
+		},
+		Defaults: &Defaults{
+			TagFormat: "{name}/v{version}",
+			Remote:    "origin",
+			Branch:    "main",
+		},
+	}
+
+	// Convert libraries
+	for _, stateLib := range stateFile.Libraries {
+		lib := convertLibrary(stateLib, releaseBlocked[stateLib.ID], moduleConfigs[stateLib.ID], googleapisDir)
+		output.Libraries = append(output.Libraries, lib)
+	}
+
+	// Sort libraries by name
+	slices.SortFunc(output.Libraries, func(a, b *LibrarianLibrary) int {
+		return strings.Compare(a.Name, b.Name)
+	})
+
+	return output, nil
+}
+
+func convertLibrary(state *StateLibrary, releaseBlocked bool, moduleConfig *RepoConfigModule, googleapisDir string) *LibrarianLibrary {
+	lib := &LibrarianLibrary{
+		Name: state.ID,
+	}
+
+	// Skip generation for handwritten libraries (no APIs).
+	if len(state.APIs) == 0 {
+		lib.SkipGenerate = true
+	}
+
+	// Skip generation if any API path doesn't exist in the current googleapis commit.
+	for _, api := range state.APIs {
+		apiDir := filepath.Join(googleapisDir, api.Path)
+		if _, err := os.Stat(apiDir); os.IsNotExist(err) {
+			fmt.Printf("warning: skipping %s: API path %s not found in googleapis\n", state.ID, api.Path)
+			lib.SkipGenerate = true
+			break
+		}
+	}
+
+	// Set output based on name (for non-standard cases)
+	if state.ID == "root-module" {
+		lib.Output = "."
+	}
+
+	// Handle release blocking
+	if releaseBlocked {
+		lib.SkipRelease = true
+	}
+
+	// Handle custom tag format (only if different from default)
+	if state.TagFormat != "" && state.TagFormat != "{id}/v{version}" {
+		lib.TagFormat = strings.ReplaceAll(state.TagFormat, "{id}", "{name}")
+	}
+
+	// Build API config map from repo-config.yaml
+	apiConfigs := make(map[string]*RepoConfigAPI)
+	if moduleConfig != nil {
+		for _, api := range moduleConfig.APIs {
+			apiConfigs[api.Path] = api
+		}
+
+		// Handle module_path_version (for v2+ modules like "storage/v2")
+		if moduleConfig.ModulePathVersion != "" {
+			lib.Go = &GoModule{
+				ModulePath: fmt.Sprintf("cloud.google.com/go/%s/%s", state.ID, moduleConfig.ModulePathVersion),
+			}
+		}
+	}
+
+	// Set module path for libraries with version suffix in name (like "bigquery/v2")
+	if lib.Go == nil && strings.Contains(state.ID, "/v") {
+		lib.Go = &GoModule{
+			ModulePath: fmt.Sprintf("cloud.google.com/go/%s", state.ID),
+		}
+	}
+
+	// Convert APIs
+	for _, stateAPI := range state.APIs {
+		api := &LibrarianAPI{
+			Path: stateAPI.Path,
+		}
+
+		// Service config - include full path
+		if stateAPI.ServiceConfig != "" {
+			api.ServiceConfig = filepath.Join(stateAPI.Path, stateAPI.ServiceConfig)
+		}
+
+		// Parse BUILD.bazel to get GAPIC configuration.
+		buildFile := filepath.Join(googleapisDir, stateAPI.Path, "BUILD.bazel")
+		bazelCfg, err := bazel.Parse(buildFile)
+		if err != nil {
+			fmt.Printf("warning: failed to parse %s: %v\n", buildFile, err)
+		} else if bazelCfg.HasGAPIC {
+			// Use import path from BUILD.bazel.
+			if bazelCfg.GAPICImportPath != "" {
+				if api.Go == nil {
+					api.Go = &GoPackage{}
+				}
+				api.Go.ImportPath = bazelCfg.GAPICImportPath
+			}
+
+			// Set other GAPIC options.
+			if bazelCfg.GRPCServiceConfig != "" {
+				api.GRPCServiceConfig = bazelCfg.GRPCServiceConfig
+			}
+			if bazelCfg.DIREGAPIC {
+				api.DIREGAPIC = true
+			}
+			if bazelCfg.Metadata {
+				api.Metadata = boolPtr(true)
+			}
+			if bazelCfg.ReleaseLevel != "" {
+				api.ReleaseLevel = bazelCfg.ReleaseLevel
+			}
+			if bazelCfg.RESTNumericEnums {
+				api.RESTNumericEnums = boolPtr(true)
+			}
+			if bazelCfg.Transport != "" {
+				api.Transport = bazelCfg.Transport
+			}
+			if bazelCfg.HasLegacyGRPC {
+				if api.Go == nil {
+					api.Go = &GoPackage{}
+				}
+				api.Go.LegacyGRPC = true
+			}
+		} else if !bazelCfg.HasGAPIC {
+			// No GAPIC rule means this API doesn't need GAPIC generation.
+			api.DisableGAPIC = true
+		}
+
+		// Apply repo-config API settings (may override bazel settings).
+		if apiConfig, ok := apiConfigs[stateAPI.Path]; ok {
+			if apiConfig.DisableGAPIC {
+				api.DisableGAPIC = true
+			}
+			if api.Go == nil {
+				api.Go = &GoPackage{}
+			}
+			if apiConfig.ClientDirectory != "" {
+				api.Go.ClientDirectory = apiConfig.ClientDirectory
+			}
+			if len(apiConfig.NestedProtos) > 0 {
+				api.Go.NestedProtos = apiConfig.NestedProtos
+			}
+			if apiConfig.ProtoPackage != "" {
+				api.Go.ProtoPackage = apiConfig.ProtoPackage
+			}
+		}
+
+		// Clean up empty Go config.
+		if api.Go != nil && api.Go.ImportPath == "" && !api.Go.LegacyGRPC &&
+			api.Go.ClientDirectory == "" && len(api.Go.NestedProtos) == 0 && api.Go.ProtoPackage == "" {
+			api.Go = nil
+		}
+
+		lib.APIs = append(lib.APIs, api)
+	}
+
+	return lib
+}
+
+func readStateFile(path string) (*StateFile, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var state StateFile
+	if err := yaml.Unmarshal(data, &state); err != nil {
+		return nil, err
+	}
+	return &state, nil
+}
+
+func readConfigFile(path string) (*ConfigFile, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var config ConfigFile
+	if err := yaml.Unmarshal(data, &config); err != nil {
+		return nil, err
+	}
+	return &config, nil
+}
+
+func readRepoConfigFile(path string) (*RepoConfigFile, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var config RepoConfigFile
+	if err := yaml.Unmarshal(data, &config); err != nil {
+		return nil, err
+	}
+	return &config, nil
+}
+
+func boolPtr(b bool) *bool {
+	return &b
+}
