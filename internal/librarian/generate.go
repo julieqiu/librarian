@@ -170,6 +170,9 @@ func generate(ctx context.Context, language string, library *config.Library, sou
 	case "testhelper":
 		err = testGenerate(library)
 	case "go":
+		if err := golang.RequireTools(); err != nil {
+			return err
+		}
 		keep := append(library.Keep,
 			"CHANGES.md",
 			"README.md",
@@ -182,6 +185,9 @@ func generate(ctx context.Context, language string, library *config.Library, sou
 		}
 		err = golang.Generate(ctx, library, sources)
 	case "rust":
+		if err := rust.RequireTools(); err != nil {
+			return err
+		}
 		// Always keep Cargo.toml for Rust libraries.
 		keep := append(library.Keep, "Cargo.toml")
 		if err := cleanOutput(library.Output, keep); err != nil {

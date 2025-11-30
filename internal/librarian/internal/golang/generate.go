@@ -460,9 +460,9 @@ func moveFiles(sourceDir, targetDir string) error {
 	return nil
 }
 
-// goimports runs goimports on the generated files.
+// goimports runs goimports on the generated files using the go tool directive.
 func goimports(_ context.Context, dir string) error {
-	return command.Run("goimports", "-w", dir)
+	return command.Run("go", "tool", "goimports", "-w", dir)
 }
 
 func sourceDir(source *config.Source, repo string) (string, error) {
