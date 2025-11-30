@@ -108,8 +108,11 @@ func generateAll(ctx context.Context, cfg *config.Config) ([]string, error) {
 		return nil, err
 	}
 	// Apply defaults to populate API paths before checking coverage.
+	// Skip libraries marked with skip_generate.
 	for _, lib := range cfg.Libraries {
-		applyDefault(lib, cfg.Default)
+		if !lib.SkipGenerate {
+			applyDefault(lib, cfg.Default)
+		}
 	}
 	uncoveredAPIs := findUncoveredAPIs(cfg, googleapisDir)
 	var generatedDirs []string
@@ -138,6 +141,10 @@ func generateLibrary(ctx context.Context, cfg *config.Config, libraryName string
 	}
 	for _, lib := range cfg.Libraries {
 		if lib.Name == libraryName {
+			if lib.SkipGenerate {
+				fmt.Printf("skipping %s: skip_generate is set\n", lib.Name)
+				return lib.Output, nil
+			}
 			applyDefault(lib, cfg.Default)
 			for _, api := range lib.APIs {
 				if api.ServiceConfig == "" {
