@@ -54,3 +54,20 @@ func testGenerate(library *config.Library) error {
 	readmePath := filepath.Join(library.Output, "README.md")
 	return os.WriteFile(readmePath, []byte(content), 0644)
 }
+
+func testCreate(libraryName string, apis []*config.API) error {
+	// Simulate creating a new library by writing a marker file.
+	output := "src/generated/" + libraryName
+	if err := os.MkdirAll(output, 0755); err != nil {
+		return err
+	}
+
+	// Write a marker file with library info.
+	var apiPaths []string
+	for _, api := range apis {
+		apiPaths = append(apiPaths, api.Path)
+	}
+	content := fmt.Sprintf("# %s\n\nCreated library with APIs: %v\n", libraryName, apiPaths)
+	readmePath := filepath.Join(output, "README.md")
+	return os.WriteFile(readmePath, []byte(content), 0644)
+}

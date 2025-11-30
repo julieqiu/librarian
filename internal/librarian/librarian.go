@@ -34,6 +34,7 @@ func Run(ctx context.Context, args ...string) error {
 		Version:   Version(),
 		Commands: []*cli.Command{
 			versionCommand(),
+			createCommand(),
 			tidyCommand(),
 			generateCommand(),
 			releaseCommand(),
