@@ -39,6 +39,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/config/bazel"
 	"github.com/googleapis/librarian/internal/fetch"
 	"gopkg.in/yaml.v3"
@@ -117,75 +118,6 @@ type RepoConfigAPI struct {
 	ProtoPackage    string   `yaml:"proto_package,omitempty"`
 }
 
-// Output structures for librarian.yaml
-
-// LibrarianConfig represents the output librarian.yaml file.
-type LibrarianConfig struct {
-	Language  string              `yaml:"language"`
-	Repo      string              `yaml:"repo,omitempty"`
-	Sources   *Sources            `yaml:"sources,omitempty"`
-	Defaults  *Defaults           `yaml:"defaults,omitempty"`
-	Libraries []*LibrarianLibrary `yaml:"libraries,omitempty"`
-}
-
-// Sources represents the sources section.
-type Sources struct {
-	Googleapis *Source `yaml:"googleapis,omitempty"`
-}
-
-// Source represents a source repository reference.
-type Source struct {
-	Commit string `yaml:"commit"`
-	SHA256 string `yaml:"sha256,omitempty"`
-}
-
-// Defaults represents default settings.
-type Defaults struct {
-	Output    string `yaml:"output,omitempty"`
-	Transport string `yaml:"transport,omitempty"`
-	TagFormat string `yaml:"tag_format,omitempty"`
-	Remote    string `yaml:"remote,omitempty"`
-	Branch    string `yaml:"branch,omitempty"`
-}
-
-// LibrarianLibrary represents a library in librarian.yaml.
-type LibrarianLibrary struct {
-	Name         string          `yaml:"name"`
-	Output       string          `yaml:"output,omitempty"`
-	SkipGenerate bool            `yaml:"skip_generate,omitempty"`
-	SkipRelease  bool            `yaml:"skip_release,omitempty"`
-	TagFormat    string          `yaml:"tag_format,omitempty"`
-	APIs         []*LibrarianAPI `yaml:"apis,omitempty"`
-	Go           *GoModule       `yaml:"go,omitempty"`
-}
-
-// LibrarianAPI represents an API in librarian.yaml.
-type LibrarianAPI struct {
-	Path              string     `yaml:"path"`
-	ServiceConfig     string     `yaml:"service_config,omitempty"`
-	GRPCServiceConfig string     `yaml:"grpc_service_config,omitempty"`
-	DisableGAPIC      bool       `yaml:"disable_gapic,omitempty"`
-	DIREGAPIC         bool       `yaml:"diregapic,omitempty"`
-	Metadata          *bool      `yaml:"metadata,omitempty"`
-	ReleaseLevel      string     `yaml:"release_level,omitempty"`
-	RESTNumericEnums  *bool      `yaml:"rest_numeric_enums,omitempty"`
-	Transport         string     `yaml:"transport,omitempty"`
-	Go                *GoPackage `yaml:"go,omitempty"`
-}
-
-// GoModule contains Go-specific library configuration.
-type GoModule struct {
-	ModulePath string `yaml:"module_path,omitempty"`
-}
-
-// GoPackage contains Go-specific API configuration.
-type GoPackage struct {
-	ImportPath      string   `yaml:"import_path,omitempty"`
-	LegacyGRPC      bool     `yaml:"legacy_grpc,omitempty"`
-	ClientDirectory string   `yaml:"client_directory,omitempty"`
-	NestedProtos    []string `yaml:"nested_protos,omitempty"`
-	ProtoPackage    string   `yaml:"proto_package,omitempty"`
-}
 
 func main() {
 	repoPath := flag.String("repo", "", "path to the google-cloud-go repository (if empty, downloads from GitHub)")
@@ -267,7 +199,7 @@ func fetchRepo(org, repo, branch string) (string, error) {
 
 // fetchGoogleapis fetches the googleapis commit used by most google-cloud-go libraries,
 // computes its SHA256, and returns the source config and the local directory path.
-func fetchGoogleapis() (*Source, string, error) {
+func fetchGoogleapis() (*config.Source, string, error) {
 	// Use the googleapis commit from google-cloud-go's .librarian/state.yaml.
 	sha := "7c0dcbba70fc5dd64655a77e74dbbf8aaf04c1bf"
 	fmt.Printf("using googleapis commit: %s\n", sha)
@@ -288,7 +220,7 @@ func fetchGoogleapis() (*Source, string, error) {
 	}
 	fmt.Printf("googleapis directory: %s\n", dir)
 
-	return &Source{
+	return &config.Source{
 		Commit: sha,
 		SHA256: checksum,
 	}, dir, nil
@@ -296,7 +228,7 @@ func fetchGoogleapis() (*Source, string, error) {
 
 // migrate reads the .librarian configuration files and converts them to
 // a librarian.yaml configuration.
-func migrate(repoPath string) (*LibrarianConfig, error) {
+func migrate(repoPath string) (*config.Config, error) {
 	stateFile, err := readStateFile(filepath.Join(repoPath, ".librarian", "state.yaml"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to read state.yaml: %w", err)
@@ -330,13 +262,13 @@ func migrate(repoPath string) (*LibrarianConfig, error) {
 	}
 
 	// Build output config
-	output := &LibrarianConfig{
+	output := &config.Config{
 		Language: "go",
 		Repo:     "googleapis/google-cloud-go",
-		Sources: &Sources{
+		Sources: &config.Sources{
 			Googleapis: googleapisSrc,
 		},
-		Defaults: &Defaults{
+		Default: &config.Default{
 			TagFormat: "{name}/v{version}",
 			Remote:    "origin",
 			Branch:    "main",
@@ -350,15 +282,15 @@ func migrate(repoPath string) (*LibrarianConfig, error) {
 	}
 
 	// Sort libraries by name
-	slices.SortFunc(output.Libraries, func(a, b *LibrarianLibrary) int {
+	slices.SortFunc(output.Libraries, func(a, b *config.Library) int {
 		return strings.Compare(a.Name, b.Name)
 	})
 
 	return output, nil
 }
 
-func convertLibrary(state *StateLibrary, releaseBlocked bool, moduleConfig *RepoConfigModule, googleapisDir string) *LibrarianLibrary {
-	lib := &LibrarianLibrary{
+func convertLibrary(state *StateLibrary, releaseBlocked bool, moduleConfig *RepoConfigModule, googleapisDir string) *config.Library {
+	lib := &config.Library{
 		Name: state.ID,
 	}
 
@@ -387,6 +319,14 @@ func convertLibrary(state *StateLibrary, releaseBlocked bool, moduleConfig *Repo
 		lib.SkipRelease = true
 	}
 
+	// Convert preserve_regex to keep (strip regex anchors and unescape)
+	for _, pattern := range state.PreserveRegex {
+		path := strings.TrimPrefix(pattern, "^")
+		path = strings.TrimSuffix(path, "$")
+		path = strings.ReplaceAll(path, `\.`, ".")
+		lib.Keep = append(lib.Keep, path)
+	}
+
 	// Handle custom tag format (only if different from default)
 	if state.TagFormat != "" && state.TagFormat != "{id}/v{version}" {
 		lib.TagFormat = strings.ReplaceAll(state.TagFormat, "{id}", "{name}")
@@ -401,7 +341,7 @@ func convertLibrary(state *StateLibrary, releaseBlocked bool, moduleConfig *Repo
 
 		// Handle module_path_version (for v2+ modules like "storage/v2")
 		if moduleConfig.ModulePathVersion != "" {
-			lib.Go = &GoModule{
+			lib.Go = &config.GoModule{
 				ModulePath: fmt.Sprintf("cloud.google.com/go/%s/%s", state.ID, moduleConfig.ModulePathVersion),
 			}
 		}
@@ -409,14 +349,14 @@ func convertLibrary(state *StateLibrary, releaseBlocked bool, moduleConfig *Repo
 
 	// Set module path for libraries with version suffix in name (like "bigquery/v2")
 	if lib.Go == nil && strings.Contains(state.ID, "/v") {
-		lib.Go = &GoModule{
+		lib.Go = &config.GoModule{
 			ModulePath: fmt.Sprintf("cloud.google.com/go/%s", state.ID),
 		}
 	}
 
 	// Convert APIs
 	for _, stateAPI := range state.APIs {
-		api := &LibrarianAPI{
+		api := &config.API{
 			Path: stateAPI.Path,
 		}
 
@@ -434,7 +374,7 @@ func convertLibrary(state *StateLibrary, releaseBlocked bool, moduleConfig *Repo
 			// Use import path from BUILD.bazel.
 			if bazelCfg.GAPICImportPath != "" {
 				if api.Go == nil {
-					api.Go = &GoPackage{}
+					api.Go = &config.GoPackage{}
 				}
 				api.Go.ImportPath = bazelCfg.GAPICImportPath
 			}
@@ -460,7 +400,7 @@ func convertLibrary(state *StateLibrary, releaseBlocked bool, moduleConfig *Repo
 			}
 			if bazelCfg.HasLegacyGRPC {
 				if api.Go == nil {
-					api.Go = &GoPackage{}
+					api.Go = &config.GoPackage{}
 				}
 				api.Go.LegacyGRPC = true
 			}
@@ -475,7 +415,7 @@ func convertLibrary(state *StateLibrary, releaseBlocked bool, moduleConfig *Repo
 				api.DisableGAPIC = true
 			}
 			if api.Go == nil {
-				api.Go = &GoPackage{}
+				api.Go = &config.GoPackage{}
 			}
 			if apiConfig.ClientDirectory != "" {
 				api.Go.ClientDirectory = apiConfig.ClientDirectory
