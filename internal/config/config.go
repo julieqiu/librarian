@@ -115,6 +115,9 @@ type Library struct {
 
 	// Rust contains Rust-specific library configuration.
 	Rust *RustCrate `yaml:"rust,omitempty"`
+
+	// Go contains Go-specific library configuration.
+	Go *GoModule `yaml:"go,omitempty"`
 }
 
 // API describes an API to include in a library.
@@ -123,10 +126,51 @@ type API struct {
 	// "google/cloud/secretmanager/v1".
 	Path string `yaml:"path"`
 
-	// ServiceConfig is the path to the service config file.
-	ServiceConfig string `yaml:"service_config,omitempty"`
+	// DIREGAPIC enables DIREGAPIC (Discovery REST GAPICs) for compute/GCE.
+	DIREGAPIC bool `yaml:"diregapic,omitempty"`
+
+	// DisableGAPIC skips GAPIC generation for this API.
+	DisableGAPIC bool `yaml:"disable_gapic,omitempty"`
 
 	// Format is the API specification format, either "protobuf" (default) or
 	// "discovery".
 	Format string `yaml:"format,omitempty"`
+
+	// GRPCServiceConfig is the name of the gRPC service config JSON file,
+	// e.g., "cloudasset_grpc_service_config.json".
+	GRPCServiceConfig string `yaml:"grpc_service_config,omitempty"`
+
+	// Metadata controls whether metadata (e.g., gapic_metadata.json) is generated.
+	Metadata *bool `yaml:"metadata,omitempty"`
+
+	// RESTNumericEnums controls whether the REST client supports numeric enums.
+	RESTNumericEnums *bool `yaml:"rest_numeric_enums,omitempty"`
+
+	// ServiceConfig is the path to the service config file.
+	ServiceConfig string `yaml:"service_config,omitempty"`
+
+	// Go contains Go-specific API configuration.
+	Go *GoPackage `yaml:"go,omitempty"`
+}
+
+// GoPackage contains Go-specific configuration for an API. These fields
+// correspond to the go_gapic_library rule in BUILD.bazel files.
+type GoPackage struct {
+	// ImportPath is the Go import path for the generated GAPIC client,
+	// e.g., "cloud.google.com/go/asset/apiv1;asset".
+	ImportPath string `yaml:"import_path,omitempty"`
+
+	// GoGRPC indicates whether to use go_grpc_library style (newer) vs
+	// go_proto_library style.
+	GoGRPC *bool `yaml:"go_grpc,omitempty"`
+
+	// LegacyGRPC indicates whether go_proto_library uses the legacy
+	// @io_bazel_rules_go//proto:go_grpc.
+	LegacyGRPC bool `yaml:"legacy_grpc,omitempty"`
+}
+
+// GoModule contains Go-specific configuration for a library.
+type GoModule struct {
+	// ModulePath is the Go module path, e.g., "cloud.google.com/go/secretmanager".
+	ModulePath string `yaml:"module_path,omitempty"`
 }

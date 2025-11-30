@@ -102,6 +102,11 @@ func buildExclusionSet(language string) *exclusionSet {
 	}
 	// Add language-specific exclusions.
 	switch language {
+	case "go":
+		es.prefixes = append(es.prefixes, config.ExcludedAPIs.Go...)
+		for _, p := range config.ExactExcludedAPIs.Go {
+			es.exact[p] = true
+		}
 	case "rust":
 		es.prefixes = append(es.prefixes, config.ExcludedAPIs.Rust...)
 		for _, p := range config.ExactExcludedAPIs.Rust {

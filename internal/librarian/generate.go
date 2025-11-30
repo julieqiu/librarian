@@ -22,6 +22,7 @@ import (
 
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/fetch"
+	"github.com/googleapis/librarian/internal/librarian/internal/golang"
 	"github.com/googleapis/librarian/internal/librarian/internal/rust"
 	"github.com/googleapis/librarian/internal/yaml"
 	"github.com/urfave/cli/v3"
@@ -161,6 +162,18 @@ func generate(ctx context.Context, language string, library *config.Library, sou
 	switch language {
 	case "testhelper":
 		err = testGenerate(library)
+	case "go":
+		keep := append(library.Keep,
+			"CHANGES.md",
+			"README.md",
+			"go.mod",
+			"internal/generated/snippets/go.mod",
+			"internal/version.go",
+		)
+		if err := cleanOutput(library.Output, keep); err != nil {
+			return err
+		}
+		err = golang.Generate(ctx, library, sources)
 	case "rust":
 		// Always keep Cargo.toml for Rust libraries.
 		keep := append(library.Keep, "Cargo.toml")

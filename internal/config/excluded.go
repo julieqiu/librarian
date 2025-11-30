@@ -20,6 +20,7 @@ package config
 // Paths are matched as prefixes (e.g., "google/cloud/foo" matches "google/cloud/foo/v1").
 var ExcludedAPIs = struct {
 	All  []string
+	Go   []string
 	Rust []string
 }{
 	All: []string{
@@ -159,6 +160,8 @@ var ExcludedAPIs = struct {
 		"google/streetview",
 		"google/watcher",
 	},
+
+	Go: []string{},
 
 	Rust: []string{
 		// Advertising & Marketing
@@ -316,10 +319,12 @@ var ExcludedAPIs = struct {
 // Unlike ExcludedAPIs, these are not prefix matches - the channel path must match exactly.
 var ExactExcludedAPIs = struct {
 	All  []string
+	Go   []string
 	Rust []string
 }{
 	All: []string{
 		"google/cloud", // Root cloud directory (common_resources.proto, extended_operations.proto)
 	},
+	Go:   []string{},
 	Rust: []string{},
 }
