@@ -47,11 +47,6 @@ func Create(ctx context.Context, cfg *config.Config, libraryName string, apis []
 
 	slog.Info("creating new Rust library", "name", libraryName, "output", output)
 
-	// Verify required tools are installed.
-	if err := RequireTools(); err != nil {
-		return err
-	}
-
 	// Prepare cargo workspace by creating a new library crate.
 	if err := prepareCargoWorkspace(output); err != nil {
 		return err

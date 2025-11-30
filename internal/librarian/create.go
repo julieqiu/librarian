@@ -95,6 +95,9 @@ func runCreate(ctx context.Context, libraryName string, apiPaths []string) error
 	case "testhelper":
 		return testCreate(libraryName, apis)
 	case "rust":
+		if err := rust.RequireTools(); err != nil {
+			return err
+		}
 		return rust.Create(ctx, cfg, libraryName, apis)
 	case "go":
 		return fmt.Errorf("create not yet implemented for Go")
