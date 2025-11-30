@@ -19,6 +19,7 @@ import (
 	"fmt"
 
 	"github.com/googleapis/librarian/internal/config"
+	"github.com/googleapis/librarian/internal/librarian/internal/golang"
 	"github.com/googleapis/librarian/internal/librarian/internal/rust"
 	"github.com/googleapis/librarian/internal/yaml"
 	"github.com/urfave/cli/v3"
@@ -81,6 +82,8 @@ func releaseAll(cfg *config.Config) (*config.Config, error) {
 	switch cfg.Language {
 	case "testhelper":
 		return testReleaseAll(cfg)
+	case "go":
+		return golang.ReleaseAll(cfg)
 	case "rust":
 		return rust.ReleaseAll(cfg)
 	default:
@@ -92,9 +95,11 @@ func releaseLibrary(cfg *config.Config, name string) (*config.Config, error) {
 	switch cfg.Language {
 	case "testhelper":
 		return testReleaseLibrary(cfg, name)
+	case "go":
+		return golang.ReleaseLibrary(cfg, name)
 	case "rust":
 		return rust.ReleaseLibrary(cfg, name)
 	default:
-		return nil, fmt.Errorf("language not supported for release --all: %q", cfg.Language)
+		return nil, fmt.Errorf("language not supported for release: %q", cfg.Language)
 	}
 }
