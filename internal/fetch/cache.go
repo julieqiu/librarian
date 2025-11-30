@@ -111,6 +111,21 @@ func RepoDir(repo, commit, expectedSHA256 string) (string, error) {
 	return outDir, nil
 }
 
+// CachedRepoDir returns the path to an already-cached repository directory,
+// or empty string if not cached. This allows callers to check if a repo/commit
+// exists in the cache without downloading or verifying SHA256.
+func CachedRepoDir(repo, commit string) string {
+	cacheDir, err := cacheDir()
+	if err != nil {
+		return ""
+	}
+	dir, err := extractedDir(cacheDir, repo, commit)
+	if err != nil {
+		return ""
+	}
+	return dir
+}
+
 // cacheDir returns the root cache directory for librarian operations. It
 // checks the $LIBRARIAN_CACHE environment variable, falling back to
 // $HOME/.cache/librarian if not set.
