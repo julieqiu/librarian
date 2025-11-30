@@ -168,9 +168,6 @@ type GoPackage struct {
 	// @io_bazel_rules_go//proto:go_grpc.
 	LegacyGRPC bool `yaml:"legacy_grpc,omitempty"`
 
-	// ClientDirectory overrides the default client output directory.
-	ClientDirectory string `yaml:"client_directory,omitempty"`
-
 	// NestedProtos lists additional proto files to include.
 	NestedProtos []string `yaml:"nested_protos,omitempty"`
 

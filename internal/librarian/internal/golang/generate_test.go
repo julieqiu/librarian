@@ -605,3 +605,4 @@ func TestCollectProtoFiles_NotExists(t *testing.T) {
 		t.Error("expected error for nonexistent path")
 	}
 }
+
