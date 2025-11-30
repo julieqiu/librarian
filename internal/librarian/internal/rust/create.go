@@ -146,11 +146,6 @@ func postGenerate(outdir string) error {
 		return fmt.Errorf("cargo fmt failed: %w", err)
 	}
 
-	// Add the new files to git.
-	if err := command.Run("git", "add", outdir); err != nil {
-		return fmt.Errorf("git add failed: %w", err)
-	}
-
 	// Get the package name from Cargo.toml.
 	packageName, err := getPackageName(outdir)
 	if err != nil {
@@ -183,8 +178,7 @@ func postGenerate(outdir string) error {
 		return fmt.Errorf("typos failed: %w", err)
 	}
 
-	// Add workspace files to git.
-	return command.Run("git", "add", "Cargo.lock", "Cargo.toml")
+	return nil
 }
 
 // getPackageName reads the package name from Cargo.toml.
