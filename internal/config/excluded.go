@@ -79,8 +79,8 @@ var ExcludedAPIs = struct {
 		"google/cloud/gkebackup/logging",
 		"google/cloud/gkehub/policycontroller",
 		"google/cloud/gkehub/servicemesh",
-		"google/cloud/gkehub/v1/configmanagement",      // Nested module of gkehub/v1
-		"google/cloud/gkehub/v1/multiclusteringress",   // Nested module of gkehub/v1
+		"google/cloud/gkehub/v1/configmanagement",    // Nested module of gkehub/v1
+		"google/cloud/gkehub/v1/multiclusteringress", // Nested module of gkehub/v1
 		"google/cloud/gkehub/v1alpha",
 		"google/cloud/gkehub/v1beta",
 		"google/cloud/gsuiteaddons/logging",
@@ -161,7 +161,175 @@ var ExcludedAPIs = struct {
 		"google/watcher",
 	},
 
-	Go: []string{},
+	Go: []string{
+		// Advertising & Marketing
+		"google/ads/admanager/v1",
+		"google/ads/admob/v1",
+		"google/ads/datamanager/v1",
+		"google/ads/googleads/v19/common",
+		"google/ads/googleads/v19/enums",
+		"google/ads/googleads/v19/errors",
+		"google/ads/googleads/v19/resources",
+		"google/ads/googleads/v19/services",
+		"google/ads/googleads/v20/common",
+		"google/ads/googleads/v20/enums",
+		"google/ads/googleads/v20/errors",
+		"google/ads/googleads/v20/resources",
+		"google/ads/googleads/v20/services",
+		"google/ads/googleads/v21/common",
+		"google/ads/googleads/v21/enums",
+		"google/ads/googleads/v21/errors",
+		"google/ads/googleads/v21/resources",
+		"google/ads/googleads/v21/services",
+		"google/ads/googleads/v22/common",
+		"google/ads/googleads/v22/enums",
+		"google/ads/googleads/v22/errors",
+		"google/ads/googleads/v22/resources",
+		"google/ads/googleads/v22/services",
+		"google/ads/searchads360/v0/common",
+		"google/ads/searchads360/v0/enums",
+		"google/ads/searchads360/v0/errors",
+		"google/ads/searchads360/v0/resources",
+		"google/ads/searchads360/v0/services",
+
+		// AI & Machine Learning
+		"google/ai/generativelanguage/v1beta3",
+
+		// Analytics
+		"google/analytics/admin/v1beta",
+		"google/analytics/cloud",
+		"google/analytics/data/v1alpha",
+		"google/analytics/data/v1beta",
+
+		// API Infrastructure
+		"google/api",
+		"google/api/servicecontrol/v2",
+
+		// App Engine
+		"google/appengine/legacy",
+		"google/appengine/logging/v1",
+		"google/appengine/v1beta",
+
+		// Google Apps
+		"google/apps/alertcenter/v1beta1",
+		"google/apps/card/v1",
+		"google/apps/drive/activity/v2",
+		"google/apps/drive/labels/v2",
+		"google/apps/drive/labels/v2beta",
+		"google/apps/script/type",
+		"google/apps/script/type/calendar",
+		"google/apps/script/type/docs",
+		"google/apps/script/type/drive",
+		"google/apps/script/type/gmail",
+		"google/apps/script/type/sheets",
+		"google/apps/script/type/slides",
+
+		// Chat
+		"google/chat/logging/v1",
+
+		// Cloud AI Platform
+		"google/cloud/aiplatform/v1/schema/predict/instance",
+		"google/cloud/aiplatform/v1/schema/predict/params",
+		"google/cloud/aiplatform/v1/schema/predict/prediction",
+		"google/cloud/aiplatform/v1/schema/trainingjob/definition",
+
+		// Cloud APIs (beta/alpha/specialized)
+		"google/cloud/asset/v1p1beta1",
+		"google/cloud/batch/v1alpha",
+		"google/cloud/biglake/v1",
+		"google/cloud/bigquery/logging/v1",
+		"google/cloud/cloudsecuritycompliance/v1",
+		"google/cloud/commerce/consumer/procurement/v1alpha1",
+		"google/cloud/common",
+		"google/cloud/compute/v1small",
+		"google/cloud/configdelivery/v1alpha",
+		"google/cloud/connectors/v1",
+		"google/cloud/contentwarehouse/v1",
+		"google/cloud/domains/v1",
+		"google/cloud/enterpriseknowledgegraph/v1",
+		"google/cloud/gdchardwaremanagement/v1alpha",
+		"google/cloud/geminidataanalytics/v1alpha",
+		"google/cloud/gkehub/v1",
+		"google/cloud/hypercomputecluster/v1alpha",
+		"google/cloud/hypercomputecluster/v1beta",
+		"google/cloud/location",
+		"google/cloud/mediatranslation/v1alpha1",
+		"google/cloud/networksecurity/v1",
+		"google/cloud/networksecurity/v1alpha1",
+		"google/cloud/orchestration/airflow/service/v1beta1",
+		"google/cloud/recommender/logging/v1",
+		"google/cloud/redis/cluster/v1beta1",
+		"google/cloud/secrets/v1beta1",
+		"google/cloud/security/privateca/v1beta1",
+		"google/cloud/sql/v1",
+		"google/cloud/telcoautomation/v1alpha1",
+		"google/cloud/texttospeech/v1beta1",
+		"google/cloud/timeseriesinsights/v1",
+		"google/cloud/tpu/v2",
+		"google/cloud/tpu/v2alpha1",
+		"google/cloud/translate/v3beta1",
+		"google/cloud/videointelligence/v1p1beta1",
+		"google/cloud/videointelligence/v1p2beta1",
+		"google/cloud/vision/v1p2beta1",
+		"google/cloud/vision/v1p3beta1",
+		"google/cloud/vision/v1p4beta1",
+		"google/cloud/visionai/v1alpha1",
+		"google/cloud/websecurityscanner/v1alpha",
+		"google/cloud/websecurityscanner/v1beta",
+
+		// Container
+		"google/container/v1beta1",
+
+		// DevTools
+		"google/devtools/containeranalysis/v1",
+		"google/devtools/source/v1",
+
+		// Geo
+		"google/geo/type",
+
+		// IAM
+		"google/iam/admin/v1",
+		"google/iam/v2beta",
+		"google/identity/accesscontextmanager/type",
+
+		// Logging
+		"google/logging/type",
+
+		// Maps
+		"google/maps/aerialview/v1",
+		"google/maps/mapsplatformdatasets/v1",
+		"google/maps/mobilitybilling/logs/v1",
+		"google/maps/playablelocations/v3",
+		"google/maps/playablelocations/v3/sample",
+		"google/maps/regionlookup/v1alpha",
+		"google/maps/roads/v1op",
+		"google/maps/routes/v1",
+		"google/maps/routes/v1alpha",
+		"google/maps/unity",
+		"google/maps/weather/v1",
+
+		// Marketing Platform
+		"google/marketingplatform/admin/v1alpha",
+
+		// RPC
+		"google/rpc",
+		"google/rpc/context",
+
+		// Shopping
+		"google/shopping/merchant/accounts/v1alpha",
+		"google/shopping/merchant/reports/v1alpha",
+
+		// Storage
+		"google/storage/platformlogs/v1",
+		"google/storage/v1",
+		"google/storagetransfer/logging",
+
+		// Types
+		"google/type",
+
+		// Grafeas
+		"grafeas/v1",
+	},
 
 	Rust: []string{
 		// Advertising & Marketing
