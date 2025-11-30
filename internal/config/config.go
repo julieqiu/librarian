@@ -99,6 +99,9 @@ type Library struct {
 	// Keep lists files and directories to preserve during regeneration.
 	Keep []string `yaml:"keep,omitempty"`
 
+	// TagFormat overrides the default tag format for this library.
+	TagFormat string `yaml:"tag_format,omitempty"`
+
 	// CopyrightYear is the copyright year for the library.
 	CopyrightYear string `yaml:"copyright_year,omitempty"`
 
@@ -164,6 +167,15 @@ type GoPackage struct {
 	// LegacyGRPC indicates whether go_proto_library uses the legacy
 	// @io_bazel_rules_go//proto:go_grpc.
 	LegacyGRPC bool `yaml:"legacy_grpc,omitempty"`
+
+	// ClientDirectory overrides the default client output directory.
+	ClientDirectory string `yaml:"client_directory,omitempty"`
+
+	// NestedProtos lists additional proto files to include.
+	NestedProtos []string `yaml:"nested_protos,omitempty"`
+
+	// ProtoPackage overrides the proto package name.
+	ProtoPackage string `yaml:"proto_package,omitempty"`
 }
 
 // GoModule contains Go-specific configuration for a library.
