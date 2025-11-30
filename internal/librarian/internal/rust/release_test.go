@@ -78,8 +78,7 @@ func TestReleaseOne(t *testing.T) {
 
 func setupRelease(t *testing.T) *config.Config {
 	t.Helper()
-	cmdtest.RequireCommand(t, "cargo")
-	cmdtest.RequireCommand(t, "taplo")
+	cmdtest.RequireForTest(t, "cargo", "taplo")
 	tmpDir := t.TempDir()
 	t.Chdir(tmpDir)
 

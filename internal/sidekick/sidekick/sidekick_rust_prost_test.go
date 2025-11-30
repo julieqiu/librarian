@@ -23,8 +23,7 @@ import (
 )
 
 func TestRustProstFromProtobuf(t *testing.T) {
-	cmdtest.RequireCommand(t, "cargo")
-	cmdtest.RequireCommand(t, "protoc")
+	cmdtest.RequireForTest(t, "cargo", "protoc")
 	outDir := t.TempDir()
 	svcConfig := path.Join(testdataDir, "googleapis/google/type/type.yaml")
 	specificationSource := path.Join(testdataDir, "googleapis/google/type")

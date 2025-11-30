@@ -22,7 +22,7 @@ import (
 )
 
 func TestRustProstConvert(t *testing.T) {
-	cmdtest.RequireCommand(t, "protoc")
+	cmdtest.RequireForTest(t, "protoc")
 	outDir := t.TempDir()
 
 	type TestConfig struct {

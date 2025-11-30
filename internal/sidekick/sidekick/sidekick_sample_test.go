@@ -23,7 +23,7 @@ import (
 )
 
 func TestSampleFromProtobuf(t *testing.T) {
-	cmdtest.RequireCommand(t, "protoc")
+	cmdtest.RequireForTest(t, "protoc")
 	outDir := t.TempDir()
 	svcConfig := path.Join(testdataDir, "googleapis/google/type/type.yaml")
 	specificationSource := path.Join(testdataDir, "googleapis/google/type")

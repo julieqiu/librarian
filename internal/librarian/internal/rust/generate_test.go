@@ -25,9 +25,7 @@ import (
 )
 
 func TestGenerate(t *testing.T) {
-	cmdtest.RequireCommand(t, "protoc")
-	cmdtest.RequireCommand(t, "rustfmt")
-	cmdtest.RequireCommand(t, "taplo")
+	cmdtest.RequireForTest(t, "protoc", "rustfmt", "taplo")
 	testdataDir, err := filepath.Abs("../../../sidekick/testdata")
 	if err != nil {
 		t.Fatal(err)

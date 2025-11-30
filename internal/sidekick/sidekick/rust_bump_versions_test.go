@@ -22,7 +22,7 @@ import (
 )
 
 func TestRustBumpVersions(t *testing.T) {
-	cmdtest.RequireCommand(t, "taplo")
+	cmdtest.RequireForTest(t, "taplo")
 	config := &config.Config{
 		Release: &config.Release{
 			Preinstalled: map[string]string{
