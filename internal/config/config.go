@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package config provides types for librarian.yaml configuration files.
 package config
 
 // Config represents a librarian.yaml configuration file.
