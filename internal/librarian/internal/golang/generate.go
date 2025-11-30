@@ -130,12 +130,56 @@ func invokeProtoc(_ context.Context, library *config.Library, api *config.API, g
 			protoFiles = append(protoFiles, filepath.Join(apiDir, entry.Name()))
 		}
 	}
+
+	// Add nested protos if specified.
+	// These are relative paths from the googleapis directory.
+	if api.Go != nil {
+		for _, nested := range api.Go.NestedProtos {
+			nestedPath := filepath.Join(googleapisDir, api.Path, nested)
+			nestedProtos, err := collectProtoFiles(nestedPath)
+			if err != nil {
+				return fmt.Errorf("failed to collect nested protos from %s: %w", nested, err)
+			}
+			protoFiles = append(protoFiles, nestedProtos...)
+		}
+	}
+
 	if len(protoFiles) == 0 {
 		return fmt.Errorf("no .proto files found in %s", apiDir)
 	}
 
 	args := buildProtocArgs(library, api, googleapisDir, outputDir, protoFiles)
 	return command.Run(args[0], args[1:]...)
+}
+
+// collectProtoFiles collects all .proto files from the given path.
+// If path is a file, returns it directly. If path is a directory,
+// returns all .proto files in that directory (non-recursive).
+func collectProtoFiles(path string) ([]string, error) {
+	info, err := os.Stat(path)
+	if err != nil {
+		return nil, err
+	}
+
+	if !info.IsDir() {
+		if filepath.Ext(path) == ".proto" {
+			return []string{path}, nil
+		}
+		return nil, nil
+	}
+
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return nil, err
+	}
+
+	var files []string
+	for _, entry := range entries {
+		if !entry.IsDir() && filepath.Ext(entry.Name()) == ".proto" {
+			files = append(files, filepath.Join(path, entry.Name()))
+		}
+	}
+	return files, nil
 }
 
 // protocPath returns the protoc binary path, checking PROTOC env var first.
@@ -205,6 +249,9 @@ func buildProtocArgs(library *config.Library, api *config.API, googleapisDir, ou
 	}
 	if api.RESTNumericEnums != nil && *api.RESTNumericEnums {
 		args = append(args, "--go_gapic_opt=rest-numeric-enums")
+	}
+	if api.Go != nil && api.Go.ProtoPackage != "" {
+		args = append(args, "--go_gapic_opt=module="+api.Go.ProtoPackage)
 	}
 
 	// Add include path.

@@ -241,6 +241,29 @@ func TestBuildProtocArgs(t *testing.T) {
 				"/source/googleapis/google/cloud/secretmanager/v1/service.proto",
 			},
 		},
+		{
+			name:    "with proto_package",
+			library: &config.Library{},
+			api: &config.API{
+				Path: "google/cloud/secretmanager/v1",
+				Go: &config.GoPackage{
+					ImportPath:   "cloud.google.com/go/secretmanager/apiv1;secretmanager",
+					ProtoPackage: "google.cloud.secretmanager.v1",
+				},
+			},
+			want: []string{
+				"protoc",
+				"--experimental_allow_proto3_optional",
+				"--go_out=/output",
+				"--go-grpc_out=/output",
+				"--go-grpc_opt=require_unimplemented_servers=false",
+				"--go_gapic_out=/output",
+				"--go_gapic_opt=go-gapic-package=cloud.google.com/go/secretmanager/apiv1;secretmanager",
+				"--go_gapic_opt=module=google.cloud.secretmanager.v1",
+				"-I=/source/googleapis",
+				"/source/googleapis/google/cloud/secretmanager/v1/service.proto",
+			},
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			got := buildProtocArgs(test.library, test.api, googleapisDir, outputDir, protoFiles)
@@ -511,5 +534,74 @@ func TestMoveSnippets_NoSnippets(t *testing.T) {
 	// No internal/snippets directory exists.
 	if err := moveSnippets(outputDir, "testlib"); err != nil {
 		t.Errorf("expected no error when no snippets exist: %v", err)
+	}
+}
+
+func TestCollectProtoFiles(t *testing.T) {
+	dir := t.TempDir()
+
+	// Create test proto files.
+	if err := os.WriteFile(filepath.Join(dir, "service.proto"), []byte("syntax = \"proto3\";"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "types.proto"), []byte("syntax = \"proto3\";"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	// Create a non-proto file that should be ignored.
+	if err := os.WriteFile(filepath.Join(dir, "README.md"), []byte("# README"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	files, err := collectProtoFiles(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(files) != 2 {
+		t.Errorf("expected 2 proto files, got %d", len(files))
+	}
+}
+
+func TestCollectProtoFiles_SingleFile(t *testing.T) {
+	dir := t.TempDir()
+	protoFile := filepath.Join(dir, "service.proto")
+	if err := os.WriteFile(protoFile, []byte("syntax = \"proto3\";"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	files, err := collectProtoFiles(protoFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(files) != 1 {
+		t.Errorf("expected 1 proto file, got %d", len(files))
+	}
+	if files[0] != protoFile {
+		t.Errorf("expected %s, got %s", protoFile, files[0])
+	}
+}
+
+func TestCollectProtoFiles_NonProtoFile(t *testing.T) {
+	dir := t.TempDir()
+	txtFile := filepath.Join(dir, "readme.txt")
+	if err := os.WriteFile(txtFile, []byte("hello"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	files, err := collectProtoFiles(txtFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(files) != 0 {
+		t.Errorf("expected 0 files for non-proto file, got %d", len(files))
+	}
+}
+
+func TestCollectProtoFiles_NotExists(t *testing.T) {
+	_, err := collectProtoFiles("/nonexistent/path")
+	if err == nil {
+		t.Error("expected error for nonexistent path")
 	}
 }
