@@ -111,11 +111,10 @@ type RepoConfigModule struct {
 
 // RepoConfigAPI represents an API in repo-config.yaml.
 type RepoConfigAPI struct {
-	Path            string   `yaml:"path"`
-	DisableGAPIC    bool     `yaml:"disable_gapic,omitempty"`
-	ClientDirectory string   `yaml:"client_directory,omitempty"`
-	NestedProtos    []string `yaml:"nested_protos,omitempty"`
-	ProtoPackage    string   `yaml:"proto_package,omitempty"`
+	Path         string   `yaml:"path"`
+	DisableGAPIC bool     `yaml:"disable_gapic,omitempty"`
+	NestedProtos []string `yaml:"nested_protos,omitempty"`
+	ProtoPackage string   `yaml:"proto_package,omitempty"`
 }
 
 
@@ -417,9 +416,6 @@ func convertLibrary(state *StateLibrary, releaseBlocked bool, moduleConfig *Repo
 			if api.Go == nil {
 				api.Go = &config.GoPackage{}
 			}
-			if apiConfig.ClientDirectory != "" {
-				api.Go.ClientDirectory = apiConfig.ClientDirectory
-			}
 			if len(apiConfig.NestedProtos) > 0 {
 				api.Go.NestedProtos = apiConfig.NestedProtos
 			}
@@ -430,7 +426,7 @@ func convertLibrary(state *StateLibrary, releaseBlocked bool, moduleConfig *Repo
 
 		// Clean up empty Go config.
 		if api.Go != nil && api.Go.ImportPath == "" && !api.Go.LegacyGRPC &&
-			api.Go.ClientDirectory == "" && len(api.Go.NestedProtos) == 0 && api.Go.ProtoPackage == "" {
+			len(api.Go.NestedProtos) == 0 && api.Go.ProtoPackage == "" {
 			api.Go = nil
 		}
 
