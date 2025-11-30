@@ -99,8 +99,9 @@ func buildCodec(library *config.Library) map[string]string {
 	if library.Version != "" {
 		codec["version"] = library.Version
 	}
-	if library.ReleaseLevel != "" {
-		codec["release-level"] = library.ReleaseLevel
+	// Use the first API's release level (Rust has one API per library).
+	if len(library.APIs) > 0 && library.APIs[0].ReleaseLevel != "" {
+		codec["release-level"] = library.APIs[0].ReleaseLevel
 	}
 	if library.Name != "" {
 		codec["package-name-override"] = library.Name

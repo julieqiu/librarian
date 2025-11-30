@@ -90,8 +90,7 @@ func TestFindServiceConfig(t *testing.T) {
 
 func TestFill(t *testing.T) {
 	defaults := &config.Default{
-		Output:       "src/generated/",
-		ReleaseLevel: "stable",
+		Output: "src/generated/",
 	}
 	for _, test := range []struct {
 		name     string
@@ -104,22 +103,19 @@ func TestFill(t *testing.T) {
 			defaults: defaults,
 			lib:      &config.Library{},
 			want: &config.Library{
-				APIs:         []*config.API{{}},
-				Output:       "src/generated",
-				ReleaseLevel: "stable",
+				APIs:   []*config.API{{}},
+				Output: "src/generated",
 			},
 		},
 		{
 			name:     "preserves existing values",
 			defaults: defaults,
 			lib: &config.Library{
-				Output:       "custom/output/",
-				ReleaseLevel: "preview",
+				Output: "custom/output/",
 			},
 			want: &config.Library{
-				APIs:         []*config.API{{}},
-				Output:       "custom/output/",
-				ReleaseLevel: "preview",
+				APIs:   []*config.API{{}},
+				Output: "custom/output/",
 			},
 		},
 		{
@@ -127,9 +123,8 @@ func TestFill(t *testing.T) {
 			defaults: defaults,
 			lib:      &config.Library{Output: "custom/output/"},
 			want: &config.Library{
-				APIs:         []*config.API{{}},
-				Output:       "custom/output/",
-				ReleaseLevel: "stable",
+				APIs:   []*config.API{{}},
+				Output: "custom/output/",
 			},
 		},
 		{
@@ -143,10 +138,9 @@ func TestFill(t *testing.T) {
 			defaults: defaults,
 			lib:      &config.Library{Name: "google-cloud-speech-v1"},
 			want: &config.Library{
-				Name:         "google-cloud-speech-v1",
-				APIs:         []*config.API{{Path: "google/cloud/speech/v1"}},
-				Output:       "src/generated/cloud/speech/v1",
-				ReleaseLevel: "stable",
+				Name:   "google-cloud-speech-v1",
+				APIs:   []*config.API{{Path: "google/cloud/speech/v1"}},
+				Output: "src/generated/cloud/speech/v1",
 			},
 		},
 		{
@@ -154,9 +148,8 @@ func TestFill(t *testing.T) {
 			defaults: defaults,
 			lib:      &config.Library{APIs: []*config.API{{Path: "grafeas/v1"}}},
 			want: &config.Library{
-				APIs:         []*config.API{{Path: "grafeas/v1"}},
-				Output:       "src/generated/grafeas/v1",
-				ReleaseLevel: "stable",
+				APIs:   []*config.API{{Path: "grafeas/v1"}},
+				Output: "src/generated/grafeas/v1",
 			},
 		},
 	} {

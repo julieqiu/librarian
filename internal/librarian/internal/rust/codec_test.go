@@ -59,13 +59,20 @@ func TestToSidekickConfig(t *testing.T) {
 		{
 			name: "with version and release level",
 			library: &config.Library{
-				Name:         "google-cloud-storage",
-				Version:      "0.1.0",
-				ReleaseLevel: "preview",
+				Name:    "google-cloud-storage",
+				Version: "0.1.0",
+				APIs: []*config.API{
+					{
+						Path:          "google/cloud/storage/v1",
+						ServiceConfig: "google/cloud/storage/v1/storage_v1.yaml",
+						ReleaseLevel:  "preview",
+					},
+				},
 			},
 			api: &config.API{
 				Path:          "google/cloud/storage/v1",
 				ServiceConfig: "google/cloud/storage/v1/storage_v1.yaml",
+				ReleaseLevel:  "preview",
 			},
 			googleapisDir: "/tmp/googleapis",
 			want: &sidekickconfig.Config{

@@ -59,12 +59,6 @@ type Default struct {
 	// Output is the directory where generated code is written.
 	Output string `yaml:"output,omitempty"`
 
-	// Transport is the transport protocol, such as "grpc+rest" or "grpc".
-	Transport string `yaml:"transport,omitempty"`
-
-	// ReleaseLevel is either "stable" or "preview".
-	ReleaseLevel string `yaml:"release_level,omitempty"`
-
 	// TagFormat is the template for git tags, such as "{name}/v{version}".
 	TagFormat string `yaml:"tag_format,omitempty"`
 
@@ -107,12 +101,6 @@ type Library struct {
 	// CopyrightYear is the copyright year for the library.
 	CopyrightYear string `yaml:"copyright_year,omitempty"`
 
-	// Transport is the transport protocol, such as "grpc+rest" or "grpc".
-	Transport string `yaml:"transport,omitempty"`
-
-	// ReleaseLevel is either "stable" or "preview".
-	ReleaseLevel string `yaml:"release_level,omitempty"`
-
 	// Rust contains Rust-specific library configuration.
 	Rust *RustCrate `yaml:"rust,omitempty"`
 
@@ -143,11 +131,19 @@ type API struct {
 	// Metadata controls whether metadata (e.g., gapic_metadata.json) is generated.
 	Metadata *bool `yaml:"metadata,omitempty"`
 
+	// ReleaseLevel is the release level for this API, e.g., "alpha", "beta", or "ga".
+	// This is extracted from the BUILD.bazel file.
+	ReleaseLevel string `yaml:"release_level,omitempty"`
+
 	// RESTNumericEnums controls whether the REST client supports numeric enums.
 	RESTNumericEnums *bool `yaml:"rest_numeric_enums,omitempty"`
 
 	// ServiceConfig is the path to the service config file.
 	ServiceConfig string `yaml:"service_config,omitempty"`
+
+	// Transport is the transport protocol for this API, e.g., "grpc", "rest", or "grpc+rest".
+	// This overrides the library-level transport setting.
+	Transport string `yaml:"transport,omitempty"`
 
 	// Go contains Go-specific API configuration.
 	Go *GoPackage `yaml:"go,omitempty"`

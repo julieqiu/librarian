@@ -231,9 +231,6 @@ func applyDefault(lib *config.Library, d *config.Default) {
 		apiPath := lib.APIs[0].Path
 		lib.Output = filepath.Join(d.Output, strings.TrimPrefix(apiPath, "google/"))
 	}
-	if lib.ReleaseLevel == "" {
-		lib.ReleaseLevel = d.ReleaseLevel
-	}
 	if d.Rust == nil {
 		return
 	}
