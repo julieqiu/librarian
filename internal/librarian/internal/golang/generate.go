@@ -16,12 +16,14 @@
 package golang
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/googleapis/librarian/internal/command"
@@ -30,12 +32,20 @@ import (
 	"github.com/googleapis/librarian/internal/yaml"
 )
 
+// versionRegex matches 'const Version = "X.Y.Z"' in version.go.
+var versionRegex = regexp.MustCompile(`const Version = "([^"]+)"`)
+
 const (
 	googleapisRepo = "github.com/googleapis/googleapis"
 )
 
 // Generate generates a Go client library.
 func Generate(ctx context.Context, library *config.Library, sources *config.Sources) error {
+	// Read version from existing version.go if not set in config.
+	if library.Version == "" {
+		library.Version = readVersion(library.Output)
+	}
+
 	// Skip libraries with no generatable APIs (handwritten libraries like auth).
 	// Check for APIs with valid googleapis paths (starting with "google/").
 	hasGeneratableAPIs := false
@@ -473,4 +483,24 @@ func sourceDir(source *config.Source, repo string) (string, error) {
 		return source.Dir, nil
 	}
 	return fetch.RepoDir(repo, source.Commit, source.SHA256)
+}
+
+// readVersion reads the version from an existing internal/version.go file.
+// Returns the version string, or empty string if the file doesn't exist
+// or doesn't have a version constant.
+func readVersion(dir string) string {
+	versionPath := filepath.Join(dir, "internal", "version.go")
+	f, err := os.Open(versionPath)
+	if err != nil {
+		return ""
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		if matches := versionRegex.FindStringSubmatch(scanner.Text()); len(matches) == 2 {
+			return matches[1]
+		}
+	}
+	return ""
 }

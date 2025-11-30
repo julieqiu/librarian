@@ -15,6 +15,8 @@
 package golang
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -408,5 +410,55 @@ func TestDeriveGoGapicPackage(t *testing.T) {
 				t.Errorf("got %q, want %q", got, test.want)
 			}
 		})
+	}
+}
+
+func TestReadVersion(t *testing.T) {
+	for _, test := range []struct {
+		name    string
+		content string
+		want    string
+	}{
+		{
+			name:    "standard format",
+			content: "package internal\n\nconst Version = \"1.2.3\"",
+			want:    "1.2.3",
+		},
+		{
+			name:    "with comments",
+			content: "package internal\n\n// Version is the current release.\nconst Version = \"0.5.0\"",
+			want:    "0.5.0",
+		},
+		{
+			name:    "no version",
+			content: "package internal\n\nconst Foo = \"bar\"",
+			want:    "",
+		},
+		{
+			name:    "empty file",
+			content: "",
+			want:    "",
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			dir := t.TempDir()
+			internalDir := filepath.Join(dir, "internal")
+			if err := os.MkdirAll(internalDir, 0755); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(internalDir, "version.go"), []byte(test.content), 0644); err != nil {
+				t.Fatal(err)
+			}
+			if got := readVersion(dir); got != test.want {
+				t.Errorf("got %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestReadVersion_NoFile(t *testing.T) {
+	dir := t.TempDir()
+	if got := readVersion(dir); got != "" {
+		t.Errorf("got %q, want empty string", got)
 	}
 }
