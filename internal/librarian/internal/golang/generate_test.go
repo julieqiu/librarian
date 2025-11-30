@@ -36,42 +36,15 @@ func TestBuildProtocArgs(t *testing.T) {
 		want    []string
 	}{
 		{
-			name: "basic GAPIC",
-			library: &config.Library{
-				Transport:    "grpc+rest",
-				ReleaseLevel: "stable",
-			},
+			name:    "basic GAPIC",
+			library: &config.Library{},
 			api: &config.API{
 				Path:          "google/cloud/secretmanager/v1",
 				ServiceConfig: "google/cloud/secretmanager/v1/secretmanager_v1.yaml",
+				Transport:     "grpc+rest",
+				ReleaseLevel:  "stable",
 				Go: &config.GoPackage{
 					ImportPath: "cloud.google.com/go/secretmanager/apiv1;secretmanager",
-				},
-			},
-			want: []string{
-				"protoc",
-				"--experimental_allow_proto3_optional",
-				"--go_v1_out=/output",
-				"--go_gapic_out=/output",
-				"--go_gapic_opt=go-gapic-package=cloud.google.com/go/secretmanager/apiv1;secretmanager",
-				"--go_gapic_opt=api-service-config=/source/googleapis/google/cloud/secretmanager/v1/secretmanager_v1.yaml",
-				"--go_gapic_opt=transport=grpc+rest",
-				"--go_gapic_opt=release-level=stable",
-				"-I=/source/googleapis",
-				"/source/googleapis/google/cloud/secretmanager/v1/service.proto",
-			},
-		},
-		{
-			name: "with go_grpc",
-			library: &config.Library{
-				Transport: "grpc",
-			},
-			api: &config.API{
-				Path:          "google/cloud/secretmanager/v1",
-				ServiceConfig: "google/cloud/secretmanager/v1/secretmanager_v1.yaml",
-				Go: &config.GoPackage{
-					ImportPath: "cloud.google.com/go/secretmanager/apiv1;secretmanager",
-					GoGRPC:     &boolTrue,
 				},
 			},
 			want: []string{
@@ -83,19 +56,43 @@ func TestBuildProtocArgs(t *testing.T) {
 				"--go_gapic_out=/output",
 				"--go_gapic_opt=go-gapic-package=cloud.google.com/go/secretmanager/apiv1;secretmanager",
 				"--go_gapic_opt=api-service-config=/source/googleapis/google/cloud/secretmanager/v1/secretmanager_v1.yaml",
+				"--go_gapic_opt=transport=grpc+rest",
+				"--go_gapic_opt=release-level=stable",
+				"-I=/source/googleapis",
+				"/source/googleapis/google/cloud/secretmanager/v1/service.proto",
+			},
+		},
+		{
+			name: "derived import path",
+			library: &config.Library{
+				Name: "accessapproval",
+			},
+			api: &config.API{
+				Path:          "google/cloud/accessapproval/v1",
+				ServiceConfig: "google/cloud/accessapproval/v1/accessapproval_v1.yaml",
+				Transport:     "grpc",
+			},
+			want: []string{
+				"protoc",
+				"--experimental_allow_proto3_optional",
+				"--go_out=/output",
+				"--go-grpc_out=/output",
+				"--go-grpc_opt=require_unimplemented_servers=false",
+				"--go_gapic_out=/output",
+				"--go_gapic_opt=go-gapic-package=cloud.google.com/go/accessapproval/apiv1;accessapproval",
+				"--go_gapic_opt=api-service-config=/source/googleapis/google/cloud/accessapproval/v1/accessapproval_v1.yaml",
 				"--go_gapic_opt=transport=grpc",
 				"-I=/source/googleapis",
 				"/source/googleapis/google/cloud/secretmanager/v1/service.proto",
 			},
 		},
 		{
-			name: "with legacy grpc",
-			library: &config.Library{
-				Transport: "grpc",
-			},
+			name:    "with legacy grpc",
+			library: &config.Library{},
 			api: &config.API{
 				Path:          "google/cloud/secretmanager/v1",
 				ServiceConfig: "google/cloud/secretmanager/v1/secretmanager_v1.yaml",
+				Transport:     "grpc",
 				Go: &config.GoPackage{
 					ImportPath: "cloud.google.com/go/secretmanager/apiv1;secretmanager",
 					LegacyGRPC: true,
@@ -115,13 +112,12 @@ func TestBuildProtocArgs(t *testing.T) {
 			},
 		},
 		{
-			name: "with metadata",
-			library: &config.Library{
-				Transport: "grpc",
-			},
+			name:    "with metadata",
+			library: &config.Library{},
 			api: &config.API{
 				Path:          "google/cloud/secretmanager/v1",
 				ServiceConfig: "google/cloud/secretmanager/v1/secretmanager_v1.yaml",
+				Transport:     "grpc",
 				Metadata:      &boolTrue,
 				Go: &config.GoPackage{
 					ImportPath: "cloud.google.com/go/secretmanager/apiv1;secretmanager",
@@ -130,7 +126,9 @@ func TestBuildProtocArgs(t *testing.T) {
 			want: []string{
 				"protoc",
 				"--experimental_allow_proto3_optional",
-				"--go_v1_out=/output",
+				"--go_out=/output",
+				"--go-grpc_out=/output",
+				"--go-grpc_opt=require_unimplemented_servers=false",
 				"--go_gapic_out=/output",
 				"--go_gapic_opt=go-gapic-package=cloud.google.com/go/secretmanager/apiv1;secretmanager",
 				"--go_gapic_opt=api-service-config=/source/googleapis/google/cloud/secretmanager/v1/secretmanager_v1.yaml",
@@ -141,13 +139,12 @@ func TestBuildProtocArgs(t *testing.T) {
 			},
 		},
 		{
-			name: "with DIREGAPIC",
-			library: &config.Library{
-				Transport: "rest",
-			},
+			name:    "with DIREGAPIC",
+			library: &config.Library{},
 			api: &config.API{
 				Path:             "google/cloud/compute/v1",
 				ServiceConfig:    "google/cloud/compute/v1/compute_v1.yaml",
+				Transport:        "rest",
 				DIREGAPIC:        true,
 				RESTNumericEnums: &boolTrue,
 				Go: &config.GoPackage{
@@ -157,7 +154,9 @@ func TestBuildProtocArgs(t *testing.T) {
 			want: []string{
 				"protoc",
 				"--experimental_allow_proto3_optional",
-				"--go_v1_out=/output",
+				"--go_out=/output",
+				"--go-grpc_out=/output",
+				"--go-grpc_opt=require_unimplemented_servers=false",
 				"--go_gapic_out=/output",
 				"--go_gapic_opt=go-gapic-package=cloud.google.com/go/compute/apiv1;compute",
 				"--go_gapic_opt=api-service-config=/source/googleapis/google/cloud/compute/v1/compute_v1.yaml",
@@ -169,13 +168,12 @@ func TestBuildProtocArgs(t *testing.T) {
 			},
 		},
 		{
-			name: "with grpc service config",
-			library: &config.Library{
-				Transport: "grpc",
-			},
+			name:    "with grpc service config",
+			library: &config.Library{},
 			api: &config.API{
 				Path:              "google/cloud/asset/v1",
 				ServiceConfig:     "google/cloud/asset/v1/cloudasset_v1.yaml",
+				Transport:         "grpc",
 				GRPCServiceConfig: "cloudasset_grpc_service_config.json",
 				Go: &config.GoPackage{
 					ImportPath: "cloud.google.com/go/asset/apiv1;asset",
@@ -184,7 +182,9 @@ func TestBuildProtocArgs(t *testing.T) {
 			want: []string{
 				"protoc",
 				"--experimental_allow_proto3_optional",
-				"--go_v1_out=/output",
+				"--go_out=/output",
+				"--go-grpc_out=/output",
+				"--go-grpc_opt=require_unimplemented_servers=false",
 				"--go_gapic_out=/output",
 				"--go_gapic_opt=go-gapic-package=cloud.google.com/go/asset/apiv1;asset",
 				"--go_gapic_opt=api-service-config=/source/googleapis/google/cloud/asset/v1/cloudasset_v1.yaml",
@@ -207,9 +207,34 @@ func TestBuildProtocArgs(t *testing.T) {
 			want: []string{
 				"protoc",
 				"--experimental_allow_proto3_optional",
-				"--go_v1_out=/output",
+				"--go_out=/output",
+				"--go-grpc_out=/output",
+				"--go-grpc_opt=require_unimplemented_servers=false",
 				"--go_gapic_out=/output",
 				"--go_gapic_opt=go-gapic-package=cloud.google.com/go/secretmanager/apiv1;secretmanager",
+				"-I=/source/googleapis",
+				"/source/googleapis/google/cloud/secretmanager/v1/service.proto",
+			},
+		},
+		{
+			name:    "api release level",
+			library: &config.Library{},
+			api: &config.API{
+				Path:         "google/cloud/secretmanager/v1",
+				ReleaseLevel: "beta",
+				Go: &config.GoPackage{
+					ImportPath: "cloud.google.com/go/secretmanager/apiv1;secretmanager",
+				},
+			},
+			want: []string{
+				"protoc",
+				"--experimental_allow_proto3_optional",
+				"--go_out=/output",
+				"--go-grpc_out=/output",
+				"--go-grpc_opt=require_unimplemented_servers=false",
+				"--go_gapic_out=/output",
+				"--go_gapic_opt=go-gapic-package=cloud.google.com/go/secretmanager/apiv1;secretmanager",
+				"--go_gapic_opt=release-level=beta",
 				"-I=/source/googleapis",
 				"/source/googleapis/google/cloud/secretmanager/v1/service.proto",
 			},
@@ -228,7 +253,7 @@ func TestDetermineReleaseLevel(t *testing.T) {
 	for _, test := range []struct {
 		name            string
 		importPath      string
-		configuredLevel string
+		apiReleaseLevel string
 		want            string
 	}{
 		{
@@ -247,26 +272,26 @@ func TestDetermineReleaseLevel(t *testing.T) {
 			want:       "preview",
 		},
 		{
-			name:            "alpha configured",
+			name:            "api alpha",
 			importPath:      "cloud.google.com/go/secretmanager/apiv1",
-			configuredLevel: "alpha",
+			apiReleaseLevel: "alpha",
 			want:            "preview",
 		},
 		{
-			name:            "beta configured",
+			name:            "api beta",
 			importPath:      "cloud.google.com/go/secretmanager/apiv1",
-			configuredLevel: "beta",
+			apiReleaseLevel: "beta",
 			want:            "preview",
 		},
 		{
-			name:            "path takes precedence",
+			name:            "path takes precedence over api",
 			importPath:      "cloud.google.com/go/secretmanager/apiv1beta1",
-			configuredLevel: "stable",
+			apiReleaseLevel: "ga",
 			want:            "preview",
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			got := determineReleaseLevel(test.importPath, test.configuredLevel)
+			got := determineReleaseLevel(test.importPath, test.apiReleaseLevel)
 			if got != test.want {
 				t.Errorf("got %q, want %q", got, test.want)
 			}
@@ -320,6 +345,65 @@ func TestBuildDocURL(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			got := buildDocURL(test.modulePath, test.importPath)
+			if got != test.want {
+				t.Errorf("got %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestDeriveGoGapicPackage(t *testing.T) {
+	for _, test := range []struct {
+		name        string
+		libraryName string
+		apiPath     string
+		want        string
+	}{
+		{
+			name:        "basic google/cloud path",
+			libraryName: "accessapproval",
+			apiPath:     "google/cloud/accessapproval/v1",
+			want:        "cloud.google.com/go/accessapproval/apiv1;accessapproval",
+		},
+		{
+			name:        "beta version",
+			libraryName: "secretmanager",
+			apiPath:     "google/cloud/secretmanager/v1beta1",
+			want:        "cloud.google.com/go/secretmanager/apiv1beta1;secretmanager",
+		},
+		{
+			name:        "alpha version",
+			libraryName: "aiplatform",
+			apiPath:     "google/cloud/aiplatform/v1alpha",
+			want:        "cloud.google.com/go/aiplatform/apiv1alpha;aiplatform",
+		},
+		{
+			name:        "nested path under google/cloud",
+			libraryName: "bigquery",
+			apiPath:     "google/cloud/bigquery/connection/v1",
+			want:        "cloud.google.com/go/bigquery/connection/apiv1;connection",
+		},
+		{
+			name:        "non-cloud path (google/ai)",
+			libraryName: "ai",
+			apiPath:     "google/ai/generativelanguage/v1",
+			want:        "cloud.google.com/go/ai/generativelanguage/apiv1;generativelanguage",
+		},
+		{
+			name:        "non-cloud path (google/analytics)",
+			libraryName: "analytics",
+			apiPath:     "google/analytics/admin/v1alpha",
+			want:        "cloud.google.com/go/analytics/admin/apiv1alpha;admin",
+		},
+		{
+			name:        "empty api path",
+			libraryName: "secretmanager",
+			apiPath:     "",
+			want:        "",
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got := deriveGoGapicPackage(test.libraryName, test.apiPath)
 			if got != test.want {
 				t.Errorf("got %q, want %q", got, test.want)
 			}

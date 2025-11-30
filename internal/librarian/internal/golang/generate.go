@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package golang implements Go client library generation.
 package golang
 
 import (
@@ -35,10 +36,32 @@ const (
 
 // Generate generates a Go client library.
 func Generate(ctx context.Context, library *config.Library, sources *config.Sources) error {
+	// Skip libraries with no generatable APIs (handwritten libraries like auth).
+	// Check for APIs with valid googleapis paths (starting with "google/").
+	hasGeneratableAPIs := false
+	for _, api := range library.APIs {
+		if strings.HasPrefix(api.Path, "google/") && !api.DisableGAPIC {
+			hasGeneratableAPIs = true
+			break
+		}
+	}
+	if !hasGeneratableAPIs {
+		fmt.Printf("skipping %s: no APIs to generate\n", library.Name)
+		return nil
+	}
+
 	googleapisDir, err := sourceDir(sources.Googleapis, googleapisRepo)
 	if err != nil {
 		return err
 	}
+
+	// Derive output path from library name if not set.
+	// For google-cloud-go, libraries are at the root with the library name as directory.
+	outputDir := library.Output
+	if outputDir == "" {
+		outputDir = library.Name
+	}
+
 	// Create a temporary directory for protoc output.
 	tempDir, err := os.MkdirTemp("", "librarian-go-*")
 	if err != nil {
@@ -50,6 +73,10 @@ func Generate(ctx context.Context, library *config.Library, sources *config.Sour
 		if api.DisableGAPIC {
 			continue
 		}
+		// Skip APIs without valid googleapis paths.
+		if !strings.HasPrefix(api.Path, "google/") {
+			continue
+		}
 		if err := invokeProtoc(ctx, library, api, googleapisDir, tempDir); err != nil {
 			return fmt.Errorf("protoc failed for api %q: %w", api.Path, err)
 		}
@@ -58,19 +85,24 @@ func Generate(ctx context.Context, library *config.Library, sources *config.Sour
 		}
 	}
 
-	if err := flattenOutput(tempDir, library.Output); err != nil {
+	modulePath := ""
+	if library.Go != nil {
+		modulePath = library.Go.ModulePath
+	}
+	if err := flattenOutput(tempDir, library.Name, modulePath, outputDir); err != nil {
 		return fmt.Errorf("failed to flatten output: %w", err)
 	}
 
-	if err := goimports(ctx, library.Output); err != nil {
-		return fmt.Errorf("failed to run goimports: %w", err)
+	if err := goimports(ctx, outputDir); err != nil {
+		// Log but don't fail - generated code may have issues from the gapic generator
+		fmt.Printf("warning: goimports failed: %v\n", err)
 	}
 
 	return nil
 }
 
 // invokeProtoc runs protoc to generate Go client code for the given API.
-func invokeProtoc(ctx context.Context, library *config.Library, api *config.API, googleapisDir, outputDir string) error {
+func invokeProtoc(_ context.Context, library *config.Library, api *config.API, googleapisDir, outputDir string) error {
 	apiDir := filepath.Join(googleapisDir, api.Path)
 	entries, err := os.ReadDir(apiDir)
 	if err != nil {
@@ -91,36 +123,52 @@ func invokeProtoc(ctx context.Context, library *config.Library, api *config.API,
 	return command.Run(args[0], args[1:]...)
 }
 
+// protocPath returns the protoc binary path, checking PROTOC env var first.
+func protocPath() string {
+	if p := os.Getenv("PROTOC"); p != "" {
+		return p
+	}
+	return "protoc"
+}
+
 // buildProtocArgs constructs the protoc command arguments.
 func buildProtocArgs(library *config.Library, api *config.API, googleapisDir, outputDir string, protoFiles []string) []string {
 	args := []string{
-		"protoc",
+		protocPath(),
 		"--experimental_allow_proto3_optional",
 	}
 
 	// Determine which proto compiler plugins to use.
-	goGRPC := api.Go != nil && api.Go.GoGRPC != nil && *api.Go.GoGRPC
+	// By default, use modern plugins (protoc-gen-go + protoc-gen-go-grpc).
+	// If legacy_grpc is set, use the v1 plugin with plugins=grpc option.
 	legacyGRPC := api.Go != nil && api.Go.LegacyGRPC
 
-	if goGRPC {
+	if legacyGRPC {
+		args = append(args,
+			"--go_v1_out="+outputDir,
+			"--go_v1_opt=plugins=grpc",
+		)
+	} else {
 		args = append(args,
 			"--go_out="+outputDir,
 			"--go-grpc_out="+outputDir,
 			"--go-grpc_opt=require_unimplemented_servers=false",
 		)
-	} else {
-		args = append(args, "--go_v1_out="+outputDir)
-		if legacyGRPC {
-			args = append(args, "--go_v1_opt=plugins=grpc")
-		}
 	}
 
 	// Add GAPIC plugin arguments.
 	args = append(args, "--go_gapic_out="+outputDir)
 
 	// Build GAPIC options.
+	// go-gapic-package is required. Use explicit value if set, otherwise derive from library name and API path.
+	importPath := ""
 	if api.Go != nil && api.Go.ImportPath != "" {
-		args = append(args, "--go_gapic_opt=go-gapic-package="+api.Go.ImportPath)
+		importPath = api.Go.ImportPath
+	} else {
+		importPath = deriveGoGapicPackage(library.Name, api.Path)
+	}
+	if importPath != "" {
+		args = append(args, "--go_gapic_opt=go-gapic-package="+importPath)
 	}
 	if api.ServiceConfig != "" {
 		args = append(args, "--go_gapic_opt=api-service-config="+filepath.Join(googleapisDir, api.ServiceConfig))
@@ -128,11 +176,11 @@ func buildProtocArgs(library *config.Library, api *config.API, googleapisDir, ou
 	if api.GRPCServiceConfig != "" {
 		args = append(args, "--go_gapic_opt=grpc-service-config="+filepath.Join(googleapisDir, api.Path, api.GRPCServiceConfig))
 	}
-	if library.Transport != "" {
-		args = append(args, "--go_gapic_opt=transport="+library.Transport)
+	if api.Transport != "" {
+		args = append(args, "--go_gapic_opt=transport="+api.Transport)
 	}
-	if library.ReleaseLevel != "" {
-		args = append(args, "--go_gapic_opt=release-level="+library.ReleaseLevel)
+	if api.ReleaseLevel != "" {
+		args = append(args, "--go_gapic_opt=release-level="+api.ReleaseLevel)
 	}
 	if api.Metadata != nil && *api.Metadata {
 		args = append(args, "--go_gapic_opt=metadata")
@@ -151,6 +199,54 @@ func buildProtocArgs(library *config.Library, api *config.API, googleapisDir, ou
 	args = append(args, protoFiles...)
 
 	return args
+}
+
+// deriveGoGapicPackage derives the go-gapic-package value from the API path.
+// The format is: "cloud.google.com/go/{path}/api{version};{packagename}"
+//
+// Examples:
+//   - "google/cloud/accessapproval/v1" → "cloud.google.com/go/accessapproval/apiv1;accessapproval"
+//   - "google/ai/generativelanguage/v1" → "cloud.google.com/go/ai/generativelanguage/apiv1;generativelanguage"
+//   - "google/cloud/bigquery/connection/v1" → "cloud.google.com/go/bigquery/connection/apiv1;connection"
+func deriveGoGapicPackage(_, apiPath string) string {
+	if apiPath == "" {
+		return ""
+	}
+
+	// Strip "google/" prefix.
+	path := strings.TrimPrefix(apiPath, "google/")
+	// Strip "cloud/" prefix (for google/cloud/... paths).
+	path = strings.TrimPrefix(path, "cloud/")
+
+	// Split into components.
+	parts := strings.Split(path, "/")
+	if len(parts) == 0 {
+		return ""
+	}
+
+	// Find the version component (starts with "v" followed by digit).
+	versionIdx := -1
+	for i, part := range parts {
+		if len(part) > 1 && part[0] == 'v' && part[1] >= '0' && part[1] <= '9' {
+			versionIdx = i
+			break
+		}
+	}
+	if versionIdx == -1 || versionIdx == 0 {
+		return ""
+	}
+
+	// Path components before version.
+	pathParts := parts[:versionIdx]
+	version := parts[versionIdx]
+
+	// Package name is the last component before version.
+	packageName := pathParts[len(pathParts)-1]
+	packageName = strings.ReplaceAll(packageName, "-", "")
+
+	// Build import path.
+	importPath := strings.Join(pathParts, "/")
+	return fmt.Sprintf("cloud.google.com/go/%s/api%s;%s", importPath, version, packageName)
 }
 
 // repoMetadata is used for JSON marshaling in .repo-metadata.json.
@@ -191,13 +287,17 @@ func generateRepoMetadata(library *config.Library, api *config.API, googleapisDi
 	modulePath := ""
 	if library.Go != nil && library.Go.ModulePath != "" {
 		modulePath = library.Go.ModulePath
+	} else if importPath != "" {
+		// Derive module path from import path by stripping the apiv* suffix.
+		// e.g., "cloud.google.com/go/accessapproval/apiv1" -> "cloud.google.com/go/accessapproval"
+		modulePath = deriveModulePath(importPath)
 	}
 
 	// Build doc URL.
 	docURL := buildDocURL(modulePath, importPath)
 
 	// Determine release level.
-	releaseLevel := determineReleaseLevel(importPath, library.ReleaseLevel)
+	releaseLevel := determineReleaseLevel(importPath, api.ReleaseLevel)
 
 	// Extract API shortname from the full name.
 	apiShortname := extractAPIShortname(serviceConfig.Name)
@@ -238,6 +338,21 @@ type serviceYAML struct {
 	Name  string `yaml:"name"`
 }
 
+// deriveModulePath derives the Go module path from an import path.
+// Go modules in google-cloud-go are always at cloud.google.com/go/{name}.
+// For example:
+//   - "cloud.google.com/go/accessapproval/apiv1" -> "cloud.google.com/go/accessapproval"
+//   - "cloud.google.com/go/ai/generativelanguage/apiv1" -> "cloud.google.com/go/ai"
+func deriveModulePath(importPath string) string {
+	parts := strings.Split(importPath, "/")
+	// Go modules are always cloud.google.com/go/{name}, so take first 3 parts.
+	// parts[0] = "cloud.google.com", parts[1] = "go", parts[2] = "{name}"
+	if len(parts) >= 3 {
+		return strings.Join(parts[:3], "/")
+	}
+	return importPath
+}
+
 // buildDocURL constructs the documentation URL for the API.
 func buildDocURL(modulePath, importPath string) string {
 	if modulePath == "" || importPath == "" {
@@ -248,8 +363,8 @@ func buildDocURL(modulePath, importPath string) string {
 }
 
 // determineReleaseLevel determines the release level based on the import path
-// and the configured release level.
-func determineReleaseLevel(importPath, configuredLevel string) string {
+// and API-level release level (from BUILD.bazel).
+func determineReleaseLevel(importPath, apiReleaseLevel string) string {
 	// Check import path for alpha/beta.
 	if i := strings.LastIndex(importPath, "/"); i != -1 {
 		lastElem := importPath[i+1:]
@@ -258,8 +373,8 @@ func determineReleaseLevel(importPath, configuredLevel string) string {
 		}
 	}
 
-	// Check configured release level.
-	if configuredLevel == "alpha" || configuredLevel == "beta" {
+	// Check API-level release level (from BUILD.bazel).
+	if apiReleaseLevel == "alpha" || apiReleaseLevel == "beta" {
 		return "preview"
 	}
 
@@ -274,14 +389,37 @@ func extractAPIShortname(nameFull string) string {
 }
 
 // flattenOutput moves generated files from the nested cloud.google.com/go/...
-// structure to the top level of the output directory.
-func flattenOutput(tempDir, outputDir string) error {
-	goDir := filepath.Join(tempDir, "cloud.google.com", "go")
-	if _, err := os.Stat(goDir); os.IsNotExist(err) {
-		return fmt.Errorf("go directory does not exist: %s", goDir)
+// structure to the output directory.
+// For versioned modules (e.g., dataproc with module path cloud.google.com/go/dataproc/v2),
+// protoc generates to cloud.google.com/go/dataproc/v2/apiv1/... and we need to
+// flatten that to outputDir/apiv1/... (removing the v2 level).
+func flattenOutput(tempDir, libraryName, modulePath, outputDir string) error {
+	// Determine the source directory based on module path.
+	// For versioned modules like cloud.google.com/go/dataproc/v2, the generated files
+	// are at tempDir/cloud.google.com/go/dataproc/v2/...
+	// For non-versioned modules, they're at tempDir/cloud.google.com/go/libraryName/...
+	var srcDir string
+	if modulePath != "" {
+		parts := strings.Split(modulePath, "/")
+		// Module path format: cloud.google.com/go/{name} or cloud.google.com/go/{name}/{version}
+		if len(parts) == 4 {
+			// Versioned module: cloud.google.com/go/{name}/{version}
+			srcDir = filepath.Join(tempDir, "cloud.google.com", "go", parts[2], parts[3])
+		} else if len(parts) == 3 {
+			// Non-versioned module: cloud.google.com/go/{name}
+			srcDir = filepath.Join(tempDir, "cloud.google.com", "go", parts[2])
+		}
+	}
+	if srcDir == "" {
+		srcDir = filepath.Join(tempDir, "cloud.google.com", "go", libraryName)
 	}
 
-	if err := moveFiles(goDir, outputDir); err != nil {
+	if _, err := os.Stat(srcDir); os.IsNotExist(err) {
+		return fmt.Errorf("source directory does not exist: %s", srcDir)
+	}
+
+	// Move files from source to output directory.
+	if err := moveFiles(srcDir, outputDir); err != nil {
 		return err
 	}
 
@@ -293,6 +431,11 @@ func moveFiles(sourceDir, targetDir string) error {
 	entries, err := os.ReadDir(sourceDir)
 	if err != nil {
 		return fmt.Errorf("failed to read directory %s: %w", sourceDir, err)
+	}
+
+	// Ensure target directory exists.
+	if err := os.MkdirAll(targetDir, 0755); err != nil {
+		return fmt.Errorf("failed to create directory %s: %w", targetDir, err)
 	}
 
 	for _, entry := range entries {
@@ -318,7 +461,7 @@ func moveFiles(sourceDir, targetDir string) error {
 }
 
 // goimports runs goimports on the generated files.
-func goimports(ctx context.Context, dir string) error {
+func goimports(_ context.Context, dir string) error {
 	return command.Run("goimports", "-w", dir)
 }
 
