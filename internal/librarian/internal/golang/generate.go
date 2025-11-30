@@ -103,6 +103,11 @@ func Generate(ctx context.Context, library *config.Library, sources *config.Sour
 		return fmt.Errorf("failed to flatten output: %w", err)
 	}
 
+	// Move generated snippets to repo root's internal/generated/snippets directory.
+	if err := moveSnippets(outputDir, library.Name); err != nil {
+		return fmt.Errorf("failed to move snippets: %w", err)
+	}
+
 	if err := goimports(ctx, outputDir); err != nil {
 		// Log but don't fail - generated code may have issues from the gapic generator
 		fmt.Printf("warning: goimports failed: %v\n", err)
@@ -431,6 +436,34 @@ func flattenOutput(tempDir, libraryName, modulePath, outputDir string) error {
 	// Move files from source to output directory.
 	if err := moveFiles(srcDir, outputDir); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// moveSnippets moves generated snippets from the library output directory to
+// the repo root's internal/generated/snippets directory.
+// GAPIC generates snippets at outputDir/internal/snippets/... and this function
+// moves them to internal/generated/snippets/{libraryName}/...
+func moveSnippets(outputDir, libraryName string) error {
+	srcDir := filepath.Join(outputDir, "internal", "snippets")
+	if _, err := os.Stat(srcDir); os.IsNotExist(err) {
+		// No snippets generated, nothing to do.
+		return nil
+	}
+
+	destDir := filepath.Join("internal", "generated", "snippets", libraryName)
+	if err := os.MkdirAll(destDir, 0755); err != nil {
+		return fmt.Errorf("failed to create snippets directory: %w", err)
+	}
+
+	if err := moveFiles(srcDir, destDir); err != nil {
+		return err
+	}
+
+	// Remove the now-empty internal/snippets directory from library output.
+	if err := os.RemoveAll(srcDir); err != nil {
+		return fmt.Errorf("failed to remove source snippets directory: %w", err)
 	}
 
 	return nil

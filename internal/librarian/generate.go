@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/fetch"
@@ -177,10 +178,14 @@ func generate(ctx context.Context, language string, library *config.Library, sou
 			"CHANGES.md",
 			"README.md",
 			"go.mod",
-			"internal/generated/snippets/go.mod",
 			"internal/version.go",
 		)
 		if err := cleanOutput(library.Output, keep); err != nil {
+			return err
+		}
+		// Clean snippets directory separately (it's at repo root, not inside library).
+		snippetsDir := filepath.Join("internal", "generated", "snippets", library.Name)
+		if err := cleanOutput(snippetsDir, nil); err != nil {
 			return err
 		}
 		err = golang.Generate(ctx, library, sources)

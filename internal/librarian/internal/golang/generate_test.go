@@ -462,3 +462,54 @@ func TestReadVersion_NoFile(t *testing.T) {
 		t.Errorf("got %q, want empty string", got)
 	}
 }
+
+func TestMoveSnippets(t *testing.T) {
+	// Create a temporary directory to serve as the working directory.
+	// This ensures internal/generated/snippets is created within the temp dir.
+	workDir := t.TempDir()
+	t.Chdir(workDir)
+
+	outputDir := filepath.Join(workDir, "testlib")
+	srcSnippetsDir := filepath.Join(outputDir, "internal", "snippets")
+	if err := os.MkdirAll(srcSnippetsDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create test snippet files.
+	snippetContent := "package snippets\n\nfunc Example() {}\n"
+	if err := os.WriteFile(filepath.Join(srcSnippetsDir, "example.go"), []byte(snippetContent), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(srcSnippetsDir, "subdir"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(srcSnippetsDir, "subdir", "nested.go"), []byte(snippetContent), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := moveSnippets(outputDir, "testlib"); err != nil {
+		t.Fatal(err)
+	}
+
+	// Verify snippets moved to destination.
+	destDir := filepath.Join("internal", "generated", "snippets", "testlib")
+	if _, err := os.Stat(filepath.Join(destDir, "example.go")); err != nil {
+		t.Errorf("expected example.go at destination: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(destDir, "subdir", "nested.go")); err != nil {
+		t.Errorf("expected subdir/nested.go at destination: %v", err)
+	}
+
+	// Verify source directory removed.
+	if _, err := os.Stat(srcSnippetsDir); !os.IsNotExist(err) {
+		t.Errorf("expected source snippets directory to be removed")
+	}
+}
+
+func TestMoveSnippets_NoSnippets(t *testing.T) {
+	outputDir := t.TempDir()
+	// No internal/snippets directory exists.
+	if err := moveSnippets(outputDir, "testlib"); err != nil {
+		t.Errorf("expected no error when no snippets exist: %v", err)
+	}
+}
