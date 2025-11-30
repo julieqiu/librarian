@@ -162,6 +162,11 @@ func generate(ctx context.Context, language string, library *config.Library, sou
 	case "testhelper":
 		err = testGenerate(library)
 	case "rust":
+		// Always keep Cargo.toml for Rust libraries.
+		keep := append(library.Keep, "Cargo.toml")
+		if err := cleanOutput(library.Output, keep); err != nil {
+			return err
+		}
 		err = rust.Generate(ctx, library, sources)
 	default:
 		err = fmt.Errorf("generate not implemented for %q", language)

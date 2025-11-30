@@ -17,7 +17,6 @@ package rust
 import (
 	"bufio"
 	"context"
-	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -38,9 +37,6 @@ const (
 
 // Generate generates a Rust client library.
 func Generate(ctx context.Context, library *config.Library, sources *config.Sources) error {
-	if err := cleanOutput(library.Output, library.Keep); err != nil {
-		return err
-	}
 	// Read copyright year and version from existing Cargo.toml if not set in config.
 	// This avoids storing these values in librarian.yaml while preserving existing ones.
 	if library.CopyrightYear == "" {
@@ -111,66 +107,6 @@ func Format(dirs ...string) error {
 		}
 	}
 	return nil
-}
-
-// cleanOutput removes all files and directories in dir except Cargo.toml and
-// files specified in the keep list.
-func cleanOutput(dir string, keep []string) error {
-	entries, err := os.ReadDir(dir)
-	if errors.Is(err, fs.ErrNotExist) {
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-	// Build a set of top-level entries that contain kept files.
-	keepDirs := make(map[string][]string)
-	for _, k := range keep {
-		// Split on path separator to get first component.
-		first := k
-		rest := ""
-		if idx := findPathSep(k); idx != -1 {
-			first = k[:idx]
-			rest = k[idx+1:]
-		}
-		if rest != "" {
-			keepDirs[first] = append(keepDirs[first], rest)
-		} else {
-			// Keep the entire entry.
-			keepDirs[first] = nil
-		}
-	}
-	for _, e := range entries {
-		if e.Name() == "Cargo.toml" {
-			continue
-		}
-		subKeep, hasKeep := keepDirs[e.Name()]
-		if hasKeep && subKeep == nil {
-			// Keep entire entry.
-			continue
-		}
-		if hasKeep && e.IsDir() {
-			// Recursively clean directory while preserving kept files.
-			if err := cleanOutput(filepath.Join(dir, e.Name()), subKeep); err != nil {
-				return err
-			}
-			continue
-		}
-		if err := os.RemoveAll(filepath.Join(dir, e.Name())); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// findPathSep returns the index of the first path separator in s, or -1.
-func findPathSep(s string) int {
-	for i, c := range s {
-		if c == '/' || c == filepath.Separator {
-			return i
-		}
-	}
-	return -1
 }
 
 func sourceDir(source *config.Source, repo string) (string, error) {
