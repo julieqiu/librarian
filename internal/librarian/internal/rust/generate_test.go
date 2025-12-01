@@ -40,9 +40,7 @@ func TestGenerate(t *testing.T) {
 		CopyrightYear: "2025",
 		APIs: []*config.API{
 			{
-				Path:          "google/cloud/secretmanager/v1",
-				ServiceConfig: "google/cloud/secretmanager/v1/secretmanager_v1.yaml",
-				ReleaseLevel:  "preview",
+				Path: "google/cloud/secretmanager/v1",
 			},
 		},
 		Rust: &config.RustCrate{

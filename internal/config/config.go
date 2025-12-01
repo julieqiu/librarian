@@ -118,36 +118,12 @@ type API struct {
 	// "google/cloud/secretmanager/v1".
 	Path string `yaml:"path"`
 
-	// DIREGAPIC enables DIREGAPIC (Discovery REST GAPICs) for compute/GCE.
-	DIREGAPIC bool `yaml:"diregapic,omitempty"`
-
 	// DisableGAPIC skips GAPIC generation for this API.
 	DisableGAPIC bool `yaml:"disable_gapic,omitempty"`
 
 	// Format is the API specification format, either "protobuf" (default) or
 	// "discovery".
 	Format string `yaml:"format,omitempty"`
-
-	// GRPCServiceConfig is the name of the gRPC service config JSON file,
-	// e.g., "cloudasset_grpc_service_config.json".
-	GRPCServiceConfig string `yaml:"grpc_service_config,omitempty"`
-
-	// Metadata controls whether metadata (e.g., gapic_metadata.json) is generated.
-	Metadata *bool `yaml:"metadata,omitempty"`
-
-	// ReleaseLevel is the release level for this API, e.g., "alpha", "beta", or "ga".
-	// This is extracted from the BUILD.bazel file.
-	ReleaseLevel string `yaml:"release_level,omitempty"`
-
-	// RESTNumericEnums controls whether the REST client supports numeric enums.
-	RESTNumericEnums *bool `yaml:"rest_numeric_enums,omitempty"`
-
-	// ServiceConfig is the path to the service config file.
-	ServiceConfig string `yaml:"service_config,omitempty"`
-
-	// Transport is the transport protocol for this API, e.g., "grpc", "rest", or "grpc+rest".
-	// This overrides the library-level transport setting.
-	Transport string `yaml:"transport,omitempty"`
 
 	// Go contains Go-specific API configuration.
 	Go *GoPackage `yaml:"go,omitempty"`

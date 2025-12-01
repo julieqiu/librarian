@@ -18,6 +18,7 @@ import (
 	"strings"
 
 	"github.com/googleapis/librarian/internal/config"
+	"github.com/googleapis/librarian/internal/serviceconfig"
 	sidekickconfig "github.com/googleapis/librarian/internal/sidekick/config"
 )
 
@@ -45,7 +46,7 @@ func toSidekickConfig(library *config.Library, api *config.API, googleapisDir, d
 		General: sidekickconfig.GeneralConfig{
 			Language:            "rust",
 			SpecificationFormat: specFormat,
-			ServiceConfig:       api.ServiceConfig,
+			ServiceConfig:       serviceconfig.DerivePath(api.Path),
 			SpecificationSource: api.Path,
 		},
 		Source: source,
@@ -100,8 +101,11 @@ func buildCodec(library *config.Library) map[string]string {
 		codec["version"] = library.Version
 	}
 	// Use the first API's release level (Rust has one API per library).
-	if len(library.APIs) > 0 && library.APIs[0].ReleaseLevel != "" {
-		codec["release-level"] = library.APIs[0].ReleaseLevel
+	if len(library.APIs) > 0 {
+		apiCfg := serviceconfig.NewAPI(library.APIs[0].Path)
+		if apiCfg.ReleaseLevel != "" {
+			codec["release-level"] = apiCfg.ReleaseLevel
+		}
 	}
 	if library.Name != "" {
 		codec["package-name-override"] = library.Name

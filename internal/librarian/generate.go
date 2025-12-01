@@ -147,15 +147,6 @@ func generateLibrary(ctx context.Context, cfg *config.Config, libraryName string
 				return lib.Output, nil
 			}
 			applyDefault(lib, cfg.Default)
-			for _, api := range lib.APIs {
-				if api.ServiceConfig == "" {
-					serviceConfig, err := findServiceConfig(googleapisDir, api.Path)
-					if err != nil {
-						return "", err
-					}
-					api.ServiceConfig = serviceConfig
-				}
-			}
 			if err := generate(ctx, cfg.Language, lib, googleapisDir, cfg.Sources); err != nil {
 				return "", err
 			}

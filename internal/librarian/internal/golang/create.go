@@ -51,8 +51,9 @@ func Create(ctx context.Context, libraryName string, apis []*config.API, googlea
 	}
 
 	title := libraryName
-	if apis[0].ServiceConfig != "" {
-		serviceYAMLPath := filepath.Join(googleapisDir, apis[0].ServiceConfig)
+	serviceConfigPath := serviceconfig.DerivePath(apis[0].Path)
+	if serviceConfigPath != "" {
+		serviceYAMLPath := filepath.Join(googleapisDir, serviceConfigPath)
 		cfg, err := serviceconfig.Read(serviceYAMLPath)
 		if err != nil {
 			return err

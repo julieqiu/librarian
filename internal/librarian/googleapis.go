@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/googleapis/librarian/internal/config"
+	"github.com/googleapis/librarian/internal/serviceconfig"
 )
 
 // findUncoveredAPIs returns API paths found in googleapis that are not covered
@@ -143,15 +144,6 @@ func hasProtoFiles(dir string) bool {
 	return false
 }
 
-// knownServiceConfigs maps API paths to their service config files for cases
-// where the service config is not in the same directory as the API.
-var knownServiceConfigs = map[string]string{
-	"google/cloud/aiplatform/v1/schema/predict/instance":       "google/cloud/aiplatform/v1/schema/aiplatform_v1.yaml",
-	"google/cloud/aiplatform/v1/schema/predict/params":         "google/cloud/aiplatform/v1/schema/aiplatform_v1.yaml",
-	"google/cloud/aiplatform/v1/schema/predict/prediction":     "google/cloud/aiplatform/v1/schema/aiplatform_v1.yaml",
-	"google/cloud/aiplatform/v1/schema/trainingjob/definition": "google/cloud/aiplatform/v1/schema/aiplatform_v1.yaml",
-}
-
 // findServiceConfig finds the service config file for a channel path. It looks
 // for YAML files containing "type: google.api.Service", skipping any files
 // ending in _gapic.yaml.
@@ -160,8 +152,9 @@ var knownServiceConfigs = map[string]string{
 // "google/cloud/secretmanager/v1"). Returns the service config path relative
 // to googleapisDir, or empty string if not found.
 func findServiceConfig(googleapisDir, apiPath string) (string, error) {
-	// Check known service config mappings first.
-	if sc, ok := knownServiceConfigs[apiPath]; ok {
+	// Check known service config full path overrides first (for APIs with
+	// service config in a different directory).
+	if sc, ok := serviceconfig.PathOverride(apiPath); ok {
 		return sc, nil
 	}
 	dir := filepath.Join(googleapisDir, apiPath)
@@ -169,7 +162,6 @@ func findServiceConfig(googleapisDir, apiPath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
@@ -181,7 +173,6 @@ func findServiceConfig(googleapisDir, apiPath string) (string, error) {
 		if strings.HasSuffix(name, "_gapic.yaml") {
 			continue
 		}
-
 		path := filepath.Join(dir, name)
 		isServiceConfig, err := isServiceConfigFile(path)
 		if err != nil {

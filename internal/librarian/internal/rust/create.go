@@ -27,6 +27,7 @@ import (
 	"github.com/googleapis/librarian/internal/command"
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/fetch"
+	"github.com/googleapis/librarian/internal/serviceconfig"
 	sidekickconfig "github.com/googleapis/librarian/internal/sidekick/config"
 	"github.com/googleapis/librarian/internal/sidekick/parser"
 	sidekickrust "github.com/googleapis/librarian/internal/sidekick/rust"
@@ -95,7 +96,7 @@ func createGenerate(ctx context.Context, cfg *config.Config, apis []*config.API,
 				Language:            "rust",
 				SpecificationFormat: "protobuf",
 				SpecificationSource: api.Path,
-				ServiceConfig:       api.ServiceConfig,
+				ServiceConfig:       serviceconfig.DerivePath(api.Path),
 			},
 			Codec: map[string]string{
 				"copyright-year": fmt.Sprintf("%04d", year),

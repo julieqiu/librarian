@@ -79,16 +79,11 @@ func runCreate(ctx context.Context, libraryName string, apiPaths []string) error
 		apiPaths = []string{strings.ReplaceAll(libraryName, "-", "/")}
 	}
 
-	// Build API configs with service configs.
+	// Build API configs.
 	var apis []*config.API
 	for _, apiPath := range apiPaths {
-		serviceConfig, err := findServiceConfig(googleapisDir, apiPath)
-		if err != nil {
-			return fmt.Errorf("failed to find service config for %s: %w", apiPath, err)
-		}
 		apis = append(apis, &config.API{
-			Path:          apiPath,
-			ServiceConfig: serviceConfig,
+			Path: apiPath,
 		})
 	}
 

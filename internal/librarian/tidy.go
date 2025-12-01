@@ -169,14 +169,6 @@ func removeRedundantFields(lib *config.Library, defaultOutput string) *config.Li
 			lib.Output = ""
 		}
 	}
-	for _, api := range lib.APIs {
-		if api.ServiceConfig != "" {
-			lastSlash := strings.LastIndex(api.ServiceConfig, "/")
-			if lastSlash != -1 && api.ServiceConfig[:lastSlash] == api.Path {
-				api.ServiceConfig = ""
-			}
-		}
-	}
 	return lib
 }
 

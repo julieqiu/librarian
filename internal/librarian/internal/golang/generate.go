@@ -29,6 +29,7 @@ import (
 	"github.com/googleapis/librarian/internal/command"
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/fetch"
+	"github.com/googleapis/librarian/internal/serviceconfig"
 	"github.com/googleapis/librarian/internal/yaml"
 )
 
@@ -224,29 +225,37 @@ func buildProtocArgs(library *config.Library, api *config.API, googleapisDir, ou
 	if importPath != "" {
 		args = append(args, "--go_gapic_opt=go-gapic-package="+importPath)
 	}
-	if api.ServiceConfig != "" {
-		args = append(args, "--go_gapic_opt=api-service-config="+filepath.Join(googleapisDir, api.ServiceConfig))
+
+	// Get API config from serviceconfig package.
+	apiCfg := serviceconfig.NewAPI(api.Path)
+	serviceConfigPath := serviceconfig.DerivePath(api.Path)
+	grpcServiceConfig := serviceconfig.GetGRPCServiceConfig(api.Path)
+
+	if serviceConfigPath != "" {
+		args = append(args, "--go_gapic_opt=api-service-config="+filepath.Join(googleapisDir, serviceConfigPath))
 	}
-	if api.GRPCServiceConfig != "" {
-		args = append(args, "--go_gapic_opt=grpc-service-config="+filepath.Join(googleapisDir, api.Path, api.GRPCServiceConfig))
+	if grpcServiceConfig != "" {
+		args = append(args, "--go_gapic_opt=grpc-service-config="+filepath.Join(googleapisDir, api.Path, grpcServiceConfig))
 	}
-	if api.Transport != "" {
-		args = append(args, "--go_gapic_opt=transport="+api.Transport)
+	if apiCfg.Transport != "" {
+		args = append(args, "--go_gapic_opt=transport="+apiCfg.Transport)
 	}
-	if api.ReleaseLevel != "" {
-		args = append(args, "--go_gapic_opt=release-level="+api.ReleaseLevel)
-	}
-	if api.Metadata != nil && *api.Metadata {
-		args = append(args, "--go_gapic_opt=metadata")
-	}
-	if api.DIREGAPIC {
-		args = append(args, "--go_gapic_opt=diregapic")
-	}
-	if api.RESTNumericEnums != nil && *api.RESTNumericEnums {
-		args = append(args, "--go_gapic_opt=rest-numeric-enums")
+	// Convert release level from serviceconfig (ga, beta, alpha) to Go GAPIC format (stable, preview).
+	releaseLevel := determineReleaseLevel(importPath, apiCfg.ReleaseLevel)
+	if releaseLevel != "" {
+		args = append(args, "--go_gapic_opt=release-level="+releaseLevel)
 	}
 	if api.Go != nil && api.Go.ProtoPackage != "" {
 		args = append(args, "--go_gapic_opt=module="+api.Go.ProtoPackage)
+	}
+	if apiCfg.Metadata {
+		args = append(args, "--go_gapic_opt=metadata")
+	}
+	if apiCfg.DIREGAPIC {
+		args = append(args, "--go_gapic_opt=diregapic")
+	}
+	if apiCfg.RESTNumericEnums {
+		args = append(args, "--go_gapic_opt=rest-numeric-enums")
 	}
 
 	// Add include path.
@@ -320,12 +329,13 @@ type repoMetadata struct {
 
 // generateRepoMetadata generates a .repo-metadata.json file for the API.
 func generateRepoMetadata(library *config.Library, api *config.API, googleapisDir, outputDir string) error {
-	if api.ServiceConfig == "" {
+	serviceConfigPath := serviceconfig.DerivePath(api.Path)
+	if serviceConfigPath == "" {
 		return nil
 	}
 
 	// Read the service YAML to get title and name.
-	serviceYAMLPath := filepath.Join(googleapisDir, api.ServiceConfig)
+	serviceYAMLPath := filepath.Join(googleapisDir, serviceConfigPath)
 	serviceConfig, err := yaml.Read[serviceYAML](serviceYAMLPath)
 	if err != nil {
 		return fmt.Errorf("failed to read service YAML %s: %w", serviceYAMLPath, err)
@@ -354,7 +364,8 @@ func generateRepoMetadata(library *config.Library, api *config.API, googleapisDi
 	docURL := buildDocURL(modulePath, importPath)
 
 	// Determine release level.
-	releaseLevel := determineReleaseLevel(importPath, api.ReleaseLevel)
+	apiCfg := serviceconfig.NewAPI(api.Path)
+	releaseLevel := determineReleaseLevel(importPath, apiCfg.ReleaseLevel)
 
 	// Extract API shortname from the full name.
 	apiShortname := extractAPIShortname(serviceConfig.Name)
