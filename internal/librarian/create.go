@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/googleapis/librarian/internal/config"
+	"github.com/googleapis/librarian/internal/librarian/internal/golang"
 	"github.com/googleapis/librarian/internal/librarian/internal/rust"
 	"github.com/googleapis/librarian/internal/yaml"
 	"github.com/urfave/cli/v3"
@@ -100,7 +101,10 @@ func runCreate(ctx context.Context, libraryName string, apiPaths []string) error
 		}
 		return rust.Create(ctx, cfg, libraryName, apis)
 	case "go":
-		return fmt.Errorf("create not yet implemented for Go")
+		if err := golang.RequireTools(); err != nil {
+			return err
+		}
+		return golang.Create(ctx, libraryName, apis, googleapisDir)
 	default:
 		return fmt.Errorf("create not implemented for %q", cfg.Language)
 	}

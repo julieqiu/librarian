@@ -32,6 +32,17 @@ func Run(command string, arg ...string) error {
 	return nil
 }
 
+// RunIn executes a program (with arguments) in the specified directory.
+func RunIn(dir string, command string, arg ...string) error {
+	cmd := exec.Command(command, arg...)
+	cmd.Dir = dir
+	fmt.Fprintf(os.Stderr, "Running in %s: %s\n", dir, cmd.String())
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("%v: %v\n%s", cmd, err, output)
+	}
+	return nil
+}
+
 // Require checks that the named tools are installed and in PATH.
 func Require(names ...string) error {
 	var missing []string

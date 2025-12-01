@@ -156,7 +156,7 @@ func generateLibrary(ctx context.Context, cfg *config.Config, libraryName string
 					api.ServiceConfig = serviceConfig
 				}
 			}
-			if err := generate(ctx, cfg.Language, lib, cfg.Sources); err != nil {
+			if err := generate(ctx, cfg.Language, lib, googleapisDir, cfg.Sources); err != nil {
 				return "", err
 			}
 			return lib.Output, nil
@@ -165,7 +165,7 @@ func generateLibrary(ctx context.Context, cfg *config.Config, libraryName string
 	return "", fmt.Errorf("library %q not found", libraryName)
 }
 
-func generate(ctx context.Context, language string, library *config.Library, sources *config.Sources) error {
+func generate(ctx context.Context, language string, library *config.Library, googleapisDir string, sources *config.Sources) error {
 	var err error
 	switch language {
 	case "testhelper":
@@ -188,7 +188,7 @@ func generate(ctx context.Context, language string, library *config.Library, sou
 		if err := cleanOutput(snippetsDir, nil); err != nil {
 			return err
 		}
-		err = golang.Generate(ctx, library, sources)
+		err = golang.Generate(ctx, library, googleapisDir)
 	case "rust":
 		if err := rust.RequireTools(); err != nil {
 			return err

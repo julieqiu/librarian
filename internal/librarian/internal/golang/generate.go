@@ -40,7 +40,7 @@ const (
 )
 
 // Generate generates a Go client library.
-func Generate(ctx context.Context, library *config.Library, sources *config.Sources) error {
+func Generate(ctx context.Context, library *config.Library, googleapisDir string) error {
 	// Read version from existing version.go if not set in config.
 	if library.Version == "" {
 		library.Version = readVersion(library.Output)
@@ -58,11 +58,6 @@ func Generate(ctx context.Context, library *config.Library, sources *config.Sour
 	if !hasGeneratableAPIs {
 		fmt.Printf("skipping %s: no APIs to generate\n", library.Name)
 		return nil
-	}
-
-	googleapisDir, err := sourceDir(sources.Googleapis, googleapisRepo)
-	if err != nil {
-		return err
 	}
 
 	// Derive output path from library name if not set.
