@@ -16,6 +16,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -23,7 +24,7 @@ import (
 )
 
 func main() {
-	if err := sidekick.Run(os.Args[1:]); err != nil {
+	if err := sidekick.Run(context.Background(), os.Args[1:]); err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
