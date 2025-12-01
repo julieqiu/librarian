@@ -54,14 +54,6 @@ const (
 	defaultBranch   = "main"
 )
 
-// knownServiceConfigs maps API paths to their service config files for cases
-// where the service config is not in the same directory as the API.
-var knownServiceConfigs = map[string]string{
-	"google/cloud/aiplatform/v1/schema/predict/instance":       "google/cloud/aiplatform/v1/schema/aiplatform_v1.yaml",
-	"google/cloud/aiplatform/v1/schema/predict/params":         "google/cloud/aiplatform/v1/schema/aiplatform_v1.yaml",
-	"google/cloud/aiplatform/v1/schema/predict/prediction":     "google/cloud/aiplatform/v1/schema/aiplatform_v1.yaml",
-	"google/cloud/aiplatform/v1/schema/trainingjob/definition": "google/cloud/aiplatform/v1/schema/aiplatform_v1.yaml",
-}
 
 func main() {
 	repoPath := flag.String("repo", "", "path to the repository containing .sidekick.toml files (if empty, downloads from GitHub)")
@@ -350,13 +342,9 @@ func convertLibrary(repoPath, sidekickPath string, sc *sidekickconfig.Config, ro
 		}
 	}
 
-	// Set service config from sidekick config or known mappings.
-	if sc.General.ServiceConfig != "" {
-		lib.APIs[0].ServiceConfig = sc.General.ServiceConfig
-	} else if apiPath := lib.APIs[0].Path; apiPath != "" {
-		if knownSC, ok := knownServiceConfigs[apiPath]; ok {
-			lib.APIs[0].ServiceConfig = knownSC
-		}
+	// Remove empty API entries (protobuf APIs with derivable paths).
+	if len(lib.APIs) > 0 && lib.APIs[0].Format == "" && lib.APIs[0].Path == "" {
+		lib.APIs = nil
 	}
 
 	// Convert codec and source options to Rust config, filtering out defaults.
@@ -409,10 +397,6 @@ func convertLibrary(repoPath, sidekickPath string, sc *sidekickconfig.Config, ro
 	// command reads them directly from the existing Cargo.toml file, avoiding
 	// duplication in config.
 
-	// Set release level on the API (Rust has one API per library).
-	if level, ok := sc.Codec["release-level"]; ok && len(lib.APIs) > 0 {
-		lib.APIs[0].ReleaseLevel = level
-	}
 
 	// Convert extra-modules to both keep (preserve files) and extra_modules
 	// (include module declarations in lib.rs).
