@@ -27,21 +27,20 @@ import (
 const TestReleaseVersion = "1.2.3"
 
 func testReleaseAll(cfg *config.Config) (*config.Config, error) {
-	if cfg.Versions == nil {
-		cfg.Versions = make(map[string]string)
-	}
-	for k := range cfg.Versions {
-		cfg.Versions[k] = TestReleaseVersion
+	for _, lib := range cfg.Libraries {
+		lib.Version = TestReleaseVersion
 	}
 	return cfg, nil
 }
 
 func testReleaseLibrary(cfg *config.Config, name string) (*config.Config, error) {
-	if cfg.Versions == nil {
-		cfg.Versions = make(map[string]string)
+	for _, lib := range cfg.Libraries {
+		if lib.Name == name {
+			lib.Version = TestReleaseVersion
+			return cfg, nil
+		}
 	}
-	cfg.Versions[name] = TestReleaseVersion
-	return cfg, nil
+	return nil, fmt.Errorf("library %q not found", name)
 }
 
 func testGenerate(library *config.Library) error {

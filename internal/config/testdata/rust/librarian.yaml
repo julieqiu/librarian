@@ -40,12 +40,11 @@ libraries:
   - name: google-cloud-secretmanager-v1
     channels:
       - path: google/cloud/secretmanager/v1
+    version: 1.2.3
   - name: google-cloud-storage-v2
     channels:
       - path: google/cloud/storage/v2
     rust:
       disabled_rustdoc_warnings:
         - rustdoc::bare_urls
-versions:
-  google-cloud-secretmanager-v1: 0.1.0
-  google-cloud-storage-v2: 0.2.0
+    version: 2.3.4
