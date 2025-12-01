@@ -280,12 +280,124 @@ func migrate(repoPath string) (*config.Config, error) {
 		output.Libraries = append(output.Libraries, lib)
 	}
 
+	// Filter out auto-discoverable libraries (they will be discovered from googleapis).
+	output.Libraries = filterAutoDiscoverable(output.Libraries)
+
 	// Sort libraries by name
 	slices.SortFunc(output.Libraries, func(a, b *config.Library) int {
 		return strings.Compare(a.Name, b.Name)
 	})
 
 	return output, nil
+}
+
+// filterAutoDiscoverable removes libraries that can be auto-discovered from
+// googleapis and don't need explicit configuration.
+func filterAutoDiscoverable(libs []*config.Library) []*config.Library {
+	var result []*config.Library
+	for _, lib := range libs {
+		if !isAutoDiscoverable(lib) {
+			result = append(result, lib)
+		}
+	}
+	return result
+}
+
+// isAutoDiscoverable returns true if a library can be auto-discovered
+// from googleapis and doesn't need to be in the config.
+func isAutoDiscoverable(lib *config.Library) bool {
+	// Must have a name to be discoverable.
+	if lib.Name == "" {
+		return false
+	}
+	// Libraries with special flags must be kept.
+	if lib.SkipGenerate || lib.SkipRelease || lib.SkipPublish {
+		return false
+	}
+	// Libraries with keep files must be kept.
+	if len(lib.Keep) > 0 {
+		return false
+	}
+	// Libraries with custom output must be kept.
+	if lib.Output != "" {
+		return false
+	}
+	// Libraries with custom tag format must be kept.
+	if lib.TagFormat != "" {
+		return false
+	}
+	// Libraries with Go module config must be kept.
+	if lib.Go != nil {
+		return false
+	}
+	// Check each API for special config.
+	for _, api := range lib.APIs {
+		if !isAutoDiscoverableAPI(api) {
+			return false
+		}
+	}
+	return true
+}
+
+// isAutoDiscoverableAPI returns true if an API can be auto-discovered
+// and doesn't need special configuration.
+func isAutoDiscoverableAPI(api *config.API) bool {
+	// APIs with special format (e.g., discovery) must be kept.
+	if api.Format != "" {
+		return false
+	}
+	// APIs with disable_gapic must be kept.
+	if api.DisableGAPIC {
+		return false
+	}
+	// APIs with Go config must be kept.
+	if api.Go != nil {
+		return false
+	}
+	return true
+}
+
+// deriveGoGapicPackage derives the go-gapic-package value from the API path.
+// The format is: "cloud.google.com/go/{path}/api{version};{packagename}"
+func deriveGoGapicPackage(apiPath string) string {
+	if apiPath == "" {
+		return ""
+	}
+
+	// Strip "google/" prefix.
+	path := strings.TrimPrefix(apiPath, "google/")
+	// Strip "cloud/" prefix (for google/cloud/... paths).
+	path = strings.TrimPrefix(path, "cloud/")
+
+	// Split into components.
+	parts := strings.Split(path, "/")
+	if len(parts) == 0 {
+		return ""
+	}
+
+	// Find the version component (starts with "v" followed by digit).
+	versionIdx := -1
+	for i, part := range parts {
+		if len(part) > 1 && part[0] == 'v' && part[1] >= '0' && part[1] <= '9' {
+			versionIdx = i
+			break
+		}
+	}
+	if versionIdx == -1 || versionIdx == 0 {
+		return ""
+	}
+
+	// Path components before version.
+	pathParts := parts[:versionIdx]
+	version := parts[versionIdx]
+
+	// Package name is the last component before version.
+	packageName := pathParts[len(pathParts)-1]
+	packageName = strings.ReplaceAll(packageName, "-", "")
+
+	// Build import path.
+	importPath := strings.Join(pathParts, "/")
+	return fmt.Sprintf("cloud.google.com/go/%s/api%s;%s", importPath, version, packageName)
 }
 
 func convertLibrary(state *StateLibrary, releaseBlocked bool, moduleConfig *RepoConfigModule, googleapisDir string) *config.Library {
@@ -400,10 +512,17 @@ func convertLibrary(state *StateLibrary, releaseBlocked bool, moduleConfig *Repo
 			}
 		}
 
-		// Clean up empty Go config.
-		if api.Go != nil && api.Go.ImportPath == "" && !api.Go.LegacyGRPC &&
-			len(api.Go.NestedProtos) == 0 && api.Go.ProtoPackage == "" {
-			api.Go = nil
+		// Clean up Go config if it only has derivable import_path.
+		if api.Go != nil {
+			// Clear import_path if it matches what would be derived.
+			if api.Go.ImportPath != "" && api.Go.ImportPath == deriveGoGapicPackage(api.Path) {
+				api.Go.ImportPath = ""
+			}
+			// Clear Go config entirely if empty.
+			if api.Go.ImportPath == "" && !api.Go.LegacyGRPC &&
+				len(api.Go.NestedProtos) == 0 && api.Go.ProtoPackage == "" {
+				api.Go = nil
+			}
 		}
 
 		lib.APIs = append(lib.APIs, api)
@@ -448,6 +567,3 @@ func readRepoConfigFile(path string) (*RepoConfigFile, error) {
 	return &config, nil
 }
 
-func boolPtr(b bool) *bool {
-	return &b
-}
