@@ -359,11 +359,6 @@ func convertLibrary(state *StateLibrary, releaseBlocked bool, moduleConfig *Repo
 			Path: stateAPI.Path,
 		}
 
-		// Service config - include full path
-		if stateAPI.ServiceConfig != "" {
-			api.ServiceConfig = filepath.Join(stateAPI.Path, stateAPI.ServiceConfig)
-		}
-
 		// Parse BUILD.bazel to get GAPIC configuration.
 		buildFile := filepath.Join(googleapisDir, stateAPI.Path, "BUILD.bazel")
 		bazelCfg, err := bazel.Parse(buildFile)
@@ -378,25 +373,6 @@ func convertLibrary(state *StateLibrary, releaseBlocked bool, moduleConfig *Repo
 				api.Go.ImportPath = bazelCfg.GAPICImportPath
 			}
 
-			// Set other GAPIC options.
-			if bazelCfg.GRPCServiceConfig != "" {
-				api.GRPCServiceConfig = bazelCfg.GRPCServiceConfig
-			}
-			if bazelCfg.DIREGAPIC {
-				api.DIREGAPIC = true
-			}
-			if bazelCfg.Metadata {
-				api.Metadata = boolPtr(true)
-			}
-			if bazelCfg.ReleaseLevel != "" {
-				api.ReleaseLevel = bazelCfg.ReleaseLevel
-			}
-			if bazelCfg.RESTNumericEnums {
-				api.RESTNumericEnums = boolPtr(true)
-			}
-			if bazelCfg.Transport != "" {
-				api.Transport = bazelCfg.Transport
-			}
 			if bazelCfg.HasLegacyGRPC {
 				if api.Go == nil {
 					api.Go = &config.GoPackage{}
