@@ -22,6 +22,86 @@ import (
 	"github.com/googleapis/librarian/internal/config"
 )
 
+func TestDeriveGoLibraryName(t *testing.T) {
+	for _, test := range []struct {
+		apiPath string
+		want    string
+	}{
+		{"google/cloud/speech/v1", "speech"},
+		{"google/cloud/speech/v1p1beta1", "speech"},
+		{"google/cloud/bigquery/storage/v1", "bigquery"},
+		{"google/ai/generativelanguage/v1", "ai"},
+		{"google/devtools/cloudbuild/v1", "devtools"},
+		{"grafeas/v1", "grafeas"},
+		{"", ""},
+	} {
+		t.Run(test.apiPath, func(t *testing.T) {
+			got := deriveGoLibraryName(test.apiPath)
+			if got != test.want {
+				t.Errorf("got %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestDiscoverLibraries(t *testing.T) {
+	for _, test := range []struct {
+		name string
+		cfg  *config.Config
+		want []string // library names
+	}{
+		{
+			name: "discovers all",
+			cfg:  &config.Config{},
+			want: []string{"library", "grafeas", "speech"},
+		},
+		{
+			name: "skips existing library by name",
+			cfg: &config.Config{
+				Libraries: []*config.Library{
+					{Name: "speech"},
+				},
+			},
+			want: []string{"library", "grafeas"},
+		},
+		{
+			name: "skips existing library by API path",
+			cfg: &config.Config{
+				Libraries: []*config.Library{
+					{APIs: []*config.API{{Path: "google/cloud/speech/v1"}}},
+				},
+			},
+			// speech is still discovered because the library has no name,
+			// but the v1 API path is skipped
+			want: []string{"library", "grafeas", "speech"},
+		},
+		{
+			name: "all covered by name",
+			cfg: &config.Config{
+				Libraries: []*config.Library{
+					{Name: "speech"},
+					{Name: "grafeas"},
+					{Name: "library"},
+				},
+			},
+			want: nil,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got := discoverLibraries(test.cfg, "testdata/googleapis")
+			var names []string
+			for _, lib := range got {
+				names = append(names, lib.Name)
+			}
+			slices.Sort(names)
+			slices.Sort(test.want)
+			if diff := cmp.Diff(test.want, names); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
 func TestFindUncoveredAPIs(t *testing.T) {
 	for _, test := range []struct {
 		name string

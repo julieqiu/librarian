@@ -115,6 +115,13 @@ func generateAll(ctx context.Context, cfg *config.Config) ([]string, error) {
 			applyDefault(lib, cfg.Default)
 		}
 	}
+	// Discover libraries from googleapis not already in config.
+	discovered := discoverLibraries(cfg, googleapisDir)
+	for _, lib := range discovered {
+		applyDefault(lib, cfg.Default)
+	}
+	cfg.Libraries = append(cfg.Libraries, discovered...)
+
 	uncoveredAPIs := findUncoveredAPIs(cfg, googleapisDir)
 	var generatedDirs []string
 	for _, lib := range cfg.Libraries {

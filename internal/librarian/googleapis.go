@@ -202,6 +202,78 @@ func isServiceConfigFile(path string) (bool, error) {
 	return false, scanner.Err()
 }
 
+// deriveGoLibraryName extracts the Go library name from an API path.
+// Examples:
+//   - "google/cloud/speech/v1" → "speech"
+//   - "google/cloud/bigquery/storage/v1" → "bigquery"
+//   - "google/ai/generativelanguage/v1" → "ai"
+//   - "grafeas/v1" → "grafeas"
+func deriveGoLibraryName(apiPath string) string {
+	// Strip "google/" prefix.
+	path := strings.TrimPrefix(apiPath, "google/")
+	// Strip "cloud/" prefix (for google/cloud/... paths).
+	path = strings.TrimPrefix(path, "cloud/")
+
+	// The library name is the first component.
+	parts := strings.Split(path, "/")
+	if len(parts) == 0 {
+		return ""
+	}
+	return parts[0]
+}
+
+// discoverLibraries scans googleapis and returns Library entries for APIs
+// not already covered by explicit config entries. APIs are grouped by
+// derived library name.
+func discoverLibraries(cfg *config.Config, googleapisDir string) []*config.Library {
+	allAPIs, err := listAPIs(googleapisDir, cfg.Language)
+	if err != nil {
+		return nil
+	}
+
+	// Build set of library names already in config (including skip_generate ones).
+	existingLibs := make(map[string]bool)
+	for _, lib := range cfg.Libraries {
+		existingLibs[lib.Name] = true
+	}
+
+	// Build set of API paths already covered.
+	coveredAPIs := make(map[string]bool)
+	for _, lib := range cfg.Libraries {
+		for _, api := range lib.APIs {
+			coveredAPIs[api.Path] = true
+		}
+	}
+
+	// Group uncovered APIs by library name.
+	apisByLib := make(map[string][]string)
+	for _, apiPath := range allAPIs {
+		if coveredAPIs[apiPath] {
+			continue
+		}
+		libName := deriveGoLibraryName(apiPath)
+		if libName == "" {
+			continue
+		}
+		// Skip if library already exists in config.
+		if existingLibs[libName] {
+			continue
+		}
+		apisByLib[libName] = append(apisByLib[libName], apiPath)
+	}
+
+	// Create Library entries for discovered APIs.
+	var discovered []*config.Library
+	for libName, apiPaths := range apisByLib {
+		lib := &config.Library{Name: libName}
+		for _, apiPath := range apiPaths {
+			lib.APIs = append(lib.APIs, &config.API{Path: apiPath})
+		}
+		discovered = append(discovered, lib)
+	}
+	return discovered
+}
+
 // applyDefault populates empty library fields from the provided defaults.
 func applyDefault(lib *config.Library, d *config.Default) {
 	// Ensure each library has at least one API with a path.
