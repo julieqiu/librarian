@@ -51,10 +51,7 @@ func release(cfg *config.Config, name string) (*config.Config, error) {
 		if name == "" {
 			return true
 		}
-		if name == pkgName {
-			return true
-		}
-		return false
+		return name == pkgName
 	}
 
 	var found bool

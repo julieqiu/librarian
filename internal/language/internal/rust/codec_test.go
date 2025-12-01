@@ -117,6 +117,9 @@ func TestToSidekickConfig(t *testing.T) {
 			library: &config.Library{
 				Name: "google-cloud-storage",
 				Rust: &config.RustCrate{
+					RustDefault: config.RustDefault{
+						DisabledRustdocWarnings: []string{"broken_intra_doc_links"},
+					},
 					ModulePath:                "gcs",
 					PerServiceFeatures:        true,
 					IncludeGrpcOnlyMethods:    true,
@@ -124,7 +127,6 @@ func TestToSidekickConfig(t *testing.T) {
 					HasVeneer:                 true,
 					RoutingRequired:           true,
 					GenerateSetterSamples:     true,
-					DisabledRustdocWarnings:   []string{"broken_intra_doc_links"},
 					DisabledClippyWarnings:    []string{"too_many_arguments"},
 					DefaultFeatures:           []string{"default-feature"},
 					ExtraModules:              []string{"extra-module"},
@@ -164,13 +166,11 @@ func TestToSidekickConfig(t *testing.T) {
 			},
 		},
 		{
-			name: "with publish disabled",
+			name: "with skip publish (not for publication)",
 			library: &config.Library{
-				Name: "google-cloud-storage",
-				Publish: &config.LibraryPublish{
-					Disabled: true,
-				},
-				Rust: &config.RustCrate{},
+				Name:        "google-cloud-storage",
+				SkipPublish: true,
+				Rust:        &config.RustCrate{},
 			},
 			channel: &config.Channel{
 				Path:          "google/cloud/storage/v1",
@@ -198,14 +198,16 @@ func TestToSidekickConfig(t *testing.T) {
 			library: &config.Library{
 				Name: "google-cloud-storage",
 				Rust: &config.RustCrate{
-					PackageDependencies: []config.RustPackageDependency{
-						{
-							Name:      "tokio",
-							Package:   "tokio",
-							Source:    "1.0",
-							ForceUsed: true,
-							UsedIf:    "feature = \"async\"",
-							Feature:   "async",
+					RustDefault: config.RustDefault{
+						PackageDependencies: []*config.RustPackageDependency{
+							{
+								Name:      "tokio",
+								Package:   "tokio",
+								Source:    "1.0",
+								ForceUsed: true,
+								UsedIf:    "feature = \"async\"",
+								Feature:   "async",
+							},
 						},
 					},
 				},
@@ -414,7 +416,7 @@ func TestFormatPackageDependency(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			got := formatPackageDependency(test.dep)
+			got := formatPackageDependency(&test.dep)
 			if got != test.want {
 				t.Errorf("formatPackageDependency() = %q, want %q", got, test.want)
 			}

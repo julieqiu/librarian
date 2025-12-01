@@ -23,7 +23,66 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func TestReadWrite(t *testing.T) {
+func TestRead(t *testing.T) {
+	got, err := Read("testdata/rust/librarian.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := &Config{
+		Language: "rust",
+		Sources: &Sources{
+			Discovery: &Source{
+				Commit: "b27c80574e918a7e2a36eb21864d1d2e45b8c032",
+				SHA256: "67c8d3792f0ebf5f0582dce675c379d0f486604eb0143814c79e788954aa1212",
+			},
+			Googleapis: &Source{
+				Commit: "9fcfbea0aa5b50fa22e190faceb073d74504172b",
+				SHA256: "81e6057ffd85154af5268c2c3c8f2408745ca0f7fa03d43c68f4847f31eb5f98",
+			},
+		},
+		Default: &Default{
+			Output:       "src/generated/",
+			ReleaseLevel: "stable",
+			TagFormat:    "{name}/v{version}",
+			Rust: &RustDefault{
+				DisabledRustdocWarnings: []string{
+					"redundant_explicit_links",
+					"broken_intra_doc_links",
+				},
+				PackageDependencies: []*RustPackageDependency{
+					{Name: "bytes", Package: "bytes", ForceUsed: true},
+					{Name: "serde", Package: "serde", ForceUsed: true},
+				},
+			},
+		},
+		Libraries: []*Library{
+			{
+				Name:    "google-cloud-secretmanager-v1",
+				Version: "1.2.3",
+				Channels: []*Channel{
+					{Path: "google/cloud/secretmanager/v1"},
+				},
+			},
+			{
+				Name:    "google-cloud-storage-v2",
+				Version: "2.3.4",
+				Channels: []*Channel{
+					{Path: "google/cloud/storage/v2"},
+				},
+				Rust: &RustCrate{
+					RustDefault: RustDefault{
+						DisabledRustdocWarnings: []string{"rustdoc::bare_urls"},
+					},
+				},
+			},
+		},
+	}
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("mismatch (-want +got):\n%s", diff)
+	}
+}
+
+func TestWrite(t *testing.T) {
 	cfg, err := Read("testdata/rust/librarian.yaml")
 	if err != nil {
 		t.Fatal(err)
