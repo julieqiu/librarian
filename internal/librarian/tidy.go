@@ -144,6 +144,10 @@ func formatConfig(cfg *config.Config) *config.Config {
 			})
 		}
 		newlib := removeRedundantFields(lib, defaultOutput)
+		// Skip libraries that are auto-discoverable (Go only for now).
+		if cfg.Language == "go" && isGoAutoDiscoverable(newlib) {
+			continue
+		}
 		if !isDefaultLibrary(newlib) {
 			result = append(result, newlib)
 		}
@@ -177,6 +181,64 @@ func isDefaultLibrary(lib *config.Library) bool {
 		return false
 	}
 	return reflect.DeepEqual(lib, &config.Library{Name: lib.Name})
+}
+
+// isGoAutoDiscoverable returns true if a Go library can be auto-discovered
+// from googleapis and doesn't need to be in the config.
+func isGoAutoDiscoverable(lib *config.Library) bool {
+	// Must have a name to be discoverable.
+	if lib.Name == "" {
+		return false
+	}
+	// Libraries with special flags must be kept.
+	if lib.SkipGenerate || lib.SkipRelease || lib.SkipPublish {
+		return false
+	}
+	// Libraries with keep files must be kept.
+	if len(lib.Keep) > 0 {
+		return false
+	}
+	// Libraries with custom output must be kept.
+	if lib.Output != "" {
+		return false
+	}
+	// Libraries with custom tag format must be kept.
+	if lib.TagFormat != "" {
+		return false
+	}
+	// Libraries with Go module config must be kept.
+	if lib.Go != nil {
+		return false
+	}
+	// Libraries with Rust config must be kept.
+	if lib.Rust != nil {
+		return false
+	}
+	// Check each API for special config.
+	for _, api := range lib.APIs {
+		if !isGoAutoDiscoverableAPI(api) {
+			return false
+		}
+	}
+	return true
+}
+
+// isGoAutoDiscoverableAPI returns true if an API can be auto-discovered
+// and doesn't need special configuration.
+func isGoAutoDiscoverableAPI(api *config.API) bool {
+	// APIs with special format (e.g., discovery) must be kept.
+	if api.Format != "" {
+		return false
+	}
+	// APIs with disable_gapic must be kept.
+	if api.DisableGAPIC {
+		return false
+	}
+	// APIs with Go config must be kept.
+	if api.Go != nil {
+		return false
+	}
+	return true
 }
 
 func isDiscoveryAPI(lib *config.Library) bool {
