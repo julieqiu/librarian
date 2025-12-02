@@ -18,6 +18,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/fs"
+	"os"
+	"path/filepath"
 
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/fetch"
@@ -111,6 +114,10 @@ func generate(ctx context.Context, language string, library *config.Library, sou
 	case "testhelper":
 		err = testGenerate(library)
 	case "rust":
+		keep := append(library.Keep, "Cargo.toml")
+		if err := cleanOutput(library.Output, keep); err != nil {
+			return err
+		}
 		err = rust.Generate(ctx, library, sources)
 	default:
 		err = fmt.Errorf("generate not implemented for %q", language)
@@ -131,4 +138,34 @@ func fetchGoogleapisDir(ctx context.Context, sources *config.Sources) (string, e
 		return sources.Googleapis.Dir, nil
 	}
 	return fetch.RepoDir(ctx, googleapisRepo, sources.Googleapis.Commit, sources.Googleapis.SHA256)
+}
+
+// cleanOutput removes all files in dir except those in keep. The keep list
+// should contain paths relative to dir. It returns an error if any file in
+// keep does not exist.
+func cleanOutput(dir string, keep []string) error {
+	keepSet := make(map[string]bool)
+	for _, k := range keep {
+		path := filepath.Join(dir, k)
+		if _, err := os.Stat(path); errors.Is(err, fs.ErrNotExist) {
+			return fmt.Errorf("%s: file %q in keep list does not exist", dir, k)
+		}
+		keepSet[k] = true
+	}
+	return filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		rel, err := filepath.Rel(dir, path)
+		if err != nil {
+			return err
+		}
+		if keepSet[rel] {
+			return nil
+		}
+		return os.Remove(path)
+	})
 }
