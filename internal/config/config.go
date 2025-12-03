@@ -126,6 +126,9 @@ type Library struct {
 	// overrides Default.Transport.
 	Transport string `yaml:"transport,omitempty"`
 
+	// DescriptionOverride overrides the library description.
+	DescriptionOverride string `yaml:"description_override,omitempty"`
+
 	// Rust contains Rust-specific library configuration.
 	Rust *RustCrate `yaml:"rust,omitempty"`
 }
