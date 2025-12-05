@@ -158,6 +158,7 @@ func TestReadSidekickFiles(t *testing.T) {
 					Version:             "1.1.0",
 					CopyrightYear:       "2025",
 					DescriptionOverride: "Description override",
+					SpecificationFormat: "discovery",
 					Rust: &config.RustCrate{
 						RustDefault: config.RustDefault{
 							DisabledRustdocWarnings: []string{"bare_urls", "broken_intra_doc_links", "redundant_explicit_links"},
@@ -191,9 +192,10 @@ func TestReadSidekickFiles(t *testing.T) {
 							ServiceConfig: "google/cloud/sql/v1/sqladmin_v1.yaml",
 						},
 					},
-					SkipPublish:   true,
-					Version:       "1.2.0",
-					CopyrightYear: "2025",
+					SkipPublish:         true,
+					Version:             "1.2.0",
+					CopyrightYear:       "2025",
+					SpecificationFormat: "openapi",
 					Rust: &config.RustCrate{
 						RustDefault: config.RustDefault{
 							PackageDependencies: []*config.RustPackageDependency{
