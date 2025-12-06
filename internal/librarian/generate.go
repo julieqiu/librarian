@@ -28,6 +28,7 @@ import (
 	"github.com/googleapis/librarian/internal/serviceconfig"
 	"github.com/googleapis/librarian/internal/yaml"
 	"github.com/urfave/cli/v3"
+	"golang.org/x/sync/errgroup"
 )
 
 const googleapisRepo = "github.com/googleapis/googleapis"
@@ -88,12 +89,15 @@ func generateAll(ctx context.Context, cfg *config.Config) error {
 		return err
 	}
 	cfg.Libraries = append(cfg.Libraries, libraries...)
+
+	fmt.Printf("generating %d libraries\n", len(cfg.Libraries))
+	g, ctx := errgroup.WithContext(ctx)
 	for _, lib := range cfg.Libraries {
-		if err := generateLibrary(ctx, cfg, lib.Name); err != nil {
-			return err
-		}
+		g.Go(func() error {
+			return generateLibrary(ctx, cfg, lib.Name)
+		})
 	}
-	return nil
+	return g.Wait()
 }
 
 // deriveDefaultLibraries finds libraries for allowed channels that are not
