@@ -33,7 +33,10 @@ import (
 )
 
 const (
-	sidekickFile = ".sidekick.toml"
+	sidekickFile            = ".sidekick.toml"
+	discoveryArchivePrefix  = "https://github.com/googleapis/discovery-artifact-manager/archive/"
+	googleapisArchivePrefix = "https://github.com/googleapis/googleapis/archive/"
+	tarballSuffix           = ".tar.gz"
 )
 
 var (
@@ -142,8 +145,13 @@ func readRootSidekick(repoPath string) (*config.Config, error) {
 
 	releaseLevel, _ := sidekick.Codec["release-level"].(string)
 	warnings, _ := sidekick.Codec["disabled-rustdoc-warnings"].(string)
-	googleapisCommitSHA, _ := sidekick.Source["googleapis-sha256"].(string)
-	discoveryCommitSHA, _ := sidekick.Source["discovery-sha256"].(string)
+	discoverySHA256, _ := sidekick.Source["discovery-sha256"].(string)
+	discoveryRoot, _ := sidekick.Source["discovery-root"].(string)
+	googleapisSHA256, _ := sidekick.Source["googleapis-sha256"].(string)
+	googleapisRoot, _ := sidekick.Source["googleapis-root"].(string)
+
+	discoveryCommit := strings.TrimSuffix(strings.TrimPrefix(discoveryRoot, discoveryArchivePrefix), tarballSuffix)
+	googleapisCommit := strings.TrimSuffix(strings.TrimPrefix(googleapisRoot, googleapisArchivePrefix), tarballSuffix)
 
 	// Parse package dependencies
 	packageDependencies := parsePackageDependencies(sidekick.Codec)
@@ -152,10 +160,12 @@ func readRootSidekick(repoPath string) (*config.Config, error) {
 		Language: "rust",
 		Sources: &config.Sources{
 			Discovery: &config.Source{
-				Commit: discoveryCommitSHA,
+				Commit: discoveryCommit,
+				SHA256: discoverySHA256,
 			},
 			Googleapis: &config.Source{
-				Commit: googleapisCommitSHA,
+				Commit: googleapisCommit,
+				SHA256: googleapisSHA256,
 			},
 		},
 		Default: &config.Default{
