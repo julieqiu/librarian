@@ -38,6 +38,8 @@ var (
 	defaultBackoff      = 10 * time.Second
 )
 
+const maxDownloadRetries = 3
+
 // Endpoints defines the endpoints used to access GitHub.
 type Endpoints struct {
 	// API defines the endpoint used to make API calls.
@@ -142,7 +144,7 @@ func TarballLink(githubDownload string, repo *Repo, sha string) string {
 
 // DownloadTarball downloads a tarball from the given url to the target
 // path, verifying its SHA256 checksum matches expectedSha256. It retries up to
-// 3 times with exponential backoff on failure.
+// maxDownloadRetries times with exponential backoff on failure.
 func DownloadTarball(ctx context.Context, target, url, expectedSha256 string) error {
 	if fileExists(target) {
 		return nil
@@ -169,7 +171,6 @@ func DownloadTarball(ctx context.Context, target, url, expectedSha256 string) er
 	if err := downloadTarball(ctx, tempPath, url); err != nil {
 		return err
 	}
-
 	sha, err := computeSHA256(tempPath)
 	if err != nil {
 		return err
@@ -184,10 +185,10 @@ func DownloadTarball(ctx context.Context, target, url, expectedSha256 string) er
 }
 
 // downloadTarball downloads a tarball from the given source URL to the target
-// path. It retries up to 3 times with exponential backoff on failure.
+// path. It retries up to maxDownloadRetries times with exponential backoff on failure.
 func downloadTarball(ctx context.Context, target, source string) error {
 	var err error
-	for i := range 3 {
+	for i := range maxDownloadRetries {
 		if i > 0 {
 			select {
 			case <-time.After(defaultBackoff):
@@ -197,16 +198,15 @@ func downloadTarball(ctx context.Context, target, source string) error {
 			}
 		}
 
-		if err := downloadAttempt(ctx, target, source); err != nil {
+		if err = downloadAttempt(ctx, target, source); err != nil {
 			if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 				return err
 			}
 			continue
 		}
 		return nil
-
 	}
-	return fmt.Errorf("download failed after 3 attempts, last error=%w", err)
+	return fmt.Errorf("download failed after %d attempts, last error=%w", maxDownloadRetries, err)
 }
 
 func downloadAttempt(ctx context.Context, target, source string) (err error) {
@@ -237,11 +237,9 @@ func downloadAttempt(ctx context.Context, target, source string) (err error) {
 	if response.StatusCode >= 300 {
 		return fmt.Errorf("http error in download %s", response.Status)
 	}
-
 	if _, err := io.Copy(file, response.Body); err != nil {
 		return err
 	}
-
 	return nil
 }
 
