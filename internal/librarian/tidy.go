@@ -51,7 +51,17 @@ func RunTidy() error {
 	if err := validateLibraries(cfg); err != nil {
 		return err
 	}
+	for _, lib := range cfg.Libraries {
+		if lib.Output != "" && len(lib.Channels) == 1 && isDerivableOutput(cfg, lib) {
+			lib.Output = ""
+		}
+	}
 	return yaml.Write(librarianConfigPath, formatConfig(cfg))
+}
+
+func isDerivableOutput(cfg *config.Config, lib *config.Library) bool {
+	derivedOutput := defaultOutput(cfg.Language, lib.Channels[0].Path, cfg.Default.Output)
+	return lib.Output == derivedOutput
 }
 
 func validateLibraries(cfg *config.Config) error {
