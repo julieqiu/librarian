@@ -116,7 +116,7 @@ func TestFindSidekickFiles(t *testing.T) {
 		{
 			name:    "no_src_directory",
 			path:    "testdata/find-sidekick-files/no-src",
-			wantErr: errSrcNotFound,
+			wantErr: os.ErrNotExist,
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -139,7 +139,7 @@ func TestFindSidekickFiles(t *testing.T) {
 	}
 }
 
-func TestReadSidekickFiles(t *testing.T) {
+func TestBuildGAPIC(t *testing.T) {
 	for _, test := range []struct {
 		name     string
 		files    []string
@@ -265,7 +265,7 @@ func TestReadSidekickFiles(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			got, err := readSidekickFiles(test.files, test.repoName)
+			got, err := buildGAPIC(test.files, test.repoName)
 			if test.wantErr != nil {
 				if !errors.Is(err, test.wantErr) {
 					t.Errorf("got error %v, want %v", err, test.wantErr)
@@ -323,6 +323,129 @@ func TestDeriveLibraryName(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			got := deriveLibraryName(test.api)
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestFindCargos(t *testing.T) {
+	for _, test := range []struct {
+		name    string
+		path    string
+		want    []string
+		wantErr error
+	}{
+		{
+			name: "success",
+			path: "testdata/find-cargos/success",
+			want: []string{
+				"testdata/find-cargos/success/Cargo.toml",
+				"testdata/find-cargos/success/dir-1/Cargo.toml",
+				"testdata/find-cargos/success/dir-2/dirdir-2/Cargo.toml",
+			},
+		},
+		{
+			name:    "invalid_path",
+			path:    "testdata/find-cargos/non-existent-path",
+			wantErr: os.ErrNotExist,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := findCargos(test.path)
+			if test.wantErr != nil {
+				if !errors.Is(err, test.wantErr) {
+					t.Errorf("got error %v, want %v", err, test.wantErr)
+				}
+				return
+			}
+
+			if err != nil {
+				t.Errorf("got error %v, want nil", err)
+				return
+			}
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestBuildVeneer(t *testing.T) {
+	for _, test := range []struct {
+		name    string
+		files   []string
+		want    map[string]*config.Library
+		wantErr error
+	}{
+		{
+			name: "success",
+			files: []string{
+				"testdata/build-veneer/success/lib-1/Cargo.toml",
+				"testdata/build-veneer/success/lib-2/Cargo.toml",
+			},
+			want: map[string]*config.Library{
+				"google-cloud-storage": {
+					Name:          "google-cloud-storage",
+					Veneer:        true,
+					Output:        "testdata/build-veneer/success/lib-1",
+					Version:       "1.5.0",
+					CopyrightYear: "2025",
+					Rust: &config.RustCrate{
+						Modules: []*config.RustModule{
+							{
+								GenerateSetterSamples: true,
+								HasVeneer:             true,
+								IncludedIds: []string{
+									".google.storage.v2.Storage.DeleteBucket",
+									".google.storage.v2.Storage.GetBucket",
+									".google.storage.v2.Storage.CreateBucket",
+									".google.storage.v2.Storage.ListBuckets",
+								},
+								IncludeGrpcOnlyMethods: true,
+								NameOverrides:          ".google.storage.v2.Storage=StorageControl",
+								Output:                 "testdata/build-veneer/success/lib-1/dir-1",
+								RoutingRequired:        true,
+								ServiceConfig:          "google/storage/v2/storage_v2.yaml",
+								SkippedIds:             []string{".google.iam.v1.ResourcePolicyMember"},
+								Source:                 "google/storage/v2",
+								Template:               "grpc-client",
+							},
+							{
+								GenerateSetterSamples: false,
+								ModulePath:            "crate::generated::gapic_control::model",
+								NameOverrides:         ".google.storage.control.v2.IntelligenceConfig.Filter.cloud_storage_buckets=CloudStorageBucketsOneOf",
+								Output:                "testdata/build-veneer/success/lib-1/dir-2/dirdir-2",
+								Source:                "google/storage/control/v2",
+								Template:              "convert-prost",
+							},
+						},
+					},
+				},
+				"google-cloud-spanner": {
+					Name:          "google-cloud-spanner",
+					Veneer:        true,
+					Output:        "testdata/build-veneer/success/lib-2",
+					Version:       "0.0.0",
+					CopyrightYear: "2025",
+				},
+			},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := buildVeneer(test.files)
+			if test.wantErr != nil {
+				if !errors.Is(err, test.wantErr) {
+					t.Errorf("got error %v, want %v", err, test.wantErr)
+				}
+				return
+			}
+
+			if err != nil {
+				t.Errorf("got error %v, want nil", err)
+				return
+			}
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("mismatch (-want +got):\n%s", diff)
 			}
