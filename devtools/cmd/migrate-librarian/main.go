@@ -192,7 +192,7 @@ func fetchGoogleapis(ctx context.Context) (*config.Source, error) {
 		Org:  "googleapis",
 		Repo: "googleapis",
 	}
-	latestCommit, sha256, err := fetch.LatestCommitAndChecksum(endpoint, repo)
+	latestCommit, sha256, err := fetch.LatestCommitAndChecksum(endpoint, repo, "master")
 	if err != nil {
 		return nil, err
 	}

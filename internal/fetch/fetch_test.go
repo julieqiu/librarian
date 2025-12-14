@@ -544,6 +544,7 @@ func TestLatestCommitAndChecksum(t *testing.T) {
 		expectedTarballContents = "mock tarball content for checksum"
 		testOrg                 = "testorg"
 		testRepo                = "testrepo"
+		branch                  = "master"
 	)
 	// Calculate the expected SHA256 for the tarball contents.
 	hasher := sha256.New()
@@ -577,7 +578,7 @@ func TestLatestCommitAndChecksum(t *testing.T) {
 		Repo: testRepo,
 	}
 
-	gotCommit, gotSha256, err := LatestCommitAndChecksum(endpoints, repo)
+	gotCommit, gotSha256, err := LatestCommitAndChecksum(endpoints, repo, branch)
 	if err != nil {
 		t.Fatalf("LatestCommitAndChecksum() error = %v, wantErr %v", err, nil)
 	}
@@ -665,7 +666,7 @@ func TestLatestCommitAndChecksumFailure(t *testing.T) {
 		endpoints := &Endpoints{API: server.URL, Download: server.URL}
 		repo := &Repo{Org: testOrg, Repo: testRepo}
 
-		_, _, err := LatestCommitAndChecksum(endpoints, repo)
+		_, _, err := LatestCommitAndChecksum(endpoints, repo, "master")
 		if err == nil {
 			t.Error("expected an error when LatestSha fails, but got nil")
 		}
@@ -687,7 +688,7 @@ func TestLatestCommitAndChecksumFailure(t *testing.T) {
 		endpoints := &Endpoints{API: server.URL, Download: server.URL}
 		repo := &Repo{Org: testOrg, Repo: testRepo}
 
-		_, _, err := LatestCommitAndChecksum(endpoints, repo)
+		_, _, err := LatestCommitAndChecksum(endpoints, repo, "master")
 		if err == nil {
 			t.Error("expected an error when Sha256 fails, but got nil")
 		}

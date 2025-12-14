@@ -45,7 +45,7 @@ func TestUpdateRootConfig(t *testing.T) {
 
 	oldLatestCommitAndChecksum := latestCommitAndChecksum
 	defer func() { latestCommitAndChecksum = oldLatestCommitAndChecksum }()
-	latestCommitAndChecksum = func(_ *fetch.Endpoints, _ *fetch.Repo) (string, string, error) {
+	latestCommitAndChecksum = func(_ *fetch.Endpoints, _ *fetch.Repo, _ string) (string, string, error) {
 		return latestSha, latestShaContentsHash, nil
 	}
 
@@ -145,12 +145,12 @@ func TestUpdateRootConfigErrors(t *testing.T) {
 			defer func() { latestCommitAndChecksum = oldLatestCommitAndChecksum }()
 
 			if test.mockLatestCommitAndChecksumErr != nil {
-				latestCommitAndChecksum = func(_ *fetch.Endpoints, _ *fetch.Repo) (string, string, error) {
+				latestCommitAndChecksum = func(_ *fetch.Endpoints, _ *fetch.Repo, _ string) (string, string, error) {
 					return "", "", test.mockLatestCommitAndChecksumErr
 				}
 			} else {
 				// Default successful mock if no specific error is provided
-				latestCommitAndChecksum = func(_ *fetch.Endpoints, _ *fetch.Repo) (string, string, error) {
+				latestCommitAndChecksum = func(_ *fetch.Endpoints, _ *fetch.Repo, _ string) (string, string, error) {
 					return "mockSha", "mockSha256", nil
 				}
 			}

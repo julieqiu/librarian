@@ -115,7 +115,7 @@ func updateSource(endpoints *fetch.Endpoints, name string, source *config.Source
 	oldCommit := source.Commit
 	oldSHA256 := source.SHA256
 
-	commit, sha256, err := fetch.LatestCommitAndChecksum(endpoints, repo)
+	commit, sha256, err := fetch.LatestCommitAndChecksum(endpoints, repo, "master")
 	if err != nil {
 		return err
 	}

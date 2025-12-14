@@ -41,7 +41,7 @@ func UpdateRootConfig(rootConfig *Config, rootName string) error {
 		return err
 	}
 
-	latestSha, newSha256, err := latestCommitAndChecksum(endpoints, repo)
+	latestSha, newSha256, err := latestCommitAndChecksum(endpoints, repo, "master")
 	if err != nil {
 		return err
 	}

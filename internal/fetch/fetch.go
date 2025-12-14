@@ -30,8 +30,6 @@ import (
 	"time"
 )
 
-const branch = "master"
-
 var (
 	errChecksumMismatch = errors.New("checksum mismatch")
 	errMissingSHA256    = errors.New("expectedSha256 is required")
@@ -121,7 +119,7 @@ func latestSha(query string) (string, error) {
 
 // LatestCommitAndChecksum fetches the latest commit SHA and the SHA256 of the tarball for that
 // commit from the GitHub API for the given repository.
-func LatestCommitAndChecksum(endpoints *Endpoints, repo *Repo) (commit, sha256 string, err error) {
+func LatestCommitAndChecksum(endpoints *Endpoints, repo *Repo, branch string) (commit, sha256 string, err error) {
 	apiURL := fmt.Sprintf("%s/repos/%s/%s/commits/%s", endpoints.API, repo.Org, repo.Repo, branch)
 	commit, err = latestSha(apiURL)
 	if err != nil {
