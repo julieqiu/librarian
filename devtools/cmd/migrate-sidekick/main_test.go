@@ -68,6 +68,7 @@ func TestReadRootSidekick(t *testing.T) {
 								ForceUsed: true,
 							},
 						},
+						GenerateSetterSamples: "true",
 					},
 				},
 			},
@@ -174,6 +175,7 @@ func TestBuildGAPIC(t *testing.T) {
 					Rust: &config.RustCrate{
 						RustDefault: config.RustDefault{
 							DisabledRustdocWarnings: []string{"bare_urls", "broken_intra_doc_links", "redundant_explicit_links"},
+							GenerateSetterSamples:   "true",
 						},
 						PerServiceFeatures:        true,
 						ModulePath:                "crate",
@@ -190,7 +192,6 @@ func TestBuildGAPIC(t *testing.T) {
 						HasVeneer:                 true,
 						RoutingRequired:           true,
 						IncludeGrpcOnlyMethods:    true,
-						GenerateSetterSamples:     true,
 						GenerateRpcSamples:        true,
 						PostProcessProtos:         "example post processing",
 						DetailedTracingAttributes: true,
@@ -503,11 +504,11 @@ func TestBuildConfig(t *testing.T) {
 					Rust: &config.RustCrate{
 						RustDefault: config.RustDefault{
 							DisabledRustdocWarnings: []string{"bare_urls", "broken_intra_doc_links", "redundant_explicit_links"},
+							GenerateSetterSamples:   "true",
 						},
-						PerServiceFeatures:    true,
-						GenerateSetterSamples: true,
-						GenerateRpcSamples:    true,
-						NameOverrides:         ".google.cloud.security/publicca.v1.Storage=StorageControl",
+						PerServiceFeatures: true,
+						GenerateRpcSamples: true,
+						NameOverrides:      ".google.cloud.security/publicca.v1.Storage=StorageControl",
 					},
 				},
 				"skipped": {
@@ -537,11 +538,11 @@ func TestBuildConfig(t *testing.T) {
 						Rust: &config.RustCrate{
 							RustDefault: config.RustDefault{
 								DisabledRustdocWarnings: []string{"bare_urls", "broken_intra_doc_links", "redundant_explicit_links"},
+								GenerateSetterSamples:   "true",
 							},
-							PerServiceFeatures:    true,
-							GenerateSetterSamples: true,
-							GenerateRpcSamples:    true,
-							NameOverrides:         ".google.cloud.security/publicca.v1.Storage=StorageControl",
+							PerServiceFeatures: true,
+							GenerateRpcSamples: true,
+							NameOverrides:      ".google.cloud.security/publicca.v1.Storage=StorageControl",
 						},
 					},
 				},

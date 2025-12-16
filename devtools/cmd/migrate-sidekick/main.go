@@ -162,6 +162,7 @@ func readRootSidekick(repoPath string) (*config.Config, error) {
 	discoveryRoot, _ := sidekick.Source["discovery-root"].(string)
 	googleapisSHA256, _ := sidekick.Source["googleapis-sha256"].(string)
 	googleapisRoot, _ := sidekick.Source["googleapis-root"].(string)
+	generateSetterSamples, _ := sidekick.Codec["generate-setter-samples"].(string)
 
 	discoveryCommit := strings.TrimSuffix(strings.TrimPrefix(discoveryRoot, discoveryArchivePrefix), tarballSuffix)
 	googleapisCommit := strings.TrimSuffix(strings.TrimPrefix(googleapisRoot, googleapisArchivePrefix), tarballSuffix)
@@ -187,6 +188,7 @@ func readRootSidekick(repoPath string) (*config.Config, error) {
 			Rust: &config.RustDefault{
 				PackageDependencies:     packageDependencies,
 				DisabledRustdocWarnings: strToSlice(warnings),
+				GenerateSetterSamples:   generateSetterSamples,
 			},
 		},
 	}
@@ -394,6 +396,7 @@ func buildGAPIC(files []string, repoPath string) (map[string]*config.Library, er
 			RustDefault: config.RustDefault{
 				PackageDependencies:     packageDeps,
 				DisabledRustdocWarnings: strToSlice(disabledRustdocWarnings),
+				GenerateSetterSamples:   generateSetterSamples,
 			},
 			PerServiceFeatures:        strToBool(perServiceFeatures),
 			ModulePath:                modulePath,
@@ -410,7 +413,6 @@ func buildGAPIC(files []string, repoPath string) (map[string]*config.Library, er
 			HasVeneer:                 strToBool(hasVeneer),
 			RoutingRequired:           strToBool(routingRequired),
 			IncludeGrpcOnlyMethods:    strToBool(includeGrpcOnlyMethods),
-			GenerateSetterSamples:     strToBool(generateSetterSamples),
 			GenerateRpcSamples:        strToBool(generateRpcSamples),
 			PostProcessProtos:         postProcessProtos,
 			DetailedTracingAttributes: strToBool(detailedTracingAttributes),
@@ -570,7 +572,7 @@ func buildConfig(libraries map[string]*config.Library, defaults *config.Config) 
 		// Check if library has extra configuration beyond just name/api/version
 		hasExtraConfig := lib.CopyrightYear != "" ||
 			(lib.Rust != nil && (lib.Rust.PerServiceFeatures || len(lib.Rust.DisabledRustdocWarnings) > 0 ||
-				lib.Rust.GenerateSetterSamples || lib.Rust.GenerateRpcSamples ||
+				lib.Rust.GenerateSetterSamples != "" || lib.Rust.GenerateRpcSamples ||
 				len(lib.Rust.PackageDependencies) > 0 || len(lib.Rust.PaginationOverrides) > 0 ||
 				lib.Rust.NameOverrides != ""))
 		// Only include in libraries section if:
