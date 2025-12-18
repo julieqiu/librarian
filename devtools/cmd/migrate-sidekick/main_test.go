@@ -414,8 +414,10 @@ func TestBuildVeneer(t *testing.T) {
 					Rust: &config.RustCrate{
 						Modules: []*config.RustModule{
 							{
-								GenerateSetterSamples: true,
-								HasVeneer:             true,
+								DisabledRustdocWarnings: []string{},
+								GenerateSetterSamples:   true,
+								ModuleRoots:             nil,
+								HasVeneer:               true,
 								IncludedIds: []string{
 									".google.storage.v2.Storage.DeleteBucket",
 									".google.storage.v2.Storage.GetBucket",
@@ -435,10 +437,13 @@ func TestBuildVeneer(t *testing.T) {
 							{
 								GenerateSetterSamples: false,
 								ModulePath:            "crate::generated::gapic_control::model",
-								NameOverrides:         ".google.storage.control.v2.IntelligenceConfig.Filter.cloud_storage_buckets=CloudStorageBucketsOneOf",
-								Output:                "testdata/build-veneer/success/lib-1/dir-2/dirdir-2",
-								Source:                "google/storage/control/v2",
-								Template:              "convert-prost",
+								ModuleRoots: map[string]string{
+									"project-root": ".",
+								},
+								NameOverrides: ".google.storage.control.v2.IntelligenceConfig.Filter.cloud_storage_buckets=CloudStorageBucketsOneOf",
+								Output:        "testdata/build-veneer/success/lib-1/dir-2/dirdir-2",
+								Source:        "google/storage/control/v2",
+								Template:      "convert-prost",
 							},
 						},
 					},
@@ -449,6 +454,55 @@ func TestBuildVeneer(t *testing.T) {
 					Output:        "testdata/build-veneer/success/lib-2",
 					Version:       "0.0.0",
 					CopyrightYear: "2025",
+				},
+			},
+		},
+		{
+			name: "google_cloud-wkt",
+			files: []string{
+				"testdata/build-veneer/wkt/Cargo.toml",
+				"testdata/build-veneer/wkt/tests/common/Cargo.toml",
+			},
+			want: map[string]*config.Library{
+				"common": {
+					Name:          "common",
+					Veneer:        true,
+					Output:        "testdata/build-veneer/wkt/tests/common",
+					Version:       "0.0.0",
+					CopyrightYear: "2025",
+					Rust: &config.RustCrate{
+						Modules: []*config.RustModule{
+							{
+								DisabledRustdocWarnings: []string{},
+								ModulePath:              "crate::generated",
+								ModuleRoots: map[string]string{
+									"project-root": ".",
+								},
+								Output:   "testdata/build-veneer/wkt/tests/common/src/generated",
+								Source:   "src/wkt/tests/protos",
+								Template: "mod",
+							},
+						},
+					},
+				},
+				"google-cloud-wkt": {
+					Name:          "google-cloud-wkt",
+					Veneer:        true,
+					Output:        "testdata/build-veneer/wkt",
+					Version:       "1.2.0",
+					CopyrightYear: "2025",
+					Rust: &config.RustCrate{
+						Modules: []*config.RustModule{
+							{
+								GenerateSetterSamples: true,
+								IncludeList:           "api.proto,source_context.proto,type.proto,descriptor.proto",
+								ModulePath:            "crate",
+								Output:                "testdata/build-veneer/wkt/src/generated",
+								Source:                "google/protobuf",
+								Template:              "mod",
+							},
+						},
+					},
 				},
 			},
 		},
