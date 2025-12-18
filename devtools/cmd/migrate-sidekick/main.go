@@ -590,8 +590,15 @@ func buildConfig(libraries map[string]*config.Library, defaults *config.Config) 
 	for _, lib := range libraries {
 		// Get the API path for this library
 		apiPath := ""
+		serviceConfigDoesNotExist := false
 		if len(lib.Channels) > 0 {
 			apiPath = lib.Channels[0].Path
+			for _, ch := range lib.Channels {
+				if ch.ServiceConfig == "" {
+					ch.ServiceConfigDoesNotExist = true
+					serviceConfigDoesNotExist = true
+				}
+			}
 		}
 
 		// Derive expected library name from API path
@@ -603,11 +610,8 @@ func buildConfig(libraries map[string]*config.Library, defaults *config.Config) 
 				lib.Rust.GenerateSetterSamples != "" || lib.Rust.GenerateRpcSamples ||
 				len(lib.Rust.PackageDependencies) > 0 || len(lib.Rust.PaginationOverrides) > 0 ||
 				lib.Rust.NameOverrides != ""))
-		// Only include in libraries section if:
-		// 1. Name doesn't match expected naming convention (name override)
-		// 2. Library has extra configuration
-		// 3. Library spans multiple APIs
-		if !nameMatchesConvention || hasExtraConfig || len(lib.Channels) > 1 {
+		// Only include in libraries section if specific data needs to be retained
+		if !nameMatchesConvention || hasExtraConfig || len(lib.Channels) > 1 || serviceConfigDoesNotExist {
 			libCopy := *lib
 			libList = append(libList, &libCopy)
 		}
