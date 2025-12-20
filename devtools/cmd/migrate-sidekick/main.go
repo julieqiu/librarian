@@ -51,6 +51,11 @@ var (
 	errUnableToCalculateOutputPath = errors.New("unable to calculate output path")
 )
 
+var excludedVeneerLibraries = map[string]struct{}{
+	"echo-server": {},
+	"gcp-sdk":     {},
+}
+
 // SidekickConfig represents the structure of a .sidekick.toml file.
 type SidekickConfig struct {
 	General struct {
@@ -505,6 +510,12 @@ func buildVeneer(files []string) (map[string]*config.Library, error) {
 		if err != nil {
 			return nil, err
 		}
+
+		if _, ok := excludedVeneerLibraries[cargo.Package.Name]; ok {
+			slog.Info("Excluding hardcoded veneer library", "name", cargo.Package.Name)
+			continue
+		}
+
 		dir := filepath.Dir(file)
 		rustModules, err := buildModules(dir)
 		if err != nil {
