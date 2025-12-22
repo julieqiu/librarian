@@ -17,18 +17,15 @@ package rust
 
 import (
 	"errors"
-	"fmt"
-	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/semver"
 	rustrelease "github.com/googleapis/librarian/internal/sidekick/rust_release"
 	"github.com/pelletier/go-toml/v2"
 )
-
-var errLibraryNotFound = errors.New("library not found")
 
 type cargoPackage struct {
 	Name    string `toml:"name"`
@@ -39,85 +36,53 @@ type cargoManifest struct {
 	Package *cargoPackage `toml:"package"`
 }
 
-// ReleaseAll bumps versions for all Cargo.toml files and updates librarian.yaml.
-func ReleaseAll(cfg *config.Config) (*config.Config, error) {
-	return release(cfg, "")
-}
+var errCouldNotDeriveSrcPath = errors.New("could not derive source path for library")
 
-// ReleaseLibrary bumps the version for a specific library and updates librarian.yaml.
-func ReleaseLibrary(cfg *config.Config, name string) (*config.Config, error) {
-	return release(cfg, name)
-}
-
-func release(cfg *config.Config, name string) (*config.Config, error) {
-	shouldRelease := func(pkgName string) bool {
-		// If name is the empty string, release everything.
-		if name == "" {
-			return true
-		}
-		return name == pkgName
+// ReleaseLibrary bumps version for Cargo.toml files and updates librarian config version.
+func ReleaseLibrary(cfg *config.Config, library *config.Library) error {
+	srcPath := deriveSrcPath(library, cfg)
+	if srcPath == "" {
+		return errCouldNotDeriveSrcPath
 	}
-
-	var found bool
-	err := filepath.WalkDir(".", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() || d.Name() != "Cargo.toml" {
-			return nil
-		}
-		contents, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-
-		var manifest cargoManifest
-		if err := toml.Unmarshal(contents, &manifest); err != nil {
-			return err
-		}
-		if manifest.Package == nil {
-			return nil
-		}
-		if !shouldRelease(manifest.Package.Name) {
-			return nil
-		}
-
-		found = true
-		newVersion, err := semver.DeriveNextOptions{
-			BumpVersionCore:       true,
-			DowngradePreGAChanges: true,
-		}.DeriveNext(semver.Minor, manifest.Package.Version)
-		if err != nil {
-			return err
-		}
-		if err := rustrelease.UpdateCargoVersion(path, newVersion); err != nil {
-			return err
-		}
-		library, err := libraryByName(cfg, manifest.Package.Name)
-		if err != nil {
-			return err
-		}
-		library.Version = newVersion
-		return nil
-	})
+	cargoFile := filepath.Join(srcPath, "Cargo.toml")
+	cargoContents, err := os.ReadFile(cargoFile)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	if name != "" && !found {
-		return nil, fmt.Errorf("library %q not found", name)
+	var manifest cargoManifest
+	if err := toml.Unmarshal(cargoContents, &manifest); err != nil {
+		return err
 	}
-	return cfg, nil
+	if manifest.Package == nil {
+		return err
+	}
+	newVersion, err := semver.DeriveNextOptions{
+		BumpVersionCore:       true,
+		DowngradePreGAChanges: true,
+	}.DeriveNext(semver.Minor, manifest.Package.Version)
+	if err != nil {
+		return err
+	}
+	if err := rustrelease.UpdateCargoVersion(cargoFile, newVersion); err != nil {
+		return err
+	}
+	library.Version = newVersion
+	return nil
 }
 
-// libraryByName returns a library with the given name from the config.
-func libraryByName(c *config.Config, name string) (*config.Library, error) {
-	if c.Libraries == nil {
-		return nil, errLibraryNotFound
+func deriveSrcPath(libCfg *config.Library, cfg *config.Config) string {
+	if libCfg.Output != "" {
+		return libCfg.Output
 	}
-	for _, library := range c.Libraries {
-		if library.Name == name {
-			return library, nil
+	libSrcDir := ""
+	if len(libCfg.Channels) > 0 && libCfg.Channels[0].Path != "" {
+		libSrcDir = libCfg.Channels[0].Path
+	} else {
+		libSrcDir = strings.ReplaceAll(libCfg.Name, "-", "/")
+		if cfg.Default == nil {
+			return ""
 		}
 	}
-	return nil, errLibraryNotFound
+	return DefaultOutput(libSrcDir, cfg.Default.Output)
+
 }

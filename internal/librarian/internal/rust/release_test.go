@@ -15,14 +15,12 @@
 package rust
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/testhelpers"
 )
@@ -34,37 +32,23 @@ const (
 	storageInitial  = "1.0.0"
 	storageReleased = "1.1.0"
 
-	secretmanagerDir      = "src/secretmanager"
-	secretmanagerCargo    = "src/secretmanager/Cargo.toml"
-	secretmanagerName     = "google-cloud-secretmanager-v1"
-	secretmanagerInitial  = "1.5.3"
-	secretmanagerReleased = "1.6.0"
+	secretmanagerDir     = "src/secretmanager"
+	secretmanagerCargo   = "src/secretmanager/Cargo.toml"
+	secretmanagerName    = "google-cloud-secretmanager-v1"
+	secretmanagerInitial = "1.5.3"
 )
-
-func TestReleaseAll(t *testing.T) {
-	cfg := setupRelease(t)
-	got, err := ReleaseAll(cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	checkCargoVersion(t, storageCargo, storageReleased)
-	checkCargoVersion(t, secretmanagerCargo, secretmanagerReleased)
-	checkLibraryVersion(t, got, storageName, storageReleased)
-	checkLibraryVersion(t, got, secretmanagerName, secretmanagerReleased)
-}
 
 func TestReleaseOne(t *testing.T) {
 	cfg := setupRelease(t)
-	got, err := ReleaseLibrary(cfg, storageName)
+	err := ReleaseLibrary(cfg, cfg.Libraries[0])
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	checkCargoVersion(t, storageCargo, storageReleased)
 	checkCargoVersion(t, secretmanagerCargo, secretmanagerInitial)
-	checkLibraryVersion(t, got, storageName, storageReleased)
-	checkLibraryVersion(t, got, secretmanagerName, secretmanagerInitial)
+	checkLibraryVersion(t, cfg.Libraries[0], storageReleased)
+	checkLibraryVersion(t, cfg.Libraries[1], secretmanagerInitial)
 }
 
 func setupRelease(t *testing.T) *config.Config {
@@ -81,10 +65,12 @@ func setupRelease(t *testing.T) *config.Config {
 			{
 				Name:    storageName,
 				Version: storageInitial,
+				Output:  storageDir,
 			},
 			{
 				Name:    secretmanagerName,
 				Version: secretmanagerInitial,
+				Output:  secretmanagerDir,
 			},
 		},
 	}
@@ -120,71 +106,79 @@ func checkCargoVersion(t *testing.T, path, wantVersion string) {
 	}
 }
 
-func checkLibraryVersion(t *testing.T, cfg *config.Config, name, wantVersion string) {
+func checkLibraryVersion(t *testing.T, library *config.Library, wantVersion string) {
 	t.Helper()
-	for _, lib := range cfg.Libraries {
-		if lib.Name == name {
-			if lib.Version != wantVersion {
-				t.Errorf("library %q version mismatch: want %q, got %q", name, wantVersion, lib.Version)
-			}
-			return
-		}
+	if library.Version != wantVersion {
+		t.Errorf("library %q version mismatch: want %q, got %q", library.Name, wantVersion, library.Version)
 	}
-	t.Errorf("library %q not found in config", name)
 }
 
-func TestLibraryByName(t *testing.T) {
+func TestDeriveSrcPath(t *testing.T) {
 	for _, test := range []struct {
-		name        string
-		libraryName string
-		config      *config.Config
-		want        *config.Library
-		wantErr     error
+		name   string
+		config *config.Config
+		want   string
 	}{
 		{
-			name:        "find_a_library",
-			libraryName: "example-library",
+			name: "use library output",
 			config: &config.Config{
+				Default: &config.Default{
+					Output: "ignored",
+				},
 				Libraries: []*config.Library{
-					{Name: "example-library"},
-					{Name: "another-library"},
+					{Output: "src/lib/dir"},
 				},
 			},
-			want: &config.Library{Name: "example-library"},
+			want: "src/lib/dir",
 		},
 		{
-			name:        "no_library_in_config",
-			libraryName: "example-library",
-			config:      &config.Config{},
-			wantErr:     errLibraryNotFound,
-		},
-		{
-			name:        "does_not_find_a_library",
-			libraryName: "non-existent-library",
+			name: "use channel path",
 			config: &config.Config{
-				Libraries: []*config.Library{
-					{Name: "example-library"},
-					{Name: "another-library"},
+				Default: &config.Default{
+					Output: "src/",
+				},
+				Libraries: []*config.Library{{
+					Channels: []*config.Channel{
+						{Path: "channel/dir"},
+					},
+				},
 				},
 			},
-			wantErr: errLibraryNotFound,
+			want: "src/channel/dir",
+		},
+		{
+			name: "use library name",
+			config: &config.Config{
+				Default: &config.Default{
+					Output: "src/",
+				},
+				Libraries: []*config.Library{{
+					Name: "lib-name",
+				},
+				},
+			},
+			want: "src/lib/name",
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			got, err := libraryByName(test.config, test.libraryName)
-			if test.wantErr != nil {
-				if !errors.Is(err, test.wantErr) {
-					t.Errorf("got error %v, want %v", err, test.wantErr)
-				}
-				return
-			}
-			if err != nil {
-				t.Errorf("libraryByName(%q): %v", test.libraryName, err)
-				return
-			}
-			if diff := cmp.Diff(test.want, got); diff != "" {
-				t.Errorf("mismatch (-want +got):\n%s", diff)
+			got := deriveSrcPath(test.config.Libraries[0], test.config)
+			if got != test.want {
+				t.Errorf("got derived source path  %s, wanted %s", got, test.want)
 			}
 		})
+	}
+}
+
+func TestInvalidDerivedSource(t *testing.T) {
+	cfg := &config.Config{
+		Libraries: []*config.Library{
+			{
+				Name: storageName,
+			},
+		},
+	}
+	err := ReleaseLibrary(cfg, cfg.Libraries[0])
+	if err != errCouldNotDeriveSrcPath {
+		t.Errorf("wanted error %v, got %v", errCouldNotDeriveSrcPath, err)
 	}
 }

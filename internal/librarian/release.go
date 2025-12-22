@@ -16,6 +16,7 @@ package librarian
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/googleapis/librarian/internal/config"
@@ -23,6 +24,8 @@ import (
 	"github.com/googleapis/librarian/internal/yaml"
 	"github.com/urfave/cli/v3"
 )
+
+var errLibraryNotFound = errors.New("library not found")
 
 func releaseCommand() *cli.Command {
 	return &cli.Command{
@@ -67,9 +70,16 @@ func runRelease(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 	if all {
-		cfg, err = releaseAll(cfg)
+		err = releaseAll(cfg)
 	} else {
-		cfg, err = releaseLibrary(cfg, libraryName)
+		libConfg, err := libraryByName(cfg, libraryName)
+		if err != nil {
+			return err
+		}
+		err = releaseLibrary(cfg, libConfg)
+		if err != nil {
+			return err
+		}
 	}
 	if err != nil {
 		return err
@@ -77,24 +87,35 @@ func runRelease(ctx context.Context, cmd *cli.Command) error {
 	return yaml.Write(librarianConfigPath, cfg)
 }
 
-func releaseAll(cfg *config.Config) (*config.Config, error) {
+func releaseAll(cfg *config.Config) error {
+	for _, library := range cfg.Libraries {
+		if err := releaseLibrary(cfg, library); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func releaseLibrary(cfg *config.Config, libConfig *config.Library) error {
 	switch cfg.Language {
 	case "testhelper":
-		return testReleaseAll(cfg)
+		return testReleaseLibrary(libConfig)
 	case "rust":
-		return rust.ReleaseAll(cfg)
+		return rust.ReleaseLibrary(cfg, libConfig)
 	default:
-		return nil, fmt.Errorf("language not supported for release --all: %q", cfg.Language)
+		return fmt.Errorf("language not supported for release: %q", cfg.Language)
 	}
 }
 
-func releaseLibrary(cfg *config.Config, name string) (*config.Config, error) {
-	switch cfg.Language {
-	case "testhelper":
-		return testReleaseLibrary(cfg, name)
-	case "rust":
-		return rust.ReleaseLibrary(cfg, name)
-	default:
-		return nil, fmt.Errorf("language not supported for release --all: %q", cfg.Language)
+// libraryByName returns a library with the given name from the config.
+func libraryByName(c *config.Config, name string) (*config.Library, error) {
+	if c.Libraries == nil {
+		return nil, errLibraryNotFound
 	}
+	for _, library := range c.Libraries {
+		if library.Name == name {
+			return library, nil
+		}
+	}
+	return nil, errLibraryNotFound
 }
