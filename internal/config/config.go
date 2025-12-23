@@ -18,11 +18,14 @@ package config
 
 // Config represents a librarian.yaml configuration file.
 type Config struct {
+	// Language specifies the language for this workspace (go, python, rust).
+	//
+	// This field should appear first in the config, since it establishes the
+	// operating mode for Librarian.
+	Language string `yaml:"language"`
+
 	// Default contains default settings for all libraries.
 	Default *Default `yaml:"default,omitempty"`
-
-	// Language is the language for this workspace (go, python, rust).
-	Language string `yaml:"language"`
 
 	// Libraries contains configuration overrides for libraries that need
 	// special handling, and differ from default settings.
