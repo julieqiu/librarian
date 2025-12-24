@@ -1,9 +1,6 @@
 # Engineering Execution Plan
 
-This document outlines the phased roadmap for building and deploying the
-new `librarian` ecosystem.
-The plan is ordered by dependency and risk,
-ensuring a stable foundation before expansion.
+This document outlines the phased roadmap for building and deploying the new `librarian` ecosystem.
 
 ## Phase 1: Design & Specification
 **Goal:** Define the system architecture, configuration schema, and workflows.
@@ -16,8 +13,7 @@ ensuring a stable foundation before expansion.
     *   `design/googleapis.md` (Upstream Data Model)
 
 ## Phase 2: Foundation (Rust Parity)
-**Goal:** Build the `librarian` binary to feature parity with `sidekick` (Rust).
-Prove the design works for one language.
+**Goal:** Build the `librarian` binary to feature parity with `sidekick` (Rust). Prove the design works for one language.
 *   **Focus:** `librarian create`, `generate`, `update`, `release` for Rust.
 *   **Milestones:**
     *   [Milestone 73](https://github.com/googleapis/librarian/milestone/73)
@@ -27,9 +23,7 @@ Prove the design works for one language.
 ## Phase 3: Migration Bridge (Dual-Write)
 **Goal:** Secure the legacy production path for Go and Python before attempting to port them.
 *   **Task:** Implement the "Dual-Write" strategy in `legacylibrarian`.
-*   **Deliverable:** Production releases of Go/Python libraries automatically
-generate a shadow `librarian.yaml` (v2),
-enabling validation without disruption.
+*   **Deliverable:** Production releases of Go/Python libraries automatically generate a shadow `librarian.yaml` (v2), enabling validation without disruption.
 
 ## Phase 4: Infrastructure (The Central Catalog)
 **Goal:** Implement the centralized API definition system to support multi-language scaling.

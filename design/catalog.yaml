@@ -1,0 +1,27 @@
+# Central Catalog of APIs
+# This file serves as the master list of all APIs available for client library generation.
+# It maps logical API groups to their specific proto and service configuration paths within
+# the googleapis/googleapis repository.
+
+# APIs that SHOULD be onboarded by language repositories.
+# These represent the active, supported surface of Google Cloud APIs.
+standard:
+  - api_path: google/cloud/secretmanager/v1
+    service_config_path: google/cloud/secretmanager/v1/secretmanager_v1.yaml
+
+  - api_path: google/pubsub/v1
+    service_config_path: google/pubsub/v1/pubsub_v1.yaml
+
+  - api_path: google/cloud/aiplatform/v1
+    service_config_path: google/cloud/aiplatform/v1/aiplatform_v1.yaml
+
+# APIs that are maintained for legacy reasons but may not be recommended for new adoption.
+# Language repositories may choose to support these if they have existing clients.
+legacy:
+  - api_path: google/cloud/dialogflow/v2
+    service_config_path: google/cloud/dialogflow/v2/dialogflow_v2.yaml
+    reason: "Replaced by Dialogflow CX (v3)"
+
+  - api_path: google/datastore/v1beta3
+    service_config_path: google/datastore/v1beta3/datastore_v1beta3.yaml
+    reason: "Deprecated version"

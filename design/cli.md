@@ -8,37 +8,44 @@ Generate, Update, Release, Publish).
 ## Command Reference
 
 ### `librarian create`
-**Usage:** `librarian create --library <name> [flags]`
+**Usage:** `librarian create <name> [apis...] [flags]`
 *   **Purpose:** Adds a new library to the `librarian.yaml` configuration and performs the initial code generation.
-*   **Flags:**
-    *   `--library`: The name of the library to create (e.g., `google-cloud-secretmanager`).
-    *   `--source`: (Optional) Override the default API source path.
+*   **Arguments:**
+    *   `<name>`: The name of the library to create (e.g., `google-cloud-secretmanager`).
+    *   `[apis...]`: One or more API paths (e.g., `google/cloud/secretmanager/v1`) that define the channels for this library. These are looked up in `catalog.yaml`.
 
 ### `librarian generate`
-**Usage:** `librarian generate [flags]`
+**Usage:** `librarian generate [<name> | --all] [flags]`
 *   **Purpose:** Regenerates the code for managed libraries using the current configuration and sources.
+*   **Arguments:**
+    *   `<name>`: (Optional) The name of a specific library to regenerate. If omitted, `--all` must be used.
 *   **Flags:**
-    *   `--library <name>`: Regenerate *only* the specified library.
-    *   `--all`: Regenerate *all* libraries listed in `librarian.yaml` (default behavior might be all, or require this flag for safety).
+    *   `--all`: Regenerate *all* libraries listed in `librarian.yaml`. Exclusive with `<name>` argument.
 
 ### `librarian update`
-**Usage:** `librarian update [flags]`
+**Usage:** `librarian update [<source> | --all] [flags]`
 *   **Purpose:** Updates the internal state or global dependencies,
 such as the `googleapis` commit hash in `librarian.yaml`.
+*   **Arguments:**
+    *   `<source>`: (Optional) The name of a specific source to update (e.g., `googleapis`, `protobuf`). If omitted, `--all` must be used.
 *   **Flags:**
-    *   `--all`: Update all global sources to their latest valid versions.
+    *   `--all`: Update *all* global sources to their latest valid versions. Exclusive with `<source>` argument.
 
 ### `librarian release`
-**Usage:** `librarian release [flags]`
+**Usage:** `librarian release [<name> | --all] [flags]`
 *   **Purpose:** Prepares libraries for release.
 This typically involves calculating the next semantic version,
 updating `CHANGELOG.md`, and bumping versions in manifest files (e.g., `Cargo.toml`).
+*   **Arguments:**
+    *   `<name>`: (Optional) The name of a specific library to prepare for release. If omitted, `--all` must be used.
 *   **Flags:**
-    *   `--library <name>`: Prepare release for *only* the specified library.
-    *   `--all`: Prepare release for all libraries that have changes.
+    *   `--all`: Prepare release for *all* libraries that have changes. Exclusive with `<name>` argument.
 
 ### `librarian publish`
-**Usage:** `librarian publish [flags]`
+**Usage:** `librarian publish [<name> | --all] [flags]`
 *   **Purpose:** Uploads the prepared artifacts to the package registry.
+*   **Arguments:**
+    *   `<name>`: (Optional) The name of a specific artifact to publish. If omitted, `--all` must be used.
 *   **Flags:**
+    *   `--all`: Publish *all* released artifacts. Exclusive with `<name>` argument.
     *   `--dry-run`: Perform all checks but do not actually upload.
