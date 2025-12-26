@@ -15,13 +15,18 @@ standard:
   - api_path: google/cloud/aiplatform/v1
     service_config_path: google/cloud/aiplatform/v1/aiplatform_v1.yaml
 
-# APIs that are maintained for legacy reasons but may not be recommended for new adoption.
-# Language repositories may choose to support these if they have existing clients.
+# APIs that are maintained for legacy reasons and may not be recommended for new adoption.
+# These may only be supported by a specific list of languages.
 legacy:
   - api_path: google/cloud/dialogflow/v2
     service_config_path: google/cloud/dialogflow/v2/dialogflow_v2.yaml
-    reason: "Replaced by Dialogflow CX (v3)"
+    languages: # List of languages that support this legacy API
+      - go
+      - python
+      - java
 
   - api_path: google/datastore/v1beta3
     service_config_path: google/datastore/v1beta3/datastore_v1beta3.yaml
-    reason: "Deprecated version"
+    languages:
+      - go
+      - python
