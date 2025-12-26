@@ -38,8 +38,7 @@ This command will generate the library, add the library to Cargo and git, and
 run the necessary tests:
 
 ```bash
-go run github.com/googleapis/librarian/cmd/librarian@main create \
-    --library ${library}
+go run github.com/googleapis/librarian/cmd/librarian@main create ${library}
 ```
 
 Commit all these changes and send a PR to merge them:
@@ -125,7 +124,7 @@ Run:
 ```bash
 V=$(cat .librarian-version.txt)
 go run github.com/googleapis/librarian/cmd/librarian@${V} generate \
-    --library google-cloud-secretmanager-v1 && \
+    google-cloud-secretmanager-v1 && \
     cargo fmt -p google-cloud-secretmanager-v1
 ```
 
@@ -160,7 +159,8 @@ You can make changes in the `librarian` directory as usual. To test them change
 the normal commands to use that directory. For example:
 
 ```bash
-go -C ../librarian run ./cmd/librarian generate --all -repo-path $PWD && cargo fmt
+# Build and run the local librarian code against the current directory
+go run ../librarian/cmd/librarian generate --all && cargo fmt
 ```
 
 Once the changes work then send a PR in the librarian repo to make your changes. Wait for the PR to be approved and merged.
@@ -193,7 +193,7 @@ directory. In this case you might need to manually edit `librarian.yaml` first.
 
 ```bash
 go run github.com/googleapis/librarian/cmd/librarian@main generate \
-    --library google-cloud-api
+    google-cloud-api
 ```
 
 Add the files to `git`, compile them, and run the tests:
@@ -231,7 +231,7 @@ Now add the library back:
 
 ```shell
 go run github.com/googleapis/librarian/cmd/librarian@main create \
-    --library google-cloud-websecurityscanner-v1
+    google-cloud-websecurityscanner-v1
 ```
 
 [protocol buffer compiler installation]: https://protobuf.dev/installation/
