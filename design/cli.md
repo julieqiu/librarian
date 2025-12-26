@@ -21,6 +21,7 @@ Generate, Update, Release, Publish).
     *   `<name>`: (Optional) The name of a specific library to regenerate. If omitted, `--all` must be used.
 *   **Flags:**
     *   `--all`: Regenerate *all* libraries listed in `librarian.yaml`. Exclusive with `<name>` argument.
+    *   `--check`: Verify that the generated code matches the current configuration without modifying files. Returns a non-zero exit code if changes are detected.
 
 ### `librarian update`
 **Usage:** `librarian update [<source> | --all] [flags]`
@@ -40,6 +41,7 @@ updating `CHANGELOG.md`, and bumping versions in manifest files (e.g., `Cargo.to
     *   `<name>`: (Optional) The name of a specific library to prepare for release. If omitted, `--all` must be used.
 *   **Flags:**
     *   `--all`: Prepare release for *all* libraries that have changes. Exclusive with `<name>` argument.
+    *   `--skip-semver-checks`: Skip semantic version compliance checks (e.g., `cargo semver-checks`) during release preparation. Use with caution.
 
 ### `librarian publish`
 **Usage:** `librarian publish [<name> | --all] [flags]`
@@ -48,4 +50,3 @@ updating `CHANGELOG.md`, and bumping versions in manifest files (e.g., `Cargo.to
     *   `<name>`: (Optional) The name of a specific artifact to publish. If omitted, `--all` must be used.
 *   **Flags:**
     *   `--all`: Publish *all* released artifacts. Exclusive with `<name>` argument.
-    *   `--dry-run`: Perform all checks but do not actually upload.
