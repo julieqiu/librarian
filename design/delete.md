@@ -3,7 +3,9 @@
 This document outlines the process for safely deleting a client library managed by `librarian` from a repository.
 
 ## Goal
-To remove a library's configuration from `librarian.yaml`, clean up its generated code, and ensure it is no longer managed by `librarian` for generation or release.
+To remove a library's configuration from `librarian.yaml`,
+clean up its generated code, and ensure it is no longer managed by `librarian`
+for generation or release.
 
 ## Prerequisites
 
@@ -14,14 +16,16 @@ To remove a library's configuration from `librarian.yaml`, clean up its generate
 ## Deletion Workflow
 
 ### 1. Create a Feature Branch
-Start by creating a new Git branch for your deletion work. This ensures your changes are isolated and can be reviewed via a Pull Request.
+Start by creating a new Git branch for your deletion work.
+This ensures your changes are isolated and can be reviewed via a Pull Request.
 
 ```bash
 git checkout -b feat/delete-<library-name>
 ```
 
 ### 2. Run `librarian delete`
-Use the `librarian delete` command to remove the library's entry from your repository's `librarian.yaml` and clean up its associated generated code and files.
+Use the `librarian delete` command to remove the library's entry from your
+repository's `librarian.yaml` and clean up its associated generated code and files.
 
 ```bash
 librarian delete <library-name>
@@ -51,7 +55,8 @@ git commit -m "feat(<library-name>): delete client library"
 
 ### 4. Open a Pull Request
 
-Push your branch and open a Pull Request against the `main` branch of your repository. The PR will be reviewed by maintainers to ensure:
+Push your branch and open a Pull Request against the `main` branch of your repository.
+The PR will be reviewed by maintainers to ensure:
 *   The `librarian.yaml` entry is correctly removed.
 *   All generated files are cleaned up.
 *   No unintended files were deleted.

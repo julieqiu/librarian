@@ -1,90 +1,95 @@
 # Release Workflow
 
-This document outlines the standard workflow for preparing and publishing releases for client libraries managed by `librarian`.
+This document outlines the standard workflow for preparing and publishing
+client library releases for repositories managed by `librarian`,
+primarily driven by `librarianops` automation,
+but fully supporting manual developer workflows.
 
 ## Goal
-To reliably update library versions, generate release artifacts (e.g., changelogs), and publish them to their respective package registries (e.g., PyPI, crates.io).
+To reliably update library versions, generate release artifacts (e.g.,
+changelogs), and publish them to their respective package registries (e.g.,
+PyPI, crates.io), with flexible manual override capabilities.
 
 ## Prerequisites
 
 1.  **Repository Configuration**: `librarian.yaml` is correctly configured for all libraries intended for release.
-2.  **Clean State**: The repository is in a clean state, with all desired code changes merged into `main`.
-3.  **Tooling Installed**: The `librarian` CLI tool is installed and accessible.
+2.  **Code Freshness**: All desired code changes for the release (including generated code) are merged into `main`.
+3.  **Tooling Operational**: The `librarianops` service (or CLI) and `librarian` CLI are installed and accessible.
 
-## Release Workflow
+## Release Workflow (Automation-Driven)
 
-### 1. Create a Release Branch
-All release preparations should occur on a dedicated release branch, isolating changes until they are ready for merge.
+### 1. `librarianops release` Execution (Platform Team / Automation)
 
-```bash
-git checkout -b release/v<next-version-or-date> # e.g., release/v1.2.3 or release/2025-01-01
-```
+A Platform Team member (or scheduled `librarianops` automation) runs the `librarianops release` command.
 
-### 2. Prepare Release Artifacts (`librarian release`)
-Use `librarian release` to calculate new versions, update `librarian.yaml`, and generate release-related files like `CHANGELOG.md` and package manifests (e.g., `Cargo.toml`, `setup.py`).
+*   **Action:**
+    1.  `librarianops` iterates through all configured language repositories.
+    2.  For each repository, it checks for detected changes in libraries that are eligible for release (i.e., `release: true` in `librarian.yaml`).
+    3.  For eligible libraries, it creates a dedicated release branch (e.g., `release/google-cloud-secretmanager-v1.2.1`).
+    4.  It executes `librarian release --all` (or `--library <name>`) within that repository.
+        *   **Version Calculation**: Determines the next semantic version for each eligible library.
+        *   **Config Update**: Updates the `version` field for relevant libraries in `librarian.yaml`.
+        *   **Manifest Update**: Bumps versions in language-specific package manifest files (e.g., `Cargo.toml` for Rust, `setup.py` for Python).
+        *   **Changelog Generation**: Updates `CHANGELOG.md` files (global or per-library) with new release entries.
+    5.  It executes `librarian generate --all` to refresh any generated artifacts (e.g., READMEs) that embed version numbers or other release data.
+    6.  It creates or updates a Pull Request (PR) in the language repository, proposing the release preparation changes.
 
-```bash
-# To prepare all libraries that have detected changes:
-librarian release --all
+### 2. Language Team Review and Merge
 
-# To prepare a specific library (e.g., for a targeted hotfix):
-librarian release google-cloud-secretmanager
-```
+The respective Language Team reviews the automatically generated Release PR.
 
-*   **Actions by `librarian release`:**
-    1.  **Version Calculation**: Determines the next semantic version for each eligible library based on detected changes and current version in `librarian.yaml`.
-    2.  **Config Update**: Updates the `version` field for relevant libraries in `librarian.yaml`.
-    3.  **Manifest Update**: Bumps versions in language-specific package manifest files (e.g., `Cargo.toml` for Rust, `setup.py` for Python).
-    4.  **Changelog Generation**: Updates `CHANGELOG.md` files (global or per-library, as configured) with new release entries.
-    5.  **Generated Code Refresh (Optional but Recommended)**: After version bumps and changelog updates, some generated code (e.g., READMEs that embed version numbers) might need to be refreshed. A subsequent `librarian generate --all` ensures consistency.
+*   **Action:** The language team verifies the version bumps, changelog entries, and ensures all tests pass.
+*   **Outcome:** Merging the PR into `main` finalizes the release preparation in the repository.
 
-### 3. Regenerate Code (if necessary)
-As noted above, if release preparation (e.g., updating `README.md` based on new versions) requires regenerating parts of the code, run a full generation step.
+### 3. `librarian publish` Execution (CI/CD Automation)
 
-```bash
-librarian generate --all
-# Or for a specific library:
-librarian generate google-cloud-secretmanager
+After the Release PR is merged into `main`,
+a CI/CD job (typically triggered by the merge event or a new Git tag) will
+automatically run the `librarian publish` command.
 
-# Also run language-specific formatters
-cargo fmt # for Rust
-# black . && isort . # for Python
-```
+*   **Action:**
+    1.  The CI/CD pipeline runs `librarian publish --all` (or `--library <name>`).
+    2.  **Artifact Upload**: Uploads the finalized package artifacts (e.g., `.crate` files to crates.io, `.whl` files to PyPI) to their respective registries.
+    3.  **Tagging**: Creates a Git tag (e.g., `google-cloud-secretmanager/v1.2.1` based on `release.tag_format`) on the `main` branch, pointing to the merged commit.
+    4.  **Verification**: The CI/CD pipeline performs post-publish checks.
 
-### 4. Review and Commit Changes
-Review all changes made by `librarian release` and `librarian generate`.
+### 4. Post-Release Verification
 
-```bash
-git status
-git diff
-```
+*   **Action:** The Platform Team and Language Teams verify that the new
+versions are available in the respective package registries and that the
+Git tags have been created correctly.
 
-Commit the changes to the release branch. The commit message should clearly indicate this is a release preparation.
+## Manual Release Workflows (Developer-Driven)
 
-```bash
-git commit -m "chore: prepare for v1.2.3 release"
-```
+Language team members can run `librarian release` directly for local testing,
+debugging, or managing highly specific release scenarios (e.g., a targeted hotfix).
 
-### 5. Open Pull Request and Merge
+### 1. Local Release Preparation
 
-Push your release branch and open a Pull Request targeting the `main` branch. The PR should be reviewed and merged.
+1.  **Create a Release Branch:**
+    ```bash
+git checkout -b release/v1.2.3-manual
+    ```
+2.  **Run `librarian release`:**
+    ```bash
+librarian release google-cloud-secretmanager # For a specific library
+# OR
+librarian release --all # For all libraries
+    ```
+3.  **Regenerate Code & Format (if needed):**
+    ```bash
+librarian generate --all # If READMEs/other generated files depend on new versions
+cargo fmt # Or language-specific formatter
+    ```
+4.  **Review, Commit, and Open PR:** Review changes, commit, and open a PR to `main`.
 
-### 6. Publish Release Artifacts (`librarian publish`)
+### 2. Manual Publish (for Debugging/Override)
 
-After the release branch is merged into `main`, a CI/CD job (triggered by the merge or a new tag) will run the `librarian publish` command.
+In rare cases, a manual `librarian publish` might be needed (e.g.,
+re-publishing a corrupted artifact, though this should be avoided).
 
-```bash
-# This command is typically run by automation in a CI/CD pipeline
-librarian publish --all
-
-# Or for a specific library:
+1.  **Ensure Prepared State:** Make sure the library is in a released state (versions bumped, changelogs updated).
+2.  **Run Publish:**
+    ```bash
 librarian publish google-cloud-secretmanager
-```
-
-*   **Actions by `librarian publish`:**
-    1.  **Artifact Upload**: Uploads the finalized package artifacts (e.g., `.crate` files to crates.io, `.whl` files to PyPI).
-    2.  **Tagging**: Creates a Git tag (e.g., `google-cloud-secretmanager/v1.2.1`) on the `main` branch, as configured by `release.tag_format`.
-
-### 7. Post-Release
-
-Verify that the new versions are available in the respective package registries and that the Git tags have been created correctly.
+    ```

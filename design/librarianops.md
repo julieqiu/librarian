@@ -1,14 +1,25 @@
 # LibrarianOps Automation Design
 
-This document outlines the architecture for `librarianops`, the automation engine that drives the `librarian` ecosystem. It is designed as a **Service-First** system to enable event-driven responsiveness, while retaining a **CLI** for operator control and debugging.
+This document outlines the architecture for `librarianops`,
+the automation engine that drives the `librarian` ecosystem.
+It is designed as a **Service-First** system to enable event-driven responsiveness,
+while retaining a **CLI** for operator control and debugging.
 
 ## Architecture
 
 The system follows a "Core Logic as Library" pattern:
 
-1.  **Core Logic (`internal/ops`)**: Contains the business logic for reconciling repository state (e.g., `SyncSources`, `ReleaseRepository`). It is agnostic to *how* it is triggered (HTTP request vs CLI command).
-2.  **The Service (`cmd/librarianserver`)**: A long-running web service (deployed to Cloud Run) that listens for events (GitHub Webhooks, Cloud Pub/Sub, Cloud Scheduler triggers) and invokes the Core Logic.
-3.  **The Admin CLI (`cmd/librarianops`)**: A command-line tool that wraps the Core Logic. Used by engineers for manual interventions, testing, and "break-glass" scenarios.
+1.  **Core Logic (`internal/ops`)**: Contains the business logic for reconciling
+repository state (e.g.,
+`SyncSources`, `ReleaseRepository`).
+It is agnostic to *how* it is triggered (HTTP request vs CLI command).
+2.  **The Service (`cmd/librarianserver`)**:
+A long-running web service (deployed to Cloud Run) that listens for events (GitHub Webhooks,
+Cloud Pub/Sub, Cloud Scheduler triggers) and invokes the Core Logic.
+3.  **The Admin CLI (`cmd/librarianops`)**:
+A command-line tool that wraps the Core Logic.
+Used by engineers for manual interventions,
+testing, and "break-glass" scenarios.
 
 ## Core Operations
 
