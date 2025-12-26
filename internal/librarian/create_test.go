@@ -15,14 +15,12 @@
 package librarian
 
 import (
-	"context"
 	"errors"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/googleapis/librarian/internal/config"
-	"github.com/googleapis/librarian/internal/librarian/rust"
 	"gopkg.in/yaml.v3"
 )
 
@@ -36,46 +34,7 @@ const (
 	defaultSpecFormat = "protobuf"
 )
 
-type mockGenerator struct {
-	called   bool
-	callArgs struct {
-		all         bool
-		libraryName string
-	}
-}
-
-func (m *mockGenerator) Run(ctx context.Context, all bool, libraryName string) error {
-	m.called = true
-	m.callArgs.all = all
-	m.callArgs.libraryName = libraryName
-	return nil
-}
-
-type mockRustHelper struct {
-	prepareCalled   bool
-	prepareCallArgs struct {
-		outputDir string
-	}
-	validateCalled   bool
-	validateCallArgs struct {
-		outputDir string
-	}
-}
-
-func (m *mockRustHelper) HelperPrepareCargoWorkspace(ctx context.Context, outputDir string) error {
-	m.prepareCalled = true
-	m.prepareCallArgs.outputDir = outputDir
-	return nil
-}
-
-func (m *mockRustHelper) HelperFormatAndValidateLibrary(ctx context.Context, outputDir string) error {
-	m.validateCalled = true
-	m.validateCallArgs.outputDir = outputDir
-	return nil
-}
-
 func TestCreateLibrary(t *testing.T) {
-
 	for _, test := range []struct {
 		name             string
 		libName          string
@@ -88,11 +47,11 @@ func TestCreateLibrary(t *testing.T) {
 			name:     "run create for existing library",
 			libName:  libExists,
 			output:   libExistsOutput,
-			language: "rust",
+			language: "testhelper",
 		},
 		{
 			name:     "create new library",
-			language: "rust",
+			language: "testhelper",
 			libName:  newLib,
 			output:   newLibOutput,
 		},
@@ -114,32 +73,18 @@ func TestCreateLibrary(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-
 			if !test.skipCreatingYaml {
 				createLibrarianYaml(t, libExists, libExistsOutput, test.language, "")
 			}
-			var gen Generator = &mockGenerator{}
-			var rustHelper rust.RustHelper = &mockRustHelper{}
-
-			err := create(context.Background(), test.libName, "", "", test.output, defaultSpecFormat, gen, rustHelper)
+			err := create(t.Context(), test.libName, "", "", test.output, defaultSpecFormat)
 			if test.wantErr != nil {
 				if !errors.Is(err, test.wantErr) {
 					t.Errorf("want error %v, got %v", test.wantErr, err)
 				}
 				return
 			}
-
-			mock := gen.(*mockGenerator)
-			if !mock.called {
-				t.Error("expected mockGenerator.Run to be called")
-			}
-			if mock.callArgs.libraryName != test.libName {
-				t.Errorf("expected libraryName %s, got %s", test.libName, mock.callArgs.libraryName)
-			}
-
 		})
 	}
-
 }
 
 func TestCreateCommand(t *testing.T) {
@@ -163,13 +108,11 @@ func TestCreateCommand(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-
 			err := Run(t.Context(), test.args...)
 			if test.wantErr != nil {
 				if !errors.Is(err, test.wantErr) {
 					t.Errorf("want error %v, got %v", test.wantErr, err)
 				}
-				return
 			}
 		})
 	}
@@ -226,7 +169,6 @@ func TestDeriveOutput(t *testing.T) {
 		language       string
 		wantErr        error
 	}{
-
 		{
 			name:           "default rust output directory used with spec source",
 			language:       "rust",
@@ -270,7 +212,6 @@ func TestDeriveOutput(t *testing.T) {
 }
 
 func TestAddLibraryToLibrarianYaml(t *testing.T) {
-
 	for _, test := range []struct {
 		name          string
 		output        string
@@ -280,7 +221,6 @@ func TestAddLibraryToLibrarianYaml(t *testing.T) {
 		libraryName   string
 		language      string
 	}{
-
 		{
 			name:        "new library with no specification-source and service-config",
 			libraryName: newLib,

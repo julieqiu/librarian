@@ -77,10 +77,10 @@ func createCommand() *cli.Command {
 }
 
 func runCreate(ctx context.Context, name, specSource, serviceConfig, output, specFormat string) error {
-	return create(ctx, name, specSource, serviceConfig, output, specFormat, &Generate{}, &rust.RustHelp{})
+	return create(ctx, name, specSource, serviceConfig, output, specFormat)
 }
 
-func create(ctx context.Context, libraryName, specSource, serviceConfig, output, specFormat string, gen Generator, rustHelper rust.RustHelper) error {
+func create(ctx context.Context, libraryName, specSource, serviceConfig, output, specFormat string) error {
 	cfg, err := yaml.Read[config.Config](librarianConfigPath)
 	if err != nil {
 		return fmt.Errorf("%w: %v", errNoYaml, err)
@@ -88,7 +88,7 @@ func create(ctx context.Context, libraryName, specSource, serviceConfig, output,
 	// check for existing libraries, if it exists just run generate
 	for _, lib := range cfg.Libraries {
 		if lib.Name == libraryName {
-			return gen.Run(ctx, false, libraryName)
+			return runGenerate(ctx, false, libraryName)
 		}
 	}
 	specSource = deriveSpecSource(specSource, serviceConfig, cfg.Language)
@@ -100,13 +100,13 @@ func create(ctx context.Context, libraryName, specSource, serviceConfig, output,
 	}
 	switch cfg.Language {
 	case "rust":
-		if err := rustHelper.HelperPrepareCargoWorkspace(ctx, output); err != nil {
+		if err := rust.PrepareCargoWorkspace(ctx, output); err != nil {
 			return err
 		}
-		if err := gen.Run(ctx, false, libraryName); err != nil {
+		if err := runGenerate(ctx, false, libraryName); err != nil {
 			return err
 		}
-		return rustHelper.HelperFormatAndValidateLibrary(ctx, output)
+		return rust.FormatAndValidateLibrary(ctx, output)
 	default:
 		return errUnsupportedLanguage
 	}
