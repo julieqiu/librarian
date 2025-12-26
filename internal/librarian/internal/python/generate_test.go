@@ -172,54 +172,6 @@ func TestCreateProtocOptions(t *testing.T) {
 	}
 }
 
-func TestSourceDir(t *testing.T) {
-	originalFetchRepoDir := fetchRepoDir
-	t.Cleanup(func() {
-		fetchRepoDir = originalFetchRepoDir
-	})
-
-	fetchRepoDir = func(ctx context.Context, repo, commit, sha256 string) (string, error) {
-		return "fetched", nil
-	}
-	for _, test := range []struct {
-		name        string
-		source      *config.Source
-		expected    string
-		expectedErr bool
-	}{
-		{
-			name:     "source is nil",
-			source:   nil,
-			expected: "",
-		},
-		{
-			name: "source has dir",
-			source: &config.Source{
-				Dir: "path/to/dir",
-			},
-			expected: "path/to/dir",
-		},
-		{
-			name: "source needs fetching",
-			source: &config.Source{
-				Commit: "commit",
-				SHA256: "sha256",
-			},
-			expected: "fetched",
-		},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			got, err := sourceDir(context.Background(), test.source, "repo")
-			if (err != nil) != test.expectedErr {
-				t.Fatalf("sourceDir() error = %v, wantErr %v", err, test.expectedErr)
-			}
-			if diff := cmp.Diff(test.expected, got); diff != "" {
-				t.Errorf("sourceDir() returned diff (-want +got):\n%s", diff)
-			}
-		})
-	}
-}
-
 func TestCopyReadmeToDocsDir(t *testing.T) {
 	t.Parallel()
 	for _, test := range []struct {
@@ -543,7 +495,7 @@ python_mono_repo.owlbot_main(%q)
 	})
 	runCommand = newMockRunCommand(t, commands)
 
-	err = Generate(t.Context(), library, sources)
+	err = Generate(t.Context(), library, sources.Googleapis.Dir)
 	if err != nil {
 		t.Fatalf("Generate() error = %v", err)
 	}

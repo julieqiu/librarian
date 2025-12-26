@@ -66,8 +66,8 @@ func TestGenerateVeneer(t *testing.T) {
 			},
 		},
 	}
-	sources := &config.Sources{
-		Googleapis: &config.Source{Dir: googleapisDir},
+	sources := &Sources{
+		Googleapis: googleapisDir,
 	}
 	if err := Generate(t.Context(), library, sources); err != nil {
 		t.Fatal(err)
@@ -174,8 +174,8 @@ func TestGenerate(t *testing.T) {
 			},
 		},
 	}
-	sources := &config.Sources{
-		Googleapis: &config.Source{Dir: googleapisDir},
+	sources := &Sources{
+		Googleapis: googleapisDir,
 	}
 	if err := Generate(t.Context(), library, sources); err != nil {
 		t.Fatal(err)
