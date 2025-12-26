@@ -41,6 +41,7 @@ updating `CHANGELOG.md`, and bumping versions in manifest files (e.g., `Cargo.to
     *   `<name>`: (Optional) The name of a specific library to prepare for release. If omitted, `--all` must be used.
 *   **Flags:**
     *   `--all`: Prepare release for *all* libraries that have changes. Exclusive with `<name>` argument.
+    *   `--limit <N>`: (Optional) Limit the number of libraries processed for release to N. Useful for staggered rollouts of large changes.
     *   `--skip-semver-checks`: Skip semantic version compliance checks (e.g., `cargo semver-checks`) during release preparation. Use with caution.
 
 ### `librarian publish`
