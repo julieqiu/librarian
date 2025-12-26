@@ -26,8 +26,9 @@ This directory contains the design specifications for the `librarian.yaml` confi
 
 ### Open Issues & Considerations
 *   **[Release Ownership and Control](./issues/release-ownership.md)**: Discusses the challenge of empowering language teams with control over release timing for specific libraries, addressed by the `release: false` flag. ([GitHub Issue #2951](https://github.com/googleapis/librarian/issues/2951))
-*   **[Staggered Release](./issues/staggered-release.md)**: Discusses the problem of managing large-scale releases and the solution using the `--limit` flag for staggered rollouts.
+*   **[Staggered Release](./issues/staggered-release.md)**: Discusses the problem of managing large-scale releases and the solution using the `--limit` flag for staggered rollouts. ([GitHub Issue #3254](https://github.com/googleapis/librarian/issues/3254))
 *   **[Multiple Python Runtimes](./issues/multiple-runtimes.md)**: Addresses the problem of supporting multiple Python runtimes in the Librarian image and the plan to consolidate to a single 3.14 runtime.
+*   **[Release Level Inference](./issues/release-level-inference.md)**: Proposes logic for automatically setting `release_level` (stable vs. preview) based on API path versions and launch stages. ([GitHub Issue #2352](https://github.com/googleapis/librarian/issues/2352))
 
 ## Key Design Principles
 
