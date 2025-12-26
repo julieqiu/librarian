@@ -22,6 +22,7 @@ A Platform Team member (or scheduled `librarianops` automation) runs the `librar
     2.  For each repository, it checks for detected changes in libraries that are eligible for release (i.e., `release: true` in `librarian.yaml`).
     3.  For eligible libraries, it creates a dedicated release branch (e.g., `release/google-cloud-secretmanager-v1.2.1`).
     4.  It executes `librarian release --all` (or `librarian release <name>`) within that repository.
+        *   **Staggered Rollouts:** If a massive update has occurred (e.g., updating the generator image affecting 200+ libraries), `librarianops` can be configured to use `librarian release --all --limit 10`. This processes only the first 10 pending libraries, creating a manageable batch for release and minimizing the blast radius of potential issues.
         *   **Version Calculation**: Determines the next semantic version for each eligible library.
         *   **Config Update**: Updates the `version` field for relevant libraries in `librarian.yaml`.
         *   **Manifest Update**: Bumps versions in language-specific package manifest files (e.g., `Cargo.toml` for Rust, `setup.py` for Python).
