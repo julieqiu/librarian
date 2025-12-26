@@ -34,7 +34,7 @@ const (
 	defaultSpecFormat = "protobuf"
 )
 
-func TestCreateLibrary(t *testing.T) {
+func TestRunCreate(t *testing.T) {
 	for _, test := range []struct {
 		name             string
 		libName          string
@@ -76,7 +76,7 @@ func TestCreateLibrary(t *testing.T) {
 			if !test.skipCreatingYaml {
 				createLibrarianYaml(t, libExists, libExistsOutput, test.language, "")
 			}
-			err := create(t.Context(), test.libName, "", "", test.output, defaultSpecFormat)
+			err := runCreate(t.Context(), test.libName, "", "", test.output, defaultSpecFormat)
 			if test.wantErr != nil {
 				if !errors.Is(err, test.wantErr) {
 					t.Errorf("want error %v, got %v", test.wantErr, err)

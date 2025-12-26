@@ -63,24 +63,20 @@ func createCommand() *cli.Command {
 			},
 		},
 		Action: func(ctx context.Context, c *cli.Command) error {
-			libraryName := c.Args().First()
-			if libraryName == "" {
+			name := c.Args().First()
+			if name == "" {
 				return errMissingLibraryName
 			}
 			specSource := c.String("specification-source")
 			serviceConfig := c.String("service-config")
 			output := c.String("output")
 			specFormat := c.String("specification-format")
-			return runCreate(ctx, libraryName, specSource, serviceConfig, output, specFormat)
+			return runCreate(ctx, name, specSource, serviceConfig, output, specFormat)
 		},
 	}
 }
 
-func runCreate(ctx context.Context, name, specSource, serviceConfig, output, specFormat string) error {
-	return create(ctx, name, specSource, serviceConfig, output, specFormat)
-}
-
-func create(ctx context.Context, libraryName, specSource, serviceConfig, output, specFormat string) error {
+func runCreate(ctx context.Context, libraryName, specSource, serviceConfig, output, specFormat string) error {
 	cfg, err := yaml.Read[config.Config](librarianConfigPath)
 	if err != nil {
 		return fmt.Errorf("%w: %v", errNoYaml, err)

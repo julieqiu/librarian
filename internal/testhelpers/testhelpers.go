@@ -74,7 +74,10 @@ func ContinueInNewGitRepository(t *testing.T, tmpDir string) {
 	t.Helper()
 	RequireCommand(t, "git")
 	t.Chdir(tmpDir)
-	if err := command.Run(t.Context(), "git", "init", "-b", "main"); err != nil {
+	if err := command.Run(t.Context(), "git", "init"); err != nil {
+		t.Fatal(err)
+	}
+	if err := command.Run(t.Context(), "git", "checkout", "-b", "main"); err != nil {
 		t.Fatal(err)
 	}
 	configNewGitRepository(t)
