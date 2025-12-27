@@ -27,6 +27,65 @@ For guidance, refer to the following resources:
   Google’s guidance on Go style and design decisions.
 
 
+## Naming and Spelling
+
+Follow the rules and conventions in [Idiomatic Go](https://dmitri.shuralyov.com/idiomatic-go).
+
+### Capitalization
+
+For brands or words with more than 1 capital letter, lowercase all letters when unexported.
+- **Good**: `oauthToken`, `githubClient`
+- **Bad**: `oAuthToken`, `gitHubClient`
+
+See [Idiomatic Go: Capitalization](https://dmitri.shuralyov.com/idiomatic-go#for-brands-or-words-with-more-than-1-capital-letter-lowercase-all-letters)
+
+### Comments
+
+Comments for humans always have a single space after the slashes.
+- **Good**: `// This is a comment.`
+- **Bad**: `//This is a comment.`
+
+See [Idiomatic Go: Comments](https://dmitri.shuralyov.com/idiomatic-go#comments-for-humans-always-have-a-single-space-after-the-slashes)
+
+### Collection Names
+
+Use singular form for collection repo/folder name.
+- **Good**: `example/`, `image/`, `player/`
+- **Bad**: `examples/`, `images/`, `players/`
+
+See [Idiomatic Go: Collection Names](https://dmitri.shuralyov.com/idiomatic-go#use-singular-form-for-collection-repo-folder-name)
+
+### Consistent Spelling
+
+Use consistent spelling of certain words.
+- **Good**: `unmarshaling`, `marshaling`, `canceled`
+- **Bad**: `unmarshalling`, `marshalling`, `cancelled`
+
+See [Idiomatic Go: Spelling](https://dmitri.shuralyov.com/idiomatic-go#use-consistent-spelling-of-certain-words) and [Go Wiki: Spelling](https://go.dev/wiki/Spelling)
+
+
+## Control Flow
+
+### Avoid unnecessary `else`
+To keep the main logic flow linear and reduce indentation, return early or continue
+early instead of using `else` blocks.
+
+```go
+// Good
+if err != nil {
+    return err
+}
+// process success case
+
+// Bad
+if err == nil {
+    // process success case
+} else {
+    return err
+}
+```
+
+
 ## Writing Go Doc Comments
 
 "Doc comments" are comments that appear immediately before top-level package,
@@ -50,6 +109,26 @@ When writing tests, we follow the patterns below to ensure consistency,
 readability, and ease of debugging. See
 [Go Test Comments](https://go.dev/wiki/TestComments) for conventions around
 writing test code.
+
+### Use `t.Context()`
+
+Always use `t.Context()` instead of `context.Background()` in tests to ensure
+proper cancellation and cleanup.
+
+Example:
+```go
+err := Run(t.Context(), []string{"cmd", "arg"})
+```
+
+### Use `t.TempDir()`
+
+Always use `t.TempDir()` instead of manually creating and cleaning up temporary
+directories.
+
+Example:
+```go
+err := Run(t.Context(), []string{"cmd", "-output", t.TempDir()})
+```
 
 ### Use `cmp.Diff` for comparisons
 
