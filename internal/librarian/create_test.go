@@ -324,42 +324,26 @@ func TestAddLibraryToLibrarianYaml(t *testing.T) {
 	}
 }
 
-func createLibrarianYaml(t *testing.T, libName string, libOutput string, language string, defaultOutput string) config.Config {
+func createLibrarianYaml(t *testing.T, name string, libOutput string, language string, defaultOutput string) config.Config {
+	t.Helper()
+
 	tempDir := t.TempDir()
 	t.Chdir(tempDir)
-	configPath := filepath.Join(tempDir, librarianConfigPath)
-	config := config.Config{
+	cfg := config.Config{
 		Language: language,
-		Sources: &config.Sources{
-			Googleapis: &config.Source{
-				Dir: "/googleapis/testdata",
-			},
-		},
 		Default: &config.Default{
 			Output: defaultOutput,
 		},
 		Libraries: []*config.Library{
 			{
-				Name:   libName,
+				Name:   name,
 				Output: libOutput,
 			},
 		},
 	}
-
-	configBytes, err := yaml.Marshal(&config)
-	if err != nil {
-		t.Fatalf("Failed to marshal YAML: %v", err)
-	}
-
-	if err := os.WriteFile(configPath, configBytes, 0644); err != nil {
+	if err := yaml.Write(librarianConfigPath, &cfg); err != nil {
 		t.Fatal(err)
 	}
-
-	if err := os.MkdirAll(filepath.Join(tempDir, libOutput), 0755); err != nil {
-		t.Fatal(err)
-	}
-	return config
-}
 
 func validateLibrarianYaml(t *testing.T, libName string, libOutput string, specSource string, specFormat string, serviceConfig string) {
 	configBytes, err := os.ReadFile(librarianConfigPath)
