@@ -21,6 +21,7 @@ import (
 
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/librarian/githelpers"
+	"github.com/googleapis/librarian/internal/librarian/internal/python"
 	"github.com/googleapis/librarian/internal/librarian/internal/rust"
 	"github.com/googleapis/librarian/internal/yaml"
 	"github.com/urfave/cli/v3"
@@ -35,6 +36,7 @@ var (
 var (
 	librarianGenerateLibrary = generateLibrary
 	rustReleaseLibrary       = rust.ReleaseLibrary
+	pythonReleaseLibrary     = python.ReleaseLibrary
 )
 
 func releaseCommand() *cli.Command {
@@ -131,6 +133,8 @@ func getSrcPathForLanguage(cfg *config.Config, libConfig *config.Library) (strin
 		srcPath = testDeriveSrcPath(libConfig)
 	case "rust":
 		srcPath = rust.DeriveSrcPath(libConfig, cfg)
+	case "python":
+		srcPath = python.DeriveSrcPath(libConfig, cfg)
 	}
 	if srcPath == "" {
 		return "", errCouldNotDeriveSrcPath
@@ -144,6 +148,14 @@ func releaseLibrary(ctx context.Context, cfg *config.Config, libConfig *config.L
 		return testReleaseLibrary(libConfig)
 	case "rust":
 		if err := rustReleaseLibrary(libConfig, srcPath); err != nil {
+			return err
+		}
+		if _, err := librarianGenerateLibrary(ctx, cfg, libConfig.Name); err != nil {
+			return err
+		}
+		return nil
+	case "python":
+		if err := pythonReleaseLibrary(libConfig, srcPath); err != nil {
 			return err
 		}
 		if _, err := librarianGenerateLibrary(ctx, cfg, libConfig.Name); err != nil {
