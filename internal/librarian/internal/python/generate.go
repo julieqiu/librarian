@@ -18,7 +18,6 @@ package python
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -34,7 +33,6 @@ const (
 
 // Variables used for mocking.
 var (
-	runCommand   = run
 	fetchRepoDir = fetch.RepoDir
 )
 
@@ -148,13 +146,10 @@ func generateChannel(ctx context.Context, channel *config.Channel, library *conf
 		protos[index] = rel
 	}
 
-	cmdArgs := []string{
-		"protoc",
-	}
+	cmdArgs := []string{"protoc"}
 	cmdArgs = append(cmdArgs, protos...)
 	cmdArgs = append(cmdArgs, protocOptions...)
-
-	if err := runCommand(ctx, cmdArgs, googleapisDir); err != nil {
+	if err := runInDir(ctx, googleapisDir, cmdArgs...); err != nil {
 		return fmt.Errorf("protoc command failed: %w", err)
 	}
 
@@ -249,21 +244,13 @@ func getStagingChildDirectory(apiPath string) string {
 
 // runPostProcessor runs the synthtool post processor on the output directory.
 func runPostProcessor(ctx context.Context, repoRoot, outDir string) error {
-	slog.Debug("Running Python post-processor")
-
-	// Run python_mono_repo.owlbot_main
 	pythonCode := fmt.Sprintf(`
 from synthtool.languages import python_mono_repo
 python_mono_repo.owlbot_main(%q)
 `, outDir)
-	cmdArgs := []string{
-		"python3", "-c", pythonCode,
-	}
-	if err := runCommand(ctx, cmdArgs, repoRoot); err != nil {
+	if err := runInDir(ctx, repoRoot, "python3", "-c", pythonCode); err != nil {
 		return fmt.Errorf("post processor failed: %w", err)
 	}
-
-	slog.Debug("Python post-processor ran successfully")
 	return nil
 }
 

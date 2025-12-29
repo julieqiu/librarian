@@ -52,7 +52,7 @@ func TestRun(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			err := run(context.Background(), test.args, ".")
+			err := runInDir(context.Background(), ".", test.args...)
 			if (err != nil) != test.wantErr {
 				t.Fatalf("Run() error = %v, wantErr %v", err, test.wantErr)
 			}

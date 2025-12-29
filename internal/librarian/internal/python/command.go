@@ -24,11 +24,11 @@ import (
 	"strings"
 )
 
-// run executes a command in a specified working directory and logs its output.
-func run(ctx context.Context, args []string, workingDir string) error {
-	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+// runInDir executes a command in a specified working directory and logs its output.
+func runInDir(ctx context.Context, dir string, arg ...string) error {
+	cmd := exec.CommandContext(ctx, arg[0], arg[1:]...)
 	cmd.Env = os.Environ()
-	cmd.Dir = workingDir
+	cmd.Dir = dir
 	cmd.Stdout = os.Stderr
 	cmd.Stderr = os.Stderr
 	slog.Debug("running command", "command", strings.Join(cmd.Args, " "), "dir", cmd.Dir)
