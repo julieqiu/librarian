@@ -25,8 +25,7 @@ import (
 	"time"
 
 	"github.com/googleapis/librarian/internal/config"
-	"github.com/googleapis/librarian/internal/librarian/rust"
-
+	"github.com/googleapis/librarian/internal/librarian/internal/rust"
 	"github.com/googleapis/librarian/internal/yaml"
 	"github.com/urfave/cli/v3"
 )
@@ -98,13 +97,9 @@ func runCreate(ctx context.Context, name, specSource, serviceConfig, output, spe
 	case languageFake:
 		return runGenerate(ctx, false, name)
 	case languageRust:
-		if err := rust.PrepareCargoWorkspace(ctx, output); err != nil {
-			return err
-		}
-		if err := runGenerate(ctx, false, name); err != nil {
-			return err
-		}
-		return rust.FormatAndValidateLibrary(ctx, output)
+		return rust.Create(ctx, output, func(ctx context.Context) error {
+			return runGenerate(ctx, false, name)
+		})
 	default:
 		return errUnsupportedLanguage
 	}
