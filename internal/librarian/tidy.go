@@ -51,6 +51,7 @@ func RunTidy() error {
 	if err := validateLibraries(cfg); err != nil {
 		return err
 	}
+
 	for _, lib := range cfg.Libraries {
 		if lib.Output != "" && len(lib.Channels) == 1 && isDerivableOutput(cfg, lib) {
 			lib.Output = ""
@@ -64,7 +65,7 @@ func RunTidy() error {
 			}
 		}
 		lib.Channels = slices.DeleteFunc(lib.Channels, func(ch *config.Channel) bool {
-			return ch.Path == "" && ch.ServiceConfig == "" && !ch.ServiceConfigDoesNotExist
+			return ch.Path == "" && ch.ServiceConfig == ""
 		})
 
 		tidyLanguageConfig(lib, cfg.Language)
@@ -87,6 +88,32 @@ func isDerivableServiceConfig(language string, lib *config.Library, ch *config.C
 		path = deriveChannelPath(language, lib)
 	}
 	return ch.ServiceConfig != "" && ch.ServiceConfig == deriveServiceConfig(path)
+}
+
+// deriveServiceConfig returns the conventionally derived service config
+// path for a given channel. For example, if resolved_path is
+// "google/cloud/speech/v1", it derives to
+// "google/cloud/speech/v1/speech_v1.yaml".
+//
+// It returns an empty string if the resolved path does not contain sufficient
+// components or if the version component does not start with 'v'.
+//
+// This is only used by librarian tidy as a heuristic for serviceconfig.Find,
+// since that command currently does not have access to the googleapis
+// directory.
+//
+// TODO(https://github.com/googleapis/librarian/issues/3358): use
+// serviceconfig.Find instead.
+func deriveServiceConfig(resolvedPath string) string {
+	parts := strings.Split(resolvedPath, "/")
+	if len(parts) >= 2 {
+		version := parts[len(parts)-1]
+		service := parts[len(parts)-2]
+		if strings.HasPrefix(version, "v") {
+			return fmt.Sprintf("%s/%s_%s.yaml", resolvedPath, service, version)
+		}
+	}
+	return ""
 }
 
 func validateLibraries(cfg *config.Config) error {
