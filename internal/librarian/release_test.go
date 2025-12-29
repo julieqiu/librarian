@@ -286,9 +286,9 @@ func TestReleaseRust(t *testing.T) {
 				releaseCalled = true
 				return test.releaseError
 			}
-			librarianGenerateLibrary = func(ctx context.Context, cfg *config.Config, libraryName string) (*config.Library, error) {
+			librarianGenerateLibrary = func(ctx context.Context, all bool, libraryName string) error {
 				generateCalled = true
-				return nil, test.generateError
+				return test.generateError
 			}
 			libConfg := &config.Library{}
 			err := releaseLibrary(t.Context(), cfg, libConfg, test.srcPath)
