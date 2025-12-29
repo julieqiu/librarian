@@ -18,10 +18,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"slices"
 	"strings"
 
 	"github.com/googleapis/librarian/internal/config"
+	"github.com/googleapis/librarian/internal/serviceconfig"
 	"github.com/googleapis/librarian/internal/yaml"
 	"github.com/urfave/cli/v3"
 )
@@ -37,13 +40,13 @@ func tidyCommand() *cli.Command {
 		Usage:     "format and validate librarian.yaml",
 		UsageText: "librarian tidy [path]",
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			return RunTidy()
+			return RunTidy(ctx)
 		},
 	}
 }
 
 // RunTidy formats and validates the librarian configuration file.
-func RunTidy() error {
+func RunTidy(ctx context.Context) error {
 	cfg, err := yaml.Read[config.Config](librarianConfigPath)
 	if err != nil {
 		return err
@@ -52,15 +55,25 @@ func RunTidy() error {
 		return err
 	}
 
+	var googleapisDir string
+	if cfg.Sources != nil && cfg.Sources.Googleapis != nil {
+		var err error
+		googleapisDir, err = fetchGoogleapisDir(ctx, cfg.Sources)
+		if err != nil {
+			return err
+		}
+	}
+
 	for _, lib := range cfg.Libraries {
 		if lib.Output != "" && len(lib.Channels) == 1 && isDerivableOutput(cfg, lib) {
 			lib.Output = ""
 		}
 		for _, ch := range lib.Channels {
-			if isDerivableChannelPath(cfg.Language, lib, ch) {
+			fixIncorrectServiceConfig(googleapisDir, cfg.Language, lib, ch)
+			if isDerivableChannelPath(googleapisDir, cfg.Language, lib, ch) {
 				ch.Path = ""
 			}
-			if isDerivableServiceConfig(cfg.Language, lib, ch) {
+			if isDerivableServiceConfig(googleapisDir, cfg.Language, lib, ch) {
 				ch.ServiceConfig = ""
 			}
 		}
@@ -78,32 +91,70 @@ func isDerivableOutput(cfg *config.Config, lib *config.Library) bool {
 	return lib.Output == derivedOutput
 }
 
-func isDerivableChannelPath(language string, lib *config.Library, ch *config.Channel) bool {
-	return ch.Path == deriveChannelPath(language, lib)
+func resolvedPath(language string, lib *config.Library, ch *config.Channel) string {
+	if ch.Path != "" {
+		return ch.Path
+	}
+	return deriveChannelPath(language, lib)
 }
 
-func isDerivableServiceConfig(language string, lib *config.Library, ch *config.Channel) bool {
-	path := ch.Path
-	if path == "" {
-		path = deriveChannelPath(language, lib)
+func fixIncorrectServiceConfig(googleapisDir, language string, lib *config.Library, ch *config.Channel) {
+	if googleapisDir == "" || ch.ServiceConfig == "" {
+		return
 	}
-	return ch.ServiceConfig != "" && ch.ServiceConfig == deriveServiceConfig(path)
+	path := resolvedPath(language, lib, ch)
+	correctConfig, err := serviceconfig.Find(googleapisDir, path)
+	if err != nil || correctConfig == "" || ch.ServiceConfig == correctConfig {
+		return
+	}
+	ch.ServiceConfig = ""
+}
+
+func isDerivableChannelPath(googleapisDir, language string, lib *config.Library, ch *config.Channel) bool {
+	derivedPath := deriveChannelPath(language, lib)
+	if ch.Path != derivedPath {
+		return false
+	}
+
+	// Validate path exists if googleapis available
+	if googleapisDir != "" {
+		fullPath := filepath.Join(googleapisDir, derivedPath)
+		info, err := os.Stat(fullPath)
+		if err != nil {
+			return false
+		}
+		if !info.IsDir() {
+			return false
+		}
+	}
+
+	return true
+}
+
+func isDerivableServiceConfig(googleapisDir, language string, lib *config.Library, ch *config.Channel) bool {
+	path := resolvedPath(language, lib, ch)
+
+	// Fall back to heuristic if googleapis not available
+	if googleapisDir == "" {
+		return ch.ServiceConfig != "" && ch.ServiceConfig == deriveServiceConfig(path)
+	}
+
+	// Use serviceconfig.Find() for actual validation
+	foundConfig, err := serviceconfig.Find(googleapisDir, path)
+	if err != nil || foundConfig == "" {
+		return false
+	}
+
+	return ch.ServiceConfig == foundConfig
 }
 
 // deriveServiceConfig returns the conventionally derived service config
-// path for a given channel. For example, if resolved_path is
-// "google/cloud/speech/v1", it derives to
+// path for a given channel as a fallback when the googleapis directory
+// is not available. For example, "google/cloud/speech/v1" derives to
 // "google/cloud/speech/v1/speech_v1.yaml".
 //
 // It returns an empty string if the resolved path does not contain sufficient
 // components or if the version component does not start with 'v'.
-//
-// This is only used by librarian tidy as a heuristic for serviceconfig.Find,
-// since that command currently does not have access to the googleapis
-// directory.
-//
-// TODO(https://github.com/googleapis/librarian/issues/3358): use
-// serviceconfig.Find instead.
 func deriveServiceConfig(resolvedPath string) string {
 	parts := strings.Split(resolvedPath, "/")
 	if len(parts) >= 2 {
@@ -142,10 +193,7 @@ func validateLibraries(cfg *config.Config) error {
 			errs = append(errs, fmt.Errorf("%w: %s (appears %d times)", errDuplicateChannelPath, path, count))
 		}
 	}
-	if len(errs) > 0 {
-		return errors.Join(errs...)
-	}
-	return nil
+	return errors.Join(errs...)
 }
 
 func tidyLanguageConfig(lib *config.Library, language string) {

@@ -93,9 +93,6 @@ func TestTidyCommand(t *testing.T) {
 	t.Chdir(tempDir)
 	configPath := filepath.Join(tempDir, librarianConfigPath)
 	configContent := `language: rust
-sources:
-  googleapis:
-    commit: abc123
 libraries:
   - name: google-cloud-storage-v1
     version: "1.0.0"
@@ -297,7 +294,7 @@ libraries:
 	if err := os.WriteFile(configPath, []byte(configContent), 0644); err != nil {
 		t.Fatal(err)
 	}
-	if err := RunTidy(); err != nil {
+	if err := RunTidy(t.Context()); err != nil {
 		t.Fatal(err)
 	}
 	cfg, err := yaml.Read[config.Config](configPath)
