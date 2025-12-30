@@ -459,15 +459,3 @@ func TestCleanOutput(t *testing.T) {
 		})
 	}
 }
-
-func writeServiceConfig(t *testing.T, googleapisDir, channel, filename string) {
-	t.Helper()
-	dir := filepath.Join(googleapisDir, channel)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		t.Fatal(err)
-	}
-	content := "type: google.api.Service\nname: test.googleapis.com\n"
-	if err := os.WriteFile(filepath.Join(dir, filename), []byte(content), 0644); err != nil {
-		t.Fatal(err)
-	}
-}

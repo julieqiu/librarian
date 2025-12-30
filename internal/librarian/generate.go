@@ -108,15 +108,6 @@ func generateAll(ctx context.Context, cfg *config.Config) error {
 	return nil
 }
 
-func defaultLibraryName(language, channel string) string {
-	switch language {
-	case languageRust:
-		return rust.DefaultLibraryName(channel)
-	default:
-		return channel
-	}
-}
-
 func defaultOutput(language, channel, defaultOut string) string {
 	switch language {
 	case languageRust:
@@ -133,14 +124,6 @@ func deriveChannelPath(language string, lib *config.Library) string {
 	default:
 		return strings.ReplaceAll(lib.Name, "-", "/")
 	}
-}
-
-func dirExists(path string) bool {
-	info, err := os.Stat(path)
-	if err != nil {
-		return false
-	}
-	return info.IsDir()
 }
 
 func generateLibrary(ctx context.Context, cfg *config.Config, libraryName string) (*config.Library, error) {
