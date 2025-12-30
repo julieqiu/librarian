@@ -50,5 +50,5 @@ jobs:
           python -m pip install nox
       - name: Verify git is available
         run: git --version
-      - name: Run internal/librarian/internal/python tests
-        run: go test -race ./internal/librarian/internal/python
+      - name: Run internal/librarian/python tests
+        run: go test -race ./internal/librarian/python

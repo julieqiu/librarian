@@ -26,7 +26,7 @@ import (
 	"github.com/googleapis/librarian/internal/testhelper"
 )
 
-const googleapisDir = "../../../testdata/googleapis"
+const googleapisDir = "../../testdata/googleapis"
 
 func TestGetStagingChildDirectory(t *testing.T) {
 	t.Parallel()
