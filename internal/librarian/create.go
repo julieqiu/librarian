@@ -18,7 +18,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"path"
 	"sort"
 	"strings"
 
@@ -39,15 +38,11 @@ func createCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "create",
 		Usage:     "create a new client library",
-		UsageText: "librarian create [library] --specification-source [path] --service-config [path]",
+		UsageText: "librarian create <library> [flags]",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "specification-source",
 				Usage: "path to the specification source (e.g., google/cloud/secretmanager/v1)",
-			},
-			&cli.StringFlag{
-				Name:  "service-config",
-				Usage: "path to the service config",
 			},
 			&cli.StringFlag{
 				Name:  "output",
@@ -60,14 +55,13 @@ func createCommand() *cli.Command {
 				return errMissingLibraryName
 			}
 			specSource := c.String("specification-source")
-			serviceConfig := c.String("service-config")
 			output := c.String("output")
-			return runCreate(ctx, name, specSource, serviceConfig, output)
+			return runCreate(ctx, name, specSource, output)
 		},
 	}
 }
 
-func runCreate(ctx context.Context, name, specSource, serviceConfig, output string) error {
+func runCreate(ctx context.Context, name, specSource, output string) error {
 	cfg, err := yaml.Read[config.Config](librarianConfigPath)
 	if err != nil {
 		return fmt.Errorf("%w: %v", errNoYaml, err)
@@ -78,11 +72,10 @@ func runCreate(ctx context.Context, name, specSource, serviceConfig, output stri
 			return runGenerate(ctx, false, name)
 		}
 	}
-	specSource = deriveSpecSource(specSource, serviceConfig, cfg.Language)
 	if output, err = deriveOutput(output, cfg, name, specSource, cfg.Language); err != nil {
 		return err
 	}
-	if err := addLibraryToLibrarianConfig(cfg, name, output, specSource, serviceConfig); err != nil {
+	if err := addLibraryToLibrarianConfig(cfg, name, output, specSource); err != nil {
 		return err
 	}
 	switch cfg.Language {
@@ -95,16 +88,6 @@ func runCreate(ctx context.Context, name, specSource, serviceConfig, output stri
 	default:
 		return errUnsupportedLanguage
 	}
-}
-
-func deriveSpecSource(specSource string, serviceConfig string, language string) string {
-	switch language {
-	case languageRust:
-		if specSource == "" && serviceConfig != "" {
-			return path.Dir(serviceConfig)
-		}
-	}
-	return specSource
 }
 
 func deriveOutput(output string, cfg *config.Config, libraryName string, specSource string, language string) (string, error) {
@@ -126,17 +109,16 @@ func deriveOutput(output string, cfg *config.Config, libraryName string, specSou
 	}
 }
 
-func addLibraryToLibrarianConfig(cfg *config.Config, name, output, specificationSource, serviceConfig string) error {
+func addLibraryToLibrarianConfig(cfg *config.Config, name, output, specificationSource string) error {
 	lib := &config.Library{
 		Name:    name,
 		Output:  output,
 		Version: "0.1.0",
 	}
-	if serviceConfig != "" || specificationSource != "" {
+	if specificationSource != "" {
 		lib.Channels = []*config.Channel{
 			{
-				Path:          specificationSource,
-				ServiceConfig: serviceConfig,
+				Path: specificationSource,
 			},
 		}
 	}
