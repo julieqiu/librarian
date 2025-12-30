@@ -50,15 +50,22 @@ func RunTidy(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	if err := validateLibraries(cfg); err != nil {
-		return err
-	}
 
 	if cfg.Sources == nil || cfg.Sources.Googleapis == nil {
 		return errNoGoogleapiSourceInfo
 	}
 	googleapisDir, err := fetchSource(ctx, cfg.Sources.Googleapis, googleapisRepo)
 	if err != nil {
+		return err
+	}
+	if err := tidyConfig(ctx, cfg, googleapisDir); err != nil {
+		return err
+	}
+	return yaml.Write(librarianConfigPath, formatConfig(cfg))
+}
+
+func tidyConfig(ctx context.Context, cfg *config.Config, googleapisDir string) error {
+	if err := validateLibraries(cfg); err != nil {
 		return err
 	}
 
@@ -78,9 +85,15 @@ func RunTidy(ctx context.Context) error {
 			return ch.Path == "" && ch.ServiceConfig == ""
 		})
 
-		tidyLanguageConfig(lib, cfg.Language)
+		if cfg.Language == languageRust {
+			if lib.Rust != nil && lib.Rust.Modules != nil {
+				lib.Rust.Modules = slices.DeleteFunc(lib.Rust.Modules, func(module *config.RustModule) bool {
+					return module.Source == "none" && module.Template == ""
+				})
+			}
+		}
 	}
-	return yaml.Write(librarianConfigPath, formatConfig(cfg))
+	return nil
 }
 
 func isDerivableOutput(cfg *config.Config, lib *config.Library) bool {
@@ -137,21 +150,6 @@ func validateLibraries(cfg *config.Config) error {
 		return errors.Join(errs...)
 	}
 	return nil
-}
-
-func tidyLanguageConfig(lib *config.Library, language string) {
-	switch language {
-	case languageRust:
-		tidyRustConfig(lib)
-	}
-}
-
-func tidyRustConfig(lib *config.Library) {
-	if lib.Rust != nil && lib.Rust.Modules != nil {
-		lib.Rust.Modules = slices.DeleteFunc(lib.Rust.Modules, func(module *config.RustModule) bool {
-			return module.Source == "none" && module.Template == ""
-		})
-	}
 }
 
 func formatConfig(cfg *config.Config) *config.Config {

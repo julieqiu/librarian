@@ -18,12 +18,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"path"
 	"sort"
-	"strings"
 
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/librarian/rust"
+	"github.com/googleapis/librarian/internal/serviceconfig"
 
 	"github.com/googleapis/librarian/internal/yaml"
 	"github.com/urfave/cli/v3"
@@ -31,7 +30,6 @@ import (
 
 var (
 	errUnsupportedLanguage = errors.New("library creation is not supported for the specified language")
-	errOutputFlagRequired  = errors.New("output flag is required when default.output is not set in librarian.yaml")
 	errMissingLibraryName  = errors.New("must provide library name as argument to create a new library")
 	errNoYaml              = errors.New("unable to read librarian.yaml")
 )
@@ -40,61 +38,41 @@ func createCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "create",
 		Usage:     "create a new client library",
-		UsageText: "librarian create [library] --specification-source [path] --service-config [path]",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:  "specification-source",
-				Usage: "path to the specification source (e.g., google/cloud/secretmanager/v1)",
-			},
-			&cli.StringFlag{
-				Name:  "service-config",
-				Usage: "path to the service config",
-			},
-			&cli.StringFlag{
-				Name:  "output",
-				Usage: "output directory (optional, will be derived if not provided)",
-			},
-			&cli.StringFlag{
-				Name:  "specification-format",
-				Usage: "specification format (e.g., protobuf, discovery)",
-				Value: "protobuf",
-			},
-		},
+		UsageText: "librarian create <library> [apis...]",
 		Action: func(ctx context.Context, c *cli.Command) error {
 			name := c.Args().First()
 			if name == "" {
 				return errMissingLibraryName
 			}
-			specSource := c.String("specification-source")
-			serviceConfig := c.String("service-config")
-			output := c.String("output")
-			specFormat := c.String("specification-format")
-			return runCreate(ctx, name, specSource, serviceConfig, output, specFormat)
+			return runCreate(ctx, name, c.Args().Slice()[1:]...)
 		},
 	}
 }
 
-func runCreate(ctx context.Context, name, specSource, serviceConfig, output, specFormat string) error {
+func runCreate(ctx context.Context, name string, channel ...string) error {
 	cfg, err := yaml.Read[config.Config](librarianConfigPath)
 	if err != nil {
 		return fmt.Errorf("%w: %v", errNoYaml, err)
 	}
-	// check for existing libraries, if it exists just run generate
-	for _, lib := range cfg.Libraries {
-		if lib.Name == name {
-			return runGenerate(ctx, false, name)
-		}
+
+	if cfg.Sources == nil || cfg.Sources.Googleapis == nil {
+		return errNoGoogleapiSourceInfo
 	}
-	specSource = deriveSpecSource(specSource, serviceConfig, cfg.Language)
-	if output, err = deriveOutput(output, cfg, name, specSource, cfg.Language); err != nil {
+	googleapisDir, err := fetchSource(ctx, cfg.Sources.Googleapis, googleapisRepo)
+	if err != nil {
 		return err
 	}
-	if err := addLibraryToLibrarianConfig(cfg, name, output, specSource, serviceConfig, specFormat); err != nil {
+	if err := addLibraryToConfig(cfg, name, googleapisDir, channel...); err != nil {
 		return err
 	}
+
+	c := cfg.Libraries[0].Channels[0].Path
+	output := defaultOutput(cfg.Language, c, cfg.Default.Output)
 	switch cfg.Language {
 	case languageFake:
-		return runGenerate(ctx, false, name)
+		if err := runGenerate(ctx, false, name); err != nil {
+			return err
+		}
 	case languageRust:
 		if err := rust.PrepareCargoWorkspace(ctx, output); err != nil {
 			return err
@@ -102,59 +80,62 @@ func runCreate(ctx context.Context, name, specSource, serviceConfig, output, spe
 		if err := runGenerate(ctx, false, name); err != nil {
 			return err
 		}
-		return rust.FormatAndValidateLibrary(ctx, output)
+		if err := rust.FormatAndValidateLibrary(ctx, output); err != nil {
+			return err
+		}
 	default:
 		return errUnsupportedLanguage
 	}
+
+	if err := tidyConfig(ctx, cfg, googleapisDir); err != nil {
+		return err
+	}
+	return yaml.Write(librarianConfigPath, formatConfig(cfg))
 }
 
-func deriveSpecSource(specSource string, serviceConfig string, language string) string {
-	switch language {
-	case languageRust:
-		if specSource == "" && serviceConfig != "" {
-			return path.Dir(serviceConfig)
+func addLibraryToConfig(cfg *config.Config, name, googleapisDir string, channel ...string) error {
+	for _, lib := range cfg.Libraries {
+		if lib.Name == name {
+			return fmt.Errorf("%q already exists", name)
 		}
 	}
-	return specSource
-}
 
-func deriveOutput(output string, cfg *config.Config, libraryName string, specSource string, language string) (string, error) {
-	if output != "" {
-		return output, nil
-	}
-	if cfg.Default == nil || cfg.Default.Output == "" {
-		return "", errOutputFlagRequired
-	}
-	switch language {
-	case languageRust:
-		if specSource != "" {
-			return defaultOutput(language, specSource, cfg.Default.Output), nil
-		}
-		libOutputDir := strings.ReplaceAll(libraryName, "-", "/")
-		return defaultOutput(language, libOutputDir, cfg.Default.Output), nil
-	default:
-		return defaultOutput(language, specSource, cfg.Default.Output), nil
-	}
-}
-
-func addLibraryToLibrarianConfig(cfg *config.Config, name, output, specificationSource, serviceConfig, specificationFormat string) error {
 	lib := &config.Library{
-		Name:                name,
-		Output:              output,
-		SpecificationFormat: specificationFormat,
-		Version:             "0.1.0",
+		Name:    name,
+		Version: "0.1.0",
 	}
-	if serviceConfig != "" || specificationSource != "" {
-		lib.Channels = []*config.Channel{
-			{
-				Path:          specificationSource,
-				ServiceConfig: serviceConfig,
-			},
+
+	if len(channel) > 0 {
+		for _, c := range channel {
+			sc, err := serviceconfig.Find(googleapisDir, c)
+			if err != nil {
+				return err
+			}
+			lib.Channels = append(lib.Channels, &config.Channel{
+				Path:          c,
+				ServiceConfig: sc,
+			})
 		}
+	} else {
+		c := deriveChannelPath(cfg.Language, lib)
+		sc, err := serviceconfig.Find(googleapisDir, c)
+		if err != nil {
+			return err
+		}
+		lib.Channels = append(lib.Channels, &config.Channel{
+			Path:          c,
+			ServiceConfig: sc,
+		})
 	}
+	if len(lib.Channels) > 1 {
+		sort.Slice(lib, func(i, j int) bool {
+			return lib.Channels[i].Path < lib.Channels[j].Path
+		})
+	}
+
 	cfg.Libraries = append(cfg.Libraries, lib)
 	sort.Slice(cfg.Libraries, func(i, j int) bool {
 		return cfg.Libraries[i].Name < cfg.Libraries[j].Name
 	})
-	return yaml.Write(librarianConfigPath, cfg)
+	return nil
 }

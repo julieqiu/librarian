@@ -78,8 +78,8 @@ func Read(serviceConfigPath string) (*Service, error) {
 // The apiPath should be relative to googleapisDir (e.g.,
 // "google/cloud/secretmanager/v1"). Returns the service config path relative
 // to googleapisDir, or empty string if not found.
-func Find(googleapisDir, apiPath string) (string, error) {
-	dir := filepath.Join(googleapisDir, apiPath)
+func Find(googleapisDir, channel string) (string, error) {
+	dir := filepath.Join(googleapisDir, channel)
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return "", err
@@ -102,7 +102,7 @@ func Find(googleapisDir, apiPath string) (string, error) {
 			return "", err
 		}
 		if isServiceConfig {
-			return filepath.Join(apiPath, name), nil
+			return filepath.Join(channel, name), nil
 		}
 	}
 	return "", nil
