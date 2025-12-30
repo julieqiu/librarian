@@ -31,7 +31,7 @@ func TestGenerateVeneer(t *testing.T) {
 	outDir := t.TempDir()
 	module1Dir := filepath.Join(outDir, "src", "generated", "v1")
 	module2Dir := filepath.Join(outDir, "src", "generated", "v1beta")
-	googleapisDir, err := filepath.Abs("../../../testdata/googleapis")
+	googleapisDir, err := filepath.Abs("../../testdata/googleapis")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -136,7 +136,7 @@ func TestGenerate(t *testing.T) {
 	testhelper.RequireCommand(t, "protoc")
 	testhelper.RequireCommand(t, "rustfmt")
 	testhelper.RequireCommand(t, "taplo")
-	googleapisDir, err := filepath.Abs("../../../testdata/googleapis")
+	googleapisDir, err := filepath.Abs("../../testdata/googleapis")
 	if err != nil {
 		t.Fatal(err)
 	}

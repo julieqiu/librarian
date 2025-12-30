@@ -48,5 +48,5 @@ jobs:
           tar --version
       - name: Run sidekick tests
         run: go test -race ./internal/sidekick/...
-      - name: Run internal/librarian/internal/rust tests
-        run: go test -race ./internal/librarian/internal/rust
+      - name: Run internal/librarian/rust tests
+        run: go test -race ./internal/librarian/rust
