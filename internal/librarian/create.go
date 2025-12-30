@@ -62,25 +62,24 @@ func runCreate(ctx context.Context, name string, channel ...string) error {
 	if err != nil {
 		return err
 	}
-	if err := addLibraryToConfig(cfg, name, googleapisDir, channel...); err != nil {
+	lib, err := addLibraryToConfig(cfg, name, googleapisDir, channel...)
+	if err != nil {
 		return err
 	}
 
-	c := cfg.Libraries[0].Channels[0].Path
-	output := defaultOutput(cfg.Language, c, cfg.Default.Output)
 	switch cfg.Language {
 	case languageFake:
-		if err := runGenerate(ctx, false, name); err != nil {
+		if err := runGenerate(ctx, cfg, false, name); err != nil {
 			return err
 		}
 	case languageRust:
-		if err := rust.PrepareCargoWorkspace(ctx, output); err != nil {
+		if err := rust.PrepareCargoWorkspace(ctx, lib.Output); err != nil {
 			return err
 		}
-		if err := runGenerate(ctx, false, name); err != nil {
+		if err := runGenerate(ctx, cfg, false, name); err != nil {
 			return err
 		}
-		if err := rust.FormatAndValidateLibrary(ctx, output); err != nil {
+		if err := rust.FormatAndValidateLibrary(ctx, lib.Output); err != nil {
 			return err
 		}
 	default:
@@ -93,10 +92,10 @@ func runCreate(ctx context.Context, name string, channel ...string) error {
 	return yaml.Write(librarianConfigPath, formatConfig(cfg))
 }
 
-func addLibraryToConfig(cfg *config.Config, name, googleapisDir string, channel ...string) error {
+func addLibraryToConfig(cfg *config.Config, name, googleapisDir string, channel ...string) (*config.Library, error) {
 	for _, lib := range cfg.Libraries {
 		if lib.Name == name {
-			return fmt.Errorf("%q already exists", name)
+			return nil, fmt.Errorf("%q already exists", name)
 		}
 	}
 
@@ -109,7 +108,7 @@ func addLibraryToConfig(cfg *config.Config, name, googleapisDir string, channel 
 		for _, c := range channel {
 			sc, err := serviceconfig.Find(googleapisDir, c)
 			if err != nil {
-				return err
+				return nil, err
 			}
 			lib.Channels = append(lib.Channels, &config.Channel{
 				Path:          c,
@@ -120,13 +119,15 @@ func addLibraryToConfig(cfg *config.Config, name, googleapisDir string, channel 
 		c := deriveChannelPath(cfg.Language, lib)
 		sc, err := serviceconfig.Find(googleapisDir, c)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		lib.Channels = append(lib.Channels, &config.Channel{
 			Path:          c,
 			ServiceConfig: sc,
 		})
 	}
+
+	lib.Output = defaultOutput(cfg.Language, lib.Channels[0].Path, cfg.Default.Output)
 	if len(lib.Channels) > 1 {
 		sort.Slice(lib, func(i, j int) bool {
 			return lib.Channels[i].Path < lib.Channels[j].Path
@@ -137,5 +138,5 @@ func addLibraryToConfig(cfg *config.Config, name, googleapisDir string, channel 
 	sort.Slice(cfg.Libraries, func(i, j int) bool {
 		return cfg.Libraries[i].Name < cfg.Libraries[j].Name
 	})
-	return nil
+	return lib, nil
 }

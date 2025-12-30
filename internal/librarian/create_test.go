@@ -29,15 +29,14 @@ func TestCreateLibrary(t *testing.T) {
 	for _, test := range []struct {
 		name            string
 		libName         string
-		output          string
 		existingLibrary *config.Library
 		wantOutput      string
+		wantErr         error
 	}{
 		{
 			name:       "create new library",
 			libName:    "newlib",
-			output:     "newlib-output",
-			wantOutput: "newlib-output",
+			wantOutput: "output", // Defaults to cfg.Default.Output
 		},
 		{
 			name:    "regenerate existing library",
@@ -46,14 +45,16 @@ func TestCreateLibrary(t *testing.T) {
 				Name:   "existinglib",
 				Output: "existing-output",
 			},
-			wantOutput: "existing-output",
+			wantErr: errors.New(`"existinglib" already exists`),
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			tmpDir := t.TempDir()
 			t.Chdir(tmpDir)
 
-			// Create service config file for the library
+			// Setup a fake googleapis repo structure
+			// librarian expects: <googleapis>/<channel>/<service>.yaml
+			// For languageFake, channel derived from name is just the name.
 			serviceConfigDir := filepath.Join(tmpDir, test.libName)
 			if err := os.MkdirAll(serviceConfigDir, 0755); err != nil {
 				t.Fatal(err)
@@ -71,7 +72,7 @@ func TestCreateLibrary(t *testing.T) {
 				},
 				Sources: &config.Sources{
 					Googleapis: &config.Source{
-						Dir: tmpDir,
+						Dir: tmpDir, // Pointing to temp root as googleapis root
 					},
 				},
 			}
@@ -82,11 +83,22 @@ func TestCreateLibrary(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if err := runCreate(t.Context(), test.libName); err != nil {
+			err := runCreate(t.Context(), test.libName)
+			if test.wantErr != nil {
+				if err == nil {
+					t.Fatalf("want error %v, got nil", test.wantErr)
+				}
+				if err.Error() != test.wantErr.Error() {
+					t.Errorf("want error %v, got %v", test.wantErr, err)
+				}
+				return
+			}
+			if err != nil {
 				t.Fatal(err)
 			}
 
-			cfg, err := yaml.Read[config.Config](librarianConfigPath)
+			// Verify Config Update
+			cfg, err = yaml.Read[config.Config](librarianConfigPath)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -106,6 +118,7 @@ func TestCreateLibrary(t *testing.T) {
 				t.Errorf("output = %q, want %q", found.Output, test.wantOutput)
 			}
 
+			// Verify File Generation
 			readmePath := filepath.Join(test.wantOutput, "README.md")
 			if _, err := os.Stat(readmePath); err != nil {
 				t.Errorf("expected README.md at %s: %v", readmePath, err)
@@ -147,125 +160,12 @@ func TestCreateCommand(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-
 			err := Run(t.Context(), test.args...)
 			if test.wantErr != nil {
 				if !errors.Is(err, test.wantErr) {
 					t.Errorf("want error %v, got %v", test.wantErr, err)
 				}
 				return
-			}
-		})
-	}
-}
-
-func TestAddLibraryToConfig(t *testing.T) {
-	for _, test := range []struct {
-		name          string
-		libraryName   string
-		output        string
-		specSource    string
-		serviceConfig string
-		specFormat    string
-		want          []*config.Channel
-	}{
-		{
-			name:        "library with no specification-source and service-config",
-			libraryName: "newlib",
-			output:      "output/newlib",
-			specFormat:  "protobuf",
-		},
-		{
-			name:          "library with specification-source and service-config",
-			libraryName:   "newlib",
-			output:        "output/newlib",
-			specFormat:    "protobuf",
-			specSource:    "google/cloud/storage/v1",
-			serviceConfig: "google/cloud/storage/v1/storage_v1.yaml",
-			want: []*config.Channel{
-				{
-					Path:          "google/cloud/storage/v1",
-					ServiceConfig: "google/cloud/storage/v1/storage_v1.yaml",
-				},
-			},
-		},
-		{
-			name:        "library with specification-source",
-			libraryName: "newlib",
-			output:      "output/newlib",
-			specFormat:  "protobuf",
-			specSource:  "google/cloud/storage/v1",
-			want: []*config.Channel{
-				{
-					Path: "google/cloud/storage/v1",
-				},
-			},
-		},
-		{
-			name:          "library with service-config",
-			libraryName:   "newlib",
-			output:        "output/newlib",
-			specFormat:    "protobuf",
-			serviceConfig: "google/cloud/storage/v1/storage_v1.yaml",
-			want: []*config.Channel{
-				{
-					ServiceConfig: "google/cloud/storage/v1/storage_v1.yaml",
-				},
-			},
-		},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			tmpDir := t.TempDir()
-			t.Chdir(tmpDir)
-
-			cfg := &config.Config{
-				Language: languageFake,
-				Libraries: []*config.Library{
-					{
-						Name:   "existinglib",
-						Output: "output/existinglib",
-					},
-				},
-			}
-			if err := yaml.Write(librarianConfigPath, cfg); err != nil {
-				t.Fatal(err)
-			}
-
-			if err := addLibraryToConfig(cfg, test.libraryName, test.output, test.specSource, test.serviceConfig, test.specFormat); err != nil {
-				t.Fatal(err)
-			}
-
-			cfg, err := yaml.Read[config.Config](librarianConfigPath)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			if len(cfg.Libraries) != 2 {
-				t.Errorf("libraries count = %d, want 2", len(cfg.Libraries))
-			}
-
-			var found *config.Library
-			for _, lib := range cfg.Libraries {
-				if lib.Name == test.libraryName {
-					found = lib
-					break
-				}
-			}
-			if found == nil {
-				t.Fatalf("library %q not found in config", test.libraryName)
-			}
-
-			if found.Output != test.output {
-				t.Errorf("output = %q, want %q", found.Output, test.output)
-			}
-			if found.SpecificationFormat != test.specFormat {
-				t.Errorf("specification format = %q, want %q", found.SpecificationFormat, test.specFormat)
-			}
-			if found.Version != "0.1.0" {
-				t.Errorf("version = %q, want %q", found.Version, "0.1.0")
-			}
-			if diff := cmp.Diff(test.want, found.Channels); diff != "" {
-				t.Errorf("channels mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}

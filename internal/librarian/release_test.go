@@ -286,7 +286,7 @@ func TestReleaseRust(t *testing.T) {
 				releaseCalled = true
 				return test.releaseError
 			}
-			librarianGenerateLibrary = func(ctx context.Context, all bool, libraryName string) error {
+			librarianGenerateLibrary = func(ctx context.Context, cfg *config.Config, all bool, libraryName string) error {
 				generateCalled = true
 				return test.generateError
 			}
