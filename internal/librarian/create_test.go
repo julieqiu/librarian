@@ -82,7 +82,7 @@ func TestCreateLibrary(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if err := runCreate(t.Context(), test.libName, "", "", test.output, ""); err != nil {
+			if err := runCreate(t.Context(), test.libName, "", "", test.output); err != nil {
 				t.Fatal(err)
 			}
 
@@ -100,6 +100,7 @@ func TestCreateLibrary(t *testing.T) {
 			}
 			if found == nil {
 				t.Fatal("library not found in config")
+				return
 			}
 
 			if found.Output != test.wantOutput {
@@ -128,7 +129,7 @@ func TestCreateLibraryNoYaml(t *testing.T) {
 	tmpDir := t.TempDir()
 	t.Chdir(tmpDir)
 
-	err := runCreate(t.Context(), "newlib", "", "", "output/newlib", "protobuf")
+	err := runCreate(t.Context(), "newlib", "", "", "output/newlib")
 	if !errors.Is(err, errNoYaml) {
 		t.Errorf("want error %v, got %v", errNoYaml, err)
 	}
@@ -270,20 +271,17 @@ func TestAddLibraryToLibrarianYaml(t *testing.T) {
 		output        string
 		specSource    string
 		serviceConfig string
-		specFormat    string
 		want          []*config.Channel
 	}{
 		{
 			name:        "library with no specification-source and service-config",
 			libraryName: "newlib",
 			output:      "output/newlib",
-			specFormat:  "protobuf",
 		},
 		{
 			name:          "library with specification-source and service-config",
 			libraryName:   "newlib",
 			output:        "output/newlib",
-			specFormat:    "protobuf",
 			specSource:    "google/cloud/storage/v1",
 			serviceConfig: "google/cloud/storage/v1/storage_v1.yaml",
 			want: []*config.Channel{
@@ -297,7 +295,6 @@ func TestAddLibraryToLibrarianYaml(t *testing.T) {
 			name:        "library with specification-source",
 			libraryName: "newlib",
 			output:      "output/newlib",
-			specFormat:  "protobuf",
 			specSource:  "google/cloud/storage/v1",
 			want: []*config.Channel{
 				{
@@ -309,7 +306,6 @@ func TestAddLibraryToLibrarianYaml(t *testing.T) {
 			name:          "library with service-config",
 			libraryName:   "newlib",
 			output:        "output/newlib",
-			specFormat:    "protobuf",
 			serviceConfig: "google/cloud/storage/v1/storage_v1.yaml",
 			want: []*config.Channel{
 				{
@@ -335,7 +331,7 @@ func TestAddLibraryToLibrarianYaml(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if err := addLibraryToLibrarianConfig(cfg, test.libraryName, test.output, test.specSource, test.serviceConfig, test.specFormat); err != nil {
+			if err := addLibraryToLibrarianConfig(cfg, test.libraryName, test.output, test.specSource, test.serviceConfig); err != nil {
 				t.Fatal(err)
 			}
 
@@ -357,13 +353,11 @@ func TestAddLibraryToLibrarianYaml(t *testing.T) {
 			}
 			if found == nil {
 				t.Fatalf("library %q not found in config", test.libraryName)
+				return
 			}
 
 			if found.Output != test.output {
 				t.Errorf("output = %q, want %q", found.Output, test.output)
-			}
-			if found.SpecificationFormat != test.specFormat {
-				t.Errorf("specification format = %q, want %q", found.SpecificationFormat, test.specFormat)
 			}
 			if found.Version != "0.1.0" {
 				t.Errorf("version = %q, want %q", found.Version, "0.1.0")
