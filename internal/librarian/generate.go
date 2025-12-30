@@ -92,16 +92,6 @@ func runGenerate(ctx context.Context, all bool, libraryName string) error {
 }
 
 func generateAll(ctx context.Context, cfg *config.Config) error {
-	googleapisDir, err := fetchSource(ctx, cfg.Sources.Googleapis, googleapisRepo)
-	if err != nil {
-		return err
-	}
-
-	libraries, err := deriveDefaultLibraries(cfg, googleapisDir)
-	if err != nil {
-		return err
-	}
-	cfg.Libraries = append(cfg.Libraries, libraries...)
 	for _, lib := range cfg.Libraries {
 		lib, err := generateLibrary(ctx, cfg, lib.Name)
 		if err != nil {
@@ -116,51 +106,6 @@ func generateAll(ctx context.Context, cfg *config.Config) error {
 		}
 	}
 	return nil
-}
-
-// deriveDefaultLibraries finds libraries for allowed channels that are not
-// explicitly configured in librarian.yaml.
-//
-// For each allowed channel without configuration, it derives default values
-// for the library name and output path. If the output directory exists, the
-// library is added for generation. Channels whose output directories do not
-// exist in the librarian.yaml but should be generated are returned.
-func deriveDefaultLibraries(cfg *config.Config, googleapisDir string) ([]*config.Library, error) {
-	if cfg.Default == nil {
-		return nil, nil
-	}
-
-	configured := make(map[string]bool)
-	for _, lib := range cfg.Libraries {
-		for _, ch := range lib.Channels {
-			configured[ch.Path] = true
-		}
-	}
-
-	var derived []*config.Library
-	for channel := range serviceconfig.Allowlist {
-		if configured[channel] {
-			continue
-		}
-		name := defaultLibraryName(cfg.Language, channel)
-		output := defaultOutput(cfg.Language, channel, cfg.Default.Output)
-		if !dirExists(output) {
-			continue
-		}
-		sc, err := serviceconfig.Find(googleapisDir, channel)
-		if err != nil {
-			return nil, err
-		}
-		derived = append(derived, &config.Library{
-			Name:   name,
-			Output: output,
-			Channels: []*config.Channel{{
-				Path:          channel,
-				ServiceConfig: sc,
-			}},
-		})
-	}
-	return derived, nil
 }
 
 func defaultLibraryName(language, channel string) string {
