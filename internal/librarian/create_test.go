@@ -81,7 +81,7 @@ func TestCreateLibrary(t *testing.T) {
 			if err := yaml.Write(librarianConfigPath, cfg); err != nil {
 				t.Fatal(err)
 			}
-			if err := runCreate(t.Context(), test.libName, "", "", test.output); err != nil {
+			if err := runCreate(t.Context(), test.libName, "", test.output); err != nil {
 				t.Fatal(err)
 			}
 
@@ -120,7 +120,7 @@ func TestCreateLibraryNoYaml(t *testing.T) {
 	tmpDir := t.TempDir()
 	t.Chdir(tmpDir)
 
-	err := runCreate(t.Context(), "newlib", "", "", "output/newlib")
+	err := runCreate(t.Context(), "newlib", "", "output/newlib")
 	if !errors.Is(err, errNoYaml) {
 		t.Errorf("want error %v, got %v", errNoYaml, err)
 	}
@@ -146,46 +146,6 @@ func TestCreateCommand(t *testing.T) {
 					t.Errorf("want error %v, got %v", test.wantErr, err)
 				}
 				return
-			}
-		})
-	}
-}
-
-func TestDeriveSpecificationSource(t *testing.T) {
-	for _, test := range []struct {
-		name               string
-		serviceConfig      string
-		specSource         string
-		expectedSpecSource string
-		language           string
-	}{
-		{
-			name:               "rust missing service-config",
-			language:           "rust",
-			specSource:         "google/cloud/storage/v1",
-			expectedSpecSource: "google/cloud/storage/v1",
-		},
-		{
-			name:               "rust missing specification-source",
-			language:           "rust",
-			serviceConfig:      "google/cloud/storage/v1/storage_v1.yaml",
-			expectedSpecSource: "google/cloud/storage/v1",
-		},
-		{
-			name:               "rust missing specification-source and service-config",
-			language:           "rust",
-			expectedSpecSource: "",
-		},
-		{
-			name:               "non-rust language",
-			language:           "other-lang",
-			expectedSpecSource: "",
-		},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			got := deriveSpecSource(test.specSource, test.serviceConfig, test.language)
-			if got != test.expectedSpecSource {
-				t.Errorf("want specification source %q, got %q", test.expectedSpecSource, got)
 			}
 		})
 	}
@@ -257,12 +217,11 @@ func TestDeriveOutput(t *testing.T) {
 
 func TestAddLibraryToLibrarianYaml(t *testing.T) {
 	for _, test := range []struct {
-		name          string
-		libraryName   string
-		output        string
-		specSource    string
-		serviceConfig string
-		want          []*config.Channel
+		name        string
+		libraryName string
+		output      string
+		specSource  string
+		want        []*config.Channel
 	}{
 		{
 			name:        "library with no specification-source and service-config",
@@ -270,15 +229,13 @@ func TestAddLibraryToLibrarianYaml(t *testing.T) {
 			output:      "output/newlib",
 		},
 		{
-			name:          "library with specification-source and service-config",
-			libraryName:   "newlib",
-			output:        "output/newlib",
-			specSource:    "google/cloud/storage/v1",
-			serviceConfig: "google/cloud/storage/v1/storage_v1.yaml",
+			name:        "library with specification-source and service-config",
+			libraryName: "newlib",
+			output:      "output/newlib",
+			specSource:  "google/cloud/storage/v1",
 			want: []*config.Channel{
 				{
-					Path:          "google/cloud/storage/v1",
-					ServiceConfig: "google/cloud/storage/v1/storage_v1.yaml",
+					Path: "google/cloud/storage/v1",
 				},
 			},
 		},
@@ -294,15 +251,9 @@ func TestAddLibraryToLibrarianYaml(t *testing.T) {
 			},
 		},
 		{
-			name:          "library with service-config",
-			libraryName:   "newlib",
-			output:        "output/newlib",
-			serviceConfig: "google/cloud/storage/v1/storage_v1.yaml",
-			want: []*config.Channel{
-				{
-					ServiceConfig: "google/cloud/storage/v1/storage_v1.yaml",
-				},
-			},
+			name:        "library with service-config",
+			libraryName: "newlib",
+			output:      "output/newlib",
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -321,8 +272,7 @@ func TestAddLibraryToLibrarianYaml(t *testing.T) {
 			if err := yaml.Write(librarianConfigPath, cfg); err != nil {
 				t.Fatal(err)
 			}
-
-			if err := addLibraryToLibrarianConfig(cfg, test.libraryName, test.output, test.specSource, test.serviceConfig); err != nil {
+			if err := addLibraryToLibrarianConfig(cfg, test.libraryName, test.output, test.specSource); err != nil {
 				t.Fatal(err)
 			}
 
