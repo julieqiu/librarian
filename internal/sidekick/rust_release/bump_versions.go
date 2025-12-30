@@ -22,6 +22,7 @@ import (
 
 	"github.com/googleapis/librarian/internal/command"
 	"github.com/googleapis/librarian/internal/librarian/githelpers"
+	"github.com/googleapis/librarian/internal/librarian/rust"
 	"github.com/googleapis/librarian/internal/sidekick/config"
 )
 
@@ -40,7 +41,7 @@ func BumpVersions(ctx context.Context, config *config.Release) error {
 		return err
 	}
 	var crates []string
-	for _, manifest := range findCargoManifests(files) {
+	for _, manifest := range rust.FindCargoManifests(files) {
 		names, err := updateManifest(config, lastTag, manifest)
 		if err != nil {
 			return err

@@ -27,6 +27,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/librarian/internal/command"
 	"github.com/googleapis/librarian/internal/librarian/githelpers"
+	"github.com/googleapis/librarian/internal/librarian/rust"
 	"github.com/googleapis/librarian/internal/sidekick/config"
 )
 
@@ -53,8 +54,8 @@ func Publish(ctx context.Context, config *config.Release, dryRun bool, skipSemve
 // PublishCrates publishes the crates that have changed.
 func PublishCrates(ctx context.Context, config *config.Release, dryRun bool, skipSemverChecks bool, lastTag string, files []string) error {
 	manifests := map[string]string{}
-	for _, manifest := range findCargoManifests(files) {
-		names, err := publishedCrate(manifest)
+	for _, manifest := range rust.FindCargoManifests(files) {
+		names, err := rust.PublishedCrate(manifest)
 		if err != nil {
 			return err
 		}

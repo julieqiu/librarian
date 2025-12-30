@@ -18,8 +18,6 @@ import (
 	"bytes"
 	"os"
 	"path"
-	"slices"
-	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -230,102 +228,5 @@ func TestUpdateManifestBadSidekickConfig(t *testing.T) {
 
 	if got, err := updateManifest(&release, tag, name); err == nil {
 		t.Errorf("expected an error when using a bad sidekick file, got=%v", got)
-	}
-}
-
-func TestManifestVersionNeedsBumpSuccess(t *testing.T) {
-	const tag = "manifest-version-update-success"
-	testhelper.RequireCommand(t, "git")
-	testhelper.SetupForVersionBump(t, tag)
-	release := config.Release{
-		Remote:       "upstream",
-		Branch:       "main",
-		Preinstalled: map[string]string{},
-	}
-	name := path.Join("src", "storage", "Cargo.toml")
-	contents, err := os.ReadFile(name)
-	if err != nil {
-		t.Fatal(err)
-	}
-	lines := strings.Split(string(contents), "\n")
-	idx := slices.IndexFunc(lines, func(a string) bool { return strings.HasPrefix(a, "version ") })
-	if idx == -1 {
-		t.Fatalf("expected a line starting with `version ` in %v", lines)
-	}
-	lines[idx] = `version = "2.3.4"`
-	if err := os.WriteFile(name, []byte(strings.Join(lines, "\n")), 0644); err != nil {
-		t.Fatal(err)
-	}
-	if err := command.Run(t.Context(), "git", "commit", "-m", "updated version", "."); err != nil {
-		t.Fatal(err)
-	}
-
-	needsBump, err := manifestVersionNeedsBump(&release, tag, name)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if needsBump {
-		t.Errorf("expected no need for a bump for %s", name)
-	}
-}
-
-func TestManifestVersionNeedsBumpNewCrate(t *testing.T) {
-	const tag = "manifest-version-update-new-crate"
-	testhelper.RequireCommand(t, "git")
-	testhelper.SetupForVersionBump(t, tag)
-	release := config.Release{
-		Remote:       "upstream",
-		Branch:       "main",
-		Preinstalled: map[string]string{},
-	}
-	testhelper.AddCrate(t, path.Join("src", "new"), "google-cloud-new")
-	if err := command.Run(t.Context(), "git", "add", "."); err != nil {
-		t.Fatal(err)
-	}
-	if err := command.Run(t.Context(), "git", "commit", "-m", "new crate", "."); err != nil {
-		t.Fatal(err)
-	}
-	name := path.Join("src", "new", "Cargo.toml")
-
-	needsBump, err := manifestVersionNeedsBump(&release, tag, name)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if needsBump {
-		t.Errorf("no changes for new crates")
-	}
-}
-
-func TestManifestVersionNeedsBumpNoChange(t *testing.T) {
-	const tag = "manifest-version-update-no-change"
-	testhelper.RequireCommand(t, "git")
-	testhelper.SetupForVersionBump(t, tag)
-	release := config.Release{
-		Remote:       "upstream",
-		Branch:       "main",
-		Preinstalled: map[string]string{},
-	}
-	name := path.Join("src", "storage", "Cargo.toml")
-	needsBump, err := manifestVersionNeedsBump(&release, tag, name)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !needsBump {
-		t.Errorf("expected no change for %s", name)
-	}
-}
-
-func TestManifestVersionNeedsBumpBadDiff(t *testing.T) {
-	const tag = "manifest-version-update-success"
-	testhelper.RequireCommand(t, "git")
-	testhelper.SetupForVersionBump(t, tag)
-	release := config.Release{
-		Remote:       "upstream",
-		Branch:       "main",
-		Preinstalled: map[string]string{},
-	}
-	name := path.Join("src", "storage", "Cargo.toml")
-	if updated, err := manifestVersionNeedsBump(&release, "not-a-valid-tag", name); err == nil {
-		t.Errorf("expected an error with an valid tag, got=%v", updated)
 	}
 }
