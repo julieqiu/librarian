@@ -64,16 +64,16 @@ func generateCommand() *cli.Command {
 			if all && libraryName != "" {
 				return errBothLibraryAndAllFlag
 			}
-			return runGenerate(ctx, all, libraryName)
+			cfg, err := yaml.Read[config.Config](librarianConfigPath)
+			if err != nil {
+				return err
+			}
+			return runGenerate(ctx, cfg, all, libraryName)
 		},
 	}
 }
 
-func runGenerate(ctx context.Context, all bool, libraryName string) error {
-	cfg, err := yaml.Read[config.Config](librarianConfigPath)
-	if err != nil {
-		return err
-	}
+func runGenerate(ctx context.Context, cfg *config.Config, all bool, libraryName string) error {
 	if cfg.Sources == nil {
 		return errEmptySources
 	}

@@ -24,6 +24,7 @@ import (
 
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/librarian/rust"
+	"github.com/googleapis/librarian/internal/serviceconfig"
 	"github.com/googleapis/librarian/internal/yaml"
 	"github.com/urfave/cli/v3"
 )
@@ -139,14 +140,37 @@ func addLibraryToLibrarianConfig(cfg *config.Config, name, output, specification
 		SpecificationFormat: specificationFormat,
 		Version:             "0.1.0",
 	}
-	if serviceConfig != "" || specificationSource != "" {
-		lib.Channels = []*config.Channel{
-			{
-				Path:          specificationSource,
-				ServiceConfig: serviceConfig,
-			},
+
+	if len(channel) > 0 {
+		for _, c := range channel {
+			sc, err := serviceconfig.Find(googleapisDir, c)
+			if err != nil {
+				return nil, err
+			}
+			lib.Channels = append(lib.Channels, &config.Channel{
+				Path:          c,
+				ServiceConfig: sc,
+			})
 		}
+	} else {
+		c := deriveChannelPath(cfg.Language, lib)
+		sc, err := serviceconfig.Find(googleapisDir, c)
+		if err != nil {
+			return nil, err
+		}
+		lib.Channels = append(lib.Channels, &config.Channel{
+			Path:          c,
+			ServiceConfig: sc,
+		})
 	}
+
+	lib.Output = defaultOutput(cfg.Language, lib.Channels[0].Path, cfg.Default.Output)
+	if len(lib.Channels) > 1 {
+		sort.Slice(lib, func(i, j int) bool {
+			return lib.Channels[i].Path < lib.Channels[j].Path
+		})
+	}
+
 	cfg.Libraries = append(cfg.Libraries, lib)
 	sort.Slice(cfg.Libraries, func(i, j int) bool {
 		return cfg.Libraries[i].Name < cfg.Libraries[j].Name

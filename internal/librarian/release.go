@@ -146,7 +146,7 @@ func releaseLibrary(ctx context.Context, cfg *config.Config, libConfig *config.L
 		if err := rustReleaseLibrary(libConfig, srcPath); err != nil {
 			return err
 		}
-		if err := librarianGenerateLibrary(ctx, false, libConfig.Name); err != nil {
+		if err := librarianGenerateLibrary(ctx, cfg, false, libConfig.Name); err != nil {
 			return err
 		}
 		return nil
