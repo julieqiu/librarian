@@ -577,7 +577,7 @@ func TestDeriveNextOptions_DeriveNextPreview_Errors(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			_, err := DeriveNextPreview(test.previewVersion, test.stableVersion, nil)
+			_, err := DeriveNextPreview(test.previewVersion, test.stableVersion, DeriveNextOptions{})
 			if err == nil {
 				t.Errorf("DeriveNextOptions.DeriveNextPreview(%q, %q) did not return an error as expected.", test.previewVersion, test.stableVersion)
 			} else if !errors.Is(err, test.wantErr) {
