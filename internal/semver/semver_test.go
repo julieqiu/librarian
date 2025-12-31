@@ -539,7 +539,7 @@ func TestDeriveNextOptions_DeriveNextPreview(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			nextVersion, err := DeriveNextPreview(test.previewVersion, test.stableVersion, &test.opts)
+			nextVersion, err := DeriveNextPreview(test.previewVersion, test.stableVersion, test.opts)
 			if err != nil {
 				t.Fatalf("DeriveNextOptions.DeriveNextPreview() returned an error: %v", err)
 			}
