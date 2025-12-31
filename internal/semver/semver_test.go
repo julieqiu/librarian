@@ -282,9 +282,9 @@ func TestDeriveNext(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			nextVersion, err := DeriveNext(test.highestChange, test.currentVersion)
+			nextVersion, err := DeriveNext(test.highestChange, test.currentVersion, DeriveNextOptions{})
 			if err != nil {
-				t.Fatalf("DeriveNext() returned an error: %v", err)
+				t.Fatal(err)
 			}
 			if diff := cmp.Diff(test.expectedVersion, nextVersion); diff != "" {
 				t.Errorf("mismatch (-want +got):\n%s", diff)
@@ -405,9 +405,9 @@ func TestDeriveNextOptions_DeriveNext(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			nextVersion, err := test.opts.DeriveNext(test.highestChange, test.currentVersion)
+			nextVersion, err := DeriveNext(test.highestChange, test.currentVersion, test.opts)
 			if err != nil {
-				t.Fatalf("DeriveNextOptions.DeriveNext() returned an error: %v", err)
+				t.Fatal(err)
 			}
 			if diff := cmp.Diff(test.expectedVersion, nextVersion); diff != "" {
 				t.Errorf("mismatch (-want +got):\n%s", diff)
@@ -431,7 +431,7 @@ func TestDeriveNextOptions_DeriveNext_Error(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			_, err := DeriveNextOptions{}.DeriveNext(test.changeLevel, test.currentVersion)
+			_, err := DeriveNext(test.changeLevel, test.currentVersion, DeriveNextOptions{})
 			if err == nil {
 				t.Errorf("DeriveNextOptions.DeriveNext(%v, %q) did not return an error as expected.", test.changeLevel, test.currentVersion)
 			} else if !errors.Is(err, test.wantErr) {
@@ -539,7 +539,7 @@ func TestDeriveNextOptions_DeriveNextPreview(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			nextVersion, err := test.opts.DeriveNextPreview(test.previewVersion, test.stableVersion)
+			nextVersion, err := DeriveNextPreview(test.previewVersion, test.stableVersion, &test.opts)
 			if err != nil {
 				t.Fatalf("DeriveNextOptions.DeriveNextPreview() returned an error: %v", err)
 			}
@@ -577,7 +577,7 @@ func TestDeriveNextOptions_DeriveNextPreview_Errors(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			_, err := DeriveNextOptions{}.DeriveNextPreview(test.previewVersion, test.stableVersion)
+			_, err := DeriveNextPreview(test.previewVersion, test.stableVersion, nil)
 			if err == nil {
 				t.Errorf("DeriveNextOptions.DeriveNextPreview(%q, %q) did not return an error as expected.", test.previewVersion, test.stableVersion)
 			} else if !errors.Is(err, test.wantErr) {
