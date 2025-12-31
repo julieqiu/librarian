@@ -19,6 +19,15 @@ coverage:
         threshold: 0% # Allow 0% drop from the target; any drop below target will fail
         if_ci_failed: error # Set the CI status to 'error' if coverage conditions are not met
     patch: off
+    surfer: # Set a target coverage percentage for surfer.
+      target: 80%
+      threshold: 0%
+      flags:
+        - surfer
+flags:
+  surfer:
+    paths:
+      - internal/surfer/
 ignore:
   # test packages do not need code coverage
   - internal/sidekick/internal/api/apitest
