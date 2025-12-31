@@ -61,10 +61,11 @@ func updateManifest(config *config.Release, lastTag, manifest string) ([]string,
 	if !info.Package.Publish {
 		return nil, nil
 	}
-	newVersion, err := semver.DeriveNextOptions{
+	opts := semver.DeriveNextOptions{
 		BumpVersionCore:       true,
 		DowngradePreGAChanges: true,
-	}.DeriveNext(semver.Minor, info.Package.Version)
+	}
+	newVersion, err := semver.DeriveNext(semver.Minor, info.Package.Version, opts)
 	if err != nil {
 		return nil, err
 	}
