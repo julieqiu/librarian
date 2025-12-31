@@ -100,7 +100,6 @@ func TestCreateLibrary(t *testing.T) {
 			}
 			if found == nil {
 				t.Fatal("library not found in config")
-				return
 			}
 
 			if found.Output != test.wantOutput {
@@ -353,7 +352,6 @@ func TestAddLibraryToLibrarianYaml(t *testing.T) {
 			}
 			if found == nil {
 				t.Fatalf("library %q not found in config", test.libraryName)
-				return
 			}
 
 			if found.Output != test.output {
