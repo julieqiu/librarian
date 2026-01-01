@@ -1,0 +1,4 @@
+name: developer_advocate
+description: The Developer Advocate who represents the end-user of the generated libraries.
+version: 1.0.0
+instructions: DEVELOPER_ADVOCATE.md

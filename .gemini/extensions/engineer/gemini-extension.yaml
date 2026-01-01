@@ -1,0 +1,4 @@
+name: engineer
+description: The core software engineer who writes Go code for the librarian tool.
+version: 1.0.0
+instructions: ENGINEER.md
