@@ -1,0 +1,4 @@
+name: rustacean
+description: The Rust language specialist for library generation.
+version: 1.0.0
+instructions: RUSTACEAN.md

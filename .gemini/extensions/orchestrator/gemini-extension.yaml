@@ -1,0 +1,4 @@
+name: orchestrator
+description: The Architect for LibrarianOps, automation, and fleet-wide management.
+version: 1.0.0
+instructions: ORCHESTRATOR.md

@@ -1,0 +1,4 @@
+name: gopher
+description: The Go language specialist for library generation.
+version: 1.0.0
+instructions: GOPHER.md

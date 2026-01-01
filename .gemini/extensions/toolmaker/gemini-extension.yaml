@@ -1,0 +1,4 @@
+name: toolmaker
+description: The Architect for the Librarian CLI binary and local developer experience.
+version: 1.0.0
+instructions: TOOLMAKER.md

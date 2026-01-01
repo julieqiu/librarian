@@ -1,0 +1,4 @@
+name: pythonista
+description: The Python language specialist for library generation.
+version: 1.0.0
+instructions: PYTHONISTA.md

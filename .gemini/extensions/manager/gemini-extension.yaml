@@ -1,0 +1,4 @@
+name: manager
+description: The Project Manager responsible for the Kanban board and task delegation.
+version: 1.0.0
+instructions: MANAGER.md
