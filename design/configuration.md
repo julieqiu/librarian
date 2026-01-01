@@ -211,9 +211,9 @@ libraries:
 **Go-Specific Configuration (`go` block):**
 
 -	**`module_path_version`**: The Go module version suffix (e.g., `/v2`).
--	**`go_apis`**: Overrides for specific API paths within the module (e.g., `proto_package` renaming).
+-   **`go_apis`**: Overrides for specific API paths within the module (e.g., `proto_package` renaming).
 
-### 4. CLI Dependencies (`tool.yaml`\)
+### 4. CLI Dependencies (`tool.yaml`)
 
 The Librarian CLI repository contains a `tool.yaml` file that defines the specifications for the dependencies required by the CLI itself.
 
@@ -359,18 +359,17 @@ We considered keeping the existing split between `GAPIC YAML`, `BUILD.bazel`, an
 
 We considered creating a single massive configuration file for the entire fleet. We rejected this because it would create a bottleneck for language maintainers and obscure the ownership boundaries between platform-wide API definitions and repository-specific build rules.
 
-Plan
-----
+Migration Plan
+--------------
 
-While the long-term goal is a single source of truth, Librarian must operate in an environment where that does not yet fully exist. Our generators were designed to consume configuration from multiple independent sources, and many required fields have not yet been migrated to the upstream service configuration.
+While the long-term goal is a single upstream source of truth, Librarian must operate in a transitional environment. To bridge this gap without hard-coding logic, we will use an enhanced `sdk.yaml` as the central, declarative configuration hub.
 
-To move forward without requiring a massive upstream migration as a prerequisite, a transitional bridge will be implemented in the `googleapis/librarian` repository for data that will eventually live in the `serviceconfig` and `sdk.yaml` in `googleapis/googleapis`.
+-   `sdk.yaml` will live in `googleapis/librarian`, and contain temporary fields. The long-term goal is to migrate this file to `googleapis/googleapis`.
+-   These temporary fields will aggregate language-neutral configuration (e.g., retry policies, deadlines) that have not yet been migrated to their final destination in the upstream `serviceconfig.yaml` files.
+-   **Synthesized Configuration:** Librarian will be the sole orchestrator of configuration. It will read the local `sdk.yaml`, the repository's `librarian.yaml`, and the upstream `serviceconfig.yaml` files. From these sources, it will synthesize the final configuration artifacts (such as legacy `GAPIC YAML` files) required by the language-specific generators.
+-   **Generator Decoupling:** The generators will be modified to no longer read from any legacy upstream configuration files. Their only input will be the configuration artifacts constructed and passed to them by Librarian, ensuring a single, consistent source of truth for the generation process.
 
-### The Internal Bridge
 
--	**Internal Representation**: We use an internal model (`internal/serviceconfig/overrides.go`) to aggregate language-neutral configuration that does not yet have a home in `googleapis/googleapis`.
--	**Legacy Reconstruction**: At generation time, Librarian can reconstruct legacy configuration artifacts (such as `GAPIC YAML`) from this internal model. This allows generator behavior to remain stable while we incrementally consolidate the underlying configuration.
--	**Reconciliation**: Librarian serves as the integration layer, reconciling existing inputs with the emerging unified model until the migration to`serviceconfig` is complete.
 
 ### Consolidation Mapping
 

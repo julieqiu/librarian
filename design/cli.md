@@ -11,22 +11,36 @@ Usage:
 librarian <command> [arguments]
 ```
 
+## Library Naming Conventions
+
+Librarian derives library names based on language-specific conventions when not explicitly provided. This ensures consistency within each language ecosystem.
+
+*   **Rust:** Library names follow the `google-cloud-<service>-<version>` pattern. For example, from a library name like `google-cloud-secretmanager-v1`, the API path can be inferred as `google/cloud/secretmanager/v1`.
+*   **Go:** [Details on Go naming conventions to be added here]
+*   **Python:** [Details on Python naming conventions to be added here]
+
 The commands are:
 
 -	**[add](#add)**: add a new client library to `librarian.yaml`
 -	**[generate](#generate)**: generate client library code
 -	**[update](#update)**: update sources to the latest version
--	**[tidy](#tidy)**: format and validate librarian.yaml
 -	**[release](#release)**: prepare libraries for release
 -	**[publish](#publish)**: publish client libraries
+-	**[tidy](#tidy)**: format and validate librarian.yaml
+-	**[status](#status)**: check the health and readiness of libraries
 -	**[version](#version)**: print the librarian version
 
-Add
----
+## Add
 
-`librarian add <library> [apis...]`
+`librarian add <library> [api_path...]`
 
 Add onboards a new client library by adding it to `librarian.yaml`.
+
+If one or more `api_path` arguments are provided, they will be used directly.
+
+If no `api_path` is provided, Librarian will attempt to infer the API path based on the library name and the repository's configured language naming conventions. It will consult `sdk.yaml` for available standard APIs. If a unique API path can be unambiguously inferred, it will be used. If no unique API path can be inferred, the command will fail.
+
+In adherence with Unix philosophy, this command produces no output on success and exits with a status code of 0. On failure (e.g., an ambiguous API path), it will print a concise error message to standard error and exit with a non-zero status code.
 
 ### Options
 
@@ -39,12 +53,11 @@ Add onboards a new client library by adding it to `librarian.yaml`.
 
 ```
 # The CLI interface for adding a library should be:
-librarian add <library> [apis...]
+librarian add <library> <api_path> [api_path...]
 # For languages other than Rust (for example, Go and Python), multiple channels may be supported. In those cases, users can specify multiple API paths.
 
 # For example, any of these commands would work:
 
-librarian add google-cloud-secret-manager
 librarian add google-cloud-secret-manager google/cloud/secretmanager/v1
 librarian add google-cloud-secret-manager google/cloud/secretmanager/v1  --output packages/google-cloud-secret-manager
 librarian add google-cloud-secret-manager \
@@ -102,26 +115,14 @@ $ librarian update googleapis
 $ librarian update --all
 ```
 
-Tidy
-----
-
-`librarian tidy`
-
-Tidy formats and validates the `librarian.yaml` configuration file. It simplifies entries by removing fields that can be derived from defaults.
-
-### Examples
-
-```
-# Format and validate librarian.yaml
-$ librarian tidy
-```
-
 Release
 -------
 
 `librarian release <library> | --all [flags]`
 
 Release updates versions and prepares release artifacts. It calculates the next semantic version based on changes, updates manifest files, and generates changelog entries. Either the library argument or the --all flag is required.
+
+When using `--all`, the command will attempt to process all eligible libraries. If a release for a specific library fails, the command will report the error, but it will not halt the entire batch operation. It will continue attempting to release the remaining libraries. A summary of all successes and failures will be provided upon completion.
 
 ### Options
 
@@ -170,6 +171,53 @@ $ librarian publish --all
 $ librarian publish google-cloud-secretmanager --dry-run
 ```
 
+Tidy
+----
+
+`librarian tidy`
+
+Tidy formats and validates the `librarian.yaml` configuration file. It simplifies entries by removing fields that can be derived from defaults.
+
+### Examples
+
+```
+# Format and validate librarian.yaml
+$ librarian tidy
+```
+
+Status
+------
+
+`librarian status [library]`
+
+Status performs a health check on the managed libraries in the repository. It provides a high-level overview of the state of each library, helping developers understand which libraries need attention.
+
+If a library name is provided, it will check the status of only that library. Otherwise, it will check all libraries in `librarian.yaml`.
+
+The command checks for:
+- **New Libraries Available:** Whether there are new standard APIs in `sdk.yaml` that are not yet configured in `librarian.yaml`.
+- **Configuration:** Whether a configured library has not been generated yet.
+- **Local Changes:** Whether there are local modifications in a library's directory that would be overwritten by a `generate` command.
+- **Release Readiness:** Whether a library has changed since its last release and is ready to be released.
+
+### Examples
+
+```
+# Check the status of all libraries
+$ librarian status
+
+# Example output:
+# New libraries available to be added: google-cloud-new-service-v1
+# LIBRARY                         STATUS
+# google-cloud-secretmanager      Ready to release
+# google-cloud-pubsub             Modified (will be overwritten by generate)
+# google-cloud-storage            Not generated
+
+# Check the status of a single library
+$ librarian status google-cloud-secretmanager
+```
+
+
 Version
 -------
 
@@ -193,10 +241,12 @@ Delete
 `librarian delete <library>`
 
 Delete removes a client library from `librarian.yaml` and deletes its generated
+code from the repository.
 
-code from the repository. This command is typically used when an API is
-
-deprecated or a library is no longer maintained.
+This command is designed to be safe and will **only** delete files that would
+be managed by the generation process. It respects the library's `keep` rules
+and other configuration that preserve handwritten code. This command is
+typically used when an API is deprecated or a library is no longer maintained.
 
 ### Examples
 
