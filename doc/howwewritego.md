@@ -98,14 +98,16 @@ handling:
 To keep the main logic flow linear and reduce indentation, return early or
 continue early instead of using `else` blocks.
 
+**Good**:
 ```go
-// Good
 if err != nil {
     return err
 }
 // process success case
+```
 
-// Bad
+**Bad**:
+```go
 if err == nil {
     // process success case
 } else {
@@ -116,16 +118,18 @@ if err == nil {
 Similarly, in a loop, use `continue` to skip to the next iteration instead of
 wrapping the main logic in an `else` block.
 
+**Good**:
 ```go
-// Good
 for _, item := range items {
     if item.skip {
         continue
     }
     // process item
 }
+```
 
-// Bad
+**Bad**:
+```go
 for _, item := range items {
     if !item.skip {
         // process item
@@ -139,6 +143,28 @@ When writing tests, we follow the patterns below to ensure consistency,
 readability, and ease of debugging. See
 [Go Test Comments](https://go.dev/wiki/TestComments) for conventions around
 writing test code.
+
+### Use t.Fatal(err) for simple test handling
+
+Avoid verbose or redundant failure messages. If an error occurs, pass it directly
+to `t.Fatal` or `t.Error`. The testing package automatically includes the file
+and line number, and well-constructed errors already provide their own context.
+
+**Good**:
+```go
+t.Fatal(err)
+```
+
+**Bad**:
+```go
+t.Fatalf("failed: %v", err)
+```
+
+Only use `t.Fatalf` if you need to provide extra context not present in the
+error, such as:
+```go
+t.Fatalf("failed to process user %d: %v", userID, err)
+```
 
 ### Use `t.Context()`
 
@@ -222,6 +248,7 @@ func TestTransform(t *testing.T) {
 	}
 }
 ```
+
 
 ## Need Help? Just Ask!
 

@@ -91,11 +91,11 @@ func TestUpdateVersion(t *testing.T) {
 			pomPath := filepath.Join(tmpDir, "pom.xml")
 			outPath := filepath.Join(tmpDir, "out", "pom.xml")
 			if err := os.WriteFile(pomPath, []byte(test.initial), 0644); err != nil {
-				t.Fatalf("failed to write initial pom.xml: %v", err)
+				t.Fatal(err)
 			}
 
 			if err := os.MkdirAll(filepath.Dir(outPath), 0755); err != nil {
-				t.Fatalf("failed to create output directory: %v", err)
+				t.Fatal(err)
 			}
 			err := updateVersion(pomPath, outPath, test.libraryID, test.version)
 

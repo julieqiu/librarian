@@ -51,7 +51,7 @@ func TestGoGenerateLibrarianDoc(t *testing.T) {
 				cmd = exec.Command("git", "diff", "--", test.docFile)
 				out, err := cmd.CombinedOutput()
 				if err != nil {
-					t.Fatalf("git diff failed: %v", err)
+					t.Fatal(err)
 				}
 				t.Logf("diff:\n%s", out)
 			}
