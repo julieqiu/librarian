@@ -8,8 +8,8 @@ Librarian implements a "Single Source of Truth" model that centralizes configura
 
 ### Key Files
 *   **[librarian.yaml](./librarian.yaml)**: The manifest for language-specific configuration.
-*   **[catalog.yaml](./catalog.yaml)**: The master list of all available APIs.
-*   **[tools.yaml](./tools.yaml)**: Declarative manifest of the build environment.
+*   **[sdk.yaml](./sdk.yaml)**: The master list of all APIs for which we create SDKs.
+*   **[tool.yaml](./tool.yaml)**: Declarative manifest of the CLI dependencies.
 *   **[serviceconfig.yaml](./serviceconfig.yaml)**: The authoritative language-neutral configuration.
 
 ## Documentation Index

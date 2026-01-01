@@ -68,5 +68,5 @@ Once the PR is merged, the library is successfully deleted and no longer managed
 ## Automation Integration (LibrarianOps)
 
 In the future `librarianops` world, deletion might be triggered by:
-*   An API being moved to a `deprecated` or `removed` status in `catalog.yaml`.
+*   An API being moved to a `deprecated` or `removed` status in `sdk.yaml`.
 *   A manual trigger by the Librarian team to initiate a deletion PR across relevant language repositories.

@@ -12,7 +12,7 @@ Generate, Update, Release, Publish).
 *   **Purpose:** Adds a new library to the `librarian.yaml` configuration and performs the initial code generation.
 *   **Arguments:**
     *   `<name>`: The name of the library to create (e.g., `google-cloud-secretmanager`).
-    *   `[apis...]`: One or more API paths (e.g., `google/cloud/secretmanager/v1`) that define the channels for this library. These are looked up in `catalog.yaml`.
+    *   `[apis...]`: One or more API paths (e.g., `google/cloud/secretmanager/v1`) that define the channels for this library. These are looked up in `sdk.yaml`.
 
 ### `librarian generate`
 **Usage:** `librarian generate [<name> | --all] [flags]`

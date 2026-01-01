@@ -1,5 +1,5 @@
-# Central Catalog of APIs (catalog.yaml)
-# The central registry of all APIs available for client generation.
+# SDK Configuration (sdk.yaml)
+# Defines the APIs we want to create SDKs for.
 #
 # Defines:
 # - Canonical API identities

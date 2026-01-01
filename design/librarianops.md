@@ -43,11 +43,11 @@ These operations are implemented in the Core Logic and exposed via both the Serv
     1.  For each repo: Create bot branch -> Run `librarian generate` -> Open PR.
 
 ### 3. `Onboard APIs`
-*   **Goal:** Automatically onboard new APIs defined in `catalog.yaml`.
+*   **Goal:** Automatically onboard new APIs defined in `sdk.yaml`.
 *   **Trigger (Service):**
-    *   **Event:** `push` webhook to `googleapis/librarian` (modifying `catalog.yaml`).
+    *   **Event:** `push` webhook to `googleapis/librarian` (modifying `sdk.yaml`).
 *   **Workflow:**
-    1.  Diff `catalog.yaml` vs Repo `librarian.yaml`.
+    1.  Diff `sdk.yaml` vs Repo `librarian.yaml`.
     2.  For new APIs: Create bot branch -> Run `librarian create` -> Open PR.
 
 ### 4. `Release`
@@ -59,12 +59,11 @@ These operations are implemented in the Core Logic and exposed via both the Serv
     1.  For each repo: Create release branch -> Run `librarian release` -> Open PR.
 
 ### 5. `Sync Catalog`
-*   **Goal:** Keep `catalog.yaml` in sync with `googleapis`.
+*   **Goal:** Keep `sdk.yaml` in sync with `googleapis`.
 *   **Trigger (Service):**
-    *   **Schedule:** Daily.
     *   **Event:** `push` webhook from `googleapis/googleapis`.
 *   **Workflow:**
-    1.  Scan `googleapis` -> Propose updates to `catalog.yaml` -> Open PR.
+    1.  Scan `googleapis` -> Propose updates to `sdk.yaml` -> Open PR.
 
 ## Operational Model
 

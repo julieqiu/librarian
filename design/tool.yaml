@@ -1,7 +1,5 @@
-# Reference tools.yaml Configuration
-# This file serves as the specification for the tools.yaml schema.
-# It defines the build environment, including language runtimes and specific tools
-# required for the Librarian workspace.
+# Reference tool.yaml Configuration
+# Defines the specifications for the dependencies for the Librarian CLI.
 
 # The schema version of this configuration file.
 version: v1

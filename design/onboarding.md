@@ -2,7 +2,7 @@
 
 This document describes the process for onboarding a new client library
 into a `librarian`-managed repository.
-The flow leverages the centralized `catalog.yaml` and `librarianops` automation
+The flow leverages the centralized `sdk.yaml` and `librarianops` automation
 to ensure consistency and streamline configuration.
 
 ## Goal
@@ -29,19 +29,19 @@ and available in the `googleapis/googleapis` repository.
 Someone on the Librarian Platform Team (or a scheduled `librarianops` automation) runs `librarianops sync-catalog`.
 
 *   **Action:** This command scans `googleapis/googleapis`,
-identifies new APIs, and proposes updates to `librarian/catalog.yaml` in
+identifies new APIs, and proposes updates to `librarian/sdk.yaml` in
 the `librarian` repository.
 A Pull Request is created for review.
 *   **Role:** The platform team reviews and merges this PR to update the central catalog.
 
 ### 3. `librarianops onboard-apis` Runs
 
-After `catalog.yaml` is updated (e.g., its PR is merged),
+After `sdk.yaml` is updated (e.g., its PR is merged),
 the `librarianops onboard-apis` command runs (typically scheduled or event-triggered).
 
 *   **Action:**
-    1.  `librarianops` compares the updated `catalog.yaml` with the `libraries` list in each language repository's `librarian.yaml`.
-    2.  For each new API in `catalog.yaml` not yet onboarded in a language repository:
+    1.  `librarianops` compares the updated `sdk.yaml` with the `libraries` list in each language repository's `librarian.yaml`.
+    2.  For each new API in `sdk.yaml` not yet onboarded in a language repository:
         *   A bot branch is created (e.g., `feat/onboard-<library-name>`) in the target language repo.
         *   `librarian create <library-name> [api-paths...]` is executed to add the library to `librarian.yaml` and (if applicable) generate its initial code.
         *   A Pull Request is opened in the language repository, proposing the onboarding of the new client library.

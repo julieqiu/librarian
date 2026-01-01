@@ -29,7 +29,7 @@ This document outlines the phased roadmap for building and deploying the new `li
 **Goal:** Implement the centralized API definition system to support multi-language scaling.
 *   **Dependency:** Required before onboarding Python/Go/.NET to avoid configuration duplication.
 *   **Tasks:**
-    *   Create `catalog.yaml` in the `librarian` repo.
+    *   Create `sdk.yaml` in the `librarian` repo.
     *   Populate it with Standard and Legacy APIs.
     *   Update `librarian` CLI to resolve generation targets via the Catalog.
 
@@ -47,6 +47,6 @@ This document outlines the phased roadmap for building and deploying the new `li
 *   **Dependency:** Requires a stable CLI (Phase 2 & 5).
 *   **Design:**
     *   Define automation scope (PR creation, updates, release tagging).
-    *   Design `catalog.yaml` update triggers.
+    *   Design `sdk.yaml` update triggers.
     *   Specify Bot Branch handling.
 *   **Implementation:** Build the `librarianops` bot.

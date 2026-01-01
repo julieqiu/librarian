@@ -1,133 +1,104 @@
 # Librarian Configuration Design
 
-**Author:** Librarian Team  
-**Status:** Draft
-
 ## Objective
 
-To implement a unified configuration architecture that coordinates the generation and release of Google Cloud client libraries by establishing authoritative sources of truth.
+Define the configurations used by the Librarian CLI.
 
 ## Background
 
-Generating a client library today requires coordinating state across multiple disparate files. Settings for supported transports live in `GAPIC YAML`, file inclusion rules in `BUILD.bazel`, and versioning information in various release scripts.
+Today, configuring a Google Cloud client library requires stitching together state from multiple disparate files. You might find transport settings in `GAPIC YAML`, file inclusion rules in `BUILD.bazel`, and versioning logic hidden in release scripts.
 
-This fragmentation couples language-neutral concerns (like a service's retry policy) with language-specific concerns (like a Rust crate name). When a service-level setting changes, that change currently must be manually propagated to every language-specific configuration file.
+This fragmentation creates friction. It couples language-neutral concerns, like a service's retry policy, with language-specific decisions, like a Rust crate name. If a service owner updates a deadline, that change currently requires manual updates across every language repository.
 
-We need a system that decouples these concerns and provides a clear, predictable flow of information from upstream API definitions to downstream client libraries.
+We want to make this simpler. We are introducing a unified configuration architecture that decouples these concerns and establishes a clear, predictable flow of information from upstream API definitions to downstream client libraries.
 
 ## Overview
 
-The configuration for Librarian is structured into three distinct domains of ownership, each with a single authoritative manifest:
+Our design structures configuration into four distinct domains of ownership. Each domain has a single authoritative manifest:
 
-1.  **Repository Manifest (`librarian.yaml`)**: Defines *how* a language repository builds its libraries.
-2.  **Registry (`catalog.yaml`)**: Defines *what* APIs are available to be built.
-3.  **API Definition (`serviceconfig.yaml`)**: Defines *how* an upstream API behaves.
+1.  **API Definition (`serviceconfig`)**: Service-neutral information owned by the service teams.
+2.  **SDK Manifest (`sdk.yaml`)**: Defines the APIs we want to create SDKs for.
+3.  **Repository Manifest (`librarian.yaml`)**: Information specific to a language or workspace.
+4.  **CLI Dependencies (`tool.yaml`)**: Defines the specifications for the dependencies for the Librarian CLI.
 
-Librarian acts as the integration engine, reading these inputs to produce consistent client libraries.
+Librarian acts as the integration engine, reconciling these inputs to produce consistent, high-quality client libraries.
 
 ## Detailed Design
 
-### 1. The Repository Manifest (`librarian.yaml`)
+### 1. The API Definition (`serviceconfig`)
 
-Each language repository maintains a `librarian.yaml` file in its root directory. This file is the authoritative source for that repository's participation in the ecosystem. It defines the repository's identity, required tooling versions, the list of managed libraries, and any language-specific overrides.
+The service configuration defines the surface and behavior of a Google API. This is service-neutral information owned and maintained by the service teams within the `googleapis/googleapis` repository. It is the canonical description of what the API looks like to the tools that generate clients, documentation, and support infrastructure.
 
-### 2. The Registry (`catalog.yaml`)
-
-Librarian maintains a central `catalog.yaml` file to resolve the identity and location of target APIs. The catalog lists every API available for generation, defining its canonical identity and mapping it to its source definition in the `googleapis` repository. This decouples the *existence* of an API from its *consumption* by a specific language.
-
-### 3. The API Definition (`serviceconfig.yaml`)
-
-The service configuration file defines the surface and behavior of a Google API. It is the canonical description of what the API looks like to the tools that generate clients, documentation, and support infrastructure. The configuration is expressed using the `google.api.Service` schema. Librarian reads this file but does not modify it.
+Librarian reads this file but does not modify it.
 
 #### Structure
-A typical service configuration begins by identifying the service:
+A typical service configuration follows the `google.api.Service` schema and begins by identifying the service:
+
 ```yaml
 type: google.api.Service
 config_version: 3
 name: example.googleapis.com
 title: Example API
 ```
-*   `type`: Identifies the file as a service configuration.
-*   `config_version`: Specifies the schema version.
-*   `name`: The globally unique service name.
-*   `title`: A human-readable label.
 
-#### APIs
-```yaml
-apis:
-- name: google.cloud.example.v1.ExampleService
-```
-The `apis` section enumerates the public interfaces provided by the service. The name must match the fully qualified protobuf service name. These definitions determine which RPCs are exposed and form the basis for all generated clients.
+It includes sections for:
+*   **`apis`**: Enumerates the public interfaces provided by the service.
+*   **`backend`**: Defines execution properties such as request deadlines and retry policies.
+*   **`http`**: Maps RPCs to REST endpoints.
+*   **`authentication`**: Specifies required OAuth scopes.
+*   **`publishing`**: Metadata connecting the API to documentation and issue tracking.
 
-#### Documentation
-```yaml
-documentation:
-  summary: An example API for demonstration.
-```
-Documentation fields provide human-readable descriptions used in generated reference material. These fields are used by documentation generators but do not affect runtime behavior.
+We are migrating language-neutral settings like **Release Level** (Stable/Beta) and **Transport** into this file to further consolidate sources of truth.
 
-#### Backend
-```yaml
-backend:
-  rules:
-  - selector: google.cloud.example.v1.ExampleService.*
-    deadline: 60.0
-```
-Backend rules define execution properties such as request deadlines. Rules are applied by the selector and may target individual methods or entire services.
+### 2. The SDK Manifest (`sdk.yaml`)
 
-#### HTTP
-```yaml
-http:
-  rules:
-  - selector: google.iam.v1.IAMPolicy.GetIamPolicy
-    get: /v1/{resource=projects/*/resources/*}
-```
-HTTP rules map RPCs to REST endpoints. They define HTTP methods, paths, and request bodies for REST-based access.
+The `sdk.yaml` file (formerly `catalog.yaml`) defines the set of APIs for which we want to create SDKs. It serves as the central registry that Librarian uses to validate, resolve, and enumerate supported APIs across the ecosystem.
 
-#### Authentication
-```yaml
-authentication:
-  rules:
-  - selector: google.cloud.example.v1.ExampleService.*
-    oauth:
-      canonical_scopes: https://www.googleapis.com/auth/cloud-platform
-```
-Authentication rules specify required OAuth scopes. They apply at the method or service level and are enforced by infrastructure.
+This manifest defines:
+*   **Canonical API identities**: Unique identifiers for each API.
+*   **API maturity**: The status of an API (e.g., GA, Beta, Alpha).
+*   **Mapping between APIs and their source locations**: Links APIs to their definitions in the `googleapis` repository.
 
-#### Publishing
-```yaml
-publishing:
-  documentation_uri: https://cloud.google.com/example/docs
-  github_label: api: example
-  organization: CLOUD
-  library_settings:
-  - version: google.cloud.example.v1
-    java_settings:
-      library_package: com.google.cloud.example.v1
-```
-Publishing metadata connects the API to documentation, issue tracking, and client generation. Language-specific settings allow per-language customization without altering the API definition.
+By centralizing this list, we decouple the *existence* of an API in `googleapis` from its *consumption* by the Librarian system.
 
-#### Migration Targets
-The following configuration items are planned to be moved into the service configuration:
-*   **Release Level**: Defining whether an API is Stable, Beta, or Alpha.
-*   **Transport**: Specifying supported transport protocols (gRPC, REST).
+### 3. The Repository Manifest (`librarian.yaml`)
 
-### 4. Unifying Configurations (Incremental Consolidation)
+Each language repository maintains a `librarian.yaml` file in its root directory. This manifest contains information specific to a particular language or workspace. It serves as the authoritative source for how that repository participates in the ecosystem.
 
-While the long-term goal is to have a single source of truth, Librarian must operate in an environment where that does not yet exist. Librarian invokes language-specific generators that were designed to consume configuration from multiple independent sources rather than a single unified model.
+This manifest defines:
+*   **Identity**: The repository name (e.g., `google-cloud-go`).
+*   **Tooling**: The specific versions of tools, like `protoc`, required for the build.
+*   **Inventory**: The list of libraries to be generated for this specific repository.
+*   **Overrides**: Language-specific deviations from defaults, such as renaming a package to avoid a keyword collision.
 
-In addition, the service configuration does not yet contain all of the information required by existing generators. Specifically, required inputs remain defined in generator-specific files such as `*_grpc_service_config.json`, `*_gapic.yaml`, and `BUILD.bazel`.
+### 4. CLI Dependencies (`tool.yaml`)
 
-To avoid blocking progress on a complete migration to the service configuration file, Librarian implements an internal aggregation layer:
+The Librarian CLI repository contains a `tool.yaml` file that defines the specifications for the dependencies required by the CLI itself.
 
-*   **Internal Representation**: Librarian defines an internal model (`internal/serviceconfig/overrides.go`) that aggregates language-neutral configuration that does not yet have a home in `googleapis/googleapis`.
-*   **Legacy Compatibility**: Librarian may reconstruct legacy configuration artifacts (e.g., GAPIC YAML) from this aggregated model at generation time. This allows generator behavior to remain stable while configuration is incrementally consolidated.
-*   **Reconciliation**: Until the migration to the service configuration is complete, Librarian serves as the integration layer that reconciles existing inputs with the emerging unified model.
+This manifest ensures that the environment used to run Librarian is consistent and reproducible by declaring:
+*   **Required Runtimes**: Language versions (e.g., Python 3.14, Go 1.25) needed for generators.
+*   **Tooling Specs**: Precise versions and installation sources for external dependencies like `gcp-synthtool` or `cargo-semver-checks`.
+
+### 5. Unifying Configurations (Incremental Consolidation)
+
+Our long-term goal is a single source of truth, but we must also support the present. Librarian invokes language-specific generators that were designed before this unified model existed. These generators expect configuration in specific legacy formats (like `*_gapic.yaml` or `BUILD.bazel`) and require inputs that don't yet exist in the upstream `serviceconfig`.
+
+To bridge this gap, Librarian implements an internal aggregation layer:
+
+*   **Internal Representation**: We define an internal model (`internal/serviceconfig/overrides.go`) to aggregate configuration that doesn't yet have a home in `googleapis/googleapis`.
+*   **Legacy Compatibility**: At generation time, Librarian reconstructs the necessary legacy artifacts from this model. This keeps existing generators working stably while we migrate fields to the new system.
+*   **Reconciliation**: Until the migration is complete, Librarian serves as the integration layer, reconciling existing inputs with the emerging unified model.
 
 ## Alternatives Considered
 
 ### Status Quo (Distributed Config)
-We considered maintaining the existing split between `GAPIC YAML`, `BUILD.bazel`, and `sidekick.toml`. However, this was rejected because it perpetuates the maintenance burden and data inconsistency problems described in the Background.
+We considered keeping the existing split between `GAPIC YAML`, `BUILD.bazel`, and legacy scripts. We rejected this because it perpetuates the maintenance burden and inconsistency issues we are trying to solve.
+
+### Merging `tool.yaml` with `librarian.yaml`
+We considered defining CLI dependencies directly within the repository manifest. However, we decided to separate them because tooling requirements are dependencies of the Librarian CLI itself. They should be versioned and managed alongside the CLI release, rather than being coupled to the configuration of a specific language repository.
+
+### Using Service Configuration for Onboarding
+We considered using the presence of a service configuration in `googleapis/googleapis` as the primary trigger for onboarding new SDKs. However, we decided to use a centralized `sdk.yaml` to ensure a deliberate approval process for new libraries. This model allows the Librarian platform team to validate API maturity and quality before resources are committed to generation and release. Additionally, `sdk.yaml` provides a necessary layer for platform-level overrides—such as mapping to non-standard service configuration paths—that are difficult to manage strictly from upstream sources.
 
 ### Monolithic Configuration
-We considered a single massive configuration file for the entire fleet. This was rejected because it would create a bottleneck for language maintainers and obscure the ownership boundaries between platform-wide API definitions and repository-specific build rules.
+We considered creating a single massive configuration file for the entire fleet. We rejected this because it would create a bottleneck for language maintainers and obscure the ownership boundaries between platform-wide API definitions and repository-specific build rules.

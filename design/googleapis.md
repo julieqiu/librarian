@@ -15,7 +15,7 @@ API configuration files for almost all Google Cloud services.
 *   **Service Configuration:** Many APIs include `service_config.yaml` files.
 The `publishing:` section within these files is **deprecated** and its responsibilities
 for release metadata,
-issue tracking, and documentation links are now handled by `librarian.yaml` and `catalog.yaml`.
+issue tracking, and documentation links are now handled by `librarian.yaml` and `sdk.yaml`.
 *   **Organization:** APIs are typically organized by `google/<cloud_product>/<version>/`.
 For example, `google/cloud/secretmanager/v1/secretmanager.proto` and `google/cloud/secretmanager/v1/secretmanager_v1.yaml`.
 
@@ -27,7 +27,7 @@ and reproducible builds.
 
 ## The Central Catalog
 
-The Central Catalog (`catalog.yaml`) acts as the **central manifest of all
+The Central Catalog (`sdk.yaml`) acts as the **central manifest of all
 APIs available for client library generation** across the Google Cloud ecosystem.
 It lives within the `googleapis/librarian` repository and is maintained
 by the Librarian team.
@@ -42,9 +42,9 @@ within the `googleapis/googleapis` repository.
 should generally be onboarded by all languages) and "Legacy" APIs (which
 exist for historical reasons but might only be supported by a subset of languages).
 
-### Structure (Refer to `design/catalog.yaml`)
+### Structure (Refer to `design/sdk.yaml`)
 
-The `catalog.yaml` does **not** define library names,
+The `sdk.yaml` does **not** define library names,
 as these vary by language (e.g., `google-cloud-secret-manager` in Python
 vs `google-cloud-secretmanager` in Rust).
 Instead, it lists raw API definitions, categorized into `standard` and `legacy` sections.
@@ -59,8 +59,8 @@ The `publishing:` section is deprecated.
 
 ### Role in Librarian Workflow
 Language repositories define their own mapping in their local `librarian.yaml`.
-The `librarian` tool uses the `catalog.yaml` to resolve the `api_path` and
+The `librarian` tool uses the `sdk.yaml` to resolve the `api_path` and
 `service_config_path` for a given library.
-If a library in `librarian.yaml` cannot be matched to an entry in `catalog.yaml`
+If a library in `librarian.yaml` cannot be matched to an entry in `sdk.yaml`
 (either `standard` or `legacy`),
 generation may fail or require explicit overrides.
