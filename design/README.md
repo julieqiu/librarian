@@ -10,38 +10,45 @@ Librarian implements a "Single Source of Truth" model that centralizes configura
 
 ### Key Files
 
--	**[librarian.yaml](./librarian.yaml)**: The manifest for language-specific configuration.
--	**[sdk.yaml](./sdk.yaml)**: The master list of all APIs for which we create SDKs.
--	**[tool.yaml](./tool.yaml)**: Declarative manifest of the CLI dependencies.
--	**[serviceconfig.yaml](./serviceconfig.yaml)**: The authoritative language-neutral configuration.
 
-Documentation Index
--------------------
+Directory Contents
+------------------
 
-### Contributor Guides (How-To)
+Below is a complete list of all design documents in this directory.
 
--	**[Contributor Guide](./contributor.md)**: General overview.
--	**[Python Guide](./contributor/python.md)**: For `google-cloud-python`.
--	**[Rust Guide](./contributor/rust.md)**: For `google-cloud-rust`.
+### Design
+-   [cli.md](./cli.md): CLI command specification.
+-   [configuration.md](./configuration.md): Overview of the configuration files.
+    -   [librarian.yaml](./librarian.yaml): The manifest for language-specific configuration.
+    -   [sdk.yaml](./sdk.yaml): The master list of all APIs for which we create SDKs.
+    -   [tool.yaml](./tool.yaml): Declarative manifest of the CLI dependencies.
+    -   [serviceconfig.yaml](./serviceconfig.yaml): The authoritative language-neutral configuration.
 
-### Design Documents (Architecture)
+### Root Directory
+-   [branches.md](./branches.md): Branching strategy.
+-   [contributor.md](./contributor.md): General overview for contributors.
+-   [delete.md](./delete.md): Design for the library deletion process.
+-   [engplan.md](./engplan.md): Engineering execution plan.
+-   [freeze.md](./freeze.md): Design for freezing generated code.
+-   [generate.md](./generate.md): Code generation workflow details.
+-   [googleapis.md](./googleapis.md): Details on the googleapis submodule interaction.
+-   [librarianops.md](./librarianops.md): Operational guide for librarian tooling.
+-   [migrate.md](./migrate.md): Design for migrating existing libraries.
+-   [onboarding.md](./onboarding.md): Workflow for onboarding new client libraries.
+-   [README.md](./README.md): This file.
+-   [release.md](./release.md): Release, publish, and automation workflows.
+-   [test.md](./test.md): The end-to-end testing plan.
+### Contributor Guides (`contributor/`)
+-   [python.md](./contributor/python.md): Contributor guide for `google-cloud-python`.
+-   [rust.md](./contributor/rust.md): Contributor guide for `google-cloud-rust`.
 
--	**[Python Design](./languages/python.md)**: Architecture of the Python generator and release pipeline.
--	**[Rust Design](./languages/rust.md)**: Architecture of the Rust generator and release pipeline.
+### Open Issues (`issues/`)
+-   [multiple-runtimes.md](./issues/multiple-runtimes.md): Issue on supporting multiple Python runtimes.
+-   [release-level-inference.md](./issues/release-level-inference.md): Issue on inferring release levels.
+-   [release-ownership.md](./issues/release-ownership.md): Issue on release ownership.
+-   [staggered-release.md](./issues/staggered-release.md): Issue on staggered releases.
+-   [unified-config.md](./issues/unified-config.md): Issue on unified configuration.
 
-### Workflows & Processes
-
--	**[onboarding.md](./onboarding.md)**: Workflow for onboarding new client libraries.
--	**[generate.md](./generate.md)**: Code generation workflow details.
--	**[release.md](./release.md)**: Release, publish, and automation workflows.
--	**[branches.md](./branches.md)**: Branching strategy.
--	**[cli.md](./cli.md)**: CLI command specification.
--	**[engplan.md](./engplan.md)**: Engineering execution plan.
-
-### Open Issues
-
--	**[Unified Configuration](./issues/unified-config.md)**
--	**[Release Ownership](./issues/release-ownership.md)**
--	**[Staggered Release](./issues/staggered-release.md)**
--	**[Multiple Python Runtimes](./issues/multiple-runtimes.md)**
--	**[Release Level Inference](./issues/release-level-inference.md)**
+### Language-Specific Designs (`languages/`)
+-   [python.md](./languages/python.md): Architecture of the Python generator and release pipeline.
+-   [rust.md](./languages/rust.md): Architecture of the Rust generator and release pipeline.
