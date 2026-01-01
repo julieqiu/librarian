@@ -1,10 +1,13 @@
-# Librarian Configuration Design
+Librarian Configuration Design
+==============================
 
-## Objective
+Objective
+---------
 
 Define the configurations used by the Librarian CLI.
 
-## Background
+Background
+----------
 
 Today, configuring a Google Cloud client library requires stitching together state from multiple disparate files. You might find transport settings in `GAPIC YAML`, file inclusion rules in `BUILD.bazel`, and versioning logic hidden in release scripts.
 
@@ -12,20 +15,22 @@ This fragmentation creates friction. It couples language-neutral concerns, like 
 
 We want to make this simpler. We are introducing a unified configuration architecture that decouples these concerns and establishes a clear, predictable flow of information from upstream API definitions to downstream client libraries.
 
-## Overview
+Overview
+--------
 
 Our design structures configuration into four distinct domains of ownership. Each domain has a single authoritative manifest:
 
-1.	**API Definition (`serviceconfig`)**: Service-neutral information owned by the service teams.
-2.	**SDK Manifest (`sdk.yaml`)**: Defines the APIs we want to create SDKs for.
-3.	**Repository Manifest (`librarian.yaml`)**: Information specific to a language or workspace.
-4.	**CLI Dependencies (`tool.yaml`)**: Defines the specifications for the dependencies for the Librarian CLI.
+1.	**API Definition (`serviceconfig`\)**: Service-neutral information owned by the service teams.
+2.	**SDK Manifest (`sdk.yaml`\)**: Defines the APIs we want to create SDKs for.
+3.	**Repository Manifest (`librarian.yaml`\)**: Information specific to a language or workspace.
+4.	**CLI Dependencies (`tool.yaml`\)**: Defines the specifications for the dependencies for the Librarian CLI.
 
 Librarian acts as the integration engine, reconciling these inputs to produce consistent, high-quality client libraries.
 
-## Detailed Design
+Detailed Design
+---------------
 
-### 1. The API Definition (`serviceconfig`)
+### 1. The API Definition (`serviceconfig`\)
 
 The service configuration defines the surface and behavior of a Google API. This is service-neutral information owned and maintained by the service teams within the `googleapis/googleapis` repository. It is the canonical description of what the API looks like to the tools that generate clients, documentation, and support infrastructure.
 
@@ -74,7 +79,7 @@ publishing:
   transports: [GRPC, REST]
 ```
 
-### 2. The SDK Manifest (`sdk.yaml`)
+### 2. The SDK Manifest (`sdk.yaml`\)
 
 The `sdk.yaml` file (formerly `catalog.yaml`) defines the set of APIs for which we want to create SDKs. It serves as the central registry that Librarian uses to validate, resolve, and enumerate supported APIs across the ecosystem.
 
@@ -95,17 +100,17 @@ legacy:
     languages: [go, python]
 ```
 
-*   **`standard`**: A list of APIs that are supported by default. These are APIs that will be automatically generated if `librarian create --all` is executed.
+-	**`standard`**: A list of APIs that are supported by default. These are APIs that will be automatically generated if `librarian create --all` is executed.
 
-    *   **`api_path`**: The path to the API in `googleapis` (e.g., `google/cloud/secretmanager/v1`).
+	-	**`api_path`**: The path to the API in `googleapis` (e.g., `google/cloud/secretmanager/v1`).
 
-    *   **`service_config_path`**: The path to the service configuration file relative to the API path.
+	-	**`service_config_path`**: The path to the service configuration file relative to the API path.
 
-*   **`legacy`**: A list of APIs that are maintained for backward compatibility, but are no longer intended to be created for new SDKs. These will be skipped by `librarian create --all`.
+-	**`legacy`**: A list of APIs that are maintained for backward compatibility, but are no longer intended to be created for new SDKs. These will be skipped by `librarian create --all`.
 
-    *   **`languages`**: Restricts support for legacy APIs to specific languages.
+	-	**`languages`**: Restricts support for legacy APIs to specific languages.
 
-### 3. The Repository Manifest (`librarian.yaml`)
+### 3. The Repository Manifest (`librarian.yaml`\)
 
 Each language repository maintains a `librarian.yaml` file in its root directory. This manifest contains information specific to a particular language or workspace. It serves as the authoritative source for how that repository participates in the ecosystem.
 
@@ -132,7 +137,7 @@ Each language repository maintains a `librarian.yaml` file in its root directory
 -	**`channels`**: A list of API versions to include (e.g., `google/cloud/secretmanager/v1`).
 -	**`veneer`**: Boolean indicating if this is a wrapper library with handwritten components.
 
-**Rust Example (`google-cloud-rust/librarian.yaml`):**
+**Rust Example (`google-cloud-rust/librarian.yaml`\):**
 
 ```yaml
 language: rust
@@ -164,7 +169,7 @@ libraries:
       package_name_override: google-cloud-secretmanager-v1
 ```
 
-**Python Example (`google-cloud-python/librarian.yaml`):**
+**Python Example (`google-cloud-python/librarian.yaml`\):**
 
 ```yaml
 language: python
@@ -208,7 +213,7 @@ libraries:
 -	**`module_path_version`**: The Go module version suffix (e.g., `/v2`).
 -	**`go_apis`**: Overrides for specific API paths within the module (e.g., `proto_package` renaming).
 
-### 4. CLI Dependencies (`tool.yaml`)
+### 4. CLI Dependencies (`tool.yaml`\)
 
 The Librarian CLI repository contains a `tool.yaml` file that defines the specifications for the dependencies required by the CLI itself.
 
@@ -242,7 +247,101 @@ rust:
 		-	**`version`**: Version pin or commit hash.
 		-	**`sha256`**: Checksum for direct downloads.
 
-## Alternatives Considered
+### 5. Library Types
+
+Different libraries have different implementation strategies. A library might be fully generated from protobuf definitions, or it might combine generated code with handwritten helpers, or it might be entirely handwritten but depend on generated subpackages. Librarian needs to know which kind of library it is working with to make the right decisions about what to generate and what to preserve.
+
+We distinguish five library types. The type is inferred from the presence or absence of specific configuration fields. This keeps the common case simple while allowing explicit control when needed.
+
+The classification logic proceeds in order:
+
+1.	If `veneer` is true and the library has language-specific modules, it is a **veneer with generated layers**.
+2.	If `veneer` is true but the library has no modules, it is a **purely handwritten veneer**.
+3.	If the library has a `keep` field, it is **hybrid**.
+4.	If a service configuration exists for the API path, it is **autogenerated with service config**.
+5.	Otherwise, it is **autogenerated from proto only**.
+
+#### Autogenerated: Proto Only
+
+The library is generated entirely from protobuf definitions. No service configuration exists, so the generator produces only the basic types and serialization code.
+
+The output directory is cleaned before each generation. Every file is replaced. This ensures a clean build and prevents orphaned files from accumulating when the API changes.
+
+```yaml
+libraries:
+  - name: google-cloud-type
+    version: 1.2.0
+```
+
+#### Autogenerated: With Service Config
+
+The library is generated from both protobuf definitions and a service configuration file. The service configuration supplies retry policies, timeouts, authentication scopes, and HTTP bindings. The generator produces a complete client library with transport-aware retry logic and request routing.
+
+Like proto-only libraries, the output directory is cleaned before generation. Every file is replaced.
+
+```yaml
+libraries:
+  - name: google-cloud-secretmanager-v1
+    version: 1.2.0
+    channels:
+      - path: google/cloud/secretmanager/v1
+```
+
+#### Hybrid
+
+The library is generated, but some files are handwritten. The `keep` field lists the handwritten files. Before generation, Librarian removes all files in the output directory except those in the `keep` list. After generation, the handwritten files remain alongside the generated code.
+
+This is useful for libraries that need custom error types, helper functions, or integration code that the generator cannot produce automatically.
+
+```yaml
+libraries:
+  - name: google-cloud-compute-v1
+    version: 2.0.0
+    keep:
+      - src/errors.rs
+      - src/operation.rs
+```
+
+The `keep` field is a list of paths relative to the library's output directory. Each path names a file or directory to preserve. If a path names a directory, all files in that directory are preserved recursively.
+
+#### Veneer: Purely Handwritten
+
+The library is entirely handwritten. Setting `veneer: true` without providing any modules signals that no generation should occur. Librarian skips the generation step entirely and leaves all files untouched.
+
+This is used for foundational libraries like authentication helpers or test utilities that do not correspond to any generated API surface.
+
+```yaml
+libraries:
+  - name: google-cloud-auth
+    version: 1.3.0
+    veneer: true
+```
+
+#### Veneer: With Generated Layers
+
+The library is primarily handwritten, but it contains generated submodules. Each module specifies a source, template, and output directory. Librarian generates code into each module's output directory while preserving everything outside those directories.
+
+This allows fine-grained control over what gets generated. One module might generate protobuf types, another might generate a gRPC client, and a third might generate conversion helpers. The handwritten veneer code orchestrates these pieces into a coherent public API.
+
+```yaml
+libraries:
+  - name: google-cloud-storage
+    version: 1.6.0
+    veneer: true
+    rust:
+      modules:
+        - output: src/generated/gapic
+          source: google/storage/v2
+          template: grpc-client
+        - output: src/generated/protos
+          source: google/storage/v2
+          template: prost
+```
+
+Before generating each module, Librarian cleans only that module's output directory. Files outside the module directories are never touched. This ensures that the handwritten veneer code remains intact while the generated layers are rebuilt from scratch.
+
+Alternatives Considered
+-----------------------
 
 ### Merging `tool.yaml` with `librarian.yaml`
 
@@ -260,7 +359,8 @@ We considered keeping the existing split between `GAPIC YAML`, `BUILD.bazel`, an
 
 We considered creating a single massive configuration file for the entire fleet. We rejected this because it would create a bottleneck for language maintainers and obscure the ownership boundaries between platform-wide API definitions and repository-specific build rules.
 
-## Plan
+Plan
+----
 
 While the long-term goal is a single source of truth, Librarian must operate in an environment where that does not yet fully exist. Our generators were designed to consume configuration from multiple independent sources, and many required fields have not yet been migrated to the upstream service configuration.
 
@@ -286,6 +386,7 @@ The following table outlines the planned consolidation of legacy configuration f
 | **API Index / Central Catalog**   | API paths, service config locations                | `sdk.yaml`                   |
 | **`synthtool` (post-processing)** | Custom file movement, templating logic             | `librarian.yaml` (minimized) |
 
-## Deprecation
+Deprecation
+-----------
 
 Once all of the GAPIC generators have migrated, we will delete the legacy configuration files.
