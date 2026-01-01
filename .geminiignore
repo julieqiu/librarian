@@ -1,0 +1,21 @@
+# Go
+go.sum
+go.work.sum
+vendor/
+coverage.out
+
+# Git
+.git/
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+
+# Temporary
+tmp/
+dist/
+build/

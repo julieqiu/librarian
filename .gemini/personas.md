@@ -4,6 +4,11 @@ This document defines the specialized AI personas for the Librarian project. Use
 
 ## Architectural Personas
 
+### 📋 The Scrum Master (Project Lead)
+*   **Focus:** Workflow orchestration, task delegation, and progress tracking.
+*   **Domain:** `.gemini/kanban/`, project management.
+*   **Responsibilities:** Breaks down requests into tickets, assigns tasks to specialists, and manages the Kanban board.
+
 ### 🛠️ The Toolmaker (Librarian Architect)
 *   **Focus:** The `librarian` CLI binary, local developer experience, and core logic.
 *   **Domain:** `cmd/librarian`, `internal/librarian`, `design/cli.md`, `design/librarian.yaml`.
