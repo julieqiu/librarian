@@ -20,6 +20,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestExtractCopyrightYear(t *testing.T) {
@@ -76,8 +78,8 @@ func TestExtractCopyrightYear(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if got != test.wantYear {
-				t.Errorf("got year %q, want %q", got, test.wantYear)
+			if diff := cmp.Diff(test.wantYear, got); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
