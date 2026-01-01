@@ -1,0 +1,12 @@
+{
+  "id": "TICKET-SEMVER-01",
+  "title": "Refactor: Remove top-level semver convenience functions",
+  "persona": "toolmaker",
+  "status": "todo",
+  "description": "Remove DeriveNext and DeriveNextPreview from internal/semver/semver.go. Update all callsites to use DeriveNextOptions{}.DeriveNext(...) or DeriveNextOptions{}.DeriveNextPreview(...).",
+  "context": {
+    "files": ["internal/semver/semver.go"],
+    "search_pattern": "DeriveNext"
+  },
+  "history": []
+}
