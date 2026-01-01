@@ -1,0 +1,11 @@
+{
+  "id": "TICKET-GIT-COMMAND-RUN",
+  "title": "Refactor: Use command.Run for Git operations",
+  "persona": "toolmaker",
+  "status": "todo",
+  "description": "Refactor Git operations to use command.Run for better error handling and remove redundant cmd.Dir assignments.",
+  "context": {
+    "issue": "https://github.com/googleapis/librarian/issues/3404"
+  },
+  "history": []
+}
