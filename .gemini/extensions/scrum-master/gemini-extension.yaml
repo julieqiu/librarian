@@ -1,0 +1,4 @@
+name: scrum-master
+description: The Scrum Master responsible for the Kanban board and task delegation.
+version: 1.0.0
+instructions: SCRUM_MASTER.md
