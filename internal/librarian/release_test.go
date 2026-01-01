@@ -252,7 +252,7 @@ func TestRelease(t *testing.T) {
 			libConfg := &config.Library{}
 			err := releaseLibrary(t.Context(), cfg, libConfg, test.srcPath)
 			if err != nil {
-				t.Fatalf("releaseLibrary() error = %v", err)
+				t.Fatal(err)
 			}
 			if libConfg.Version != test.version {
 				t.Errorf("library %q version mismatch: want %q, got %q", libConfg.Name, test.version, libConfg.Version)

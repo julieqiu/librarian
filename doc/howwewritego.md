@@ -104,7 +104,9 @@ if err != nil {
     return err
 }
 // process success case
+```
 
+```go
 // Bad
 if err == nil {
     // process success case
@@ -124,7 +126,9 @@ for _, item := range items {
     }
     // process item
 }
+```
 
+```go
 // Bad
 for _, item := range items {
     if !item.skip {
@@ -139,6 +143,28 @@ When writing tests, we follow the patterns below to ensure consistency,
 readability, and ease of debugging. See
 [Go Test Comments](https://go.dev/wiki/TestComments) for conventions around
 writing test code.
+
+### Use t.Fatal(err) for simple test handling
+
+Avoid verbose or redundant failure messages. If an error occurs, pass it directly
+to `t.Fatal` or `t.Error`. The testing package automatically includes the file
+and line number, and well-constructed errors already provide their own context.
+
+**Good**:
+```go
+t.Fatal(err)
+```
+
+**Bad**:
+```go
+t.Fatalf("failed: %v", err)
+```
+
+Only use `t.Fatalf` if you need to provide extra context not present in the
+error, such as:
+```go
+t.Fatalf("failed to process user %d: %v", userID, err)
+```
 
 ### Use `t.Context()`
 

@@ -143,7 +143,7 @@ func TestNewGenerateRunner(t *testing.T) {
 			// custom setup
 			if test.setupFunc != nil {
 				if err := test.setupFunc(test.cfg); err != nil {
-					t.Fatalf("error in setup %v", err)
+					t.Fatal(err)
 				}
 			}
 
@@ -161,7 +161,7 @@ func TestNewGenerateRunner(t *testing.T) {
 			}
 
 			if err != nil {
-				t.Fatalf("newGenerateRunner() got error: %v", err)
+				t.Fatal(err)
 			}
 
 			if r.branch == "" {
@@ -941,10 +941,10 @@ func TestGenerateScenarios(t *testing.T) {
 			if test.name == "symlink in output" {
 				outputDir := filepath.Join(r.workRoot, "output")
 				if err := os.MkdirAll(outputDir, 0755); err != nil {
-					t.Fatalf("os.MkdirAll() = %v", err)
+					t.Fatal(err)
 				}
 				if err := os.Symlink("target", filepath.Join(outputDir, "symlink")); err != nil {
-					t.Fatalf("os.Symlink() = %v", err)
+					t.Fatal(err)
 				}
 			}
 

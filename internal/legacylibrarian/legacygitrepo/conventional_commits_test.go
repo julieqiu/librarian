@@ -733,7 +733,7 @@ func TestConventionalCommit_MarshalJSON(t *testing.T) {
 	}
 	b, err := c.MarshalJSON()
 	if err != nil {
-		t.Fatalf("MarshalJSON() failed: %v", err)
+		t.Fatal(err)
 	}
 	want := `{"type":"feat","subject":"new feature","body":"body of feature","commit_hash":"1234","piper_cl_number":"12345"}`
 	if diff := cmp.Diff(want, string(b)); diff != "" {
