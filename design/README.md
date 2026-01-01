@@ -30,13 +30,11 @@ Below is a complete list of all design documents in this directory.
 -   [delete.md](./delete.md): Design for the library deletion process.
 -   [engplan.md](./engplan.md): Engineering execution plan.
 -   [freeze.md](./freeze.md): Design for freezing generated code.
--   [generate.md](./generate.md): Code generation workflow details.
 -   [googleapis.md](./googleapis.md): Details on the googleapis submodule interaction.
 -   [librarianops.md](./librarianops.md): Operational guide for librarian tooling.
 -   [migrate.md](./migrate.md): Design for migrating existing libraries.
 -   [onboarding.md](./onboarding.md): Workflow for onboarding new client libraries.
 -   [README.md](./README.md): This file.
--   [release.md](./release.md): Release, publish, and automation workflows.
 -   [test.md](./test.md): The end-to-end testing plan.
 ### Contributor Guides (`contributor/`)
 -   [python.md](./contributor/python.md): Contributor guide for `google-cloud-python`.
