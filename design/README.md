@@ -30,7 +30,6 @@ Below is a complete list of all design documents in this directory.
 -   [delete.md](./delete.md): Design for the library deletion process.
 -   [engplan.md](./engplan.md): Engineering execution plan.
 -   [freeze.md](./freeze.md): Design for freezing generated code.
--   [googleapis.md](./googleapis.md): Details on the googleapis submodule interaction.
 -   [librarianops.md](./librarianops.md): Operational guide for librarian tooling.
 -   [migrate.md](./migrate.md): Design for migrating existing libraries.
 -   [onboarding.md](./onboarding.md): Workflow for onboarding new client libraries.
