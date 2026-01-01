@@ -54,45 +54,100 @@ We are migrating language-neutral settings like **Release Level** (Stable/Beta) 
 
 The `sdk.yaml` file (formerly `catalog.yaml`) defines the set of APIs for which we want to create SDKs. It serves as the central registry that Librarian uses to validate, resolve, and enumerate supported APIs across the ecosystem.
 
-This manifest defines:
-*   **Canonical API identities**: Unique identifiers for each API.
-*   **API maturity**: The status of an API (e.g., GA, Beta, Alpha).
-*   **Mapping between APIs and their source locations**: Links APIs to their definitions in the `googleapis` repository.
+#### Structure
+The file defines canonical API identities and maps them to their upstream source locations.
 
-By centralizing this list, we decouple the *existence* of an API in `googleapis` from its *consumption* by the Librarian system.
+```yaml
+# Standard APIs: The active, supported surface.
+standard:
+  - api_path: google/cloud/secretmanager/v1
+    service_config_path: google/cloud/secretmanager/v1/secretmanager_v1.yaml
+
+# Legacy APIs: Maintained for legacy reasons.
+legacy:
+  - api_path: google/cloud/dialogflow/v2
+    service_config_path: google/cloud/dialogflow/v2/dialogflow_v2.yaml
+    languages: [go, python, java]
+```
+
+*   **`standard`**: A list of APIs that are supported by default.
+    *   **`api_path`**: The path to the API in `googleapis` (e.g., `google/cloud/secretmanager/v1`).
+    *   **`service_config_path`**: The path to the service configuration file relative to the API path.
+*   **`legacy`**: A list of APIs that are maintained for backward compatibility.
+    *   **`languages`**: Restricts support for legacy APIs to specific languages.
 
 ### 3. The Repository Manifest (`librarian.yaml`)
 
 Each language repository maintains a `librarian.yaml` file in its root directory. This manifest contains information specific to a particular language or workspace. It serves as the authoritative source for how that repository participates in the ecosystem.
 
-This manifest defines:
-*   **Identity**: The repository name (e.g., `google-cloud-go`).
-*   **Tooling**: The specific versions of tools, like `protoc`, required for the build.
-*   **Inventory**: The list of libraries to be generated for this specific repository.
-*   **Overrides**: Language-specific deviations from defaults, such as renaming a package to avoid a keyword collision.
+#### Structure
+The file defines global settings, defaults, and the specific libraries to manage.
+
+```yaml
+language: rust
+repo: googleapis/google-cloud-rust
+
+default:
+  output: src/generated/
+  transport: grpc+rest
+
+sources:
+  googleapis:
+    commit: <sha>
+    sha256: <sha256>
+
+libraries:
+  - name: google-cloud-secretmanager
+    version: 1.2.0
+```
+
+*   **`language`**: The programming language of the repository (e.g., `rust`, `python`).
+*   **`repo`**: The repository identifier (e.g., `googleapis/google-cloud-rust`).
+*   **`default`**: Shared settings applied to all libraries.
+    *   **`output`**: Default directory for generated code.
+    *   **`transport`**: Default transport protocols.
+    *   **`delete_patterns`**: Files to remove before regeneration.
+*   **`sources`**: External dependencies.
+    *   **`googleapis`**: Specific commit of the upstream definitions.
+*   **`libraries`**: The inventory of managed libraries.
+    *   **`name`**: The library identifier.
+    *   **`version`**: The current semantic version.
+    *   **`overrides`**: Language-specific configuration (e.g., package names, generation templates).
 
 ### 4. CLI Dependencies (`tool.yaml`)
 
 The Librarian CLI repository contains a `tool.yaml` file that defines the specifications for the dependencies required by the CLI itself.
 
-This manifest ensures that the environment used to run Librarian is consistent and reproducible by declaring:
-*   **Required Runtimes**: Language versions (e.g., Python 3.14, Go 1.25) needed for generators.
-*   **Tooling Specs**: Precise versions and installation sources for external dependencies like `gcp-synthtool` or `cargo-semver-checks`.
+#### Structure
+The file declares required runtimes and external tools.
 
-### 5. Unifying Configurations (Incremental Consolidation)
+```yaml
+version: v1
 
-Our long-term goal is a single source of truth, but we must also support the present. Librarian invokes language-specific generators that were designed before this unified model existed. These generators expect configuration in specific legacy formats (like `*_gapic.yaml` or `BUILD.bazel`) and require inputs that don't yet exist in the upstream `serviceconfig`.
+python:
+  version: "3.14"
+  tools:
+    pip:
+      - name: gcp-synthtool
+        version: git+https://...
 
-To bridge this gap, Librarian implements an internal aggregation layer:
+rust:
+  version: "1.76"
+  tools:
+    cargo:
+      - name: cargo-semver-checks
+        version: "0.44.0"
+```
 
-*   **Internal Representation**: We define an internal model (`internal/serviceconfig/overrides.go`) to aggregate configuration that doesn't yet have a home in `googleapis/googleapis`.
-*   **Legacy Compatibility**: At generation time, Librarian reconstructs the necessary legacy artifacts from this model. This keeps existing generators working stably while we migrate fields to the new system.
-*   **Reconciliation**: Until the migration is complete, Librarian serves as the integration layer, reconciling existing inputs with the emerging unified model.
+*   **`version`**: The schema version of the tool manifest.
+*   **`<language>`**: Language-specific tooling sections (e.g., `python`, `rust`).
+    *   **`version`**: Required runtime version.
+    *   **`tools`**: Lists of tools categorized by installer (e.g., `pip`, `cargo`, `curl`).
+        *   **`name`**: Package name or download URL.
+        *   **`version`**: Version pin or commit hash.
+        *   **`sha256`**: Checksum for direct downloads.
 
 ## Alternatives Considered
-
-### Status Quo (Distributed Config)
-We considered keeping the existing split between `GAPIC YAML`, `BUILD.bazel`, and legacy scripts. We rejected this because it perpetuates the maintenance burden and inconsistency issues we are trying to solve.
 
 ### Merging `tool.yaml` with `librarian.yaml`
 We considered defining CLI dependencies directly within the repository manifest. However, we decided to separate them because tooling requirements are dependencies of the Librarian CLI itself. They should be versioned and managed alongside the CLI release, rather than being coupled to the configuration of a specific language repository.
@@ -100,5 +155,38 @@ We considered defining CLI dependencies directly within the repository manifest.
 ### Using Service Configuration for Onboarding
 We considered using the presence of a service configuration in `googleapis/googleapis` as the primary trigger for onboarding new SDKs. However, we decided to use a centralized `sdk.yaml` to ensure a deliberate approval process for new libraries. This model allows the Librarian platform team to validate API maturity and quality before resources are committed to generation and release. Additionally, `sdk.yaml` provides a necessary layer for platform-level overrides—such as mapping to non-standard service configuration paths—that are difficult to manage strictly from upstream sources.
 
+### Status Quo (Distributed Config)
+We considered keeping the existing split between `GAPIC YAML`, `BUILD.bazel`, and legacy scripts. We rejected this because it perpetuates the maintenance burden and inconsistency issues we are trying to solve.
+
 ### Monolithic Configuration
 We considered creating a single massive configuration file for the entire fleet. We rejected this because it would create a bottleneck for language maintainers and obscure the ownership boundaries between platform-wide API definitions and repository-specific build rules.
+
+## Plan
+
+While the long-term goal is a single source of truth, Librarian must operate in an environment where that does not yet fully exist. Our generators were designed to consume configuration from multiple independent sources, and many required fields have not yet been migrated to the upstream service configuration.
+
+To move forward without requiring a massive upstream migration as a prerequisite, a transitional bridge will be implemented in the `googleapis/librarian` repository for data that will eventually live in the `serviceconfig` and `sdk.yaml` in `googleapis/googleapis`.
+
+### The Internal Bridge
+
+*   **Internal Representation**: We use an internal model (`internal/serviceconfig/overrides.go`) to aggregate language-neutral configuration that does not yet have a home in `googleapis/googleapis`.
+*   **Legacy Reconstruction**: At generation time, Librarian can reconstruct legacy configuration artifacts (such as `GAPIC YAML`) from this internal model. This allows generator behavior to remain stable while we incrementally consolidate the underlying configuration.
+*   **Reconciliation**: Librarian serves as the integration layer, reconciling existing inputs with the emerging unified model until the migration to `serviceconfig` is complete.
+
+### Consolidation Mapping
+
+The following table outlines the planned consolidation of legacy configuration files into the unified manifests:
+
+| Legacy File | Primary Fields | New Location |
+| :--- | :--- | :--- |
+| **`*_gapic.yaml`** | Package names, class overrides, generation options | `librarian.yaml` |
+| **`BUILD.bazel`** | Transport settings, numeric enum behavior | `serviceconfig` |
+| **`*_grpc_service_config.json`** | Retry policies, request deadlines | `serviceconfig` |
+| **`.sidekick.toml`** | Library inventory, state, Rust-specific settings | `librarian.yaml` |
+| **`.librarian/state.yaml`** | Library versions, generated commits, metadata | `librarian.yaml` |
+| **API Index / Central Catalog** | API paths, service config locations | `sdk.yaml` |
+| **`synthtool` (post-processing)** | Custom file movement, templating logic | `librarian.yaml` (minimized) |
+
+## Deprecation
+
+Once all of the GAPIC generators have migrated, we will delete the legacy configuration files.
