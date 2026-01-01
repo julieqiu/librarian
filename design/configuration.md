@@ -38,6 +38,9 @@ config_version: 3
 name: secretmanager.googleapis.com
 title: Secret Manager API
 
+# NEW: release_level defines the stability of the API (e.g., STABLE, BETA, ALPHA).
+release_level: STABLE
+
 # apis enumerates the public interfaces provided by the service.
 apis:
   - name: google.cloud.secretmanager.v1.SecretManagerService
@@ -66,9 +69,10 @@ publishing:
   documentation_uri: https://cloud.google.com/secret-manager/docs
   github_label: api: secretmanager
   organization: CLOUD
-```
 
-We are migrating language-neutral settings like **Release Level** (Stable/Beta) and **Transport** into this file to further consolidate sources of truth.
+  # NEW: transports defines the supported transport protocols (e.g., GRPC, REST).
+  transports: [GRPC, REST]
+```
 
 ### 2. The SDK Manifest (`sdk.yaml`)
 
@@ -91,11 +95,15 @@ legacy:
     languages: [go, python]
 ```
 
--	**`standard`**: A list of APIs that are supported by default.
-	-	**`api_path`**: The path to the API in `googleapis` (e.g., `google/cloud/secretmanager/v1`).
-	-	**`service_config_path`**: The path to the service configuration file relative to the API path.
--	**`legacy`**: A list of APIs that are maintained for backward compatibility.
-	-	**`languages`**: Restricts support for legacy APIs to specific languages.
+*   **`standard`**: A list of APIs that are supported by default. These are APIs that will be automatically generated if `librarian create --all` is executed.
+
+    *   **`api_path`**: The path to the API in `googleapis` (e.g., `google/cloud/secretmanager/v1`).
+
+    *   **`service_config_path`**: The path to the service configuration file relative to the API path.
+
+*   **`legacy`**: A list of APIs that are maintained for backward compatibility, but are no longer intended to be created for new SDKs. These will be skipped by `librarian create --all`.
+
+    *   **`languages`**: Restricts support for legacy APIs to specific languages.
 
 ### 3. The Repository Manifest (`librarian.yaml`)
 
@@ -124,9 +132,31 @@ Each language repository maintains a `librarian.yaml` file in its root directory
 -	**`channels`**: A list of API versions to include (e.g., `google/cloud/secretmanager/v1`).
 -	**`veneer`**: Boolean indicating if this is a wrapper library with handwritten components.
 
-**Example (Rust):**
+**Rust Example (`google-cloud-rust/librarian.yaml`):**
 
 ```yaml
+language: rust
+repo: googleapis/google-cloud-rust
+
+default:
+  output: src/generated/
+  release_level: stable
+  rust:
+    package_dependencies:
+      - name: api
+        package: google-cloud-api
+        source: google.api
+      - name: bytes
+        package: bytes
+        force_used: true
+      - name: gax
+        package: google-cloud-gax
+        used_if: services
+    disabled_rustdoc_warnings:
+      - redundant_explicit_links
+      - broken_intra_doc_links
+    generate_setter_samples: "true"
+
 libraries:
   - name: google-cloud-secretmanager
     version: 1.2.0
@@ -134,15 +164,28 @@ libraries:
       package_name_override: google-cloud-secretmanager-v1
 ```
 
-**Example (Python):**
+**Python Example (`google-cloud-python/librarian.yaml`):**
 
 ```yaml
+language: python
+repo: googleapis/google-cloud-python
+
+default:
+  tag_format: '{name}/v{version}'
+
 libraries:
   - name: google-cloud-secret-manager
-    version: 2.16.0
-    python:
-      opt_args:
-        - "warehouse-package-name=google-cloud-secret-manager"
+    version: 2.25.0
+    channels:
+      - path: google/cloud/secretmanager/v1
+      - path: google/cloud/secretmanager/v1beta2
+      - path: google/cloud/secrets/v1beta1
+    keep:
+      - packages/google-cloud-secret-manager/CHANGELOG.md
+      - docs/CHANGELOG.md
+      - samples/README.txt
+      - samples/snippets/README.rst
+      - tests/system
 ```
 
 **Python-Specific Configuration (`python` block):**
