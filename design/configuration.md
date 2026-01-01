@@ -32,17 +32,17 @@ The service configuration defines the surface and behavior of a Google API. This
 Librarian reads this file but does not modify it.
 
 #### Structure
-A typical service configuration follows the `google.api.Service` schema and begins by identifying the service:
+A typical service configuration follows the `google.api.Service` schema and begins by identifying the service. Using Secret Manager as an example:
 
 ```yaml
 type: google.api.Service
 config_version: 3
-name: example.googleapis.com
-title: Example API
+name: secretmanager.googleapis.com
+title: Secret Manager API
 ```
 
 It includes sections for:
-*   **`apis`**: Enumerates the public interfaces provided by the service.
+*   **`apis`**: Enumerates the public interfaces provided by the service (e.g., `google.cloud.secretmanager.v1.SecretManagerService`).
 *   **`backend`**: Defines execution properties such as request deadlines and retry policies.
 *   **`http`**: Maps RPCs to REST endpoints.
 *   **`authentication`**: Specifies required OAuth scopes.
@@ -83,6 +83,7 @@ Each language repository maintains a `librarian.yaml` file in its root directory
 #### Structure
 The file defines global settings, defaults, and the specific libraries to manage.
 
+**Rust Example (`google-cloud-rust/librarian.yaml`)**:
 ```yaml
 language: rust
 repo: googleapis/google-cloud-rust
@@ -91,28 +92,38 @@ default:
   output: src/generated/
   transport: grpc+rest
 
-sources:
-  googleapis:
-    commit: <sha>
-    sha256: <sha256>
-
 libraries:
   - name: google-cloud-secretmanager
     version: 1.2.0
+    rust:
+      package_name_override: google-cloud-secretmanager-v1
+```
+
+**Python Example (`google-cloud-python/librarian.yaml`)**:
+```yaml
+language: python
+repo: googleapis/google-cloud-python
+
+default:
+  transport: grpc+rest
+
+libraries:
+  - name: google-cloud-secret-manager
+    version: 2.16.0
+    python:
+      opt_args:
+        - "warehouse-package-name=google-cloud-secret-manager"
 ```
 
 *   **`language`**: The programming language of the repository (e.g., `rust`, `python`).
-*   **`repo`**: The repository identifier (e.g., `googleapis/google-cloud-rust`).
+*   **`repo`**: The repository identifier.
 *   **`default`**: Shared settings applied to all libraries.
     *   **`output`**: Default directory for generated code.
     *   **`transport`**: Default transport protocols.
-    *   **`delete_patterns`**: Files to remove before regeneration.
-*   **`sources`**: External dependencies.
-    *   **`googleapis`**: Specific commit of the upstream definitions.
 *   **`libraries`**: The inventory of managed libraries.
     *   **`name`**: The library identifier.
     *   **`version`**: The current semantic version.
-    *   **`overrides`**: Language-specific configuration (e.g., package names, generation templates).
+    *   **`overrides`**: Language-specific configuration (e.g., `package_name_override` for Rust, `opt_args` for Python).
 
 ### 4. CLI Dependencies (`tool.yaml`)
 
