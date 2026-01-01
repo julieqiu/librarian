@@ -16,7 +16,7 @@ Directory Contents
 
 Below is a complete list of all design documents in this directory.
 
-### Design
+### CLI Design
 -   [cli.md](./cli.md): CLI command specification.
 -   [configuration.md](./configuration.md): Overview of the configuration files.
     -   [librarian.yaml](./librarian.yaml): The manifest for language-specific configuration.
@@ -24,17 +24,17 @@ Below is a complete list of all design documents in this directory.
     -   [tool.yaml](./tool.yaml): Declarative manifest of the CLI dependencies.
     -   [serviceconfig.yaml](./serviceconfig.yaml): The authoritative language-neutral configuration.
 
-### Root Directory
--   [branches.md](./branches.md): Branching strategy.
--   [contributor.md](./contributor.md): General overview for contributors.
--   [delete.md](./delete.md): Design for the library deletion process.
--   [engplan.md](./engplan.md): Engineering execution plan.
+### Workflows
+-   [onboarding.md](./onboarding.md): Workflow for onboarding new client libraries.
 -   [freeze.md](./freeze.md): Design for freezing generated code.
 -   [librarianops.md](./librarianops.md): Operational guide for librarian tooling.
--   [migrate.md](./migrate.md): Design for migrating existing libraries.
--   [onboarding.md](./onboarding.md): Workflow for onboarding new client libraries.
--   [README.md](./README.md): This file.
+
+### Plan
+-   [branches.md](./branches.md): Branching strategy.
 -   [test.md](./test.md): The end-to-end testing plan.
+-   [engplan.md](./engplan.md): Engineering execution plan.
+-   [migrate.md](./migrate.md): Design for migrating existing libraries.
+
 ### Contributor Guides (`contributor/`)
 -   [python.md](./contributor/python.md): Contributor guide for `google-cloud-python`.
 -   [rust.md](./contributor/rust.md): Contributor guide for `google-cloud-rust`.
