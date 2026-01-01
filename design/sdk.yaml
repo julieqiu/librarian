@@ -21,12 +21,11 @@ standard:
 
 # Legacy APIs: Maintained for legacy reasons, may not be recommended for new adoption.
 legacy:
-  - api_path: google/cloud/dialogflow/v2
-    service_config_path: google/cloud/dialogflow/v2/dialogflow_v2.yaml
+  - api_path: google/cloud/secretmanager/v1beta1
+    service_config_path: google/cloud/secretmanager/v1beta1/secretmanager_v1beta1.yaml
     languages: # List of languages that support this legacy API
       - go
       - python
-      - java
 
   - api_path: google/datastore/v1beta3
     service_config_path: google/datastore/v1beta3/datastore_v1beta3.yaml
