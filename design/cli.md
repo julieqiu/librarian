@@ -1,4 +1,5 @@
-# Librarian CLI Specification
+Librarian CLI Specification
+===========================
 
 Librarian is a tool for managing Google Cloud client libraries.
 
@@ -12,51 +13,53 @@ librarian <command> [arguments]
 
 The commands are:
 
-*   **[create](#create)**: create a new client library
-*   **[generate](#generate)**: generate client library code
-*   **[update](#update)**: update sources to the latest version
-*   **[tidy](#tidy)**: format and validate librarian.yaml
-*   **[release](#release)**: prepare libraries for release
-*   **[publish](#publish)**: publish client libraries
-*   **[version](#version)**: print the librarian version
+-	**[add](#add)**: add a new client library to `librarian.yaml`
+-	**[generate](#generate)**: generate client library code
+-	**[update](#update)**: update sources to the latest version
+-	**[tidy](#tidy)**: format and validate librarian.yaml
+-	**[release](#release)**: prepare libraries for release
+-	**[publish](#publish)**: publish client libraries
+-	**[version](#version)**: print the librarian version
 
-## Create
+Add
+---
 
-`librarian create <library> [flags]`
+`librarian add <library> [apis...]`
 
-Create onboards a new client library by adding it to `librarian.yaml` and performing the initial code generation. The library argument is required.
+Add onboards a new client library by adding it to `librarian.yaml`.
 
 ### Options
 
 ```
       --output <path>
           The directory where the library should be generated. If omitted, it is derived from defaults.
-
-      --service-config <path>
-          The path to the upstream service configuration YAML.
-
-      --specification-format <format>
-          The format of the API source (default: protobuf).
-
-      --specification-source <path>
-          The path to the API definition in googleapis (e.g., google/cloud/secretmanager/v1).
 ```
 
 ### Examples
 
 ```
-# Create a library for Secret Manager
-$ librarian create google-cloud-secretmanager --specification-source google/cloud/secretmanager/v1
+# The CLI interface for adding a library should be:
+librarian add <library> [apis...]
+# For languages other than Rust (for example, Go and Python), multiple channels may be supported. In those cases, users can specify multiple API paths.
 
-# Create a library with a custom output directory
-$ librarian create google-cloud-secretmanager --output src/secretmanager
+# For example, any of these commands would work:
+
+librarian add google-cloud-secret-manager
+librarian add google-cloud-secret-manager google/cloud/secretmanager/v1
+librarian add google-cloud-secret-manager google/cloud/secretmanager/v1  --output packages/google-cloud-secret-manager
+librarian add google-cloud-secret-manager \
+  google/cloud/secretmanager/v1 \
+  google/cloud/secretmanager/v1beta2 \
+  google/cloud/secrets/v1beta1 \
+  --output packages/google-cloud-secret-manager
 ```
 
-## Generate
+Generate
+--------
 
 `librarian generate <library> | --all [flags]`
 
-Generate regenerates the code for managed libraries using the current configuration and sources. Either the library argument or the --all flag is required.
+Generate generates client library code for managed libraries using the current configuration and sources. It performs the initial code generation for newly added libraries and regenerates code for existing ones. Either the library argument or the --all flag is required.
 
 ### Options
 
@@ -75,7 +78,8 @@ $ librarian generate --all
 $ librarian generate google-cloud-secretmanager
 ```
 
-## Update
+Update
+------
 
 `librarian update <source> | --all [flags]`
 
@@ -98,7 +102,8 @@ $ librarian update googleapis
 $ librarian update --all
 ```
 
-## Tidy
+Tidy
+----
 
 `librarian tidy`
 
@@ -111,7 +116,8 @@ Tidy formats and validates the `librarian.yaml` configuration file. It simplifie
 $ librarian tidy
 ```
 
-## Release
+Release
+-------
 
 `librarian release <library> | --all [flags]`
 
@@ -134,7 +140,8 @@ $ librarian release --all
 $ librarian release google-cloud-secretmanager
 ```
 
-## Publish
+Publish
+-------
 
 `librarian publish <library> | --all [flags]`
 
@@ -163,7 +170,8 @@ $ librarian publish --all
 $ librarian publish google-cloud-secretmanager --dry-run
 ```
 
-## Version
+Version
+-------
 
 `librarian version`
 
@@ -172,6 +180,37 @@ Version prints the version of the librarian binary.
 ### Examples
 
 ```
+
 $ librarian version
+
 librarian version 0.7.0
+
 ```
+
+Delete
+------
+
+`librarian delete <library>`
+
+Delete removes a client library from `librarian.yaml` and deletes its generated
+
+code from the repository. This command is typically used when an API is
+
+deprecated or a library is no longer maintained.
+
+### Examples
+
+```bash
+
+# Remove the secretmanager library
+
+librarian delete secretmanager
+
+```
+
+Alternatives Considered
+-----------------------
+
+We considered having a single `librarian create` command that would add a new client library to `librarian.yaml` and immediately perform its initial code generation. This was attractive because it offered a single, atomic step for users to get a new, fully generated library, simplifying the "happy path" and reducing the chance of users forgetting to run generation after configuration.
+
+However, we ultimately went with separating this functionality into two commands: `librarian add` and `librarian generate`. This approach was chosen because it provides a clearer separation of concerns, making the CLI more predictable and flexible. The `librarian add` command now focuses solely on configuring `librarian.yaml`, while `librarian generate` is responsible for all code generation, whether it's the first time for a new library or a subsequent regeneration. This design supports more efficient automation by allowing multiple libraries to be added before a single, potentially long-running generation process. Although it introduces an extra step for the user during initial setup, the improved clarity, predictability, and flexibility for automation were deemed more beneficial for the long-term maintainability and usability of the tool.
