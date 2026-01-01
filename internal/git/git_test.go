@@ -203,6 +203,7 @@ func TestFilterSomeGlobs(t *testing.T) {
 }
 
 func TestAssertGitStatusClean(t *testing.T) {
+	testhelper.RequireCommand(t, "git")
 	cfg := &config.Release{
 		Preinstalled: map[string]string{
 			"git": "git",
@@ -293,6 +294,7 @@ func TestMatchesDirtyCloneError(t *testing.T) {
 }
 
 func TestChangesInDirectorySinceTag(t *testing.T) {
+	testhelper.RequireCommand(t, "git")
 	for _, test := range []struct {
 		name string
 		dir  string
@@ -310,7 +312,6 @@ func TestChangesInDirectorySinceTag(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			testhelper.RequireCommand(t, "git")
 			tag := "v1.2.3"
 			remoteDir := testhelper.SetupRepoWithChange(t, tag)
 			testhelper.CloneRepository(t, remoteDir)

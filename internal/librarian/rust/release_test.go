@@ -39,6 +39,8 @@ const (
 )
 
 func TestReleaseOne(t *testing.T) {
+	testhelper.RequireCommand(t, "cargo")
+	testhelper.RequireCommand(t, "taplo")
 	cfg := setupRelease(t)
 	err := ReleaseLibrary(cfg.Libraries[0], storageDir)
 	if err != nil {
@@ -53,8 +55,6 @@ func TestReleaseOne(t *testing.T) {
 
 func setupRelease(t *testing.T) *config.Config {
 	t.Helper()
-	testhelper.RequireCommand(t, "cargo")
-	testhelper.RequireCommand(t, "taplo")
 	tmpDir := t.TempDir()
 	t.Chdir(tmpDir)
 
