@@ -271,7 +271,7 @@ type DeriveNextOptions struct {
 
 // DeriveNext determines the appropriate SemVer version bump based on the
 // provided [ChangeLevel] and the provided [DeriveNextOptions].
-func (o DeriveNextOptions) DeriveNext(changeLevel ChangeLevel, currentVersion string) (string, error) {
+func DeriveNext(o DeriveNextOptions, changeLevel ChangeLevel, currentVersion string) (string, error) {
 	if changeLevel == None {
 		return currentVersion, nil
 	}
@@ -281,11 +281,11 @@ func (o DeriveNextOptions) DeriveNext(changeLevel ChangeLevel, currentVersion st
 		return "", err
 	}
 
-	return o.deriveNext(changeLevel, v), nil
+	return deriveNext(o, changeLevel, v), nil
 }
 
 // deriveNext implements next version derivation based on the [DeriveNextOptions].
-func (o DeriveNextOptions) deriveNext(changeLevel ChangeLevel, v version) string {
+func deriveNext(o DeriveNextOptions, changeLevel ChangeLevel, v version) string {
 	// Only bump the prerelease version number.
 	if v.Prerelease != "" && !o.BumpVersionCore {
 		// Append prerelease number if there isn't one.
@@ -351,7 +351,7 @@ var (
 // version, it must be caught up. When the preview version is ahead, a
 // prerelease number bump is all that is necessary. Every change is treated as a
 // [Minor] change. The provided preview version must have a prerelease segment.
-func (o DeriveNextOptions) DeriveNextPreview(previewVersion, stableVersion string) (string, error) {
+func DeriveNextPreview(o DeriveNextOptions, previewVersion, stableVersion string) (string, error) {
 	pv, err := parse(previewVersion)
 	if err != nil {
 		return "", errors.Join(errInvalidPreviewVersion, err)
@@ -387,19 +387,6 @@ func (o DeriveNextOptions) DeriveNextPreview(previewVersion, stableVersion strin
 		nextVerOpts.BumpVersionCore = true
 	}
 
-	return nextVerOpts.deriveNext(Minor, pv), nil
+	return deriveNext(nextVerOpts, Minor, pv), nil
 }
 
-// DeriveNext calculates the next version based on the highest change type and
-// current version using the default [DeriveNextOptions]. This is a convenience
-// method.
-func DeriveNext(highestChange ChangeLevel, currentVersion string) (string, error) {
-	return DeriveNextOptions{}.DeriveNext(highestChange, currentVersion)
-}
-
-// DeriveNextPreview calculates the next preview version based on the provided
-// stable version using the default [DeriveNextOptions]. This is a convenience
-// method.
-func DeriveNextPreview(previewVersion, stableVersion string) (string, error) {
-	return DeriveNextOptions{}.DeriveNextPreview(previewVersion, stableVersion)
-}
