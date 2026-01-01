@@ -1,22 +1,25 @@
-# Python Contributor Guide
+Python Contributor Guide
+========================
 
 This guide is intended for contributors to the `google-cloud-python` repository. It details the workflows for generating and maintaining client libraries using the `librarian` tool.
 
-## Prerequisites
+Prerequisites
+-------------
 
 Ensure you have the following installed:
 
-1.  **Librarian CLI**: The latest version of the `librarian` binary.
-2.  **Python 3.10+**: Required for `synthtool` and post-processing.
-3.  **Protoc**: Protocol Buffer compiler (v23.0+).
+1.	**Librarian CLI**: The latest version of the `librarian` binary.
+2.	**Python 3.10+**: Required for `synthtool` and post-processing.
+3.	**Protoc**: Protocol Buffer compiler (v23.0+).
 
-```bash
-librarian version
-python3 --version
-protoc --version
-```
+	```bash
+	librarian version
+	python3 --version
+	protoc --version
+	```
 
-## Workflows
+Workflows
+---------
 
 ### Generate a New Library
 
@@ -56,7 +59,8 @@ librarian generate google-cloud-secret-manager
 librarian release google-cloud-secret-manager
 ```
 
-## Troubleshooting
+Troubleshooting
+---------------
 
-*   **Protoc not found**: Ensure `protoc` is in your `$PATH`.
-*   **Synthtool errors**: Ensure you have installed the necessary Python dependencies (`pip install gcp-synthtool`).
+-	**Protoc not found**: Ensure `protoc` is in your `$PATH`.
+-	**Synthtool errors**: Ensure you have installed the necessary Python dependencies (`pip install gcp-synthtool`).
