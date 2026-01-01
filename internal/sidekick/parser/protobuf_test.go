@@ -36,7 +36,7 @@ func TestProtobuf_Info(t *testing.T) {
 	sc := sample.ServiceConfig()
 	got, err := makeAPIForProtobuf(sc, newTestCodeGeneratorRequest(t, "scalar.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	if got.Name != "secretmanager" {
 		t.Errorf("want = %q; got = %q", "secretmanager", got.Name)
@@ -58,7 +58,7 @@ func TestProtobuf_PartialInfo(t *testing.T) {
 
 	got, err := makeAPIForProtobuf(serviceConfig, newTestCodeGeneratorRequest(t, "scalar.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	want := &api.API{
 		Name:        "secretmanager",
@@ -75,7 +75,7 @@ func TestProtobuf_Scalar(t *testing.T) {
 	requireProtoc(t)
 	test, err := makeAPIForProtobuf(nil, newTestCodeGeneratorRequest(t, "scalar.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	message, ok := test.State.MessageByID[".test.Fake"]
 	if !ok {
@@ -200,7 +200,7 @@ func TestProtobuf_ScalarArray(t *testing.T) {
 	requireProtoc(t)
 	test, err := makeAPIForProtobuf(nil, newTestCodeGeneratorRequest(t, "scalar_array.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	message, ok := test.State.MessageByID[".test.Fake"]
 	if !ok {
@@ -252,7 +252,7 @@ func TestProtobuf_ScalarOptional(t *testing.T) {
 	requireProtoc(t)
 	test, err := makeAPIForProtobuf(nil, newTestCodeGeneratorRequest(t, "scalar_optional.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	message, ok := test.State.MessageByID[".test.Fake"]
 	if !ok {
@@ -304,7 +304,7 @@ func TestProtobuf_SkipExternalMessages(t *testing.T) {
 	requireProtoc(t)
 	test, err := makeAPIForProtobuf(nil, newTestCodeGeneratorRequest(t, "with_import.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	// Both `ImportedMessage` and `LocalMessage` should be in the index:
 	_, ok := test.State.MessageByID[".away.ImportedMessage"]
@@ -353,7 +353,7 @@ func TestProtobuf_SkipExternaEnums(t *testing.T) {
 	requireProtoc(t)
 	test, err := makeAPIForProtobuf(nil, newTestCodeGeneratorRequest(t, "with_import.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	// Both `ImportedEnum` and `LocalEnum` should be in the index:
 	_, ok := test.State.EnumByID[".away.ImportedEnum"]
@@ -396,7 +396,7 @@ func TestProtobuf_Comments(t *testing.T) {
 	requireProtoc(t)
 	test, err := makeAPIForProtobuf(nil, newTestCodeGeneratorRequest(t, "comments.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	message, ok := test.State.MessageByID[".test.Request"]
 	if !ok {
@@ -502,7 +502,7 @@ func TestProtobuf_UniqueEnumValues(t *testing.T) {
 	requireProtoc(t)
 	test, err := makeAPIForProtobuf(nil, newTestCodeGeneratorRequest(t, "enum_values.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	withAlias, ok := test.State.EnumByID[".test.WithAlias"]
 	if !ok {
@@ -559,7 +559,7 @@ func TestProtobuf_OneOfs(t *testing.T) {
 	requireProtoc(t)
 	test, err := makeAPIForProtobuf(nil, newTestCodeGeneratorRequest(t, "oneofs.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	message, ok := test.State.MessageByID[".test.Fake"]
 	if !ok {
@@ -634,7 +634,7 @@ func TestProtobuf_ObjectFields(t *testing.T) {
 	requireProtoc(t)
 	test, err := makeAPIForProtobuf(nil, newTestCodeGeneratorRequest(t, "object_fields.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	message, ok := test.State.MessageByID[".test.Fake"]
 	if !ok {
@@ -671,7 +671,7 @@ func TestProtobuf_WellKnownTypeFields(t *testing.T) {
 	requireProtoc(t)
 	test, err := makeAPIForProtobuf(nil, newTestCodeGeneratorRequest(t, "wkt_fields.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	message, ok := test.State.MessageByID[".test.Fake"]
 	if !ok {
@@ -738,7 +738,7 @@ func TestProtobuf_JsonName(t *testing.T) {
 	requireProtoc(t)
 	test, err := makeAPIForProtobuf(nil, newTestCodeGeneratorRequest(t, "json_name.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	message, ok := test.State.MessageByID[".test.Request"]
 	if !ok {
@@ -776,7 +776,7 @@ func TestProtobuf_MapFields(t *testing.T) {
 	requireProtoc(t)
 	test, err := makeAPIForProtobuf(nil, newTestCodeGeneratorRequest(t, "map_fields.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	message, ok := test.State.MessageByID[".test.Fake"]
 	if !ok {
@@ -874,7 +874,7 @@ func TestProtobuf_Service(t *testing.T) {
 	requireProtoc(t)
 	test, err := makeAPIForProtobuf(nil, newTestCodeGeneratorRequest(t, "test_service.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	service, ok := test.State.ServiceByID[".test.TestService"]
 	if !ok {
@@ -1010,7 +1010,7 @@ func TestProtobuf_QueryParameters(t *testing.T) {
 	requireProtoc(t)
 	test, err := makeAPIForProtobuf(nil, newTestCodeGeneratorRequest(t, "query_parameters.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	service, ok := test.State.ServiceByID[".test.TestService"]
 	if !ok {
@@ -1079,7 +1079,7 @@ func TestProtobuf_Enum(t *testing.T) {
 	requireProtoc(t)
 	test, err := makeAPIForProtobuf(nil, newTestCodeGeneratorRequest(t, "enum.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	e, ok := test.State.EnumByID[".test.Code"]
 	if !ok {
@@ -1132,7 +1132,7 @@ func TestProtobuf_Pagination(t *testing.T) {
 	requireProtoc(t)
 	test, err := makeAPIForProtobuf(nil, newTestCodeGeneratorRequest(t, "pagination.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	updateMethodPagination(nil, test)
 	service, ok := test.State.ServiceByID[".test.TestService"]
@@ -1480,7 +1480,7 @@ func TestProtobuf_OperationInfo(t *testing.T) {
 	}
 	test, err := makeAPIForProtobuf(serviceConfig, newTestCodeGeneratorRequest(t, "test_operation_info.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	service, ok := test.State.ServiceByID[".test.LroService"]
 	if !ok {
@@ -1607,7 +1607,7 @@ func TestProtobuf_AutoPopulated(t *testing.T) {
 	}
 	test, err := makeAPIForProtobuf(serviceConfig, newTestCodeGeneratorRequest(t, "auto_populated.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	for _, service := range test.Services {
 		if service.ID == ".google.longrunning.Operations" {
@@ -1744,7 +1744,7 @@ func TestProtobuf_Deprecated(t *testing.T) {
 	requireProtoc(t)
 	test, err := makeAPIForProtobuf(nil, newTestCodeGeneratorRequest(t, "deprecated.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	s, ok := test.State.ServiceByID[".test.ServiceA"]
 	if !ok {
@@ -1867,7 +1867,7 @@ func TestProtobuf_ResourceAnnotations(t *testing.T) {
 	requireProtoc(t)
 	test, err := makeAPIForProtobuf(nil, newTestCodeGeneratorRequest(t, "resource_annotations.proto"))
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 
 	t.Run("API.ResourceDefinitions", func(t *testing.T) {
@@ -2073,7 +2073,7 @@ func newTestCodeGeneratorRequest(t *testing.T, filename string) *pluginpb.CodeGe
 	}
 	request, err := newCodeGeneratorRequest("testdata", options)
 	if err != nil {
-		t.Fatalf("Failed to make API for Protobuf %v", err)
+		t.Fatal(err)
 	}
 	return request
 }
@@ -2098,7 +2098,7 @@ func TestParseResourcePatterns(t *testing.T) {
 		}
 		got, err := parseResourcePatterns(patterns)
 		if err != nil {
-			t.Fatalf("parseResourcePatterns() returned an error: %v", err)
+			t.Fatal(err)
 		}
 		if diff := cmp.Diff(want, got); diff != "" {
 			t.Errorf("mismatch (-want +got):\n%s", diff)

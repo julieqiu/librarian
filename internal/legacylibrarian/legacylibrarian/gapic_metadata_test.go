@@ -37,7 +37,7 @@ func TestReadGapicMetadata(t *testing.T) {
 	}
 	libv1JSON, err := protojson.Marshal(libv1Metadata)
 	if err != nil {
-		t.Fatalf("protojson.Marshal() failed: %v", err)
+		t.Fatal(err)
 	}
 
 	libv2Metadata := &gapic.GapicMetadata{
@@ -50,7 +50,7 @@ func TestReadGapicMetadata(t *testing.T) {
 	}
 	libv2JSON, err := protojson.Marshal(libv2Metadata)
 	if err != nil {
-		t.Fatalf("protojson.Marshal() failed: %v", err)
+		t.Fatal(err)
 	}
 
 	libTestMetadata := &gapic.GapicMetadata{
@@ -63,7 +63,7 @@ func TestReadGapicMetadata(t *testing.T) {
 	}
 	libTestJSON, err := protojson.Marshal(libTestMetadata)
 	if err != nil {
-		t.Fatalf("protojson.Marshal() failed: %v", err)
+		t.Fatal(err)
 	}
 
 	for _, test := range []struct {
@@ -143,16 +143,16 @@ func TestReadGapicMetadata(t *testing.T) {
 			for path, content := range test.files {
 				fullPath := filepath.Join(tmpDir, path)
 				if err := os.MkdirAll(filepath.Dir(fullPath), 0755); err != nil {
-					t.Fatalf("os.MkdirAll() failed: %v", err)
+					t.Fatal(err)
 				}
 				if err := os.WriteFile(fullPath, content, 0644); err != nil {
-					t.Fatalf("os.WriteFile() failed: %v", err)
+					t.Fatal(err)
 				}
 			}
 
 			got, err := readGapicMetadata(tmpDir, test.library)
 			if err != nil {
-				t.Fatalf("readGapicMetadata() failed: %v", err)
+				t.Fatal(err)
 			}
 			if diff := cmp.Diff(test.want, got, protocmp.Transform()); diff != "" {
 				t.Errorf("mismatch (-want +got):\n%s", diff)
@@ -441,7 +441,7 @@ func TestFormatAPIVersionReleaseNotes(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			got, err := formatAPIVersionReleaseNotes(test.in)
 			if err != nil {
-				t.Fatalf("formatAPIVersionReleaseNotes() failed: %v", err)
+				t.Fatal(err)
 			}
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("mismatch (-want +got):\n%s", diff)

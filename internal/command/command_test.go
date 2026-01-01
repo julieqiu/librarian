@@ -60,7 +60,7 @@ func TestRunWithEnv_VariableNotSetFailsValidation(t *testing.T) {
 	)
 	err := RunWithEnv(ctx, map[string]string{}, "sh", "-c", fmt.Sprintf("test \"$%s\" = \"%s\"", name, value))
 	if err == nil {
-		t.Fatalf("RunWithEnv() = %v, want non-nil", err)
+		t.Fatal(err)
 	}
 }
 

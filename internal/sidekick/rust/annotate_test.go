@@ -1939,7 +1939,7 @@ func TestEnumAnnotationsValuesForExamples(t *testing.T) {
 			}
 			model := api.NewTestAPI([]*api.Message{}, []*api.Enum{enum}, []*api.Service{})
 			if err := api.CrossReference(model); err != nil {
-				t.Fatalf("CrossReference() failed: %v", err)
+				t.Fatal(err)
 			}
 			codec, err := newCodec("protobuf", map[string]string{})
 			if err != nil {

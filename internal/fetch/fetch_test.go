@@ -264,7 +264,7 @@ func TestDownloadTarballChecksumMismatch(t *testing.T) {
 
 	err := DownloadTarball(t.Context(), target, server.URL+"/test.tar.gz", wrongSha)
 	if !errors.Is(err, errChecksumMismatch) {
-		t.Fatalf("expected errChecksumMismatch, got: %v", err)
+		t.Fatal(err)
 	}
 	if _, err := os.Stat(target); !os.IsNotExist(err) {
 		t.Errorf("target file should not exist after checksum failure: %v", err)
@@ -292,7 +292,7 @@ func TestDownloadTarball_ContextCanceled(t *testing.T) {
 
 	err := DownloadTarball(ctx, target, server.URL+"/test.tar.gz", "any-sha")
 	if !errors.Is(err, context.Canceled) {
-		t.Fatalf("expected context.Canceled, got: %v", err)
+		t.Fatal(err)
 	}
 }
 

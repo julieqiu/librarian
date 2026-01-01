@@ -50,12 +50,12 @@ java_gapic_library(
 	tmpDir := t.TempDir()
 	buildPath := filepath.Join(tmpDir, "BUILD.bazel")
 	if err := os.WriteFile(buildPath, []byte(content), 0644); err != nil {
-		t.Fatalf("failed to write test file: %v", err)
+		t.Fatal(err)
 	}
 
 	got, err := Parse(tmpDir)
 	if err != nil {
-		t.Fatalf("Parse() failed: %v", err)
+		t.Fatal(err)
 	}
 
 	t.Run("HasGAPIC", func(t *testing.T) {
@@ -120,12 +120,12 @@ java_gapic_library(
 	tmpDir := t.TempDir()
 	buildPath := filepath.Join(tmpDir, "BUILD.bazel")
 	if err := os.WriteFile(buildPath, []byte(content), 0644); err != nil {
-		t.Fatalf("failed to write test file: %v", err)
+		t.Fatal(err)
 	}
 
 	got, err := Parse(tmpDir)
 	if err != nil {
-		t.Fatalf("Parse() failed: %v", err)
+		t.Fatal(err)
 	}
 
 	if want := "cloudasset_v1.yaml"; got.ServiceYAML() != want {
@@ -189,12 +189,12 @@ java_grpc_library(
 	tmpDir := t.TempDir()
 	buildPath := filepath.Join(tmpDir, "BUILD.bazel")
 	if err := os.WriteFile(buildPath, []byte(content), 0644); err != nil {
-		t.Fatalf("failed to write test file: %v", err)
+		t.Fatal(err)
 	}
 
 	got, err := Parse(tmpDir)
 	if err != nil {
-		t.Fatalf("Parse() failed: %v", err)
+		t.Fatal(err)
 	}
 
 	if got.HasGAPIC() {
@@ -212,12 +212,12 @@ java_gapic_library(
 	tmpDir := t.TempDir()
 	buildPath := filepath.Join(tmpDir, "BUILD.bazel")
 	if err := os.WriteFile(buildPath, []byte(content), 0644); err != nil {
-		t.Fatalf("failed to write test file: %v", err)
+		t.Fatal(err)
 	}
 
 	got, err := Parse(tmpDir)
 	if err != nil {
-		t.Fatalf("Parse() failed: %v", err)
+		t.Fatal(err)
 	}
 
 	if got.GRPCServiceConfig() != "" {
@@ -241,7 +241,7 @@ java_gapic_library(
 	tmpDir := t.TempDir()
 	buildPath := filepath.Join(tmpDir, "BUILD.bazel")
 	if err := os.WriteFile(buildPath, []byte(content), 0644); err != nil {
-		t.Fatalf("failed to write test file: %v", err)
+		t.Fatal(err)
 	}
 
 	_, err := Parse(tmpDir)

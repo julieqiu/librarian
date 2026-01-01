@@ -1079,10 +1079,10 @@ func TestStageRun(t *testing.T) {
 				for _, dir := range []string{repoDir, outputDir} {
 					fullPath := filepath.Join(dir, path)
 					if err := os.MkdirAll(filepath.Dir(fullPath), 0755); err != nil {
-						t.Fatalf("os.MkdirAll() = %v", err)
+						t.Fatal(err)
 					}
 					if err := os.WriteFile(fullPath, []byte(content), 0644); err != nil {
-						t.Fatalf("os.WriteFile() = %v", err)
+						t.Fatal(err)
 					}
 				}
 			}
@@ -1090,21 +1090,21 @@ func TestStageRun(t *testing.T) {
 			if test.name == "run release stage command with symbolic link" {
 				if err := os.Symlink(filepath.Join(repoDir, "dir1/file1.txt"),
 					filepath.Join(repoDir, "dir1/symlink.txt")); err != nil {
-					t.Fatalf("os.Symlink() = %v", err)
+					t.Fatal(err)
 				}
 			}
 			librarianDir := filepath.Join(repoDir, ".librarian")
 			if err := os.MkdirAll(librarianDir, 0755); err != nil {
-				t.Fatalf("os.MkdirAll() = %v", err)
+				t.Fatal(err)
 			}
 
 			// Create the librarian state file.
 			stateFile := filepath.Join(repoDir, ".librarian/state.yaml")
 			if err := os.MkdirAll(filepath.Dir(stateFile), 0755); err != nil {
-				t.Fatalf("os.MkdirAll() = %v", err)
+				t.Fatal(err)
 			}
 			if err := os.WriteFile(stateFile, []byte{}, 0644); err != nil {
-				t.Fatalf("os.WriteFile() = %v", err)
+				t.Fatal(err)
 			}
 
 			err := runner.run(t.Context())

@@ -131,7 +131,7 @@ func TestValidateGenerateTest(t *testing.T) {
 
 			if test.setup != nil {
 				if err := test.setup(tmpDir); err != nil {
-					t.Fatalf("setup failed: %v", err)
+					t.Fatal(err)
 				}
 			}
 
@@ -163,7 +163,7 @@ func TestValidateGenerateTest(t *testing.T) {
 					t.Errorf("validateGenerateTest() returned error %q, want error containing %q", err.Error(), test.wantErrMsg)
 				}
 			} else if err != nil {
-				t.Fatalf("validateGenerateTest() returned unexpected error: %v", err)
+				t.Fatal(err)
 			}
 		})
 	}
@@ -355,16 +355,16 @@ import "google/api/annotations.proto";
 			// Setup proto files
 			fullProtoDir := filepath.Join(repoDir, protoPath)
 			if err := os.MkdirAll(fullProtoDir, 0755); err != nil {
-				t.Fatalf("os.MkdirAll() error = %v", err)
+				t.Fatal(err)
 			}
 			fullProtoPath := filepath.Join(fullProtoDir, protoFilename)
 			if err := os.WriteFile(fullProtoPath, []byte(test.protoContent), 0644); err != nil {
-				t.Fatalf("os.WriteFile() error = %v", err)
+				t.Fatal(err)
 			}
 
 			if test.setup != nil {
 				if err := test.setup(repoDir); err != nil {
-					t.Fatalf("setup() error = %v", err)
+					t.Fatal(err)
 				}
 			}
 
@@ -382,7 +382,7 @@ import "google/api/annotations.proto";
 					t.Errorf("prepareForGenerateTest() returned error %q, want error containing %q", err.Error(), test.wantErrMsg)
 				}
 			} else if err != nil {
-				t.Fatalf("prepareForGenerateTest() returned unexpected error: %v", err)
+				t.Fatal(err)
 			}
 
 			// Check if a GUID was expected to be injected.
@@ -576,11 +576,11 @@ func TestTestGenerateRunnerRun(t *testing.T) {
 						protoFilename := "service.proto"
 						fullProtoDir := filepath.Join(repoDir, protoPath)
 						if err := os.MkdirAll(fullProtoDir, 0755); err != nil {
-							t.Fatalf("os.MkdirAll() error = %v", err)
+							t.Fatal(err)
 						}
 						protoContent := "service MyService {}"
 						if err := os.WriteFile(filepath.Join(fullProtoDir, protoFilename), []byte(protoContent), 0644); err != nil {
-							t.Fatalf("os.WriteFile() error = %v", err)
+							t.Fatal(err)
 						}
 					}
 				}
@@ -594,7 +594,7 @@ func TestTestGenerateRunnerRun(t *testing.T) {
 			mockRepoDir := t.TempDir()
 			for _, f := range test.repoChangedFiles {
 				if err := os.WriteFile(filepath.Join(mockRepoDir, f), []byte("some content"), 0644); err != nil {
-					t.Fatalf("failed to write file: %v", err)
+					t.Fatal(err)
 				}
 			}
 			mockRepo := &MockRepository{
@@ -630,7 +630,7 @@ func TestTestGenerateRunnerRun(t *testing.T) {
 					t.Errorf("runner.run() returned error %q, want error containing %q", err.Error(), test.wantErrMsg)
 				}
 			} else if err != nil {
-				t.Fatalf("runner.run() returned unexpected error: %v", err)
+				t.Fatal(err)
 			}
 		})
 	}
@@ -698,7 +698,7 @@ func TestCleanup(t *testing.T) {
 					t.Errorf("cleanup() returned error %q, want error containing %q", err.Error(), test.wantErrMsg)
 				}
 			} else if err != nil {
-				t.Fatalf("cleanup() returned unexpected error: %v", err)
+				t.Fatal(err)
 			}
 
 			if test.sourceRepo.DeleteLocalBranchesCalls != test.wantDeleteLocalBranchesCalls {

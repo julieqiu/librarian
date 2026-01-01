@@ -71,7 +71,7 @@ func TestParseLibrary(t *testing.T) {
 			tmpDir := t.TempDir()
 			reqPath := filepath.Join(tmpDir, "generate-request.json")
 			if err := os.WriteFile(reqPath, []byte(tc.content), 0644); err != nil {
-				t.Fatalf("failed to write test file: %v", err)
+				t.Fatal(err)
 			}
 
 			got, err := ParseLibrary(reqPath)

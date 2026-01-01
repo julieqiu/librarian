@@ -146,13 +146,13 @@ func TestGenerate_DefaultBehavior(t *testing.T) {
 	cfg.APISource = apiSourceDir
 	runner, err := newGenerateRunner(cfg)
 	if err != nil {
-		t.Fatalf("newGenerateRunner() failed: %v", err)
+		t.Fatal(err)
 	}
 
 	runner.ghClient = mockGH
 	runner.containerClient = mockContainer
 	if err := runner.run(ctx); err != nil {
-		t.Fatalf("runner.run() failed: %v", err)
+		t.Fatal(err)
 	}
 
 	// 4. Assertions
@@ -254,7 +254,7 @@ func newTestGitRepoWithState(t *testing.T, state *legacyconfig.LibrarianState) l
 	runGit(t, dir, "config", "user.email", "test@example.com")
 	runGit(t, dir, "config", "user.name", "Test User")
 	if err := os.WriteFile(filepath.Join(dir, "README.md"), []byte("test"), 0644); err != nil {
-		t.Fatalf("os.WriteFile: %v", err)
+		t.Fatal(err)
 	}
 	// If state is nil, skip creating the .librarian directory
 	// and the state.yaml/legacyconfig.yaml files and return with a initial commit
@@ -271,7 +271,7 @@ func newTestGitRepoWithState(t *testing.T, state *legacyconfig.LibrarianState) l
 	// Create a state.yaml and legacyconfig.yaml file in .librarian dir.
 	librarianDir := filepath.Join(dir, legacyconfig.LibrarianDir)
 	if err := os.MkdirAll(librarianDir, 0755); err != nil {
-		t.Fatalf("os.MkdirAll: %v", err)
+		t.Fatal(err)
 	}
 
 	// Setup each source root directory to be non-empty (one `random_file.txt`)
@@ -290,15 +290,15 @@ func newTestGitRepoWithState(t *testing.T, state *legacyconfig.LibrarianState) l
 
 	bytes, err := yaml.Marshal(state)
 	if err != nil {
-		t.Fatalf("yaml.Marshal() = %v", err)
+		t.Fatal(err)
 	}
 	stateFile := filepath.Join(librarianDir, "state.yaml")
 	if err := os.WriteFile(stateFile, bytes, 0644); err != nil {
-		t.Fatalf("os.WriteFile: %v", err)
+		t.Fatal(err)
 	}
 	configFile := filepath.Join(librarianDir, "legacyconfig.yaml")
 	if err := os.WriteFile(configFile, []byte{}, 0644); err != nil {
-		t.Fatalf("os.WriteFile: %v", err)
+		t.Fatal(err)
 	}
 
 	runGit(t, dir, "add", ".")
@@ -331,41 +331,41 @@ func setupRepoForGetCommits(t *testing.T, pathAndMessages []pathAndMessage, tags
 	dir := t.TempDir()
 	gitRepo, err := git.PlainInit(dir, false)
 	if err != nil {
-		t.Fatalf("git.PlainInit failed: %v", err)
+		t.Fatal(err)
 	}
 
 	createAndCommit := func(path, msg string) {
 		w, err := gitRepo.Worktree()
 		if err != nil {
-			t.Fatalf("Worktree() failed: %v", err)
+			t.Fatal(err)
 		}
 		fullPath := filepath.Join(dir, path)
 		if err := os.MkdirAll(filepath.Dir(fullPath), 0755); err != nil {
-			t.Fatalf("os.MkdirAll failed: %v", err)
+			t.Fatal(err)
 		}
 		content := fmt.Sprintf("content-%d", rand.Intn(10000))
 		if err := os.WriteFile(fullPath, []byte(content), 0644); err != nil {
-			t.Fatalf("os.WriteFile failed: %v", err)
+			t.Fatal(err)
 		}
 		if _, err := w.Add(path); err != nil {
-			t.Fatalf("w.Add failed: %v", err)
+			t.Fatal(err)
 		}
 		_, err = w.Commit(msg, &git.CommitOptions{
 			Author: &object.Signature{Name: "Test", Email: "test@example.com"},
 		})
 		if err != nil {
-			t.Fatalf("w.Commit failed: %v", err)
+			t.Fatal(err)
 		}
 	}
 
 	createAndCommit(pathAndMessages[0].path, pathAndMessages[0].message)
 	head, err := gitRepo.Head()
 	if err != nil {
-		t.Fatalf("repo.Head() failed: %v", err)
+		t.Fatal(err)
 	}
 	for _, tag := range tags {
 		if _, err := gitRepo.CreateTag(tag, head.Hash(), nil); err != nil {
-			t.Fatalf("CreateTag failed: %v", err)
+			t.Fatal(err)
 		}
 	}
 
@@ -375,7 +375,7 @@ func setupRepoForGetCommits(t *testing.T, pathAndMessages []pathAndMessage, tags
 
 	r, err := legacygitrepo.NewRepository(&legacygitrepo.RepositoryOptions{Dir: dir})
 	if err != nil {
-		t.Fatalf("legacygitrepo.NewRepository failed: %v", err)
+		t.Fatal(err)
 	}
 	return r
 }
