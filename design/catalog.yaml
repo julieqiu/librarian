@@ -1,10 +1,14 @@
-# Central Catalog of APIs
-# This file serves as the master list of all APIs available for client library generation.
-# It maps logical API groups to their specific proto and service configuration paths within
-# the googleapis/googleapis repository.
+# Central Catalog of APIs (catalog.yaml)
+# The central registry of all APIs available for client generation.
+#
+# Defines:
+# - Canonical API identities
+# - API maturity (Standard/Legacy acting as proxy for GA/Beta/Alpha policies)
+# - Mapping between APIs and their source locations
+#
+# Used by Librarian to validate, resolve, and enumerate supported APIs.
 
-# APIs that SHOULD be onboarded by language repositories.
-# These represent the active, supported surface of Google Cloud APIs.
+# Standard APIs: The active, supported surface of Google Cloud APIs.
 standard:
   - api_path: google/cloud/secretmanager/v1
     service_config_path: google/cloud/secretmanager/v1/secretmanager_v1.yaml
@@ -15,8 +19,7 @@ standard:
   - api_path: google/cloud/aiplatform/v1
     service_config_path: google/cloud/aiplatform/v1/aiplatform_v1.yaml
 
-# APIs that are maintained for legacy reasons and may not be recommended for new adoption.
-# These may only be supported by a specific list of languages.
+# Legacy APIs: Maintained for legacy reasons, may not be recommended for new adoption.
 legacy:
   - api_path: google/cloud/dialogflow/v2
     service_config_path: google/cloud/dialogflow/v2/dialogflow_v2.yaml

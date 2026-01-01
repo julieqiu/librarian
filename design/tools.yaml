@@ -1,0 +1,37 @@
+# Reference tools.yaml Configuration
+# This file serves as the specification for the tools.yaml schema.
+# It defines the build environment, including language runtimes and specific tools
+# required for the Librarian workspace.
+
+# The schema version of this configuration file.
+version: v1
+
+# Python-specific tooling configuration.
+python:
+  version: "3.14" # The required Python runtime version.
+  tools:
+    pip:
+      # Tools installed via pip.
+      # Supports version pinning and git URLs.
+      - name: gcp-synthtool
+        version: git+https://github.com/googleapis/synthtool@5aa438a342707842d11fbbb302c6277fbf9e4655
+      - name: nox
+        # Version is optional; implies latest/compatible.
+
+    curl:
+      # Tools downloaded directly via curl/wget.
+      # Useful for standalone binaries or archives.
+      - name: https://github.com/jgm/pandoc/releases/download/$VERSION/pandoc-$VERSION-linux-amd64.tar.gz
+        version: "3.8.2"
+        sha256: "<sha256>" # Checksum verification is mandatory for curl downloads.
+
+# Rust-specific tooling configuration.
+rust:
+  version: "1.76" # The required Rust toolchain version.
+  tools:
+    cargo:
+      # Tools installed via `cargo install`.
+      - name: cargo-semver-checks
+        version: "0.44.0"
+      - name: cargo-workspaces
+        version: "0.4.0"

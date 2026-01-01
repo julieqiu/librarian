@@ -2,37 +2,68 @@
 
 This directory contains the design specifications for the `librarian.yaml` configuration schema, CLI tooling, automation, and associated workflows.
 
+## Unified Configuration Architecture
+
+Librarian implements a "Single Source of Truth" model that centralizes configuration across the ecosystem, eliminating redundant files (e.g., `BUILD.bazel`, `GAPIC YAML`, `API Index`) and separating concerns.
+
+### 1. [librarian.yaml](./librarian.yaml) (The Manifest)
+**Owner:** Language Repository.
+**Role:** Authoritative source for **language-specific** configuration and repository state.
+**Key Features:** 
+- Library versions and inventory.
+- Language-specific generation overrides.
+- **Safe Removal Policy**: Uses explicit `delete_patterns` to clean stale generated code.
+
+### 2. [catalog.yaml](./catalog.yaml) (The Registry)
+**Owner:** Platform / Central.
+**Role:** Master list of **all APIs** available for generation.
+**Key Features:**
+- Canonical API identities.
+- API maturity tracking.
+- Mapping to upstream source locations.
+
+### 3. [tools.yaml](./tools.yaml) (The Environment)
+**Owner:** Language Maintainer.
+**Role:** Declarative manifest of the **build environment**.
+**Key Features:**
+- Required language runtimes (e.g., Python 3.14, Rust 1.76).
+- Tooling dependencies (e.g., `protoc`, `cargo-semver-checks`).
+
+### 4. [serviceconfig.yaml](./serviceconfig.yaml) (The API Definition)
+**Owner:** API Producer (Upstream).
+**Role:** Authoritative **language-neutral** configuration for an API.
+**Key Features:**
+- Transports and numeric enum settings.
+- Retry policies and request deadlines (merged from gRPC JSON).
+- LRO (Long Running Operation) polling settings.
+
+## Design Principles
+
+1.  **Strict Separation of Concerns**: Language-neutral settings live in the Service Config; language-specific settings live in `librarian.yaml`.
+2.  **Explicit Intent**: Use explicit `delete_patterns` for cleanup rather than implicit "preserve" lists to prevent stale code persistence.
+3.  **No Redundancy**: If data exists in the Service Config, it should not be duplicated in `librarian.yaml`.
+4.  **Consumptive Stability**: Librarian acts as the integration layer, reconciling legacy inputs with the emerging unified model during the migration phase.
+
 ## Documents
 
 ### Configuration
-*   **[librarian.yaml](./librarian.yaml)**: The reference specification and annotated example of the new configuration schema. This defines the structure for global settings, tooling, generation inputs, and the release inventory.
-*   **[catalog.yaml](./catalog.yaml)**: The central manifest of all available APIs (Standard and Legacy) that can be onboarded for client library generation.
-*   **[serviceconfig.yaml](./serviceconfig.yaml)**: An example of the upstream Service Configuration file (found in `googleapis/googleapis`) which serves as a primary input for generation.
-*   **[googleapis.md](./googleapis.md)**: Describes the upstream `googleapis` repository and the role of the central catalog, referencing `catalog.yaml` and `serviceconfig.yaml` for their detailed structures.
-
-### Automation
-*   **[librarianops.md](./librarianops.md)**: Architecture for the automation engine (Service + CLI) that drives synchronization, onboarding, and releases.
-
-### Workflows & Processes
-*   **[onboarding.md](./onboarding.md)**: Describes the workflow for onboarding new client libraries, driven by `librarian create` and `librarianops onboard-apis`.
-*   **[generate.md](./generate.md)**: Details the code generation workflow, using `librarian generate` and `librarianops generate-all`.
-*   **[release.md](./release.md)**: Outlines the release workflow, including `librarian release`, `librarian publish`, and `librarianops release`.
-*   **[branches.md](./branches.md)**: Defines the branching strategy, covering Release branches (for standard and hotfix releases), Bot branches, and Feature branches.
-*   **[delete.md](./delete.md)**: Describes the workflow for deleting a client library from `librarian`'s management.
-*   **[engplan.md](./engplan.md)**: The phased engineering execution plan for building and deploying the `librarian` ecosystem.
-*   **[freeze.md](./freeze.md)**: A detailed workflow guide for handling emergency releases (hotfixes) during a repository code freeze.
-*   **[cli.md](./cli.md)**: Specification for the new `librarian` CLI commands (`create`, `generate`, `update`, `release`, `publish`) and their relationship to the legacy `sidekick` tool.
-*   **[rust.md](./rust.md)**: A concrete "How-To" guide for Rust contributors, demonstrating the new CLI commands in practice.
+*   **[librarian.yaml](./librarian.yaml)**: The reference specification and annotated example of the new configuration schema.
+*   **[catalog.yaml](./catalog.yaml)**: The central manifest of all available APIs that can be onboarded.
+*   **[tools.yaml](./tools.yaml)**: Specification for the build environment and tooling requirements.
+*   **[serviceconfig.yaml](./serviceconfig.yaml)**: The upstream Service Configuration file (from `googleapis/googleapis`).
+*   **[googleapis.md](./googleapis.md)**: Describes the upstream repository and the role of the central catalog.
 
 ### Open Issues & Considerations
-*   **[Release Ownership and Control](./issues/release-ownership.md)**: Discusses the challenge of empowering language teams with control over release timing for specific libraries, addressed by the `release: false` flag. ([GitHub Issue #2951](https://github.com/googleapis/librarian/issues/2951))
-*   **[Staggered Release](./issues/staggered-release.md)**: Discusses the problem of managing large-scale releases and the solution using the `--limit` flag for staggered rollouts. ([GitHub Issue #3254](https://github.com/googleapis/librarian/issues/3254))
-*   **[Multiple Python Runtimes](./issues/multiple-runtimes.md)**: Addresses the problem of supporting multiple Python runtimes in the Librarian image and the plan to consolidate to a single 3.14 runtime.
-*   **[Release Level Inference](./issues/release-level-inference.md)**: Proposes logic for automatically setting `release_level` (stable vs. preview) based on API path versions and launch stages. ([GitHub Issue #2352](https://github.com/googleapis/librarian/issues/2352))
+*   **[Unified Configuration](./issues/unified-config.md)**: Tracks the "Single Source of Truth" initiative (Milestone 72), including the consolidation of `BUILD.bazel`, `GAPIC YAML`, and `gRPC JSON`.
+*   **[Release Ownership and Control](./issues/release-ownership.md)**: Empowering language teams with control over release timing.
+*   **[Staggered Release](./issues/staggered-release.md)**: Managing large-scale releases using the `--limit` flag.
+*   **[Multiple Python Runtimes](./issues/multiple-runtimes.md)**: Supporting multiple runtimes vs. consolidating to 3.14.
+*   **[Release Level Inference](./issues/release-level-inference.md)**: Automatically setting `release_level` based on API versions.
 
-## Key Design Principles
-
-1.  **Single Source of Truth:** A unified `libraries` list defines both the generation inputs and the release artifacts, avoiding split-brain configuration states.
-2.  **Explicit Intent:** We use explicit flags (`generate: false`) rather than implicit "modes" to handle handwritten or broken libraries.
-3.  **Separation of Concerns:** Global `generation` and `release` settings are isolated in their own top-level blocks.
-4.  **Safety:** The design prioritizes repository consistency and explicit opt-ins for complex behaviors like "Veneer" libraries.
+### Workflows & Processes
+*   **[onboarding.md](./onboarding.md)**: Workflow for onboarding new client libraries.
+*   **[generate.md](./generate.md)**: Code generation workflow details.
+*   **[release.md](./release.md)**: Release, publish, and automation workflows.
+*   **[branches.md](./branches.md)**: Branching strategy (Release, Bot, Feature).
+*   **[cli.md](./cli.md)**: Specification for the `librarian` CLI commands.
+*   **[engplan.md](./engplan.md)**: Phased engineering execution plan.
