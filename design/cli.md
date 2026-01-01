@@ -120,7 +120,7 @@ Release
 
 `librarian release <library> | --all [flags]`
 
-Release updates versions and prepares release artifacts. It calculates the next semantic version based on changes, updates manifest files, and generates changelog entries. Either the library argument or the --all flag is required.
+Release updates versions and prepares release artifacts. It calculates the next semantic version based on changes, updates manifest files. Either the library argument or the --all flag is required.
 
 When using `--all`, the command will attempt to process all eligible libraries. If a release for a specific library fails, the command will report the error, but it will not halt the entire batch operation. It will continue attempting to release the remaining libraries. A summary of all successes and failures will be provided upon completion.
 

@@ -143,7 +143,6 @@ The following table outlines the planned consolidation of legacy configuration f
 | **`*_grpc_service_config.json`**  | Retry policies, request deadlines                  | `serviceconfig`              |
 | **`.sidekick.toml`**              | Library inventory, state, Rust-specific settings   | `librarian.yaml`             |
 | **`.librarian/state.yaml`**       | Library versions, generated commits, metadata      | `librarian.yaml`             |
-| **API Index / Central Catalog**   | API paths, service config locations                | `sdk.yaml`                   |
 | **`synthtool` (post-processing)** | Custom file movement, templating logic             | `librarian.yaml` (minimized) |
 
 ### Deprecation
