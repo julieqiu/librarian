@@ -1,13 +1,10 @@
-Librarian Configuration Design
-==============================
+# Librarian Configuration Design
 
-Objective
----------
+## Objective
 
 Define the configurations used by the Librarian CLI.
 
-Background
-----------
+## Background
 
 Today, configuring a Google Cloud client library requires stitching together state from multiple disparate files. You might find transport settings in `GAPIC YAML`, file inclusion rules in `BUILD.bazel`, and versioning logic hidden in release scripts.
 
@@ -15,87 +12,65 @@ This fragmentation creates friction. It couples language-neutral concerns, like 
 
 We want to make this simpler. We are introducing a unified configuration architecture that decouples these concerns and establishes a clear, predictable flow of information from upstream API definitions to downstream client libraries.
 
-Overview
---------
+## Overview
 
 Our design structures configuration into four distinct domains of ownership. Each domain has a single authoritative manifest:
 
-1.	**API Definition (`serviceconfig`\)**: Service-neutral information owned by the service teams.
-2.	**SDK Manifest (`sdk.yaml`\)**: Defines the APIs we want to create SDKs for.
-3.	**Repository Manifest (`librarian.yaml`\)**: Information specific to a language or workspace.
-4.	**CLI Dependencies (`tool.yaml`\)**: Defines the specifications for the dependencies for the Librarian CLI.
+1.	**API Definition (`serviceconfig`)**: Service-neutral information owned by the service teams.
+2.	**SDK Manifest (`sdk.yaml`)**: Defines the APIs we want to create SDKs for.
+3.	**Repository Manifest (`librarian.yaml`)**: Information specific to a language or workspace.
+4.	**CLI Dependencies (`tool.yaml`)**: Defines the specifications for the dependencies for the Librarian CLI.
 
 Librarian acts as the integration engine, reconciling these inputs to produce consistent, high-quality client libraries.
 
-Detailed Design
----------------
+## Detailed Design
 
-### 1. The API Definition (`serviceconfig`\)
+### 1. The API Definition (`serviceconfig`)
 
 The service configuration defines the surface and behavior of a Google API. This is service-neutral information owned and maintained by the service teams within the `googleapis/googleapis` repository. It is the canonical description of what the API looks like to the tools that generate clients, documentation, and support infrastructure.
 
 Librarian reads this file but does not modify it.
 
-#### Structure
-
-A typical service configuration follows the `google.api.Service` schema and begins by identifying the service:
-
 ```yaml
+# A typical service configuration follows the google.api.Service schema.
 type: google.api.Service
 config_version: 3
 name: secretmanager.googleapis.com
 title: Secret Manager API
+
+# apis enumerates the public interfaces provided by the service.
+apis:
+  - name: google.cloud.secretmanager.v1.SecretManagerService
+
+# backend defines execution properties such as request deadlines and retry policies.
+backend:
+  rules:
+  - selector: google.cloud.secretmanager.v1.SecretManagerService.*
+    deadline: 60.0
+
+# http maps RPCs to REST endpoints.
+http:
+  rules:
+  - selector: google.cloud.secretmanager.v1.SecretManagerService.AccessSecretVersion
+    get: /v1/{name=projects/*/secrets/*/versions/*}:access
+
+# authentication specifies required OAuth scopes.
+authentication:
+  rules:
+  - selector: google.cloud.secretmanager.v1.SecretManagerService.*
+    oauth:
+      canonical_scopes: https://www.googleapis.com/auth/cloud-platform
+
+# publishing metadata connects the API to documentation and issue tracking.
+publishing:
+  documentation_uri: https://cloud.google.com/secret-manager/docs
+  github_label: api: secretmanager
+  organization: CLOUD
 ```
-
-It includes sections for:
-
--	**`apis`**: Enumerates the public interfaces provided by the service.
-
-	```yaml
-	apis:
-	  - name: google.cloud.secretmanager.v1.SecretManagerService
-	```
-
--	**`backend`**: Defines execution properties such as request deadlines and retry policies.
-
-	```yaml
-	backend:
-	  rules:
-	  - selector: google.cloud.secretmanager.v1.SecretManagerService.*
-	    deadline: 60.0
-	```
-
--	**`http`**: Maps RPCs to REST endpoints.
-
-	```yaml
-	http:
-	  rules:
-	  - selector: google.cloud.secretmanager.v1.SecretManagerService.AccessSecretVersion
-	    get: /v1/{name=projects/*/secrets/*/versions/*}:access
-	```
-
--	**`authentication`**: Specifies required OAuth scopes.
-
-	```yaml
-	authentication:
-	  rules:
-	  - selector: google.cloud.secretmanager.v1.SecretManagerService.*
-	    oauth:
-	      canonical_scopes: https://www.googleapis.com/auth/cloud-platform
-	```
-
--	**`publishing`**: Metadata connecting the API to documentation and issue tracking.
-
-	```yaml
-	publishing:
-	  documentation_uri: https://cloud.google.com/secret-manager/docs
-	  github_label: api: secretmanager
-	  organization: CLOUD
-	```
 
 We are migrating language-neutral settings like **Release Level** (Stable/Beta) and **Transport** into this file to further consolidate sources of truth.
 
-### 2. The SDK Manifest (`sdk.yaml`\)
+### 2. The SDK Manifest (`sdk.yaml`)
 
 The `sdk.yaml` file (formerly `catalog.yaml`) defines the set of APIs for which we want to create SDKs. It serves as the central registry that Librarian uses to validate, resolve, and enumerate supported APIs across the ecosystem.
 
@@ -122,7 +97,7 @@ legacy:
 -	**`legacy`**: A list of APIs that are maintained for backward compatibility.
 	-	**`languages`**: Restricts support for legacy APIs to specific languages.
 
-### 3. The Repository Manifest (`librarian.yaml`\)
+### 3. The Repository Manifest (`librarian.yaml`)
 
 Each language repository maintains a `librarian.yaml` file in its root directory. This manifest contains information specific to a particular language or workspace. It serves as the authoritative source for how that repository participates in the ecosystem.
 
@@ -190,7 +165,7 @@ libraries:
 -	**`module_path_version`**: The Go module version suffix (e.g., `/v2`).
 -	**`go_apis`**: Overrides for specific API paths within the module (e.g., `proto_package` renaming).
 
-### 4. CLI Dependencies (`tool.yaml`\)
+### 4. CLI Dependencies (`tool.yaml`)
 
 The Librarian CLI repository contains a `tool.yaml` file that defines the specifications for the dependencies required by the CLI itself.
 
@@ -224,8 +199,7 @@ rust:
 		-	**`version`**: Version pin or commit hash.
 		-	**`sha256`**: Checksum for direct downloads.
 
-Alternatives Considered
------------------------
+## Alternatives Considered
 
 ### Merging `tool.yaml` with `librarian.yaml`
 
@@ -243,8 +217,7 @@ We considered keeping the existing split between `GAPIC YAML`, `BUILD.bazel`, an
 
 We considered creating a single massive configuration file for the entire fleet. We rejected this because it would create a bottleneck for language maintainers and obscure the ownership boundaries between platform-wide API definitions and repository-specific build rules.
 
-Plan
-----
+## Plan
 
 While the long-term goal is a single source of truth, Librarian must operate in an environment where that does not yet fully exist. Our generators were designed to consume configuration from multiple independent sources, and many required fields have not yet been migrated to the upstream service configuration.
 
@@ -270,7 +243,6 @@ The following table outlines the planned consolidation of legacy configuration f
 | **API Index / Central Catalog**   | API paths, service config locations                | `sdk.yaml`                   |
 | **`synthtool` (post-processing)** | Custom file movement, templating logic             | `librarian.yaml` (minimized) |
 
-Deprecation
------------
+## Deprecation
 
 Once all of the GAPIC generators have migrated, we will delete the legacy configuration files.
