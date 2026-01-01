@@ -1,59 +1,177 @@
-Librarian CLI Specification
-===========================
+# Librarian CLI Specification
 
-This document describes the command-line interface for the new `librarian` tool, which replaces the legacy `sidekick` utility. The design emphasizes consistency and clear resource management verbs (Create, Generate, Update, Release, Publish).
+Librarian is a tool for managing Google Cloud client libraries.
 
-Command Reference
------------------
+It provides a unified interface for onboarding, generating, releasing, and publishing client libraries across multiple languages.
 
-### `librarian create`
+Usage:
 
-**Usage:** `librarian create <name> [apis...] [flags]`
+```
+librarian <command> [arguments]
+```
 
--	**Purpose:** Adds a new library to the `librarian.yaml` configuration and performs the initial code generation.
--	**Arguments:**
-	-	`<name>`: The name of the library to create (e.g., `google-cloud-secretmanager`).
-	-	`[apis...]`: One or more API paths (e.g., `google/cloud/secretmanager/v1`) that define the channels for this library. These are looked up in `sdk.yaml`.
+The commands are:
 
-### `librarian generate`
+*   **[create](#create)**: create a new client library
+*   **[generate](#generate)**: generate client library code
+*   **[update](#update)**: update sources to the latest version
+*   **[tidy](#tidy)**: format and validate librarian.yaml
+*   **[release](#release)**: prepare libraries for release
+*   **[publish](#publish)**: publish client libraries
+*   **[version](#version)**: print the librarian version
 
-**Usage:** `librarian generate [<name> | --all] [flags]`
+## Create
 
--	**Purpose:** Regenerates the code for managed libraries using the current configuration and sources.
--	**Arguments:**
-	-	`<name>`: (Optional) The name of a specific library to regenerate. If omitted, `--all` must be used.
--	**Flags:**
-	-	`--all`: Regenerate *all* libraries listed in `librarian.yaml`. Exclusive with `<name>` argument.
-	-	`--check`: Verify that the generated code matches the current configuration without modifying files. Returns a non-zero exit code if changes are detected.
+`librarian create <library> [flags]`
 
-### `librarian update`
+Create onboards a new client library by adding it to `librarian.yaml` and performing the initial code generation. The library argument is required.
 
-**Usage:** `librarian update [<source> | --all] [flags]`
+### Options
 
--	**Purpose:** Updates the internal state or global dependencies, such as the `googleapis` commit hash in `librarian.yaml`.
--	**Arguments:**
-	-	`<source>`: (Optional) The name of a specific source to update (e.g., `googleapis`, `protobuf`). If omitted, `--all` must be used.
--	**Flags:**
-	-	`--all`: Update *all* global sources to their latest valid versions. Exclusive with `<source>` argument.
+```
+      --output <path>
+          The directory where the library should be generated. If omitted, it is derived from defaults.
 
-### `librarian release`
+      --service-config <path>
+          The path to the upstream service configuration YAML.
 
-**Usage:** `librarian release [<name> | --all] [flags]`
+      --specification-format <format>
+          The format of the API source (default: protobuf).
 
--	**Purpose:** Prepares libraries for release. This typically involves calculating the next semantic version, updating `CHANGELOG.md`, and bumping versions in manifest files (e.g., `Cargo.toml`).
--	**Arguments:**
-	-	`<name>`: (Optional) The name of a specific library to prepare for release. If omitted, `--all` must be used.
--	**Flags:**
-	-	`--all`: Prepare release for *all* libraries that have changes. Exclusive with `<name>` argument.
-	-	`--limit <N>`: (Optional) Limit the number of libraries processed for release to N. Useful for staggered rollouts of large changes.
-	-	`--skip-semver-checks`: Skip semantic version compliance checks (e.g., `cargo semver-checks`) during release preparation. Use with caution.
+      --specification-source <path>
+          The path to the API definition in googleapis (e.g., google/cloud/secretmanager/v1).
+```
 
-### `librarian publish`
+### Examples
 
-**Usage:** `librarian publish [<name> | --all] [flags]`
+```
+# Create a library for Secret Manager
+$ librarian create google-cloud-secretmanager --specification-source google/cloud/secretmanager/v1
 
--	**Purpose:** Uploads the prepared artifacts to the package registry.
--	**Arguments:**
-	-	`<name>`: (Optional) The name of a specific artifact to publish. If omitted, `--all` must be used.
--	**Flags:**
-	-	`--all`: Publish *all* released artifacts. Exclusive with `<name>` argument.
+# Create a library with a custom output directory
+$ librarian create google-cloud-secretmanager --output src/secretmanager
+```
+
+## Generate
+
+`librarian generate <library> | --all [flags]`
+
+Generate regenerates the code for managed libraries using the current configuration and sources. Either the library argument or the --all flag is required.
+
+### Options
+
+```
+      --all
+          Regenerate all libraries listed in librarian.yaml. Exclusive with the library argument.
+```
+
+### Examples
+
+```
+# Regenerate all libraries
+$ librarian generate --all
+
+# Regenerate a single library
+$ librarian generate google-cloud-secretmanager
+```
+
+## Update
+
+`librarian update <source> | --all [flags]`
+
+Update updates external dependencies, such as the commit hash for `googleapis` in `librarian.yaml`, to the latest available version. Either the source argument or the --all flag is required.
+
+### Options
+
+```
+      --all
+          Update all configured sources. Exclusive with the source argument.
+```
+
+### Examples
+
+```
+# Update the googleapis source commit
+$ librarian update googleapis
+
+# Update all sources
+$ librarian update --all
+```
+
+## Tidy
+
+`librarian tidy`
+
+Tidy formats and validates the `librarian.yaml` configuration file. It simplifies entries by removing fields that can be derived from defaults.
+
+### Examples
+
+```
+# Format and validate librarian.yaml
+$ librarian tidy
+```
+
+## Release
+
+`librarian release <library> | --all [flags]`
+
+Release updates versions and prepares release artifacts. It calculates the next semantic version based on changes, updates manifest files, and generates changelog entries. Either the library argument or the --all flag is required.
+
+### Options
+
+```
+      --all
+          Process all libraries that have changed since the last release.
+```
+
+### Examples
+
+```
+# Prepare release for all eligible libraries
+$ librarian release --all
+
+# Prepare release for a specific library
+$ librarian release google-cloud-secretmanager
+```
+
+## Publish
+
+`librarian publish <library> | --all [flags]`
+
+Publish uploads prepared artifacts to package registries. Either the library argument or the --all flag is required.
+
+### Options
+
+```
+      --all
+          Publish all released artifacts.
+
+      --dry-run
+          Print the publish commands without executing them.
+
+      --skip-semver-checks
+          Skip semantic versioning checks.
+```
+
+### Examples
+
+```
+# Publish all artifacts
+$ librarian publish --all
+
+# Publish a specific library (dry run)
+$ librarian publish google-cloud-secretmanager --dry-run
+```
+
+## Version
+
+`librarian version`
+
+Version prints the version of the librarian binary.
+
+### Examples
+
+```
+$ librarian version
+librarian version 0.7.0
+```
