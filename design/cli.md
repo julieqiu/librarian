@@ -120,9 +120,28 @@ Release
 
 `librarian release <library> | --all [flags]`
 
-Release updates versions and prepares release artifacts. It calculates the next semantic version based on changes, updates manifest files. Either the library argument or the --all flag is required.
+Release prepares a library for a new release. It is the first step in a two-part release process, followed by `librarian publish`.
+
+This command's primary responsibility is to determine the correct next semantic version and update all necessary files within the local repository to reflect that new version. It does not create Git tags or interact with remote repositories.
+
+Its workflow is as follows:
+1.  It analyzes the Git commit history since the last release tag to identify changes (`feat`, `fix`, `BREAKING CHANGE`).
+2.  Based on the commit history, it calculates the next semantic version for each library that has changed.
+3.  It updates the `version` field for each library in the `librarian.yaml` manifest.
+4.  It propagates the new version into all language-specific package metadata files, preparing them to be committed and published.
 
 When using `--all`, the command will attempt to process all eligible libraries. If a release for a specific library fails, the command will report the error, but it will not halt the entire batch operation. It will continue attempting to release the remaining libraries. A summary of all successes and failures will be provided upon completion.
+
+### Python Workflow
+For a Python library, `librarian release` updates the `version` in `librarian.yaml` and then writes that new version into key package files, such as:
+- `setup.py` or `pyproject.toml`
+- `gapic_version.py` or `version.py`
+- `samples/**/snippet_metadata.json`
+
+This ensures that when the package is built by `librarian publish`, all metadata is consistent.
+
+### Rust Workflow
+For a Rust library, `librarian release` is the equivalent of the legacy `sidekick rust-bump-versions` command. It updates the `version` in `librarian.yaml` and propagates that change to the `version` field in each crate's `Cargo.toml` file.
 
 ### Options
 

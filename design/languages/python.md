@@ -33,7 +33,7 @@ The workflow is orchestrated through a series of `librarian` commands that wrap 
     5.  **`keep` field:** The `keep` field in `librarian.yaml` is respected. Files listed here (e.g., `noxfile.py`, handwritten samples) are preserved and are not deleted during the pre-generation cleanup of the output directory.
 
 ### `librarian release`
--   **Functionality:** Prepares a new release by calculating the next version and updating Python package files to reflect that version.
+-   **Functionality:** Prepares a new release by calculating the next version and updating Python package files to reflect that version. This command modifies local files, which are then expected to be committed before being published with `librarian publish`.
 -   **Python-Specifics:**
     1.  **Version Calculation:**
         *   The system first reads the current version of the library from its entry within the `librarian.yaml` manifest.
