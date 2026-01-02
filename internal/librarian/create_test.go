@@ -150,7 +150,7 @@ func TestCreateCommand(t *testing.T) {
 			args: []string{
 				"librarian",
 				"create",
-				"google-cloud-secretmanager",
+				"google-cloud-secretmanager-v1",
 			},
 		},
 		{
