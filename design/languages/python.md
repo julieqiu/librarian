@@ -32,28 +32,25 @@ The workflow is orchestrated through a series of `librarian` commands that wrap 
     4.  **Post-Processing:** After generation, `librarian` runs standard Python formatters like `black` and `isort` on the generated code to ensure it conforms to `google-cloud-python` style guides.
     5.  **`keep` field:** The `keep` field in `librarian.yaml` is respected. Files listed here (e.g., `noxfile.py`, handwritten samples) are preserved and are not deleted during the pre-generation cleanup of the output directory.
 
-### `librarian release`
--   **Functionality:** Prepares a new release by calculating the next version and updating Python package files to reflect that version. This command modifies local files, which are then expected to be committed before being published with `librarian publish`.
+### `librarian stage`
+-   **Functionality:** Prepares a new release by calculating the next version and updating Python package files. This command modifies local files, which are then expected to be committed.
 -   **Python-Specifics:**
-    1.  **Version Calculation:**
-        *   The system first reads the current version of the library from its entry within the `librarian.yaml` manifest.
-        *   It then analyzes the library's conventional commit history since the last recorded release. Based on the types of changes (e.g., `feat` for minor, `fix` for patch, `BREAKING CHANGE` for major), it determines the appropriate next semantic version (e.g., 1.0.0 -> 1.0.1 or 1.1.0).
-    2.  **Update `librarian.yaml`:**
-        *   Once the next semantic version has been calculated, the version field for the specific library within the `librarian.yaml` manifest is updated to this newly determined version. This ensures that `librarian.yaml` remains the authoritative "single source of truth" for the library's version.
-    3.  **File Updates:**
-        *   The newly calculated version is then propagated and written into several key generated Python package files to ensure consistency across the library's distribution. This includes:
-            *   **Version Definition Files:** Updates the `__version__` variable in `gapic_version.py` or `version.py` files (e.g., `my_library/v1/gapic_version.py`). If present, it also updates the `__release_date__` variable to the current date.
-            *   **Project Metadata Files:** Modifies the version field within `setup.py` or `pyproject.toml`, which are used for packaging and distribution.
-            *   **Snippet Metadata Files:** Updates the `clientLibrary.version` field in `samples/**/snippet_metadata.json` files, ensuring sample code metadata reflects the correct client library version.
-    4.  **Validation:** It is expected that project-specific CI pipelines will run `pytest` or `nox` as a separate validation step. `librarian release` focuses solely on versioning and file updates.
+    1.  **Version Calculation:** Analyzes the library's conventional commit history since the last recorded release to determine the next semantic version.
+    2.  **Update `librarian.yaml`:** Updates the `version` field for the specific library within the `librarian.yaml` manifest.
+    3.  **File Updates:** Propagates the new version into key generated Python package files, including `setup.py`, `gapic_version.py`, and `samples/**/snippet_metadata.json`.
+
+### `librarian tag`
+-   **Functionality:** Creates and pushes the Git tag for a staged Python package.
+-   **Python-Specifics:**
+    1.  **Change Detection:** Identifies which libraries are candidates for tagging by finding which library versions in `librarian.yaml` have been updated since the last release tag.
+    2.  **Tagging:** Creates and pushes a Git tag to the repository, formatted according to the `tag_format` specified in `librarian.yaml` (e.g., `google-cloud-secret-manager/v2.25.0`).
 
 ### `librarian publish`
--   **Functionality:** Publishes packages that have changed since the last release tag.
+-   **Functionality:** Publishes a tagged Python package to PyPI.
 -   **Python-Specifics:**
-    1.  **Change Detection:** It identifies which libraries are candidates for publishing by finding which library versions in `librarian.yaml` have been updated since the last release tag (using `git diff`).
-    2.  **Build:** For each candidate library, it builds the source distribution (`sdist`) and wheel (`bdist_wheel`) using `setup.py`.
-    3.  **Publish:** It uses `twine` to upload the built artifacts to the Python Package Index (PyPI).
-    4.  **Tagging:** After a successful publish, it creates and pushes a Git tag to the repository, formatted according to the `tag_format` specified in `librarian.yaml` (e.g., `google-cloud-secret-manager/v2.25.0`).
+    1.  **Change Detection:** Identifies which libraries are candidates for publishing based on the presence of a new release tag.
+    2.  **Build:** Builds the source distribution (`sdist`) and wheel (`bdist_wheel`) using `setup.py`.
+    3.  **Publish:** Uses `twine` to upload the built artifacts to the Python Package Index (PyPI).
 
 ## Alternatives Considered
 (This section can be filled in as the design evolves.)

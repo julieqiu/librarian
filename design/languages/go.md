@@ -23,7 +23,7 @@ The workflow is orchestrated through `librarian` commands that wrap standard Go 
 -   **Functionality:** Adds a new library entry to `librarian.yaml`.
 -   **Go-Specifics:**
     -   Configures the Go module path and relevant API paths.
-    -   The `output` directory defaults to the module path relative to the repository root (e.g., `secretmanager/apiv1`).
+    -   The `output` directory defaults to the module path relative to the repository root (e.g., `secretmanager/apv1`).
 
 ### `librarian generate`
 -   **Functionality:** Orchestrates the Go GAPIC generator to produce client library code.
@@ -34,20 +34,24 @@ The workflow is orchestrated through `librarian` commands that wrap standard Go 
     4.  **Post-Processing:** Runs post-processing steps like `go mod tidy` to manage dependencies, applies Go-specific formatting, and updates snippet metadata.
     5.  **Global File Modifications:** Respects a configuration setting (analogous to the legacy `global_files_allowlist`) that permits modifications to shared, repository-level files like `internal/generated/snippets/go.mod`.
 
-### `librarian release`
--   **Functionality:** Prepares a new release by calculating the next version and updating Go module files. This command modifies local files, which are then expected to be committed before being published.
+### `librarian stage`
+-   **Functionality:** Prepares a new release by calculating the next version and updating Go module files. This command modifies local files, which are then expected to be committed.
 -   **Go-Specifics:**
-    2.  **Version Calculation:** Analyzes the Git commit history since the last release tag to determine the next semantic version.
-    3.  **Update `librarian.yaml`:** Modifies `librarian.yaml` to set the `version` field for the library to the newly calculated version.
-    4.  **Internal Version File Generation:** Creates or updates `internal/version.go` within the module's directory, embedding the new version string directly into the Go source code.
-    5.  **Snippet Metadata Update:** Updates the `clientLibrary.version` field in all relevant `snippet_metadata.json` files with the new version.
+    1.  **Version Calculation:** Analyzes the Git commit history since the last release tag to determine the next semantic version.
+    2.  **Update `librarian.yaml`:** Modifies `librarian.yaml` to set the `version` field for the library to the newly calculated version.
+    3.  **Internal Version File Generation:** Creates or updates `internal/version.go` within the module's directory, embedding the new version string directly into the Go source code.
+    4.  **Snippet Metadata Update:** Updates the `clientLibrary.version` field in all relevant `snippet_metadata.json` files with the new version.
+
+### `librarian tag`
+-   **Functionality:** Creates and pushes the Git tag for a staged Go module.
+-   **Go-Specifics:**
+    1.  **Change Detection:** Identifies which Go modules are candidates for tagging by checking for updated versions in `librarian.yaml` since the last Git tag.
+    2.  **Tagging:** For each candidate module, it creates and pushes a new Git tag. The tag's format is derived from the module's path and version (e.g., `secretmanager/apiv1/v1.5.0`).
 
 ### `librarian publish`
--   **Functionality:** Publishes Go modules that have changed since the last release tag.
+-   **Functionality:** Finalizes the publication of Go modules by triggering Go Proxy discovery.
 -   **Go-Specifics:**
-    1.  **Change Detection:** Identifies which Go modules are candidates for publishing by checking for updated versions in `librarian.yaml`.
-    2.  **Tagging:** For each candidate module, it creates and pushes a new Git tag. The tag's format is derived from the module's path and version (e.g., `secretmanager/apiv1/v1.5.0`).
-    3.  **Go Proxy Ingestion:** Publishing is achieved by pushing the tag. The Go Proxy (`proxy.golang.org`) automatically detects new module versions from these tags.
+    1.  **Trigger Go Proxy Discovery:** For each newly tagged module, it runs a `go get <module_path>@<version>` command (e.g., `go get cloud.google.com/go/secretmanager/apiv1@v1.5.0`). This explicit `go get` operation signals the Go Proxy to discover and index the newly released module version.
 
 ## Alternatives Considered
 (This section can be filled in as the design evolves.)
