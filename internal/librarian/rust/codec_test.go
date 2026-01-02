@@ -32,7 +32,6 @@ func TestToSidekickConfig(t *testing.T) {
 		protobufDir    string
 		conformanceDir string
 		showcaseDir    string
-		copyrightYear  string
 		want           *sidekickconfig.Config
 	}{
 		{
@@ -95,10 +94,10 @@ func TestToSidekickConfig(t *testing.T) {
 		{
 			name: "with copyright year",
 			library: &config.Library{
-				Name:  "google-cloud-storage",
-				Roots: []string{"googleapis"},
+				Name:          "google-cloud-storage",
+				CopyrightYear: "2024",
+				Roots:         []string{"googleapis"},
 			},
-			copyrightYear: "2024",
 			channel: &config.Channel{
 				Path:          "google/cloud/storage/v1",
 				ServiceConfig: "google/cloud/storage/v1/storage_v1.yaml",
@@ -713,14 +712,14 @@ func TestToSidekickConfig(t *testing.T) {
 			if test.library.Rust != nil && test.library.Rust.Modules != nil {
 				var commentOverrides []sidekickconfig.DocumentationOverride
 				for _, module := range test.library.Rust.Modules {
-					got := moduleToSidekickConfig(test.library, module, test.googleapisDir, test.protobufDir, test.copyrightYear)
+					got := moduleToSidekickConfig(test.library, module, test.googleapisDir, test.protobufDir)
 					commentOverrides = append(commentOverrides, got.CommentOverrides...)
 				}
 				if diff := cmp.Diff(test.want.CommentOverrides, commentOverrides); diff != "" {
 					t.Errorf("mismatch (-want +got):\n%s", diff)
 				}
 			} else {
-				got := toSidekickConfig(test.library, test.channel, test.googleapisDir, test.discoveryDir, test.protobufDir, test.conformanceDir, test.showcaseDir, test.copyrightYear)
+				got := toSidekickConfig(test.library, test.channel, test.googleapisDir, test.discoveryDir, test.protobufDir, test.conformanceDir, test.showcaseDir)
 				if diff := cmp.Diff(test.want, got); diff != "" {
 					t.Errorf("mismatch (-want +got):\n%s", diff)
 				}

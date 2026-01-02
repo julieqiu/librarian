@@ -39,16 +39,16 @@ type Sources struct {
 }
 
 // Generate generates a Rust client library.
-func Generate(ctx context.Context, library *config.Library, sources *Sources, copyrightYear string) error {
+func Generate(ctx context.Context, library *config.Library, sources *Sources) error {
 	if library.Veneer {
-		return generateVeneer(ctx, library, sources.Googleapis, sources.ProtobufSrc, copyrightYear)
+		return generateVeneer(ctx, library, sources.Googleapis, sources.ProtobufSrc)
 	}
 	if len(library.Channels) != 1 {
 		return fmt.Errorf("the Rust generator only supports a single channel per library")
 	}
 
 	sidekickConfig := toSidekickConfig(library, library.Channels[0],
-		sources.Googleapis, sources.Discovery, sources.ProtobufSrc, sources.Conformance, sources.Showcase, copyrightYear)
+		sources.Googleapis, sources.Discovery, sources.ProtobufSrc, sources.Conformance, sources.Showcase)
 	model, err := parser.CreateModel(sidekickConfig)
 	if err != nil {
 		return err
@@ -72,12 +72,12 @@ func Format(ctx context.Context, library *config.Library) error {
 	return nil
 }
 
-func generateVeneer(ctx context.Context, library *config.Library, googleapisDir, protobufSrcDir, copyrightYear string) error {
+func generateVeneer(ctx context.Context, library *config.Library, googleapisDir, protobufSrcDir string) error {
 	if library.Rust == nil || len(library.Rust.Modules) == 0 {
 		return fmt.Errorf("veneer %q has no modules defined", library.Name)
 	}
 	for _, module := range library.Rust.Modules {
-		sidekickConfig := moduleToSidekickConfig(library, module, googleapisDir, protobufSrcDir, copyrightYear)
+		sidekickConfig := moduleToSidekickConfig(library, module, googleapisDir, protobufSrcDir)
 		model, err := parser.CreateModel(sidekickConfig)
 		if err != nil {
 			return fmt.Errorf("module %s: %w", module.Output, err)

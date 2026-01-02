@@ -178,7 +178,8 @@ func TestBuildGAPIC(t *testing.T) {
 							ServiceConfig: "google/cloud/security/publicca/v1/publicca_v1.yaml",
 						},
 					},
-					Version: "1.1.0",
+					Version:       "1.1.0",
+					CopyrightYear: "2025",
 					Keep: []string{
 						"src/errors.rs",
 						"src/operation.rs",
@@ -222,6 +223,7 @@ func TestBuildGAPIC(t *testing.T) {
 					},
 					SkipPublish:         true,
 					Version:             "1.2.0",
+					CopyrightYear:       "2025",
 					SpecificationFormat: "openapi",
 					Output:              "testdata/read-sidekick-files/success-read",
 					Rust: &config.RustCrate{
@@ -440,10 +442,11 @@ func TestBuildVeneer(t *testing.T) {
 			},
 			want: map[string]*config.Library{
 				"google-cloud-storage": {
-					Name:    "google-cloud-storage",
-					Veneer:  true,
-					Output:  "testdata/build-veneer/success/lib-1",
-					Version: "1.5.0",
+					Name:          "google-cloud-storage",
+					Veneer:        true,
+					Output:        "testdata/build-veneer/success/lib-1",
+					Version:       "1.5.0",
+					CopyrightYear: "2025",
 					Rust: &config.RustCrate{
 						Modules: []*config.RustModule{
 							{
@@ -482,11 +485,12 @@ func TestBuildVeneer(t *testing.T) {
 					},
 				},
 				"google-cloud-spanner": {
-					Name:         "google-cloud-spanner",
-					Veneer:       true,
-					Output:       "testdata/build-veneer/success/lib-2",
-					Version:      "0.0.0",
-					SkipGenerate: true,
+					Name:          "google-cloud-spanner",
+					Veneer:        true,
+					Output:        "testdata/build-veneer/success/lib-2",
+					Version:       "0.0.0",
+					CopyrightYear: "2025",
+					SkipGenerate:  true,
 				},
 			},
 		},
@@ -497,10 +501,11 @@ func TestBuildVeneer(t *testing.T) {
 			},
 			want: map[string]*config.Library{
 				"google-cloud-storage-overridden": {
-					Name:    "google-cloud-storage-overridden",
-					Veneer:  true,
-					Output:  "testdata/build-veneer/with-overrides/lib-1",
-					Version: "1.5.0",
+					Name:          "google-cloud-storage-overridden",
+					Veneer:        true,
+					Output:        "testdata/build-veneer/with-overrides/lib-1",
+					Version:       "1.5.0",
+					CopyrightYear: "2025",
 					Rust: &config.RustCrate{
 						Modules: []*config.RustModule{
 							{
@@ -538,11 +543,12 @@ func TestBuildVeneer(t *testing.T) {
 			},
 			want: map[string]*config.Library{
 				"google-cloud-spanner": {
-					Name:         "google-cloud-spanner",
-					Veneer:       true,
-					Output:       "testdata/build-veneer/success/lib-2",
-					Version:      "0.0.0",
-					SkipGenerate: true,
+					Name:          "google-cloud-spanner",
+					Veneer:        true,
+					Output:        "testdata/build-veneer/success/lib-2",
+					Version:       "0.0.0",
+					CopyrightYear: "2025",
+					SkipGenerate:  true,
 				},
 			},
 		},
@@ -554,10 +560,11 @@ func TestBuildVeneer(t *testing.T) {
 			},
 			want: map[string]*config.Library{
 				"common": {
-					Name:    "common",
-					Veneer:  true,
-					Output:  "testdata/build-veneer/wkt/tests/common",
-					Version: "0.0.0",
+					Name:          "common",
+					Veneer:        true,
+					Output:        "testdata/build-veneer/wkt/tests/common",
+					Version:       "0.0.0",
+					CopyrightYear: "2025",
 					Rust: &config.RustCrate{
 						Modules: []*config.RustModule{
 							{
@@ -574,10 +581,11 @@ func TestBuildVeneer(t *testing.T) {
 					},
 				},
 				"google-cloud-wkt": {
-					Name:    "google-cloud-wkt",
-					Veneer:  true,
-					Output:  "testdata/build-veneer/wkt",
-					Version: "1.2.0",
+					Name:          "google-cloud-wkt",
+					Veneer:        true,
+					Output:        "testdata/build-veneer/wkt",
+					Version:       "1.2.0",
+					CopyrightYear: "2025",
 					Rust: &config.RustCrate{
 						Modules: []*config.RustModule{
 							{
@@ -601,10 +609,11 @@ func TestBuildVeneer(t *testing.T) {
 			},
 			want: map[string]*config.Library{
 				"google-cloud-storage": {
-					Name:    "google-cloud-storage",
-					Veneer:  true,
-					Output:  "testdata/build-veneer/success/lib-1",
-					Version: "1.5.0",
+					Name:          "google-cloud-storage",
+					Veneer:        true,
+					Output:        "testdata/build-veneer/success/lib-1",
+					Version:       "1.5.0",
+					CopyrightYear: "2025",
 					Rust: &config.RustCrate{
 						Modules: []*config.RustModule{
 							{
@@ -704,7 +713,8 @@ func TestBuildConfig(t *testing.T) {
 							ServiceConfig: "google/cloud/security/publicca/v1/publicca_v1.yaml",
 						},
 					},
-					Version: "1.1.0",
+					Version:       "1.1.0",
+					CopyrightYear: "2025",
 					Rust: &config.RustCrate{
 						RustDefault: config.RustDefault{
 							DisabledRustdocWarnings: []string{"bare_urls", "broken_intra_doc_links", "redundant_explicit_links"},
@@ -737,7 +747,8 @@ func TestBuildConfig(t *testing.T) {
 								ServiceConfig: "google/cloud/security/publicca/v1/publicca_v1.yaml",
 							},
 						},
-						Version: "1.1.0",
+						Version:       "1.1.0",
+						CopyrightYear: "2025",
 						Rust: &config.RustCrate{
 							RustDefault: config.RustDefault{
 								DisabledRustdocWarnings: []string{"bare_urls", "broken_intra_doc_links", "redundant_explicit_links"},
@@ -762,7 +773,8 @@ func TestBuildConfig(t *testing.T) {
 							Path: "google/cloud/orgpolicy/v1",
 						},
 					},
-					Version: "1.1.0",
+					Version:       "1.1.0",
+					CopyrightYear: "2025",
 					Rust: &config.RustCrate{
 						RustDefault: config.RustDefault{
 							DisabledRustdocWarnings: []string{"bare_urls", "broken_intra_doc_links", "redundant_explicit_links"},
@@ -784,7 +796,8 @@ func TestBuildConfig(t *testing.T) {
 								ServiceConfig: "",
 							},
 						},
-						Version: "1.1.0",
+						Version:       "1.1.0",
+						CopyrightYear: "2025",
 						Rust: &config.RustCrate{
 							RustDefault: config.RustDefault{
 								DisabledRustdocWarnings: []string{"bare_urls", "broken_intra_doc_links", "redundant_explicit_links"},

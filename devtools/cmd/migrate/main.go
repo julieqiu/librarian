@@ -315,7 +315,6 @@ func buildGAPIC(files []string, repoPath string) (map[string]*config.Library, er
 			continue
 		}
 
-		// Create or update library
 		lib, exists := libraries[libraryName]
 		if !exists {
 			lib = &config.Library{
@@ -330,24 +329,22 @@ func buildGAPIC(files []string, repoPath string) (map[string]*config.Library, er
 		}
 		lib.Output = relativePath
 
-		// Add channels
 		lib.Channels = append(lib.Channels, &config.Channel{
 			Path:          apiPath,
 			ServiceConfig: serviceConfig,
 		})
 
-		// Set version from Cargo.toml (more authoritative than sidekick)
 		if cargo.Package.Version != "" {
 			lib.Version = cargo.Package.Version
 		} else if version, ok := sidekick.Codec["version"]; ok && lib.Version == "" {
 			lib.Version = version
 		}
-
-		// Set publish disabled from Cargo.toml
 		if !cargo.Package.Publish {
 			lib.SkipPublish = true
 		}
-
+		if copyrightYear, ok := sidekick.Codec["copyright-year"]; ok && copyrightYear != "" {
+			lib.CopyrightYear = copyrightYear
+		}
 		if extraModules, ok := sidekick.Codec["extra-modules"]; ok {
 			for _, module := range strToSlice(extraModules, false) {
 				if module == "" {
@@ -356,12 +353,9 @@ func buildGAPIC(files []string, repoPath string) (map[string]*config.Library, er
 				lib.Keep = append(lib.Keep, fmt.Sprintf("src/%s.rs", module))
 			}
 		}
-
-		// Parse Rust-specific configuration from .sidekick.toml source section
 		if descriptionOverride, ok := sidekick.Source["description-override"]; ok {
 			lib.DescriptionOverride = descriptionOverride
 		}
-
 		titleOverride := sidekick.Source["title-override"]
 		if roots, ok := sidekick.Source["roots"]; ok {
 			lib.Roots = strToSlice(roots, false)
@@ -522,8 +516,8 @@ func buildVeneer(files []string) (map[string]*config.Library, error) {
 		name := cargo.Package.Name
 		veneers[name] = &config.Library{
 			Name:    name,
-			Veneer:  true,
 			Output:  dir,
+			Veneer:  true,
 			Version: cargo.Package.Version,
 		}
 		if len(rustModules) > 0 {
@@ -586,6 +580,7 @@ func buildModules(rootDir string) ([]*config.RustModule, error) {
 			}
 		}
 
+		copyrightYear := sidekick.Codec["copyright-year"]
 		hasVeneer := sidekick.Codec["has-veneer"]
 		includeGrpcOnlyMethods := sidekick.Codec["include-grpc-only-methods"]
 		routingRequired := sidekick.Codec["routing-required"]
@@ -609,6 +604,7 @@ func buildModules(rootDir string) ([]*config.RustModule, error) {
 			})
 		}
 		module := &config.RustModule{
+			CopyrightYear:          copyrightYear,
 			DocumentationOverrides: documentationOverrides,
 			GenerateSetterSamples:  strToBool(generateSetterSamples),
 			HasVeneer:              strToBool(hasVeneer),
@@ -662,10 +658,11 @@ func buildConfig(libraries map[string]*config.Library, defaults *config.Config) 
 		expectedName := deriveLibraryName(apiPath)
 		nameMatchesConvention := lib.Name == expectedName
 		// Check if library has extra configuration beyond just name/api/version
-		hasExtraConfig := (lib.Rust != nil && (lib.Rust.PerServiceFeatures || len(lib.Rust.DisabledRustdocWarnings) > 0 ||
-			lib.Rust.GenerateSetterSamples != "" || lib.Rust.GenerateRpcSamples ||
-			len(lib.Rust.PackageDependencies) > 0 || len(lib.Rust.PaginationOverrides) > 0 ||
-			lib.Rust.NameOverrides != ""))
+		hasExtraConfig := lib.CopyrightYear != "" ||
+			(lib.Rust != nil && (lib.Rust.PerServiceFeatures || len(lib.Rust.DisabledRustdocWarnings) > 0 ||
+				lib.Rust.GenerateSetterSamples != "" || lib.Rust.GenerateRpcSamples ||
+				len(lib.Rust.PackageDependencies) > 0 || len(lib.Rust.PaginationOverrides) > 0 ||
+				lib.Rust.NameOverrides != ""))
 		// Only include in libraries section if specific data needs to be retained
 		if !nameMatchesConvention || hasExtraConfig || len(lib.Channels) > 1 {
 			libCopy := *lib

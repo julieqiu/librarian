@@ -343,6 +343,9 @@ func TestAddLibraryToLibrarianYaml(t *testing.T) {
 			if found.Output != test.output {
 				t.Errorf("output = %q, want %q", found.Output, test.output)
 			}
+			if found.CopyrightYear == "" {
+				t.Error("copyright year not set")
+			}
 			if found.Version != "0.1.0" {
 				t.Errorf("version = %q, want %q", found.Version, "0.1.0")
 			}

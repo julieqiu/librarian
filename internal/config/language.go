@@ -48,6 +48,9 @@ type RustDefault struct {
 // Each module specifies what proto source to use, which template to apply,
 // and where to output the generated code.
 type RustModule struct {
+	// CopyrightYear is the copyright year for the library.
+	CopyrightYear string `yaml:"copyright_year,omitempty"`
+
 	// DisabledRustdocWarnings is a list of rustdoc warnings to disable.
 	DisabledRustdocWarnings yaml.StringSlice `yaml:"disabled_rustdoc_warnings,omitempty"`
 
