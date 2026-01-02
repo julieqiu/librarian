@@ -147,6 +147,9 @@ type Library struct {
 	// libraries).
 	Channels []*Channel `yaml:"channels,omitempty"`
 
+	// CopyrightYear is the copyright year for the library.
+	CopyrightYear string `yaml:"copyright_year,omitempty"`
+
 	// DescriptionOverride overrides the library description.
 	DescriptionOverride string `yaml:"description_override,omitempty"`
 
