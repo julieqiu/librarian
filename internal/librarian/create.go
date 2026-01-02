@@ -113,11 +113,9 @@ func addLibraryToLibrarianConfig(cfg *config.Config, name, output string, channe
 	}
 
 	for _, c := range channel {
-		lib.Channels = []*config.Channel{
-			{
-				Path: c,
-			},
-		}
+		lib.Channels = append(lib.Channels, &config.Channel{
+			Path: c,
+		})
 	}
 	cfg.Libraries = append(cfg.Libraries, lib)
 	sort.Slice(cfg.Libraries, func(i, j int) bool {
