@@ -224,20 +224,9 @@ func TestAddLibraryToLibrarianYaml(t *testing.T) {
 		want        []*config.Channel
 	}{
 		{
-			name:        "library with no specification-source and service-config",
+			name:        "library with no specification-source",
 			libraryName: "newlib",
 			output:      "output/newlib",
-		},
-		{
-			name:        "library with specification-source and service-config",
-			libraryName: "newlib",
-			output:      "output/newlib",
-			specSource:  "google/cloud/storage/v1",
-			want: []*config.Channel{
-				{
-					Path: "google/cloud/storage/v1",
-				},
-			},
 		},
 		{
 			name:        "library with specification-source",
@@ -249,11 +238,6 @@ func TestAddLibraryToLibrarianYaml(t *testing.T) {
 					Path: "google/cloud/storage/v1",
 				},
 			},
-		},
-		{
-			name:        "library with service-config",
-			libraryName: "newlib",
-			output:      "output/newlib",
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
