@@ -150,7 +150,7 @@ func TestCreateCommand(t *testing.T) {
 			args: []string{
 				"librarian",
 				"create",
-				"google-cloud-secret-manager",
+				"google-cloud-secretmanager",
 			},
 		},
 		{
@@ -158,7 +158,7 @@ func TestCreateCommand(t *testing.T) {
 			args: []string{
 				"librarian",
 				"create",
-				"google-cloud-secret-manager",
+				testName,
 				"google/cloud/secretmanager/v1",
 			},
 			wantChannels: []*config.Channel{
@@ -172,7 +172,7 @@ func TestCreateCommand(t *testing.T) {
 			args: []string{
 				"librarian",
 				"create",
-				"google-cloud-secret-manager",
+				testName,
 				"google/cloud/secretmanager/v1",
 				"google/cloud/secretmanager/v1beta2",
 				"google/cloud/secrets/v1beta1",
@@ -194,7 +194,7 @@ func TestCreateCommand(t *testing.T) {
 			args: []string{
 				"librarian",
 				"create",
-				"google-cloud-secret-manager",
+				testName,
 				"google/cloud/secretmanager/v1",
 				"google/cloud/secretmanager/v1beta2",
 				"google/cloud/secrets/v1beta1",
