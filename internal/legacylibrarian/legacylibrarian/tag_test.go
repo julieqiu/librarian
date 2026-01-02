@@ -137,7 +137,7 @@ func TestDeterminePullRequestsToProcess(t *testing.T) {
 			got, err := r.determinePullRequestsToProcess(t.Context())
 			if err != nil {
 				if test.wantErrMsg == "" {
-					t.Fatal(err)
+					t.Fatalf("unexpected error: %v", err)
 				}
 				if !strings.Contains(err.Error(), test.wantErrMsg) {
 					t.Fatalf("got %q, want contains %q", err, test.wantErrMsg)
@@ -197,7 +197,7 @@ func Test_tagRunner_run(t *testing.T) {
 			err := r.run(t.Context())
 			if err != nil {
 				if test.wantErrMsg == "" {
-					t.Fatal(err)
+					t.Fatalf("unexpected error: %v", err)
 				}
 				if !strings.Contains(err.Error(), test.wantErrMsg) {
 					t.Fatalf("got %q, want contains %q", err, test.wantErrMsg)
@@ -600,7 +600,7 @@ func TestProcessPullRequest(t *testing.T) {
 			err := r.processPullRequest(t.Context(), test.pr)
 			if err != nil {
 				if test.wantErrMsg == "" {
-					t.Fatal(err)
+					t.Fatalf("unexpected error: %v", err)
 				}
 				if !strings.Contains(err.Error(), test.wantErrMsg) {
 					t.Fatalf("got %q, want contains %q", err, test.wantErrMsg)
@@ -661,7 +661,7 @@ func TestReplacePendingLabel(t *testing.T) {
 			err := r.replacePendingLabel(t.Context(), test.pr)
 			if err != nil {
 				if test.wantErrMsg == "" {
-					t.Fatal(err)
+					t.Fatalf("unexpected error: %v", err)
 				}
 				if !strings.Contains(err.Error(), test.wantErrMsg) {
 					t.Fatalf("got %q, want contains %q", err, test.wantErrMsg)
@@ -714,7 +714,7 @@ func Test_tagRunner_run_processPullRequests(t *testing.T) {
 	}
 	err := r.run(t.Context())
 	if err == nil || !strings.Contains(err.Error(), "failed to process some pull requests") {
-		t.Fatal(err)
+		t.Fatalf("expected error 'failed to process some pull requests', got %v", err)
 	}
 	if ghClient.createReleaseCalls != 1 {
 		t.Errorf("createReleaseCalls = %v, want 1", ghClient.createReleaseCalls)

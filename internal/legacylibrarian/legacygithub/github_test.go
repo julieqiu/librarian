@@ -264,7 +264,7 @@ func TestCreatePullRequest(t *testing.T) {
 				}
 				var newPR github.NewPullRequest
 				if err := json.NewDecoder(r.Body).Decode(&newPR); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to decode request body: %v", err)
 				}
 				if *newPR.Title != "New Feature" {
 					t.Errorf("unexpected title: got %q, want %q", *newPR.Title, "New Feature")
@@ -291,7 +291,7 @@ func TestCreatePullRequest(t *testing.T) {
 			handler: func(w http.ResponseWriter, r *http.Request) {
 				var newPR github.NewPullRequest
 				if err := json.NewDecoder(r.Body).Decode(&newPR); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to decode request body: %v", err)
 				}
 				expectedBody := "Regenerated all changed APIs. See individual commits for details."
 				if *newPR.Body != expectedBody {
@@ -363,7 +363,7 @@ func TestAddLabelsToIssue(t *testing.T) {
 				}
 				var labels []string
 				if err := json.NewDecoder(r.Body).Decode(&labels); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to decode request body: %v", err)
 				}
 				expectedBody := []string{"new-label", "another-label"}
 				if strings.Join(labels, ",") != strings.Join(expectedBody, ",") {
@@ -508,7 +508,7 @@ func TestReplaceLabels(t *testing.T) {
 				}
 				var labels []string
 				if err := json.NewDecoder(r.Body).Decode(&labels); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to decode request body: %v", err)
 				}
 				expectedBody := []string{"new-label", "another-label"}
 				if diff := cmp.Diff(expectedBody, labels); diff != "" {
@@ -756,7 +756,7 @@ func TestCreateRelease(t *testing.T) {
 				}
 				var newRelease github.RepositoryRelease
 				if err := json.NewDecoder(r.Body).Decode(&newRelease); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to decode request body: %v", err)
 				}
 				if *newRelease.TagName != "v1.0.0" {
 					t.Errorf("unexpected tag name: got %q, want %q", *newRelease.TagName, "v1.0.0")
@@ -829,7 +829,7 @@ func TestCreateIssueComment(t *testing.T) {
 				}
 				var comment github.IssueComment
 				if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to decode request body: %v", err)
 				}
 				if *comment.Body != "This is a comment." {
 					t.Errorf("unexpected body: got %q, want %q", *comment.Body, "This is a comment.")
@@ -893,7 +893,7 @@ func TestFindMergedPullRequestsWithPendingReleaseLabel(t *testing.T) {
 				prs := []*github.PullRequest{&pr0, &pr1, &pr2, &pr3}
 				b, err := json.Marshal(prs)
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("json.Marshal() failed: %v", err)
 				}
 				fmt.Fprint(w, string(b))
 			},
@@ -962,7 +962,7 @@ func TestCreateTag(t *testing.T) {
 
 				var ref github.Reference
 				if err := json.NewDecoder(r.Body).Decode(&ref); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to decode request body: %v", err)
 				}
 				if ref.Ref == nil || *ref.Ref != "refs/tags/v1.2.3" {
 					t.Errorf("unexpected ref: got %v, want %s", ref.Ref, "refs/tags/v1.2.3")
@@ -1046,7 +1046,7 @@ func TestRetryableTransport(t *testing.T) {
 
 			req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, server.URL, nil)
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("http.NewRequestWithContext() failed: %v", err)
 			}
 			resp, err := client.Do(t.Context(), req, nil)
 
@@ -1056,7 +1056,7 @@ func TestRetryableTransport(t *testing.T) {
 				}
 			} else {
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("client.Do() failed: %v", err)
 				}
 				defer resp.Body.Close()
 			}

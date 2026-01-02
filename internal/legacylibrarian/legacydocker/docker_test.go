@@ -39,7 +39,7 @@ func TestNew(t *testing.T) {
 		UserGID: testGID,
 	})
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("New() error = %v", err)
 	}
 	if d.Image != testImage {
 		t.Errorf("d.Image = %q, want %q", d.Image, testImage)
@@ -921,7 +921,7 @@ func TestWriteLibraryState(t *testing.T) {
 			// Verify the file content
 			gotBytes, err := os.ReadFile(filePath)
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed to read generated file: %v", err)
 			}
 
 			wantBytes, readErr := os.ReadFile(filepath.Join("testdata", "test-write-library-state", test.wantFile))
@@ -1032,7 +1032,7 @@ func TestWriteLibrarianState(t *testing.T) {
 			// Verify the file content
 			gotBytes, err := os.ReadFile(filePath)
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed to read generated file: %v", err)
 			}
 
 			wantBytes, readErr := os.ReadFile(filepath.Join("testdata", "test-write-librarian-state", test.wantFile))
@@ -1081,7 +1081,7 @@ func TestReleaseStageRequestContent(t *testing.T) {
 	partialRepoDir := filepath.Join(tmpDir, "partial-repo")
 	librarianDir := filepath.Join(partialRepoDir, legacyconfig.LibrarianDir)
 	if err := os.MkdirAll(librarianDir, 0755); err != nil {
-		t.Fatal(err)
+		t.Fatalf("MkdirAll: %v", err)
 	}
 
 	stateWithChanges := &legacyconfig.LibrarianState{
@@ -1109,7 +1109,7 @@ func TestReleaseStageRequestContent(t *testing.T) {
 		UserGID: "1000",
 	})
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("New() failed: %v", err)
 	}
 
 	// Override the run command to intercept the arguments and verify the content
@@ -1132,13 +1132,13 @@ func TestReleaseStageRequestContent(t *testing.T) {
 		jsonPath := filepath.Join(librarianDir, "release-stage-request.json")
 		gotBytes, err := os.ReadFile(jsonPath)
 		if err != nil {
-			t.Fatal(err)
+			t.Fatalf("ReadFile failed: %v", err)
 		}
 
 		wantFile := filepath.Join("testdata", "release-stage-request", "release-stage-request.json")
 		wantBytes, err := os.ReadFile(wantFile)
 		if err != nil {
-			t.Fatal(err)
+			t.Fatalf("ReadFile for want file failed: %v", err)
 		}
 
 		if diff := cmp.Diff(strings.TrimSpace(string(wantBytes)), string(gotBytes)); diff != "" {
@@ -1154,6 +1154,6 @@ func TestReleaseStageRequestContent(t *testing.T) {
 		LibrarianConfig: &legacyconfig.LibrarianConfig{},
 	}
 	if err := d.ReleaseStage(t.Context(), req); err != nil {
-		t.Fatal(err)
+		t.Fatalf("d.ReleaseStage() failed: %v", err)
 	}
 }

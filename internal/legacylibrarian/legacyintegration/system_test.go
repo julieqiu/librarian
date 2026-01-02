@@ -480,7 +480,7 @@ func TestFindLatestImage(t *testing.T) {
 			t.Parallel()
 			client, err := images.NewArtifactRegistryClient(t.Context())
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("unexpected error in NewArtifactRegistryClient() %v", err)
 			}
 			defer client.Close()
 			got, err := client.FindLatest(t.Context(), test.image)
@@ -492,7 +492,7 @@ func TestFindLatestImage(t *testing.T) {
 			}
 
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("FindLatestImage() error = %v", err)
 			}
 
 			if !strings.HasPrefix(got, "us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-prod/librarian-go@sha256:") {
@@ -540,7 +540,7 @@ func TestGitCheckout(t *testing.T) {
 				RemoteBranch: "main",
 			})
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("error cloning repository, %v", err)
 			}
 
 			err = repo.Checkout(test.sha)
@@ -553,7 +553,7 @@ func TestGitCheckout(t *testing.T) {
 			}
 
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Checkout() unexpected error: %v", err)
 			}
 
 			headSha, err := repo.HeadHash()
@@ -561,7 +561,7 @@ func TestGitCheckout(t *testing.T) {
 				t.Fatalf("Checkout() mismatch (-want +got):\n%s", diff)
 			}
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Checkout() unexpected error fetching HeadHash: %v", err)
 			}
 		})
 	}

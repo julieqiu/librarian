@@ -100,7 +100,7 @@ func newTestGitRepoWithCommit(t *testing.T, dir string) string {
 
 	filePath := filepath.Join(dir, "README.md")
 	if err := os.WriteFile(filePath, []byte("hello"), 0644); err != nil {
-		t.Fatal(err)
+		t.Fatalf("WriteFile: %v", err)
 	}
 	for _, args := range [][]string{
 		{"add", "README.md"},
@@ -121,7 +121,7 @@ func TestCloneOrOpenLanguageRepo(t *testing.T) {
 	cleanRepoPath := newTestGitRepoWithCommit(t, "")
 	dirtyRepoPath := newTestGitRepoWithCommit(t, "")
 	if err := os.WriteFile(filepath.Join(dirtyRepoPath, "untracked.txt"), []byte("dirty"), 0644); err != nil {
-		t.Fatal(err)
+		t.Fatalf("WriteFile: %v", err)
 	}
 	notARepoPath := t.TempDir()
 
@@ -271,13 +271,13 @@ func TestCleanAndCopyLibrary(t *testing.T) {
 			setup: func(t *testing.T, repoDir, outputDir string) {
 				// Create a symlink in the output directory
 				if err := os.MkdirAll(filepath.Join(outputDir, "target"), 0755); err != nil {
-					t.Fatal(err)
+					t.Fatalf("os.MkdirAll() = %v", err)
 				}
 				if err := os.Symlink(filepath.Join(outputDir, "target"), filepath.Join(repoDir, "symlink")); err != nil {
-					t.Fatal(err)
+					t.Fatalf("os.Symlink() = %v", err)
 				}
 				if _, err := os.Create(filepath.Join(repoDir, "symlink", "example.txt")); err != nil {
-					t.Fatal(err)
+					t.Fatalf("os.Create() = %v", err)
 				}
 			},
 		},
@@ -632,7 +632,7 @@ func TestClean(t *testing.T) {
 				// Make the directory read-only to cause os.Remove to fail.
 				readOnlyDir := filepath.Join(tmpDir, "readonlydir")
 				if err := os.Chmod(readOnlyDir, 0555); err != nil {
-					t.Fatal(err)
+					t.Fatalf("os.Chmod() = %v", err)
 				}
 				// Register a cleanup function to restore permissions so TempDir can be removed.
 				t.Cleanup(func() {
@@ -722,16 +722,16 @@ func TestClean(t *testing.T) {
 			for path, content := range test.files {
 				fullPath := filepath.Join(tmpDir, path)
 				if err := os.MkdirAll(filepath.Dir(fullPath), 0755); err != nil {
-					t.Fatal(err)
+					t.Fatalf("os.MkdirAll() = %v", err)
 				}
 				if err := os.WriteFile(fullPath, []byte(content), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("os.WriteFile() = %v", err)
 				}
 			}
 			for link, target := range test.symlinks {
 				linkPath := filepath.Join(tmpDir, link)
 				if err := os.Symlink(target, linkPath); err != nil {
-					t.Fatal(err)
+					t.Fatalf("os.Symlink() = %v", err)
 				}
 			}
 			if test.setup != nil {
@@ -752,7 +752,7 @@ func TestClean(t *testing.T) {
 			paths, _ := findSubDirRelPaths(tmpDir, tmpDir)
 			remainingPaths = append(remainingPaths, paths...)
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("findSubDirRelPaths() = %v", err)
 			}
 			sort.Strings(test.wantRemaining)
 			sort.Strings(remainingPaths)
@@ -792,10 +792,10 @@ func TestFindSubDirRelPaths(t *testing.T) {
 				for _, file := range files {
 					path := filepath.Join(dir, file)
 					if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
-						t.Fatal(err)
+						t.Fatalf("os.MkdirAll() = %v", err)
 					}
 					if err := os.WriteFile(path, []byte("test"), 0644); err != nil {
-						t.Fatal(err)
+						t.Fatalf("os.WriteFile() = %v", err)
 					}
 				}
 			},
@@ -823,10 +823,10 @@ func TestFindSubDirRelPaths(t *testing.T) {
 				for _, file := range files {
 					path := filepath.Join(dir, file)
 					if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
-						t.Fatal(err)
+						t.Fatalf("os.MkdirAll() = %v", err)
 					}
 					if err := os.WriteFile(path, []byte("test"), 0644); err != nil {
-						t.Fatal(err)
+						t.Fatalf("os.WriteFile() = %v", err)
 					}
 				}
 			},
@@ -852,10 +852,10 @@ func TestFindSubDirRelPaths(t *testing.T) {
 				for _, file := range files {
 					path := filepath.Join(dir, file)
 					if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
-						t.Fatal(err)
+						t.Fatalf("os.MkdirAll() = %v", err)
 					}
 					if err := os.WriteFile(path, []byte("test"), 0644); err != nil {
-						t.Fatal(err)
+						t.Fatalf("os.WriteFile() = %v", err)
 					}
 				}
 			},
@@ -878,10 +878,10 @@ func TestFindSubDirRelPaths(t *testing.T) {
 				for _, file := range files {
 					path := filepath.Join(dir, file)
 					if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
-						t.Fatal(err)
+						t.Fatalf("os.MkdirAll() = %v", err)
 					}
 					if err := os.WriteFile(path, []byte("test"), 0644); err != nil {
-						t.Fatal(err)
+						t.Fatalf("os.WriteFile() = %v", err)
 					}
 				}
 			},
@@ -899,12 +899,12 @@ func TestFindSubDirRelPaths(t *testing.T) {
 			setup: func(t *testing.T, tmpDir string) {
 				unreadableDir := filepath.Join(tmpDir, "unreadable")
 				if err := os.Mkdir(unreadableDir, 0755); err != nil {
-					t.Fatal(err)
+					t.Fatalf("os.Mkdir() = %v", err)
 				}
 
 				// Make the directory unreadable to trigger an error in filepath.WalkDir.
 				if err := os.Chmod(unreadableDir, 0000); err != nil {
-					t.Fatal(err)
+					t.Fatalf("os.Chmod() = %v", err)
 				}
 				// Schedule cleanup to restore permissions so TempDir can be removed.
 				t.Cleanup(func() {
@@ -1071,10 +1071,10 @@ func TestFilterPathsForRemoval(t *testing.T) {
 			for path, content := range test.files {
 				fullPath := filepath.Join(tmpDir, path)
 				if err := os.MkdirAll(filepath.Dir(fullPath), 0755); err != nil {
-					t.Fatal(err)
+					t.Fatalf("os.MkdirAll() = %v", err)
 				}
 				if err := os.WriteFile(fullPath, []byte(content), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("os.WriteFile() = %v", err)
 				}
 			}
 
@@ -1118,15 +1118,15 @@ func TestSeparateFilesAndDirs(t *testing.T) {
 				for _, file := range files {
 					path := filepath.Join(tmpDir, file)
 					if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
-						t.Fatal(err)
+						t.Fatalf("os.MkdirAll() = %v", err)
 					}
 					if err := os.WriteFile(path, []byte("test"), 0644); err != nil {
-						t.Fatal(err)
+						t.Fatalf("os.WriteFile() = %v", err)
 					}
 				}
 				for _, dir := range dirs {
 					if err := os.MkdirAll(filepath.Join(tmpDir, dir), 0755); err != nil {
-						t.Fatal(err)
+						t.Fatalf("os.MkdirAll() = %v", err)
 					}
 				}
 			},
@@ -1684,7 +1684,7 @@ func TestWritePRBody(t *testing.T) {
 				return
 			}
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("unexpected error %v", err)
 			}
 
 			gotFile := gotPRBodyFile(t, test.info.workRoot)
@@ -1867,7 +1867,7 @@ func TestCopyLibraryFiles(t *testing.T) {
 			},
 			setup: func(t *testing.T, outputDir string) {
 				if err := os.Symlink("target.txt", filepath.Join(outputDir, "a/path", "link.txt")); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to create symlink: %v", err)
 				}
 			},
 			wantFiles: []string{
@@ -1878,14 +1878,14 @@ func TestCopyLibraryFiles(t *testing.T) {
 				linkPath := filepath.Join(repoDir, "a/path", "link.txt")
 				info, err := os.Lstat(linkPath)
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to lstat symlink: %v", err)
 				}
 				if info.Mode()&os.ModeSymlink == 0 {
 					t.Errorf("copied file is not a symlink")
 				}
 				target, err := os.Readlink(linkPath)
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to readlink: %v", err)
 				}
 				if target != "target.txt" {
 					t.Errorf("symlink target is incorrect: got %q, want %q", target, "target.txt")

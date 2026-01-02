@@ -42,7 +42,7 @@ func TestParseAndSetFlags(t *testing.T) {
 
 	args := []string{"-name=foo", "-count=5"}
 	if err := cmd.Flags.Parse(args); err != nil {
-		t.Fatal(err)
+		t.Fatalf("Parse() failed: %v", err)
 	}
 
 	if strFlag != "foo" {

@@ -44,7 +44,7 @@ func TestBuild(t *testing.T) {
 	// import path that contains all the necessary proto definitions.
 	sourceDir, err := filepath.Abs("../testdata/generate/source")
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("failed to get absolute path for sourceDir: %v", err)
 	}
 	tests := []struct {
 		name    string
@@ -135,7 +135,7 @@ func TestBuild(t *testing.T) {
 			}
 			got, err := Build(filepath.Join(sourceDir, test.apiPath), &test.config, sourceDir, outputConfig)
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Build() failed: %v", err)
 			}
 
 			if diff := cmp.Diff(test.want, got); diff != "" {

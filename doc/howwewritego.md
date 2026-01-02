@@ -104,9 +104,7 @@ if err != nil {
     return err
 }
 // process success case
-```
 
-```go
 // Bad
 if err == nil {
     // process success case
@@ -126,9 +124,7 @@ for _, item := range items {
     }
     // process item
 }
-```
 
-```go
 // Bad
 for _, item := range items {
     if !item.skip {
@@ -150,19 +146,18 @@ Avoid verbose or redundant failure messages. If an error occurs, pass it directl
 to `t.Fatal` or `t.Error`. The testing package automatically includes the file
 and line number, and well-constructed errors already provide their own context.
 
-**Good**:
 ```go
+// Good
 t.Fatal(err)
-```
 
-**Bad**:
-```go
+// Bad
 t.Fatalf("failed: %v", err)
 ```
 
 Only use `t.Fatalf` if you need to provide extra context not present in the
 error, such as:
 ```go
+// Good
 t.Fatalf("failed to process user %d: %v", userID, err)
 ```
 

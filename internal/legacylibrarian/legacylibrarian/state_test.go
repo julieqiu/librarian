@@ -96,7 +96,7 @@ libraries:
 		t.Run(test.name, func(t *testing.T) {
 			path := filepath.Join(t.TempDir(), "state.yaml")
 			if err := os.WriteFile(path, []byte(test.content), 0644); err != nil {
-				t.Fatal(err)
+				t.Fatalf("os.WriteFile() failed: %v", err)
 			}
 			got, err := parseLibrarianState(path, test.source)
 			if (err != nil) != test.wantErr {
@@ -209,7 +209,7 @@ func TestParseGlobalConfig(t *testing.T) {
 				return
 			}
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("parseGlobalConfig() failed: %v", err)
 			}
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("saveLibrarianState() mismatch (-want +got): %s", diff)
@@ -326,17 +326,17 @@ func TestSaveLibrarianState(t *testing.T) {
 		},
 	}
 	if err := saveLibrarianState(tmpDir, state); err != nil {
-		t.Fatal(err)
+		t.Fatalf("saveLibrarianState() failed: %v", err)
 	}
 
 	path := filepath.Join(tmpDir, legacyconfig.LibrarianDir, "state.yaml")
 	gotBytes, err := os.ReadFile(path)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("os.ReadFile() failed: %v", err)
 	}
 	gotState := &legacyconfig.LibrarianState{}
 	if err := yaml.Unmarshal(gotBytes, gotState); err != nil {
-		t.Fatal(err)
+		t.Fatalf("yaml.Unmarshal() failed: %v", err)
 	}
 	// API status should be ignored when writing to yaml.
 	state.Libraries[0].APIs[0].Status = ""
@@ -421,7 +421,7 @@ func TestReadLibraryState(t *testing.T) {
 			}
 
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("readLibraryState() unexpected error: %v", err)
 			}
 
 			if diff := cmp.Diff(test.want, got); diff != "" {
@@ -490,7 +490,7 @@ func TestLoadRepoStateFromGitHub(t *testing.T) {
 			}
 
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("loadRepoStateFromGitHub() unexpected error: %v", err)
 			}
 			if diff := cmp.Diff(test.want, got, cmpopts.EquateEmpty()); diff != "" {
 				t.Fatalf("Response library state mismatch (-want +got):\n%s", diff)

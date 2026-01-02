@@ -145,7 +145,7 @@ func TestNewUpdateImageRunner(t *testing.T) {
 			// custom setup
 			if test.setupFunc != nil {
 				if err := test.setupFunc(test.cfg); err != nil {
-					t.Fatal(err)
+					t.Fatalf("error in setup %v", err)
 				}
 			}
 
@@ -163,7 +163,7 @@ func TestNewUpdateImageRunner(t *testing.T) {
 			}
 
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("newUpdateImageRunner() got error: %v", err)
 			}
 
 			if r.branch == "" {
@@ -985,7 +985,7 @@ func TestRunContainerGenerateTest(t *testing.T) {
 					t.Errorf("runContainerGenerateTest() error = %q, want error containing %q", err.Error(), test.wantErrMsg)
 				}
 			} else if err != nil {
-				t.Fatal(err)
+				t.Fatalf("runContainerGenerateTest() returned unexpected error: %v", err)
 			}
 
 			if test.mockRepo.ResetSoftCalls != test.wantResetCalls {

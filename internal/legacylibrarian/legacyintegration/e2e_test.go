@@ -98,16 +98,16 @@ func TestRunGenerate(t *testing.T) {
 			repo := t.TempDir()
 			apiSourceRepo := t.TempDir()
 			if err := initRepo(t, repo, initialRepoStateDir, "initial commit"); err != nil {
-				t.Fatal(err)
+				t.Fatalf("languageRepo prepare test error = %v", err)
 			}
 			if err := initRepo(t, apiSourceRepo, localAPISource, "initial commit"); err != nil {
-				t.Fatal(err)
+				t.Fatalf("APISouceRepo prepare test error = %v", err)
 			}
 			if test.push {
 				// Create a local bare repository to act as the remote for the push.
 				bareRepoDir := filepath.Join(t.TempDir(), "remote.git")
 				if err := os.MkdirAll(bareRepoDir, 0755); err != nil {
-					t.Fatal(err)
+					t.Fatalf("Failed to create bare repo dir: %v", err)
 				}
 				runGit(t, bareRepoDir, "init", "--bare")
 				runGit(t, repo, "remote", "set-url", "origin", bareRepoDir)
@@ -162,7 +162,7 @@ func TestRunGenerate(t *testing.T) {
 			}
 
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("librarian generate command error = %v", err)
 			}
 		})
 	}
@@ -206,10 +206,10 @@ func TestCleanAndCopy(t *testing.T) {
 	repo := t.TempDir()
 	apiSourceRepo := t.TempDir()
 	if err := initRepo(t, repo, repoInitDir, "initial commit"); err != nil {
-		t.Fatal(err)
+		t.Fatalf("languageRepo prepare test error = %v", err)
 	}
 	if err := initRepo(t, apiSourceRepo, localAPISource, "initial commit"); err != nil {
-		t.Fatal(err)
+		t.Fatalf("APISouceRepo prepare test error = %v", err)
 	}
 
 	cmd := exec.Command(
@@ -226,7 +226,7 @@ func TestCleanAndCopy(t *testing.T) {
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
 	if err := cmd.Run(); err != nil {
-		t.Fatal(err)
+		t.Fatalf("librarian generate command error = %v", err)
 	}
 
 	// Check that the file to remove is gone.
@@ -286,10 +286,10 @@ func TestRunConfigure(t *testing.T) {
 			repo := t.TempDir()
 			apiSourceRepo := t.TempDir()
 			if err := initRepo(t, repo, initialRepoStateDir, "initial commit"); err != nil {
-				t.Fatal(err)
+				t.Fatalf("prepare test error = %v", err)
 			}
 			if err := initRepo(t, apiSourceRepo, test.apiSource, "feat: add a new api\n\nPiperOrigin-RevId: 123456"); err != nil {
-				t.Fatal(err)
+				t.Fatalf("APISouceRepo prepare test error = %v", err)
 			}
 
 			cmd := exec.Command(
@@ -319,13 +319,13 @@ func TestRunConfigure(t *testing.T) {
 				return
 			}
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed to run configure: %v", err)
 			}
 
 			// Verify the file content
 			gotBytes, err := os.ReadFile(filepath.Join(repo, ".librarian", "state.yaml"))
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed to read configure response file: %v", err)
 			}
 			wantBytes, readErr := os.ReadFile(test.updatedState)
 			if readErr != nil {
@@ -333,11 +333,11 @@ func TestRunConfigure(t *testing.T) {
 			}
 			var gotState *legacyconfig.LibrarianState
 			if err := yaml.Unmarshal(gotBytes, &gotState); err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed to unmarshal configure response file: %v", err)
 			}
 			var wantState *legacyconfig.LibrarianState
 			if err := yaml.Unmarshal(wantBytes, &wantState); err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed to unmarshal expected state: %v", err)
 			}
 
 			if diff := cmp.Diff(wantState, gotState, cmpopts.IgnoreFields(legacyconfig.LibraryState{}, "LastGeneratedCommit")); diff != "" {
@@ -389,10 +389,10 @@ func TestRunGenerate_MultipleLibraries(t *testing.T) {
 			apiSourceRepo := t.TempDir()
 
 			if err := initRepo(t, repo, test.initialRepoStateDir, "initial commit"); err != nil {
-				t.Fatal(err)
+				t.Fatalf("languageRepo prepare test error = %v", err)
 			}
 			if err := initRepo(t, apiSourceRepo, localAPISource, "initial commit"); err != nil {
-				t.Fatal(err)
+				t.Fatalf("APISouceRepo prepare test error = %v", err)
 			}
 
 			cmd := exec.Command(
@@ -416,7 +416,7 @@ func TestRunGenerate_MultipleLibraries(t *testing.T) {
 			}
 
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("librarian generate command error = %v", err)
 			}
 
 			for _, f := range test.expectedFiles {
@@ -495,14 +495,14 @@ func TestReleaseStage(t *testing.T) {
 			commitMsgPath := filepath.Join(test.testDataDir, "commit_msg.txt")
 
 			if err := initRepo(t, repo, initialRepoStateDir, "initial commit"); err != nil {
-				t.Fatal(err)
+				t.Fatalf("prepare test error = %v", err)
 			}
 
 			if test.push {
 				// Create a local bare repository to act as the remote for the push.
 				bareRepoDir := filepath.Join(t.TempDir(), "remote.git")
 				if err := os.MkdirAll(bareRepoDir, 0755); err != nil {
-					t.Fatal(err)
+					t.Fatalf("Failed to create bare repo dir: %v", err)
 				}
 				runGit(t, bareRepoDir, "init", "--bare")
 				runGit(t, repo, "remote", "set-url", "origin", bareRepoDir)
@@ -515,11 +515,11 @@ func TestReleaseStage(t *testing.T) {
 			// Add a new commit to simulate a change.
 			newFilePath := filepath.Join(test.changePath, "new-file.txt")
 			if err := os.MkdirAll(filepath.Join(repo, test.changePath), 0755); err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed to create directory for new file: %v", err)
 			}
 			commitMsgBytes, err := os.ReadFile(commitMsgPath)
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed to read commit message file: %v", err)
 			}
 
 			createCommit(t, repo, newFilePath, string(commitMsgBytes))
@@ -549,7 +549,7 @@ func TestReleaseStage(t *testing.T) {
 			cmd.Stderr = os.Stderr
 			cmd.Stdout = os.Stdout
 			if err := cmd.Run(); err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed to run release stage: %v", err)
 			}
 
 			// Verify the state.yaml file content
@@ -557,7 +557,7 @@ func TestReleaseStage(t *testing.T) {
 			t.Logf("Checking for output file in: %s", filepath.Join(outputDir, ".librarian", "state.yaml"))
 			gotBytes, err := os.ReadFile(filepath.Join(outputDir, ".librarian", "state.yaml"))
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed to read updated state.yaml from output directory: %v", err)
 			}
 			wantBytes, readErr := os.ReadFile(updatedState)
 			if readErr != nil {
@@ -565,11 +565,11 @@ func TestReleaseStage(t *testing.T) {
 			}
 			var gotState *legacyconfig.LibrarianState
 			if err := yaml.Unmarshal(gotBytes, &gotState); err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed to unmarshal configure response file: %v", err)
 			}
 			var wantState *legacyconfig.LibrarianState
 			if err := yaml.Unmarshal(wantBytes, &wantState); err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed to unmarshal expected state: %v", err)
 			}
 
 			// Use cmpopts.IgnoreFields to ignore the dynamic commit hash.
@@ -580,11 +580,11 @@ func TestReleaseStage(t *testing.T) {
 			// Verify the CHANGELOG.md file content
 			gotChangelog, err := os.ReadFile(filepath.Join(outputDir, test.changePath, "CHANGELOG.md"))
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed to read CHANGELOG.md from output directory: %v", err)
 			}
 			wantChangelogBytes, err := os.ReadFile(wantChangelog)
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed to read expected changelog for comparison: %v", err)
 			}
 			if diff := cmp.Diff(string(wantChangelogBytes), string(gotChangelog)); diff != "" {
 				t.Fatalf("Generated changelog mismatch (-want +got): %s", diff)
@@ -697,7 +697,7 @@ libraries:
 				if r.Method == "POST" && strings.HasSuffix(r.URL.Path, "/releases") {
 					var newRelease github.RepositoryRelease
 					if err := json.NewDecoder(r.Body).Decode(&newRelease); err != nil {
-						t.Fatal(err)
+						t.Fatalf("failed to decode request body: %v", err)
 					}
 					expectedTagName := "go-google-cloud-pubsub-v1-v1.0.1"
 					if *newRelease.TagName != expectedTagName {
@@ -750,7 +750,7 @@ libraries:
 			cmd.Stdout = os.Stdout
 			if err := cmd.Run(); err != nil {
 				if !test.wantErr {
-					t.Fatal(err)
+					t.Fatalf("Failed to run release tag: %v", err)
 				}
 			}
 		})
@@ -769,7 +769,7 @@ func newMockGitHubServer(t *testing.T, prTitleFragment string, expectedContentIn
 		if r.Method == "POST" && strings.HasSuffix(r.URL.Path, "/pulls") {
 			var newPR github.NewPullRequest
 			if err := json.NewDecoder(r.Body).Decode(&newPR); err != nil {
-				t.Fatal(err)
+				t.Fatalf("failed to decode request body: %v", err)
 			}
 			expectedTitle := fmt.Sprintf("chore: librarian %s pull request", prTitleFragment)
 			if !strings.Contains(*newPR.Title, expectedTitle) {

@@ -396,7 +396,7 @@ END_COMMIT`,
 				return
 			}
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("getConventionalCommitsSinceLastRelease() failed: %v", err)
 			}
 			if diff := cmp.Diff(test.want, got, cmpopts.IgnoreFields(legacygitrepo.ConventionalCommit{}, "CommitHash", "Body", "IsBreaking", "When")); diff != "" {
 				t.Errorf("getConventionalCommitsSinceLastRelease() mismatch (-want +got):\n%s", diff)
@@ -545,7 +545,7 @@ func TestGetConventionalCommitsSinceLastGeneration(t *testing.T) {
 				return
 			}
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("getConventionalCommitsSinceLastRelease() failed: %v", err)
 			}
 			if diff := cmp.Diff(test.want, got, cmpopts.IgnoreFields(legacygitrepo.ConventionalCommit{}, "CommitHash", "Body", "IsBreaking", "When")); diff != "" {
 				t.Errorf("getConventionalCommitsSinceLastRelease() mismatch (-want +got):\n%s", diff)

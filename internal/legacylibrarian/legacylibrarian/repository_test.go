@@ -121,7 +121,7 @@ func newTestGitRepoWithRemotes(t *testing.T, remotes map[string][]string) *legac
 
 	r, err := git.PlainInit(dir, false)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("git.PlainInit failed: %v", err)
 	}
 
 	for name, urls := range remotes {
@@ -130,13 +130,13 @@ func newTestGitRepoWithRemotes(t *testing.T, remotes map[string][]string) *legac
 			URLs: urls,
 		})
 		if err != nil {
-			t.Fatal(err)
+			t.Fatalf("CreateRemote failed: %v", err)
 		}
 	}
 
 	repo, err := legacygitrepo.NewRepository(&legacygitrepo.RepositoryOptions{Dir: dir})
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("legacygitrepo.NewRepository failed: %v", err)
 	}
 	return repo
 }

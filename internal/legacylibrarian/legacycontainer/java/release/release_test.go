@@ -63,7 +63,7 @@ func TestStage(t *testing.T) {
 			tmpDir := t.TempDir()
 			outputDir := filepath.Join(tmpDir, "output")
 			if err := os.MkdirAll(outputDir, 0755); err != nil {
-				t.Fatal(err)
+				t.Fatalf("failed to create output directory: %v", err)
 			}
 			cfg := &release.Config{
 				Context: &release.Context{
@@ -83,7 +83,7 @@ func TestStage(t *testing.T) {
 
 			response, err := Stage(context.Background(), cfg)
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Stage() got unexpected error: %v", err)
 			}
 
 			if response.Error != "" {
@@ -94,7 +94,7 @@ func TestStage(t *testing.T) {
 				for _, file := range []string{"java-foo/pom.xml", "java-foo/google-cloud-foo/pom.xml"} {
 					content, err := os.ReadFile(filepath.Join(outputDir, file))
 					if err != nil {
-						t.Fatal(err)
+						t.Fatalf("failed to read output file: %v", err)
 					}
 
 					hasExpectedVersionLineWithAnnotation := strings.Contains(string(content), test.expected)
@@ -107,7 +107,7 @@ func TestStage(t *testing.T) {
 				// does not change any files in the repodir.
 				entries, err := os.ReadDir(outputDir)
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to read output directory: %v", err)
 				}
 				if len(entries) != 0 {
 					t.Errorf("expected no files in output directory, got %d files", len(entries))

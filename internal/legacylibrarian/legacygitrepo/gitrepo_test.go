@@ -89,7 +89,7 @@ func TestNewRepository(t *testing.T) {
 			wantErr: true,
 			setup: func(t *testing.T) func() {
 				if err := os.Mkdir(filepath.Join(tmpDir, "non-git-dir"), 0755); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to create test dir: %v", err)
 				}
 				return func() {}
 			},
@@ -141,7 +141,7 @@ func TestNewRepository(t *testing.T) {
 			setup: func(t *testing.T) func() {
 				unreadableDir := filepath.Join(tmpDir, "unreadable")
 				if err := os.Mkdir(unreadableDir, 0000); err != nil {
-					t.Fatal(err)
+					t.Fatalf("os.Mkdir() failed: %v", err)
 				}
 				return func() {
 					if err := os.Chmod(unreadableDir, 0755); err != nil {
@@ -194,7 +194,7 @@ func TestIsClean(t *testing.T) {
 			setup: func(t *testing.T, dir string, w *git.Worktree) {
 				filePath := filepath.Join(dir, "untracked.txt")
 				if err := os.WriteFile(filePath, []byte("test"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 			},
 			wantClean: false,
@@ -204,10 +204,10 @@ func TestIsClean(t *testing.T) {
 			setup: func(t *testing.T, dir string, w *git.Worktree) {
 				filePath := filepath.Join(dir, "added.txt")
 				if err := os.WriteFile(filePath, []byte("test"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 				if _, err := w.Add("added.txt"); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to add file: %v", err)
 				}
 			},
 			wantClean: false,
@@ -217,16 +217,16 @@ func TestIsClean(t *testing.T) {
 			setup: func(t *testing.T, dir string, w *git.Worktree) {
 				filePath := filepath.Join(dir, "committed.txt")
 				if err := os.WriteFile(filePath, []byte("test"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 				if _, err := w.Add("committed.txt"); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to add file: %v", err)
 				}
 				_, err := w.Commit("commit", &git.CommitOptions{
 					Author: &object.Signature{Name: "Test", Email: "test@example.com"},
 				})
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to commit: %v", err)
 				}
 			},
 			wantClean: true,
@@ -237,21 +237,21 @@ func TestIsClean(t *testing.T) {
 				// First, commit a file.
 				filePath := filepath.Join(dir, "modified.txt")
 				if err := os.WriteFile(filePath, []byte("initial"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 				if _, err := w.Add("modified.txt"); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to add file: %v", err)
 				}
 				_, err := w.Commit("commit", &git.CommitOptions{
 					Author: &object.Signature{Name: "Test", Email: "test@example.com"},
 				})
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to commit: %v", err)
 				}
 
 				// Now modify it.
 				if err := os.WriteFile(filePath, []byte("modified"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 			},
 			wantClean: false,
@@ -262,21 +262,21 @@ func TestIsClean(t *testing.T) {
 				// First, commit a file.
 				filePath := filepath.Join(dir, "deleted.txt")
 				if err := os.WriteFile(filePath, []byte("initial"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 				if _, err := w.Add("deleted.txt"); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to add file: %v", err)
 				}
 				_, err := w.Commit("commit", &git.CommitOptions{
 					Author: &object.Signature{Name: "Test", Email: "test@example.com"},
 				})
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to commit: %v", err)
 				}
 
 				// Now delete it.
 				if err := os.Remove(filePath); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to remove file: %v", err)
 				}
 			},
 			wantClean: false,
@@ -287,7 +287,7 @@ func TestIsClean(t *testing.T) {
 			repo, dir := initTestRepo(t)
 			w, err := repo.Worktree()
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("failed to get worktree: %v", err)
 			}
 
 			r := &LocalRepository{
@@ -298,7 +298,7 @@ func TestIsClean(t *testing.T) {
 			test.setup(t, dir, w)
 			gotClean, err := r.IsClean()
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("IsClean() returned an error: %v", err)
 			}
 
 			if gotClean != test.wantClean {
@@ -328,7 +328,7 @@ func TestChangedFiles(t *testing.T) {
 			setup: func(t *testing.T, dir string, w *git.Worktree) {
 				filePath := filepath.Join(dir, "untracked.txt")
 				if err := os.WriteFile(filePath, []byte("test"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 			},
 			wantFiles: []string{"untracked.txt"},
@@ -338,10 +338,10 @@ func TestChangedFiles(t *testing.T) {
 			setup: func(t *testing.T, dir string, w *git.Worktree) {
 				filePath := filepath.Join(dir, "added.txt")
 				if err := os.WriteFile(filePath, []byte("test"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 				if _, err := w.Add("added.txt"); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to add file: %v", err)
 				}
 			},
 			wantFiles: []string{"added.txt"},
@@ -351,20 +351,20 @@ func TestChangedFiles(t *testing.T) {
 			setup: func(t *testing.T, dir string, w *git.Worktree) {
 				filePath := filepath.Join(dir, "modified.txt")
 				if err := os.WriteFile(filePath, []byte("initial"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 				if _, err := w.Add("modified.txt"); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to add file: %v", err)
 				}
 				_, err := w.Commit("commit", &git.CommitOptions{
 					Author: &object.Signature{Name: "Test", Email: "test@example.com"},
 				})
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to commit: %v", err)
 				}
 
 				if err := os.WriteFile(filePath, []byte("modified"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 			},
 			wantFiles: []string{"modified.txt"},
@@ -374,19 +374,19 @@ func TestChangedFiles(t *testing.T) {
 			setup: func(t *testing.T, dir string, w *git.Worktree) {
 				filePath := filepath.Join(dir, "deleted.txt")
 				if err := os.WriteFile(filePath, []byte("initial"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 				if _, err := w.Add("deleted.txt"); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to add file: %v", err)
 				}
 				_, err := w.Commit("commit", &git.CommitOptions{
 					Author: &object.Signature{Name: "Test", Email: "test@example.com"},
 				})
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to commit: %v", err)
 				}
 				if err := os.Remove(filePath); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to remove file: %v", err)
 				}
 			},
 			wantFiles: []string{"deleted.txt"},
@@ -397,25 +397,25 @@ func TestChangedFiles(t *testing.T) {
 				// Untracked
 				untrackedFilePath := filepath.Join(dir, "untracked.txt")
 				if err := os.WriteFile(untrackedFilePath, []byte("test"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 
 				// Modified
 				modifiedFilePath := filepath.Join(dir, "modified.txt")
 				if err := os.WriteFile(modifiedFilePath, []byte("initial"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 				if _, err := w.Add("modified.txt"); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to add file: %v", err)
 				}
 				_, err := w.Commit("commit", &git.CommitOptions{
 					Author: &object.Signature{Name: "Test", Email: "test@example.com"},
 				})
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to commit: %v", err)
 				}
 				if err := os.WriteFile(modifiedFilePath, []byte("modified"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 			},
 			wantFiles: []string{"modified.txt", "untracked.txt"},
@@ -426,7 +426,7 @@ func TestChangedFiles(t *testing.T) {
 			repo, dir := initTestRepo(t)
 			w, err := repo.Worktree()
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("failed to get worktree: %v", err)
 			}
 
 			r := &LocalRepository{
@@ -468,7 +468,7 @@ func TestAddAll(t *testing.T) {
 			setup: func(t *testing.T, dir string) {
 				filePath := filepath.Join(dir, "new_file.txt")
 				if err := os.WriteFile(filePath, []byte("test content"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 			},
 			wantStatusIsClean: false,
@@ -485,11 +485,11 @@ func TestAddAll(t *testing.T) {
 			setup: func(t *testing.T, dir string) {
 				filePath := filepath.Join(dir, "unreadable_file.txt")
 				if err := os.WriteFile(filePath, []byte("test content"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 				// Make file unreadable to cause an error during `git add`.
 				if err := os.Chmod(filePath, 0222); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to chmod file: %v", err)
 				}
 			},
 			wantErr: true,
@@ -515,7 +515,7 @@ func TestAddAll(t *testing.T) {
 			}
 			isClean, err := r.IsClean()
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("IsClean() returned an error: %v", err)
 			}
 			if isClean != test.wantStatusIsClean {
 				t.Errorf("AddAll() status.IsClean() = %v, want %v", isClean, test.wantStatusIsClean)
@@ -542,22 +542,22 @@ func TestCommit(t *testing.T) {
 		}
 		config, err := goGitRepo.Config()
 		if err != nil {
-			t.Fatal(err)
+			t.Fatalf("gitRepo.Config failed: %v", err)
 		}
 		config.User = author
 		if err := goGitRepo.SetConfig(config); err != nil {
-			t.Fatal(err)
+			t.Fatalf("gitRepo.SetConfig failed: %v", err)
 		}
 
 		w, err := goGitRepo.Worktree()
 		if err != nil {
-			t.Fatal(err)
+			t.Fatalf("Worktree() failed: %v", err)
 		}
 		if _, err := w.Commit("initial commit", &git.CommitOptions{
 			AllowEmptyCommits: true,
 			Author:            &object.Signature{Name: "Test", Email: "test@example.com"},
 		}); err != nil {
-			t.Fatal(err)
+			t.Fatalf("initial commit failed: %v", err)
 		}
 		return &LocalRepository{Dir: dir, repo: goGitRepo}
 	}
@@ -577,14 +577,14 @@ func TestCommit(t *testing.T) {
 				// Add a file to be committed.
 				filePath := filepath.Join(repo.Dir, "new.txt")
 				if err := os.WriteFile(filePath, []byte("content"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("os.WriteFile failed: %v", err)
 				}
 				w, err := repo.repo.Worktree()
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("Worktree() failed: %v", err)
 				}
 				if _, err := w.Add("new.txt"); err != nil {
-					t.Fatal(err)
+					t.Fatalf("w.Add failed: %v", err)
 				}
 				return repo
 			},
@@ -592,11 +592,11 @@ func TestCommit(t *testing.T) {
 			check: func(t *testing.T, repo *LocalRepository, commitMsg string) {
 				head, err := repo.repo.Head()
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("repo.repo.Head() failed: %v", err)
 				}
 				commit, err := repo.repo.CommitObject(head.Hash())
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("repo.repo.CommitObject() failed: %v", err)
 				}
 				if commit.Message != commitMsg {
 					t.Errorf("Commit() message = %q, want %q", commit.Message, commitMsg)
@@ -626,7 +626,7 @@ func TestCommit(t *testing.T) {
 				// Create a bare repository which has no worktree.
 				goGitRepo, err := git.PlainInit(dir, true)
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("git.PlainInit failed: %v", err)
 				}
 				return &LocalRepository{Dir: dir, repo: goGitRepo}
 			},
@@ -641,19 +641,19 @@ func TestCommit(t *testing.T) {
 				// Add a file to make the worktree dirty.
 				filePath := filepath.Join(repo.Dir, "new.txt")
 				if err := os.WriteFile(filePath, []byte("content"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("os.WriteFile failed: %v", err)
 				}
 				w, err := repo.repo.Worktree()
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("Worktree() failed: %v", err)
 				}
 				if _, err := w.Add("new.txt"); err != nil {
-					t.Fatal(err)
+					t.Fatalf("w.Add failed: %v", err)
 				}
 
 				// Make the worktree unreadable to cause worktree.Status() to fail.
 				if err := os.Chmod(repo.Dir, 0000); err != nil {
-					t.Fatal(err)
+					t.Fatalf("os.Chmod failed: %v", err)
 				}
 				t.Cleanup(func() {
 					if err := os.Chmod(repo.Dir, 0755); err != nil {
@@ -684,7 +684,7 @@ func TestCommit(t *testing.T) {
 			}
 
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Commit() unexpected error = %v", err)
 			}
 
 			if test.check != nil {
@@ -728,7 +728,7 @@ func TestRemotes(t *testing.T) {
 					Name: name,
 					URLs: urls,
 				}); err != nil {
-					t.Fatal(err)
+					t.Fatalf("CreateRemote failed: %v", err)
 				}
 			}
 
@@ -754,11 +754,11 @@ func TestGetCommit(t *testing.T) {
 	setup := func(t *testing.T, dir string) string {
 		gitRepo, err := git.PlainInit(dir, false)
 		if err != nil {
-			t.Fatal(err)
+			t.Fatalf("git.PlainInit failed: %v", err)
 		}
 		w, err := gitRepo.Worktree()
 		if err != nil {
-			t.Fatal(err)
+			t.Fatalf("Worktree() failed: %v", err)
 		}
 		if err := os.WriteFile(filepath.Join(dir, "README.md"), []byte("test"), 0644); err != nil {
 			t.Fatal(err)
@@ -824,7 +824,7 @@ func TestGetCommit(t *testing.T) {
 				return
 			}
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("GetCommit() failed: %v", err)
 			}
 
 			test.want.Hash = plumbing.NewHash(commitHash)
@@ -847,11 +847,11 @@ func TestHeadHash(t *testing.T) {
 			setup: func(t *testing.T, dir string) {
 				gitRepo, err := git.PlainInit(dir, false)
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("git.PlainInit failed: %v", err)
 				}
 				w, err := gitRepo.Worktree()
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("Worktree() failed: %v", err)
 				}
 				if err := os.WriteFile(filepath.Join(dir, "README.md"), []byte("test"), 0644); err != nil {
 					t.Fatal(err)
@@ -870,7 +870,7 @@ func TestHeadHash(t *testing.T) {
 			name: "error",
 			setup: func(t *testing.T, dir string) {
 				if _, err := git.PlainInit(dir, false); err != nil {
-					t.Fatal(err)
+					t.Fatalf("git.PlainInit failed: %v", err)
 				}
 			},
 			wantErr: true,
@@ -882,7 +882,7 @@ func TestHeadHash(t *testing.T) {
 			test.setup(t, dir)
 			repo, err := NewRepository(&RepositoryOptions{Dir: dir})
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("NewRepository() failed: %v", err)
 			}
 			_, err = repo.HeadHash()
 			if (err != nil) != test.wantErr {
@@ -936,7 +936,7 @@ func TestGetHashForPath(t *testing.T) {
 			wantHash: func(commit *object.Commit, path string) string {
 				tree, err := commit.Tree()
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to get tree: %v", err)
 				}
 				entry, err := tree.FindEntry(path)
 				if err != nil {
@@ -954,18 +954,18 @@ func TestGetHashForPath(t *testing.T) {
 				_ = createAndCommit(t, repo, "my_dir/file_in_dir.txt", []byte("content of file in dir"), "add dir and file")
 				head, err := repo.Head()
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("repo.Head failed: %v", err)
 				}
 				commit, err := repo.CommitObject(head.Hash())
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("repo.CommitObject failed: %v", err)
 				}
 				return localRepository, commit, "my_dir"
 			},
 			wantHash: func(commit *object.Commit, path string) string {
 				tree, err := commit.Tree()
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to get tree: %v", err)
 				}
 				entry, err := tree.FindEntry(path)
 				if err != nil {
@@ -1002,18 +1002,18 @@ func TestGetHashForPath(t *testing.T) {
 				_ = createAndCommit(t, repo, "another_dir/sub_dir/nested_file.txt", []byte("nested content"), "add nested file")
 				head, err := repo.Head()
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("repo.Head failed: %v", err)
 				}
 				commit, err := repo.CommitObject(head.Hash())
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("repo.CommitObject failed: %v", err)
 				}
 				return localRepository, commit, "another_dir/sub_dir/nested_file.txt"
 			},
 			wantHash: func(commit *object.Commit, path string) string {
 				tree, err := commit.Tree()
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to get tree: %v", err)
 				}
 				entry, err := tree.FindEntry(path)
 				if err != nil {
@@ -1536,7 +1536,7 @@ func initTestRepo(t *testing.T) (*git.Repository, string) {
 	dir := t.TempDir()
 	repo, err := git.PlainInit(dir, false)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("git.PlainInit failed: %v", err)
 	}
 	return repo, dir
 }
@@ -1546,20 +1546,20 @@ func createAndCommit(t *testing.T, repo *git.Repository, path string, content []
 	t.Helper()
 	w, err := repo.Worktree()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Worktree() failed: %v", err)
 	}
 
 	fullPath := filepath.Join(w.Filesystem.Root(), path)
 	if content != nil { // It's a file
 		if err := os.MkdirAll(filepath.Dir(fullPath), 0755); err != nil {
-			t.Fatal(err)
+			t.Fatalf("os.MkdirAll failed: %v", err)
 		}
 		if err := os.WriteFile(fullPath, content, 0644); err != nil {
-			t.Fatal(err)
+			t.Fatalf("os.WriteFile failed: %v", err)
 		}
 	} else { // It's a directory
 		if err := os.MkdirAll(fullPath, 0755); err != nil {
-			t.Fatal(err)
+			t.Fatalf("os.MkdirAll failed: %v", err)
 		}
 	}
 	return commitChanges(t, repo, commitMsg, path)
@@ -1571,12 +1571,12 @@ func deleteAndCommit(t *testing.T, repo *git.Repository, path string, commitMsg 
 	t.Helper()
 	w, err := repo.Worktree()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Worktree() failed: %v", err)
 	}
 
 	fullPath := filepath.Join(w.Filesystem.Root(), path)
 	if err := os.Remove(fullPath); err != nil {
-		t.Fatal(err)
+		t.Fatalf("Remove() failed: %v", err)
 	}
 	return commitChanges(t, repo, commitMsg, path)
 }
@@ -1586,13 +1586,13 @@ func renameAndCommit(t *testing.T, repo *git.Repository, fromPath, toPath string
 	t.Helper()
 	w, err := repo.Worktree()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Worktree() failed: %v", err)
 	}
 
 	fullFromPath := filepath.Join(w.Filesystem.Root(), fromPath)
 	fullToPath := filepath.Join(w.Filesystem.Root(), toPath)
 	if err := os.Rename(fullFromPath, fullToPath); err != nil {
-		t.Fatal(err)
+		t.Fatalf("Rename() failed: %v", err)
 	}
 	return commitChanges(t, repo, commitMsg, fromPath, toPath)
 }
@@ -1602,23 +1602,23 @@ func commitChanges(t *testing.T, repo *git.Repository, commitMsg string, paths .
 	t.Helper()
 	w, err := repo.Worktree()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("Worktree() failed: %v", err)
 	}
 
 	for _, path := range paths {
 		if _, err := w.Add(path); err != nil {
-			t.Fatal(err)
+			t.Fatalf("w.Add failed: %v", err)
 		}
 	}
 	hash, err := w.Commit(commitMsg, &git.CommitOptions{
 		Author: &object.Signature{Name: "Test", Email: "test@example.com"},
 	})
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("w.Commit failed: %v", err)
 	}
 	commit, err := repo.CommitObject(hash)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("repo.CommitObject failed: %v", err)
 	}
 	return commit
 }
@@ -1666,7 +1666,7 @@ func setupRepoForGetCommitsTest(t *testing.T) (*LocalRepository, map[string]stri
 
 	// Tag for commit 1
 	if _, err := repo.CreateTag("v1.0.0", commit1.Hash, nil); err != nil {
-		t.Fatal(err)
+		t.Fatalf("CreateTag failed: %v", err)
 	}
 
 	// Commit 2
@@ -1733,7 +1733,7 @@ func TestNewAndDeletedFiles(t *testing.T) {
 			setup: func(t *testing.T, dir string, w *git.Worktree) {
 				filePath := filepath.Join(dir, "untracked.txt")
 				if err := os.WriteFile(filePath, []byte("test"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 			},
 			wantFiles: []string{"untracked.txt"},
@@ -1743,10 +1743,10 @@ func TestNewAndDeletedFiles(t *testing.T) {
 			setup: func(t *testing.T, dir string, w *git.Worktree) {
 				filePath := filepath.Join(dir, "added.txt")
 				if err := os.WriteFile(filePath, []byte("test"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 				if _, err := w.Add("added.txt"); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to add file: %v", err)
 				}
 			},
 			wantFiles: []string{"added.txt"},
@@ -1756,16 +1756,16 @@ func TestNewAndDeletedFiles(t *testing.T) {
 			setup: func(t *testing.T, dir string, w *git.Worktree) {
 				filePath := filepath.Join(dir, "deleted.txt")
 				if err := os.WriteFile(filePath, []byte("initial"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 				if _, err := w.Add("deleted.txt"); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to add file: %v", err)
 				}
 				if _, err := w.Commit("commit deleted.txt", &git.CommitOptions{Author: &object.Signature{Name: "Test", Email: "test@example.com"}}); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to commit: %v", err)
 				}
 				if err := os.Remove(filePath); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to remove file: %v", err)
 				}
 			},
 			wantFiles: []string{"deleted.txt"},
@@ -1775,16 +1775,16 @@ func TestNewAndDeletedFiles(t *testing.T) {
 			setup: func(t *testing.T, dir string, w *git.Worktree) {
 				filePath := filepath.Join(dir, "modified.txt")
 				if err := os.WriteFile(filePath, []byte("initial"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 				if _, err := w.Add("modified.txt"); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to add file: %v", err)
 				}
 				if _, err := w.Commit("commit modified.txt", &git.CommitOptions{Author: &object.Signature{Name: "Test", Email: "test@example.com"}}); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to commit: %v", err)
 				}
 				if err := os.WriteFile(filePath, []byte("modified"), 0644); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to write file: %v", err)
 				}
 			},
 		},
@@ -1794,7 +1794,7 @@ func TestNewAndDeletedFiles(t *testing.T) {
 			repo, dir := initTestRepo(t)
 			w, err := repo.Worktree()
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("failed to get worktree: %v", err)
 			}
 
 			r := &LocalRepository{
@@ -1805,7 +1805,7 @@ func TestNewAndDeletedFiles(t *testing.T) {
 			test.setup(t, dir, w)
 			gotFiles, err := r.NewAndDeletedFiles()
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("NewAndDeletedFiles() returned an error: %v", err)
 			}
 
 			slices.Sort(gotFiles)
@@ -1828,24 +1828,24 @@ func TestResetHard(t *testing.T) {
 
 	// 1. Modify the tracked file.
 	if err := os.WriteFile(trackedFilePath, []byte("modified content"), 0644); err != nil {
-		t.Fatal(err)
+		t.Fatalf("failed to write file: %v", err)
 	}
 
 	// 2. Create a new untracked file.
 	untrackedFilePath := filepath.Join(dir, "untracked.txt")
 	if err := os.WriteFile(untrackedFilePath, []byte("untracked"), 0644); err != nil {
-		t.Fatal(err)
+		t.Fatalf("failed to write file: %v", err)
 	}
 
 	// Call ResetHard.
 	if err := localRepo.ResetHard(); err != nil {
-		t.Fatal(err)
+		t.Fatalf("ResetHard() failed: %v", err)
 	}
 
 	// Check that the repo is clean.
 	isClean, err := localRepo.IsClean()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("IsClean() failed: %v", err)
 	}
 	if !isClean {
 		t.Error("ResetHard() should result in a clean repository")
@@ -1859,7 +1859,7 @@ func TestResetHard(t *testing.T) {
 	// Check that the tracked file is restored to its original content.
 	content, err := os.ReadFile(trackedFilePath)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("failed to read tracked file after reset: %v", err)
 	}
 	if string(content) != initialContent {
 		t.Errorf("tracked file content mismatch after reset: got %q, want %q", string(content), initialContent)
@@ -1906,7 +1906,7 @@ func TestCheckoutCommitAndCreateBranch(t *testing.T) {
 			if !test.wantErr {
 				head, err := repo.Head()
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("repo.Head() failed: %v", err)
 				}
 
 				if head.Name().Short() != test.branchName {
@@ -1937,15 +1937,15 @@ func TestDeleteLocalBranches(t *testing.T) {
 			branchNames: []string{"test-branch"},
 			setup: func(t *testing.T, repo *LocalRepository) {
 				if err := repo.CreateBranchAndCheckout("test-branch"); err != nil {
-					t.Fatal(err)
+					t.Fatalf("CreateBranchAndCheckout() failed: %v", err)
 				}
 				// Checkout master so we are not on the branch to be deleted
 				w, err := repo.repo.Worktree()
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to get worktree: %v", err)
 				}
 				if err := w.Checkout(&git.CheckoutOptions{Branch: plumbing.NewBranchReferenceName("master")}); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to checkout master: %v", err)
 				}
 			},
 		},
@@ -1954,18 +1954,18 @@ func TestDeleteLocalBranches(t *testing.T) {
 			branchNames: []string{"branch1", "branch2"},
 			setup: func(t *testing.T, repo *LocalRepository) {
 				if err := repo.CreateBranchAndCheckout("branch1"); err != nil {
-					t.Fatal(err)
+					t.Fatalf("CreateBranchAndCheckout() failed: %v", err)
 				}
 				if err := repo.CreateBranchAndCheckout("branch2"); err != nil {
-					t.Fatal(err)
+					t.Fatalf("CreateBranchAndCheckout() failed: %v", err)
 				}
 				// Checkout master so we are not on a branch to be deleted
 				w, err := repo.repo.Worktree()
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to get worktree: %v", err)
 				}
 				if err := w.Checkout(&git.CheckoutOptions{Branch: plumbing.NewBranchReferenceName("master")}); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to checkout master: %v", err)
 				}
 			},
 		},
@@ -1981,7 +1981,7 @@ func TestDeleteLocalBranches(t *testing.T) {
 			branchNames: []string{"current-branch"},
 			setup: func(t *testing.T, repo *LocalRepository) {
 				if err := repo.CreateBranchAndCheckout("current-branch"); err != nil {
-					t.Fatal(err)
+					t.Fatalf("CreateBranchAndCheckout() failed: %v", err)
 				}
 			},
 			wantErr:    true,
@@ -1992,14 +1992,14 @@ func TestDeleteLocalBranches(t *testing.T) {
 			branchNames: []string{"branch1", "non-existing-branch"},
 			setup: func(t *testing.T, repo *LocalRepository) {
 				if err := repo.CreateBranchAndCheckout("branch1"); err != nil {
-					t.Fatal(err)
+					t.Fatalf("CreateBranchAndCheckout() failed: %v", err)
 				}
 				w, err := repo.repo.Worktree()
 				if err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to get worktree: %v", err)
 				}
 				if err := w.Checkout(&git.CheckoutOptions{Branch: plumbing.NewBranchReferenceName("master")}); err != nil {
-					t.Fatal(err)
+					t.Fatalf("failed to checkout master: %v", err)
 				}
 			},
 			wantErr:    true,
@@ -2010,10 +2010,10 @@ func TestDeleteLocalBranches(t *testing.T) {
 			branchNames: []string{"branch1", "current-branch"},
 			setup: func(t *testing.T, repo *LocalRepository) {
 				if err := repo.CreateBranchAndCheckout("branch1"); err != nil {
-					t.Fatal(err)
+					t.Fatalf("CreateBranchAndCheckout() failed: %v", err)
 				}
 				if err := repo.CreateBranchAndCheckout("current-branch"); err != nil {
-					t.Fatal(err)
+					t.Fatalf("CreateBranchAndCheckout() failed: %v", err)
 				}
 			},
 			wantErr:    true,
@@ -2098,13 +2098,13 @@ func TestResetSoft(t *testing.T) {
 			}
 
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("ResetSoft() returned unexpected error: %v", err)
 			}
 
 			// Verify HEAD is now at the initial commit.
 			headAfterReset, err := repo.Head()
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("repo.Head() after reset failed: %v", err)
 			}
 			if headAfterReset.Hash() != initialCommit.Hash {
 				t.Errorf("HEAD after reset is at %s, want %s", headAfterReset.Hash(), initialCommit.Hash)
@@ -2113,7 +2113,7 @@ func TestResetSoft(t *testing.T) {
 			// Verify the repo is no longer clean because the changes from the second commit are now staged.
 			isCleanAfterReset, err := localRepo.IsClean()
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("IsClean() after reset failed: %v", err)
 			}
 			if isCleanAfterReset {
 				t.Error("repository should be dirty after soft reset")
@@ -2122,7 +2122,7 @@ func TestResetSoft(t *testing.T) {
 			// Verify the working tree file still has the content from the second commit.
 			content, err := os.ReadFile(filepath.Join(dir, "file.txt"))
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("failed to read file after reset: %v", err)
 			}
 			if string(content) != "second content" {
 				t.Errorf("file content after reset is %q, want %q", string(content), "second content")
