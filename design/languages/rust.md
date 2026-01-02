@@ -26,31 +26,35 @@ The workflow is orchestrated through a series of `librarian` commands that wrap 
 ### `librarian generate`
 -   **Functionality:** Orchestrates the Rust generator to produce client library code and the `Cargo.toml` manifest.
 -   **Rust-Specifics:**
-    1.  **Environment:** `librarian` uses the `rust` toolchain and `cargo` binary specified in `tool.yaml`.
+    1.  **Environment:** `librarian` executes all commands within the appropriate toolkit container. It does not manage the Rust toolchain directly; it runs `cargo` and other tools directly, relying on the container's pre-configured `PATH`.
     2.  **`Cargo.toml` Generation:** The crate's manifest file, `Cargo.toml`, is generated from a template (`Cargo.toml.mustache`). All metadata, including the crate name, version, authors, and dependencies, are populated from the configuration in `librarian.yaml`.
     3.  **Generator Execution:** It invokes the Rust generator, passing in the API protos and service configuration. The generator produces the raw `.rs` source files.
     4.  **Post-Processing:** After generation, `librarian` runs `cargo fmt` on the source code and `taplo fmt` on the `Cargo.toml` file to ensure all generated artifacts conform to Rust style conventions.
     5.  **`veneer` and `modules`:** For complex "veneer" libraries, the `rust.modules` configuration in `librarian.yaml` is used to orchestrate multiple generation steps into different subdirectories.
 
-### `librarian release`
--   **Functionality:** Orchestrates the versioning process for Rust crates within a `librarian` managed repository. The command iterates through all configured libraries in `librarian.yaml`.
+### `librarian stage`
+-   **Functionality:** Prepares a new release by calculating the next version and updating local package files. This command modifies local files, which are then expected to be committed.
 -   **Rust-Specifics:**
-    1.  **Skip Release:** If a library's configuration in `librarian.yaml` includes `skip_release: true`, that library is skipped entirely for the current release process.
-    2.  **Version Determination (Cargo.toml as Source):** For libraries not skipped, `librarian release` reads the *current* version directly from the crate's `Cargo.toml` file. It then uses `internal/semver` (and git history, if available) to calculate the next appropriate semantic version.
-    3.  **Update `Cargo.toml`:** The calculated new version is written directly back to the `Cargo.toml` file, using a line-based update mechanism that preserves existing comments, formatting, and any hand-authored sections. This is crucial because `Cargo.toml` files often contain valuable developer-added context.
-    4.  **Update `librarian.yaml`:** The `version` field for the corresponding library in `librarian.yaml` is updated to reflect this new version. This ensures that `librarian.yaml` remains synchronized with the authoritative version in `Cargo.toml`.
-    5.  **Validation:** `librarian release` itself does not run `cargo test`. It is expected that `cargo test` and other comprehensive validation will be executed as a separate step in the broader CI/release pipeline to ensure library quality. This design choice prevents `librarian release` from becoming overly complex and allows for independent validation strategies.
+    1.  **Version Calculation:** For each library, `librarian` reads the current version from its `Cargo.toml` file. It then analyzes the Git commit history since the last release tag to determine the next semantic version.
+    2.  **Update `librarian.yaml`:** Updates the `version` field for the specific library within the `librarian.yaml` manifest.
+    3.  **File Updates:** Propagates the new version back into the `Cargo.toml` file using a line-based update mechanism that preserves formatting and comments. This ensures `librarian.yaml` and `Cargo.toml` are synchronized.
+    4.  **Validation:** `librarian stage` does not run `cargo test`. Validation is expected to be a separate step in the CI pipeline.
+
+### `librarian tag`
+-   **Functionality:** Creates and pushes the Git tag for a staged package. This command is run after `librarian stage` and a `git commit`.
+-   **Rust-Specifics:**
+    1.  **Change Detection:** Identifies which libraries are candidates for tagging by finding which library versions in `librarian.yaml` have been updated since the last release tag.
+    2.  **Tagging:** Creates and pushes a Git tag to the repository, formatted as `<crate-name>-v<version>`.
 
 ### `librarian publish`
--   **Functionality:** Publishes crates that have changed since the last release tag, with a strong focus on workspace integrity and safety.
+-   **Functionality:** Publishes a tagged crate to `crates.io`, with a strong focus on workspace integrity and safety.
 -   **Rust-Specifics:**
-    The `publish` command is a multi-step orchestration that delegates heavily to the `cargo-workspaces` and `cargo-semver-checks` tools to ensure a safe and correct release.
-    1.  **Change Detection:** It identifies which crates are candidates for publishing by finding which `Cargo.toml` files have been modified since the last release tag (using `git diff`).
+    The `publish` command is a multi-step orchestration that delegates heavily to the `cargo-workspaces` and `cargo-semver-checks` tools.
+    1.  **Change Detection:** It identifies which crates are candidates for publishing based on the presence of a new release tag.
     2.  **Publication Planning:** It runs `cargo workspaces plan --skip-published` to generate a publication plan, which analyzes the entire workspace dependency graph.
-    3.  **Plan Validation:** The list of changed crates found via `git` is compared against the publication plan from `cargo workspaces plan`. The command fails if these lists do not match, preventing accidental releases with missing dependency version bumps.
+    3.  **Plan Validation:** The list of changed crates found via Git is compared against the publication plan from `cargo workspaces plan`. The command fails if these lists do not match, preventing accidental releases.
     4.  **Semantic Versioning Checks:** For each crate in the publication plan, it runs `cargo semver-checks` (unless `--skip-semver-checks` is used) to validate that the version bump is appropriate for the code changes.
-    5.  **Publishing:** It executes `cargo workspaces publish`, which automatically handles the topological sort of the workspace dependencies and publishes the crates to `crates.io` in the correct order.
-    6.  **Tagging:** After a successful publish, it creates and pushes a Git tag for each published crate, formatted as `<crate-name>-v<version>`.
+    5.  **Publishing:** It executes `cargo workspaces publish`, which topologically sorts the workspace dependencies and publishes the crates to `crates.io` in the correct order.
 
 ## Alternatives Considered
 
