@@ -28,7 +28,6 @@ import (
 
 var (
 	errUnsupportedLanguage = errors.New("library creation is not supported for the specified language")
-	errOutputFlagRequired  = errors.New("output flag is required when default.output is not set in librarian.yaml")
 	errMissingLibraryName  = errors.New("must provide library name as argument to create a new library")
 	errNoYaml              = errors.New("unable to read librarian.yaml")
 )
