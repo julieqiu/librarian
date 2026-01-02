@@ -12,6 +12,7 @@ This document outlines the command-line interface and core workflows for `librar
 -   **`publish`**: Publishes a tagged release to a public registry.
 -   **`tidy`**: Formats and validates `librarian.yaml`.
 -   **`status`**: Checks the health and readiness of libraries.
+-   **`check`**: Runs a suite of quality and validation checks.
 -   **`version`**: Prints the `librarian` version.
 -   **`delete`**: Removes a client library.
 
@@ -45,3 +46,20 @@ Its workflow is as follows:
     *   **Python:** Builds the source and wheel distributions and uploads them to PyPI using `twine`.
     *   **Rust:** Runs `cargo workspaces publish` to upload packages to `crates.io`.
     *   **Go:** This command is a no-op for Go, as the `librarian tag` command is the publishing mechanism for Go modules.
+
+### `librarian check`
+
+The `check` command runs a suite of quality assurance and validation checks for a specific client library. This command is designed to provide a consolidated way for developers to verify their code against project standards without manually executing multiple language-specific tools.
+
+Its workflow is as follows:
+1.  It takes a library name as an argument and navigates to its output directory.
+2.  It identifies the library's language and orchestrates the appropriate set of validation tools.
+    *   **For Rust:**
+        -   Executes `cargo test` to run unit and integration tests.
+        -   Executes `cargo doc --workspace --no-deps` to check documentation for warnings and errors.
+        -   Executes `cargo clippy --workspace -- -D warnings` to run the linter with strict warning policies.
+    *   **For Python:**
+        -   Executes `nox -s test` to run the test suite defined in `noxfile.py`.
+    *   **For Go:**
+        -   Executes `go test ./...` to run all tests within the module.
+        -   Executes `go vet ./...` to run the Go vet linter for suspicious constructs.

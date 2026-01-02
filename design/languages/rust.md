@@ -24,13 +24,14 @@ The workflow is orchestrated through a series of `librarian` commands that wrap 
     -   The `output` directory, if not specified, defaults to a path derived from the library name by replacing hyphens with slashes (e.g., `google-cloud-secretmanager` would default to `google/cloud/secretmanager`).
 
 ### `librarian generate`
--   **Functionality:** Orchestrates the Rust generator to produce client library code and the `Cargo.toml` manifest.
+-   **Functionality:** Orchestrates the Rust generator to produce client library code, ensuring the output directory is a valid and up-to-date Rust crate. `librarian` executes all commands within the appropriate toolkit container; it does not manage the Rust toolchain directly, relying on the container's pre-configured `PATH`.
 -   **Rust-Specifics:**
-    1.  **Environment:** `librarian` executes all commands within the appropriate toolkit container. It does not manage the Rust toolchain directly; it runs `cargo` and other tools directly, relying on the container's pre-configured `PATH`.
-    2.  **`Cargo.toml` Generation:** The crate's manifest file, `Cargo.toml`, is generated from a template (`Cargo.toml.mustache`). All metadata, including the crate name, version, authors, and dependencies, are populated from the configuration in `librarian.yaml`.
-    3.  **Generator Execution:** It invokes the Rust generator, passing in the API protos and service configuration. The generator produces the raw `.rs` source files.
+    1.  **First-Time Crate Initialization:** The command first checks if the library's output directory exists.
+        -   **If the output directory does NOT exist:** It performs a one-time scaffolding step by running `cargo new --lib --vcs none <output-dir>`. This creates the directory, a placeholder `Cargo.toml`, and a `src/lib.rs`, establishing a valid Rust crate.
+    2.  **`Cargo.toml` Generation:** On every run (including the first), it generates the `Cargo.toml` file from a template (`Cargo.toml.mustache`), populating it with the specific crate name, version, authors, and dependencies defined in `librarian.yaml`. This overwrites any placeholder `Cargo.toml`, ensuring it is always synchronized with the configuration.
+    3.  **Generator Execution:** It invokes the Rust generator, passing in the API protos and service configuration. The generator produces the raw `.rs` source files, overwriting any placeholder `src/lib.rs`.
     4.  **Post-Processing:** After generation, `librarian` runs `cargo fmt` on the source code and `taplo fmt` on the `Cargo.toml` file to ensure all generated artifacts conform to Rust style conventions.
-    5.  **`veneer` and `modules`:** For complex "veneer" libraries, the `rust.modules` configuration in `librarian.yaml` is used to orchestrate multiple generation steps into different subdirectories.
+    5.  **`veneer` and `modules`:** For complex "veneer" libraries, the `rust.modules` configuration in `librarian.yaml` is used to orchestrate multiple generation steps into different subdirectories, ensuring each module is correctly generated within its respective subdirectory.
 
 ### `librarian stage`
 -   **Functionality:** Prepares a new release by calculating the next version and updating local package files. This command modifies local files, which are then expected to be committed.

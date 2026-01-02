@@ -26,13 +26,15 @@ The workflow is orchestrated through `librarian` commands that wrap standard Go 
     -   The `output` directory defaults to the module path relative to the repository root (e.g., `secretmanager/apv1`).
 
 ### `librarian generate`
--   **Functionality:** Orchestrates the Go GAPIC generator to produce client library code.
+-   **Functionality:** Orchestrates the Go GAPIC generator to produce client library code, ensuring the output directory is a valid and up-to-date Go module.
 -   **Go-Specifics:**
-    1.  **Configuration:** Gathers all necessary configuration from `librarian.yaml`, including `api_path`, `output` directory, and any `keep` rules.
-    2.  **`protoc` Invocation:** Executes `protoc` with `protoc-gen-go-gapic` to generate Go source files from protocol buffers.
-    3.  **Output Flattening:** A crucial step for Go, it flattens the initial nested output structure (e.g., `/output/cloud.google.com/go/...`) to the correct module structure (e.g., `/output/secretmanager/apiv1`).
-    4.  **Post-Processing:** Runs post-processing steps like `go mod tidy` to manage dependencies, applies Go-specific formatting, and updates snippet metadata.
-    5.  **Global File Modifications:** Respects a configuration setting (analogous to the legacy `global_files_allowlist`) that permits modifications to shared, repository-level files like `internal/generated/snippets/go.mod`.
+    1.  **First-Time Module Initialization:** The command first checks if a `go.mod` file exists in the output directory.
+        -   **If `go.mod` does NOT exist:** It performs a one-time scaffolding step by running `go mod init <module-path>` to make the directory a valid Go module.
+    2.  **`go.mod` Generation:** On every run (including the first), it generates the `go.mod` file from a template, populating it with the specific module path and dependencies defined in `librarian.yaml`. This overwrites the file created during initialization, ensuring it is always synchronized with the configuration.
+    3.  **Code Generation:** It executes `protoc` with `protoc-gen-go-gapic` to generate the `.go` source files from protocol buffers.
+    4.  **Output Flattening:** It flattens the initial nested generator output to the correct, final module structure.
+    5.  **Dependency Management:** It runs `go mod tidy` to ensure the `go.sum` file is correct and all dependencies are properly recorded.
+    6.  **Global File Modifications:** Respects a configuration setting that permits modifications to shared, repository-level files like `internal/generated/snippets/go.mod`.
 
 ### `librarian stage`
 -   **Functionality:** Prepares a new release by calculating the next version and updating Go module files. This command modifies local files, which are then expected to be committed.
