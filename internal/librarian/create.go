@@ -19,7 +19,6 @@ import (
 	"errors"
 	"fmt"
 	"sort"
-	"strings"
 
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/librarian/rust"
@@ -83,25 +82,6 @@ func runCreate(ctx context.Context, name, output string, channel ...string) erro
 		})
 	default:
 		return errUnsupportedLanguage
-	}
-}
-
-func deriveOutput(output string, cfg *config.Config, name, channel, language string) (string, error) {
-	if output != "" {
-		return output, nil
-	}
-	if cfg.Default == nil || cfg.Default.Output == "" {
-		return "", errOutputFlagRequired
-	}
-	switch language {
-	case languageRust:
-		if channel != "" {
-			return defaultOutput(language, channel, cfg.Default.Output), nil
-		}
-		libOutputDir := strings.ReplaceAll(name, "-", "/")
-		return defaultOutput(language, libOutputDir, cfg.Default.Output), nil
-	default:
-		return defaultOutput(language, channel, cfg.Default.Output), nil
 	}
 }
 
