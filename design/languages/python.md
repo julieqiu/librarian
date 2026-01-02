@@ -7,9 +7,9 @@ This document defines the Python-specific implementation, workflows, and command
 The `librarian` CLI is a language-agnostic tool for managing Google Cloud client libraries. For a high-level overview of the CLI's design, refer to [design/cli.md](./../cli.md), and for a detailed explanation of the configuration architecture, see [design/configuration.md](./../configuration.md). However, to function correctly, it requires language-specific logic to interface with each language's unique ecosystem. This document details that specific implementation for the Python ecosystem, which is centered around `pip`, PyPI, and virtual environments.
 
 ## Overview
-The Python implementation for `librarian` is designed around a "single source of truth" principle, where the `librarian.yaml` manifest is the authoritative source for all configuration. Package metadata files like `setup.py` and `__init__.py` are treated as generated artifacts, ensuring that all metadata is derived directly from `librarian.yaml`.
+The Python implementation for `librarian` is designed around a "single source of truth" principle, where the `librarian.yaml` manifest is the authoritative source for all configuration. The `librarian` Go binary acts as a smart **orchestrator**, delegating language-specific tasks to a toolkit of standard Python tools.
 
-The workflow is orchestrated through a series of `librarian` commands that wrap and delegate to standard Python tooling like `gcp-synthtool`, `pip`, `twine`, `black`, and `isort`. This approach ensures that the process is both idiomatic for Python developers and robust enough to handle the complexities of Python packaging.
+Package metadata files like `setup.py` and `__init__.py` are treated as generated artifacts, ensuring that all metadata is derived directly from `librarian.yaml`. The workflow is an explicit sequence of commands executed by `librarian` (e.g., `protoc`, `black`, `isort`, `twine`), making the process transparent, debuggable, and idiomatic for Python developers.
 
 ## Detailed Design
 
@@ -24,20 +24,19 @@ The workflow is orchestrated through a series of `librarian` commands that wrap 
     -   The `output` directory, if not specified, defaults to `packages/<library-name>`.
 
 ### `librarian generate`
--   **Functionality:** Orchestrates the Python GAPIC generator to produce client library code and package metadata.
+-   **Functionality:** Orchestrates a sequence of tools to produce client library code and package metadata. `librarian` executes all commands within the appropriate toolkit container. It does not manage virtual environments itself; it runs commands like `python3`, `protoc`, `black`, and `isort` directly, relying on the container's pre-configured `PATH`.
 -   **Python-Specifics:**
-    1.  **Environment:** `librarian` invokes the Python generator within a virtual environment, using the Python version and dependencies specified in `tool.yaml`.
-    2.  **Manifest Generation:** Key package files like `setup.py` and version files (e.g., `__init__.py`) are generated from templates. All metadata, including the package name, version, and dependencies, are populated from the configuration in `librarian.yaml`.
-    3.  **Generator Execution:** It executes `gcp-synthtool`, passing in the appropriate API protos and service configuration to generate the raw `.py` source files.
-    4.  **Post-Processing:** After generation, `librarian` runs standard Python formatters like `black` and `isort` on the generated code to ensure it conforms to `google-cloud-python` style guides.
-    5.  **`keep` field:** The `keep` field in `librarian.yaml` is respected. Files listed here (e.g., `noxfile.py`, handwritten samples) are preserved and are not deleted during the pre-generation cleanup of the output directory.
+    1.  **Pre-generation Cleanup:** `librarian` cleans the output directory. Crucially, it reads the `keep` field from `librarian.yaml` and preserves the specified files and directories (e.g., `noxfile.py`, handwritten samples) before deleting the rest.
+    2.  **Code Generation via `protoc`:** `librarian` executes `protoc` with the `--python_gapic_out` plugin. The Go binary is responsible for reading `librarian.yaml` and constructing the correct command-line arguments, including transport options and service configs.
+    3.  **Manifest & Metadata Generation:** `librarian` executes a dedicated Python script provided by the toolkit (e.g., `python3 -m synthtool.manifest_generator`). The Go binary passes metadata from `librarian.yaml` (like the library name, version, and dependencies) to this script via command-line arguments. This keeps the Python packaging logic in a maintainable Python script.
+    4.  **Code Formatting:** After code and manifests are generated, `librarian` explicitly executes standard Python formatters on the output directory, in sequence: first `black .`, then `isort .`. This makes the formatting step transparent and auditable.
 
 ### `librarian stage`
 -   **Functionality:** Prepares a new release by calculating the next version and updating Python package files. This command modifies local files, which are then expected to be committed.
 -   **Python-Specifics:**
     1.  **Version Calculation:** Analyzes the library's conventional commit history since the last recorded release to determine the next semantic version.
     2.  **Update `librarian.yaml`:** Updates the `version` field for the specific library within the `librarian.yaml` manifest.
-    3.  **File Updates:** Propagates the new version into key generated Python package files, including `setup.py`, `gapic_version.py`, and `samples/**/snippet_metadata.json`.
+    3.  **File Updates:** `librarian` delegates the propagation of the new version into Python-specific files (e.g., `setup.py`, `__init__.py`) by executing a dedicated versioning script from the toolkit.
 
 ### `librarian tag`
 -   **Functionality:** Creates and pushes the Git tag for a staged Python package.
@@ -49,8 +48,8 @@ The workflow is orchestrated through a series of `librarian` commands that wrap 
 -   **Functionality:** Publishes a tagged Python package to PyPI.
 -   **Python-Specifics:**
     1.  **Change Detection:** Identifies which libraries are candidates for publishing based on the presence of a new release tag.
-    2.  **Build:** Builds the source distribution (`sdist`) and wheel (`bdist_wheel`) using `setup.py`.
-    3.  **Publish:** Uses `twine` to upload the built artifacts to the Python Package Index (PyPI).
+    2.  **Build:** `librarian` orchestrates the standard Python build process by executing `python3 setup.py sdist bdist_wheel` in the library's output directory.
+    3.  **Publish:** `librarian` executes `twine upload dist/*` to upload the built artifacts to the Python Package Index (PyPI).
 
 ## Alternatives Considered
 (This section can be filled in as the design evolves.)
