@@ -418,16 +418,26 @@ func TestDeriveNextOptions_DeriveNext(t *testing.T) {
 
 func TestDeriveNextOptions_DeriveNext_Error(t *testing.T) {
 	for _, test := range []struct {
+		name           string
 		changeLevel    ChangeLevel
 		currentVersion string
 		wantErr        error
 	}{
-		{Major, "invalid", errInvalidVersion},
+		{
+			name:           "bad version",
+			changeLevel:    Minor,
+			currentVersion: "abc123",
+			wantErr:        errInvalidVersion,
+		},
 	} {
-		_, err := DeriveNext(test.changeLevel, test.currentVersion, DeriveNextOptions{})
-		if !errors.Is(err, test.wantErr) {
-			t.Errorf("DeriveNext(%v, %q), returned error %v, wanted %v", test.changeLevel, test.currentVersion, err, test.wantErr)
-		}
+		t.Run(test.name, func(t *testing.T) {
+			_, err := DeriveNext(test.changeLevel, test.currentVersion, DeriveNextOptions{})
+			if err == nil {
+				t.Errorf("DeriveNextOptions.DeriveNext(%v, %q) did not return an error as expected.", test.changeLevel, test.currentVersion)
+			} else if !errors.Is(err, test.wantErr) {
+				t.Errorf("DeriveNextOptions.DeriveNext(%v, %q), returned error %v, wanted %v", test.changeLevel, test.currentVersion, err, test.wantErr)
+			}
+		})
 	}
 }
 

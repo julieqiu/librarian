@@ -386,6 +386,5 @@ func DeriveNextPreview(previewVersion, stableVersion string, opts DeriveNextOpti
 
 		nextVerOpts.BumpVersionCore = true
 	}
-
 	return deriveNext(Minor, pv, nextVerOpts), nil
 }
