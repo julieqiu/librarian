@@ -282,7 +282,7 @@ func TestDeriveNext(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			got, err := DeriveNext(DeriveNextOptions{}, test.highestChange, test.currentVersion)
+			got, err := DeriveNext(test.highestChange, test.currentVersion, DeriveNextOptions{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -405,7 +405,7 @@ func TestDeriveNextOptions_DeriveNext(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			nextVersion, err := DeriveNext(test.opts, test.highestChange, test.currentVersion)
+			nextVersion, err := DeriveNext(test.highestChange, test.currentVersion, test.opts)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -424,7 +424,7 @@ func TestDeriveNextOptions_DeriveNext_Error(t *testing.T) {
 	}{
 		{Major, "invalid", errInvalidVersion},
 	} {
-		_, err := DeriveNext(DeriveNextOptions{}, test.changeLevel, test.currentVersion)
+		_, err := DeriveNext(test.changeLevel, test.currentVersion, DeriveNextOptions{})
 		if !errors.Is(err, test.wantErr) {
 			t.Errorf("DeriveNext(%v, %q), returned error %v, wanted %v", test.changeLevel, test.currentVersion, err, test.wantErr)
 		}
@@ -529,7 +529,7 @@ func TestDeriveNextOptions_DeriveNextPreview(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			nextVersion, err := DeriveNextPreview(test.opts, test.previewVersion, test.stableVersion)
+			nextVersion, err := DeriveNextPreview(test.previewVersion, test.stableVersion, test.opts)
 			if err != nil {
 				t.Fatalf("DeriveNextPreview() returned an error: %v", err)
 			}
@@ -567,7 +567,7 @@ func TestDeriveNextOptions_DeriveNextPreview_Errors(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			_, err := DeriveNextPreview(DeriveNextOptions{}, test.previewVersion, test.stableVersion)
+			_, err := DeriveNextPreview(test.previewVersion, test.stableVersion, DeriveNextOptions{})
 			if err == nil {
 				t.Errorf("DeriveNextPreview(%q, %q) did not return an error as expected.", test.previewVersion, test.stableVersion)
 			} else if !errors.Is(err, test.wantErr) {

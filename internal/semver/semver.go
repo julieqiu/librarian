@@ -271,7 +271,7 @@ type DeriveNextOptions struct {
 
 // DeriveNext determines the appropriate SemVer version bump based on the
 // provided [ChangeLevel] and the provided [DeriveNextOptions].
-func DeriveNext(o DeriveNextOptions, changeLevel ChangeLevel, currentVersion string) (string, error) {
+func DeriveNext(changeLevel ChangeLevel, currentVersion string, opts DeriveNextOptions) (string, error) {
 	if changeLevel == None {
 		return currentVersion, nil
 	}
@@ -281,13 +281,13 @@ func DeriveNext(o DeriveNextOptions, changeLevel ChangeLevel, currentVersion str
 		return "", err
 	}
 
-	return deriveNext(o, changeLevel, v), nil
+	return deriveNext(changeLevel, v, opts), nil
 }
 
 // deriveNext implements next version derivation based on the [DeriveNextOptions].
-func deriveNext(o DeriveNextOptions, changeLevel ChangeLevel, v version) string {
+func deriveNext(changeLevel ChangeLevel, v version, opts DeriveNextOptions) string {
 	// Only bump the prerelease version number.
-	if v.Prerelease != "" && !o.BumpVersionCore {
+	if v.Prerelease != "" && !opts.BumpVersionCore {
 		// Append prerelease number if there isn't one.
 		if v.PrereleaseNumber == nil {
 			v.PrereleaseSeparator = "."
@@ -302,7 +302,7 @@ func deriveNext(o DeriveNextOptions, changeLevel ChangeLevel, v version) string 
 	}
 
 	// Reset prerelease number, if present, then fallthrough to bump version core.
-	if v.PrereleaseNumber != nil && o.BumpVersionCore {
+	if v.PrereleaseNumber != nil && opts.BumpVersionCore {
 		*v.PrereleaseNumber = 1
 	}
 
@@ -312,7 +312,7 @@ func deriveNext(o DeriveNextOptions, changeLevel ChangeLevel, v version) string 
 	if v.Major == 0 {
 		if changeLevel == Major {
 			changeLevel = Minor
-		} else if changeLevel == Minor && o.DowngradePreGAChanges {
+		} else if changeLevel == Minor && opts.DowngradePreGAChanges {
 			changeLevel = Patch
 		}
 	}
@@ -351,7 +351,7 @@ var (
 // version, it must be caught up. When the preview version is ahead, a
 // prerelease number bump is all that is necessary. Every change is treated as a
 // [Minor] change. The provided preview version must have a prerelease segment.
-func DeriveNextPreview(o DeriveNextOptions, previewVersion, stableVersion string) (string, error) {
+func DeriveNextPreview(previewVersion, stableVersion string, opts DeriveNextOptions) (string, error) {
 	pv, err := parse(previewVersion)
 	if err != nil {
 		return "", errors.Join(errInvalidPreviewVersion, err)
@@ -365,7 +365,7 @@ func DeriveNextPreview(o DeriveNextOptions, previewVersion, stableVersion string
 	}
 
 	// Make a shallow copy of original options to retain any language-specific needs.
-	nextVerOpts := o
+	nextVerOpts := opts
 	coreStrOpts := stringifyOptions{
 		VersionCoreOnly: true,
 		IncludeVPrefix:  true,
@@ -387,6 +387,5 @@ func DeriveNextPreview(o DeriveNextOptions, previewVersion, stableVersion string
 		nextVerOpts.BumpVersionCore = true
 	}
 
-	return deriveNext(nextVerOpts, Minor, pv), nil
+	return deriveNext(Minor, pv, nextVerOpts), nil
 }
-

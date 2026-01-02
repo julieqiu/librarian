@@ -174,7 +174,7 @@ func NextVersion(commits []*legacygitrepo.ConventionalCommit, currentVersion str
 	if highestChange == semver.None {
 		return currentVersion, nil
 	}
-	return semver.DeriveNext(semver.DeriveNextOptions{}, highestChange, currentVersion)
+	return semver.DeriveNext(highestChange, currentVersion, semver.DeriveNextOptions{})
 }
 
 // getHighestChange determines the highest-ranking change type from a slice of commits.

@@ -49,10 +49,11 @@ func ReleaseLibrary(library *config.Library, srcPath string) error {
 	if manifest.Package == nil {
 		return err
 	}
-	newVersion, err := semver.DeriveNext(semver.DeriveNextOptions{
-		BumpVersionCore:       true,
-		DowngradePreGAChanges: true,
-	}, semver.Minor, manifest.Package.Version)
+	newVersion, err := semver.DeriveNext(semver.Minor, manifest.Package.Version,
+		semver.DeriveNextOptions{
+			BumpVersionCore:       true,
+			DowngradePreGAChanges: true,
+		})
 	if err != nil {
 		return err
 	}
