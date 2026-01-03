@@ -95,7 +95,6 @@ func addLibraryToLibrarianConfig(cfg *config.Config, name, output string, channe
 		Name:          name,
 		CopyrightYear: strconv.Itoa(time.Now().Year()),
 		Output:        output,
-		Version:       "0.1.0",
 	}
 
 	for _, c := range channel {

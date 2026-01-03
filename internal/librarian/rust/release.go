@@ -16,14 +16,16 @@
 package rust
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/semver"
-	"github.com/pelletier/go-toml/v2"
 )
+
+const defaultVersion = "0.1.0"
 
 type cargoPackage struct {
 	Name    string `toml:"name"`
@@ -37,27 +39,35 @@ type cargoManifest struct {
 // ReleaseLibrary bumps version for Cargo.toml files and updates librarian config version.
 func ReleaseLibrary(library *config.Library, srcPath string) error {
 	cargoFile := filepath.Join(srcPath, "Cargo.toml")
-	cargoContents, err := os.ReadFile(cargoFile)
-	if err != nil {
-		return err
-	}
-	var manifest cargoManifest
-	if err := toml.Unmarshal(cargoContents, &manifest); err != nil {
-		return err
-	}
-	if manifest.Package == nil {
-		return err
-	}
-	newVersion, err := semver.DeriveNext(semver.Minor, manifest.Package.Version,
-		semver.DeriveNextOptions{
-			BumpVersionCore:       true,
-			DowngradePreGAChanges: true,
-		})
-	if err != nil {
-		return err
-	}
-	if err := UpdateCargoVersion(cargoFile, newVersion); err != nil {
-		return err
+	currentVersion := library.Version
+	var newVersion string
+	if currentVersion == "" {
+		newVersion = defaultVersion
+		if _, err := os.Stat(cargoFile); os.IsNotExist(err) {
+			cargo := fmt.Sprintf(`[package]
+name                   = "%s"
+version                = "%s"
+edition                = "2021"
+`, library.Name, newVersion)
+			if err := os.WriteFile(cargoFile, []byte(cargo), 0644); err != nil {
+				return err
+			}
+		} else if err := UpdateCargoVersion(cargoFile, newVersion); err != nil {
+			return err
+		}
+	} else {
+		var err error
+		newVersion, err = semver.DeriveNext(semver.Minor, currentVersion,
+			semver.DeriveNextOptions{
+				BumpVersionCore:       true,
+				DowngradePreGAChanges: true,
+			})
+		if err != nil {
+			return err
+		}
+		if err := UpdateCargoVersion(cargoFile, newVersion); err != nil {
+			return err
+		}
 	}
 	library.Version = newVersion
 	return nil
