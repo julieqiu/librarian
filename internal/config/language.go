@@ -14,8 +14,6 @@
 
 package config
 
-import "github.com/googleapis/librarian/internal/yaml"
-
 // GoModule represents the Go-specific configuration for a library.
 type GoModule struct {
 	DeleteGenerationOutputPaths []string `yaml:"delete_generation_output_paths,omitempty"`
@@ -49,7 +47,7 @@ type RustDefault struct {
 // and where to output the generated code.
 type RustModule struct {
 	// DisabledRustdocWarnings is a list of rustdoc warnings to disable.
-	DisabledRustdocWarnings yaml.StringSlice `yaml:"disabled_rustdoc_warnings,omitempty"`
+	DisabledRustdocWarnings []string `yaml:"disabled_rustdoc_warnings,omitempty"`
 
 	// DocumentationOverrides contains overrides for element documentation.
 	DocumentationOverrides []RustDocumentationOverride `yaml:"documentation_overrides,omitempty"`
