@@ -78,6 +78,10 @@ func RunTidy(ctx context.Context) error {
 			return ch.Path == "" && ch.ServiceConfig == ""
 		})
 
+		if lib.Veneer {
+			lib.SkipGenerate = false
+		}
+
 		tidyLanguageConfig(lib, cfg.Language)
 	}
 	return yaml.Write(librarianConfigPath, formatConfig(cfg))
