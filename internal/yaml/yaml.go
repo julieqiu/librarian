@@ -35,9 +35,7 @@ type StringSlice []string
 // IsZero implements the yaml.IsZeroer interface, which determines whether a
 // field should be considered "empty" when the 'omitempty' struct tag is used.
 func (s StringSlice) IsZero() bool {
-	// return true ONLY if nil (omit field)
-	// return false if empty slice (keep field)
-	return s == nil
+	return len(s) == 0
 }
 
 // Unmarshal parses YAML data into a value of type T.

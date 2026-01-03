@@ -91,7 +91,7 @@ func TestWriteError(t *testing.T) {
 func TestStringSlice_EmptySlice(t *testing.T) {
 	strSlice := StringSlice{}
 	got := strSlice.IsZero()
-	if diff := cmp.Diff(false, got); diff != "" {
+	if diff := cmp.Diff(true, got); diff != "" {
 		t.Errorf("mismatch (-want +got):\n%s", diff)
 	}
 }
