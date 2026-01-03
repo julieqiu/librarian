@@ -537,8 +537,6 @@ func buildVeneer(files []string, repoPath string) (map[string]*config.Library, e
 			veneers[name].Rust = &config.RustCrate{
 				Modules: rustModules,
 			}
-		} else {
-			veneers[name].SkipGenerate = true
 		}
 	}
 
