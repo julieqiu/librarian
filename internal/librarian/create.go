@@ -86,9 +86,8 @@ func runCreate(ctx context.Context, name, output string, channel ...string) erro
 
 func addLibraryToLibrarianConfig(cfg *config.Config, name, output string, channel ...string) error {
 	lib := &config.Library{
-		Name:    name,
-		Output:  output,
-		Version: "0.1.0",
+		Name:   name,
+		Output: output,
 	}
 
 	for _, c := range channel {
