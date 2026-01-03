@@ -484,10 +484,9 @@ func TestBuildVeneer(t *testing.T) {
 					},
 				},
 				"google-cloud-spanner": {
-					Name:         "google-cloud-spanner",
-					Veneer:       true,
-					Output:       "lib-2",
-					SkipGenerate: true,
+					Name:   "google-cloud-spanner",
+					Veneer: true,
+					Output: "lib-2",
 				},
 			},
 		},
@@ -541,10 +540,9 @@ func TestBuildVeneer(t *testing.T) {
 			repoPath: "testdata/build-veneer/success",
 			want: map[string]*config.Library{
 				"google-cloud-spanner": {
-					Name:         "google-cloud-spanner",
-					Veneer:       true,
-					Output:       "lib-2",
-					SkipGenerate: true,
+					Name:   "google-cloud-spanner",
+					Veneer: true,
+					Output: "lib-2",
 				},
 			},
 		},
