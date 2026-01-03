@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rustrelease
+package rust
 
 import (
 	"errors"
@@ -23,7 +23,9 @@ import (
 	"strings"
 )
 
-func updateSidekickConfig(manifest, newVersion string) error {
+// UpdateSidekickConfig updates the version in a .sidekick.toml file.
+// It uses a line-based approach to preserve comments and formatting.
+func UpdateSidekickConfig(manifest, newVersion string) error {
 	dir, _ := path.Split(manifest)
 	config := path.Join(dir, ".sidekick.toml")
 	_, err := os.Stat(config)

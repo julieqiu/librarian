@@ -16,56 +16,42 @@ package rustrelease
 
 import (
 	"context"
-	"fmt"
-	"log/slog"
 
-	"github.com/googleapis/librarian/internal/command"
+	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/git"
-	"github.com/googleapis/librarian/internal/sidekick/config"
+	"github.com/googleapis/librarian/internal/librarian/rust"
+	sidekickconfig "github.com/googleapis/librarian/internal/sidekick/config"
 )
 
-// CargoPreFlight() verifies all the necessary cargo tools are installed.
-func CargoPreFlight(ctx context.Context, config *config.Release) error {
-	if err := command.Run(ctx, cargoExe(config), "--version"); err != nil {
+// PreFlight() verifies all the necessary  tools are installed.
+func PreFlight(ctx context.Context, sidekickConfig *sidekickconfig.Release) error {
+	gitExe := gitExe(sidekickConfig)
+	if err := git.GitVersion(ctx, gitExe); err != nil {
 		return err
 	}
-	tools, ok := config.Tools["cargo"]
-	if !ok {
-		return nil
+	if err := git.GitRemoteURL(ctx, gitExe, sidekickConfig.Remote); err != nil {
+		return err
 	}
-	for _, tool := range tools {
-		slog.Info("installing cargo tool", "name", tool.Name, "version", tool.Version)
-		spec := fmt.Sprintf("%s@%s", tool.Name, tool.Version)
-		if err := command.Run(ctx, cargoExe(config), "install", "--locked", spec); err != nil {
+	if tools, ok := sidekickConfig.Tools["cargo"]; ok {
+		var configTools []config.Tool
+		for _, t := range tools {
+			configTools = append(configTools, config.Tool{Name: t.Name, Version: t.Version})
+		}
+		if err := rust.CargoPreFlight(ctx, cargoExe(sidekickConfig), configTools); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-// PreFlight() verifies all the necessary  tools are installed.
-func PreFlight(ctx context.Context, config *config.Release) error {
-	gitExe := gitExe(config)
-	if err := git.GitVersion(ctx, gitExe); err != nil {
-		return err
-	}
-	if err := git.GitRemoteURL(ctx, gitExe, config.Remote); err != nil {
-		return err
-	}
-	if err := CargoPreFlight(ctx, config); err != nil {
-		return err
-	}
-	return nil
-}
-
-func gitExe(config *config.Release) string {
+func gitExe(config *sidekickconfig.Release) string {
 	if exe, ok := config.Preinstalled["git"]; ok {
 		return exe
 	}
 	return "git"
 }
 
-func cargoExe(config *config.Release) string {
+func cargoExe(config *sidekickconfig.Release) string {
 	if exe, ok := config.Preinstalled["cargo"]; ok {
 		return exe
 	}

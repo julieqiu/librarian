@@ -99,11 +99,8 @@ func verifyRequiredTools(ctx context.Context, language string, cfg *config.Relea
 	case languageFake:
 		return nil
 	case languageRust:
-		if err := sidekickrust.CargoPreFlight(ctx, rust.ToSidekickReleaseConfig(cfg)); err != nil {
-			return err
-		}
+		return rust.CargoPreFlight(ctx, command.GetExecutablePath(cfg.Preinstalled, "cargo"), cfg.Tools["cargo"])
 	default:
 		return fmt.Errorf("unknown language: %s", language)
 	}
-	return nil
 }
