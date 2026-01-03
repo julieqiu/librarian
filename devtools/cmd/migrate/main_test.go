@@ -486,8 +486,7 @@ func TestBuildVeneer(t *testing.T) {
 				"google-cloud-spanner": {
 					Name:         "google-cloud-spanner",
 					Veneer:       true,
-					Output:       "testdata/build-veneer/success/lib-2",
-					Version:      "0.0.0",
+					Output:       "lib-2",
 					SkipGenerate: true,
 				},
 			},
