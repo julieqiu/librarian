@@ -595,6 +595,8 @@ github.com/quasilyte/stdinfo v0.0.0-20220114132959-f7386bf02567 h1:M8mH9eK4OUR4l
 github.com/quasilyte/stdinfo v0.0.0-20220114132959-f7386bf02567/go.mod h1:DWNGW8A4Y+GyBgPuaQJuWiy0XYftx4Xm/y5Jqk9I6VQ=
 github.com/raeperd/recvcheck v0.2.0 h1:GnU+NsbiCqdC2XX5+vMZzP+jAJC5fht7rcVTAhX74UI=
 github.com/raeperd/recvcheck v0.2.0/go.mod h1:n04eYkwIR0JbgD73wT8wL4JjPC3wm0nFtzBnWNocnYU=
+github.com/rhysd/go-fakeio v1.0.0 h1:+TjiKCOs32dONY7DaoVz/VPOdvRkPfBkEyUDIpM8FQY=
+github.com/rhysd/go-fakeio v1.0.0/go.mod h1:joYxF906trVwp2JLrE4jlN7A0z6wrz8O6o1UjarbFzE=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.4.7 h1:WUdvkW8uEhrYfLC4ZzdpI2ztxP1I582+49Oc5Mq64VQ=
 github.com/rivo/uniseg v0.4.7/go.mod h1:FN3SvrM+Zdj16jyLfmOkMNblXMcoc8DfTHruCPUcx88=
@@ -669,6 +671,8 @@ github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 github.com/subosito/gotenv v1.4.1 h1:jyEFiXpy21Wm81FBN71l9VoMMV8H8jG+qIK3GCpY6Qs=
 github.com/subosito/gotenv v1.4.1/go.mod h1:ayKnFf/c6rvx/2iiLrJUk1e6plDbT3edrFNGqEflhK0=
+github.com/teekennedy/goldmark-markdown v0.5.1 h1:2lIlJ3AcIwaD1wFl4dflJSJFMhRTKEsEj+asVsu6M/0=
+github.com/teekennedy/goldmark-markdown v0.5.1/go.mod h1:so260mNSPELuRyynZY18719dRYlD+OSnAovqsyrOMOM=
 github.com/tenntenn/modver v1.0.1 h1:2klLppGhDgzJrScMpkj9Ujy3rXPUspSjAcev9tSEBgA=
 github.com/tenntenn/modver v1.0.1/go.mod h1:bePIyQPb7UeioSRkw3Q0XeMhYZSMx9B8ePqg6SAMGH0=
 github.com/tenntenn/text/transform v0.0.0-20200319021203-7eef512accb3 h1:f+jULpRQGxTSkNYKJ51yaw6ChIqO+Je8UqsTKN/cDag=
@@ -724,6 +728,8 @@ go-simpler.org/musttag v0.14.0 h1:XGySZATqQYSEV3/YTy+iX+aofbZZllJaqwFWs+RTtSo=
 go-simpler.org/musttag v0.14.0/go.mod h1:uP8EymctQjJ4Z1kUnjX0u2l60WfUdQxCwSNKzE1JEOE=
 go-simpler.org/sloglint v0.11.1 h1:xRbPepLT/MHPTCA6TS/wNfZrDzkGvCCqUv4Bdwc3H7s=
 go-simpler.org/sloglint v0.11.1/go.mod h1:2PowwiCOK8mjiF+0KGifVOT8ZsCNiFzvfyJeJOIt8MQ=
+go.abhg.dev/goldmark/toc v0.11.0 h1:IRixVy3/yVPKvFBc37EeBPi8XLTXrtH6BYaonSjkF8o=
+go.abhg.dev/goldmark/toc v0.11.0/go.mod h1:XMFIoI1Sm6dwF9vKzVDOYE/g1o5BmKXghLG8q/wJNww=
 go.augendre.info/arangolint v0.3.1 h1:n2E6p8f+zfXSFLa2e2WqFPp4bfvcuRdd50y6cT65pSo=
 go.augendre.info/arangolint v0.3.1/go.mod h1:6ZKzEzIZuBQwoSvlKT+qpUfIbBfFCE5gbAoTg0/117g=
 go.augendre.info/fatcontext v0.9.0 h1:Gt5jGD4Zcj8CDMVzjOJITlSb9cEch54hjRRlN3qDojE=

@@ -231,6 +231,7 @@ require (
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/stretchr/testify v1.11.1 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
+	github.com/teekennedy/goldmark-markdown v0.5.1 // indirect
 	github.com/tetafro/godot v1.5.4 // indirect
 	github.com/timakin/bodyclose v0.0.0-20241222091800-1db5c5ca4d67 // indirect
 	github.com/timonwong/loggercheck v0.11.0 // indirect
@@ -289,5 +290,6 @@ retract (
 tool (
 	github.com/golangci/golangci-lint/v2/cmd/golangci-lint
 	github.com/google/yamlfmt/cmd/yamlfmt
+	github.com/teekennedy/goldmark-markdown
 	golang.org/x/tools/cmd/goimports
 )
