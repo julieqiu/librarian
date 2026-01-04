@@ -1,71 +1,119 @@
-# Gemini CLI Context for the Librarian Project
+# Librarian
 
-This document provides context for the Gemini CLI to effectively assist with development on the Librarian project.
+Librarian is a unified command line tool for Google Cloud SDK client library
+configuration, generation, and releasing.
 
-## Project Overview
+This guide defines the Go development standards for this repository. Apply
+these instructions for all code generation, refactors, and review tasks across
+the SDLC.
 
-The Librarian project is a command-line tool written in Go that automates the management of Google Cloud SDK client
-libraries. It handles tasks such as configuration, generation, and releasing of these libraries. The tool is designed
-to be language-agnostic, using Docker containers to perform language-specific operations. The core logic resides in
-this repository, while language-specific implementations are defined in separate Docker images.
+## 1. Plan and Design
 
-## Key Technologies & Libraries
+- **Adhere to Local Standards:** Align all architectural decisions with
+  [`doc/howwewritego.md`](../doc/howwewritego.md).
+- **Codebase Map:**
+  - `cmd/`: Main entrypoint to CLI commands.
+  - `doc/`: All documentation for the project.
+  - `tool/`: Internal tools.
+  - `internal/`: Private application code.
+  - `internal/command/`: **ALWAYS** use this package to execute shell
+    commands. Do not use `os/exec` directly.
+  - `internal/yaml/`: **ALWAYS** use this package for YAML operations. Do
+    not use external YAML libraries directly.
+- **Ignore:**
+  - `doc/legacylibrarian/`: **DO NOT READ/EDIT** this directory unless
+    explicitly asked; this is legacy documentation.
+  - `internal/legacylibrarian/`: **DO NOT READ/EDIT** this directory unless
+    explicitly asked; this is legacy code.
+- **Dependencies:** **DO NOT** add new external dependencies to the project.
+  Use what is already available in the codebase.
+- **Before you write:** Explain your plan first. Identify which files need to
+  change and why.
 
-- **Go:** The primary language for the CLI.
-- **Docker:** Used for language-specific tasks, isolating them from the main CLI.
-- **GitHub:** Used for version control and managing pull requests.
-- **[go-github](https://github.com/google/go-github):** Go library for interacting with the GitHub API.
-- **[go-git](https://github.com/go-git/go-git):** A pure Go implementation of Git.
-- **YAML:** Used for the `state.yaml` file.
+## 2. Write (Implementation)
 
-## Project Structure
+- **Follow [Go Code Review Comments](https://go.dev/wiki/CodeReviewComments).**
+- **Command Execution:** Use the `internal/command` package for all external
+  process execution to ensure consistent logging and error handling.
+  - Use `command.Run(ctx, ...)` when you only care about the error.
+  - Use `command.Output(ctx, ...)` when you need the stdout/stderr.
+- **Vertical Density:** Use line breaks only to signal a shift in logic.
+  Avoid unnecessary vertical padding.
+- **Naming:** Use singular form for package/folder names (e.g., `image/`, not
+  `images/`).
 
-- `cmd/librarian/main.go`: The entrypoint for the CLI application.
-- `internal/`: Contains the core logic of the application, organized by domain.
-  - `cli/`: A lightweight framework for building the CLI commands.
-  - `config/`: Defines the data structures for configuration and state.
-  - `docker/`: Handles interaction with Docker containers.
-  - `github/`: A client for interacting with the GitHub API.
-  - `gitrepo/`: A client for interacting with local Git repositories.
-  - `librarian/`: The main business logic for the CLI commands.
-  - `secrets/`: A client for Google Secret Manager.
-- `doc/`: Contains project documentation, including architecture and contribution guidelines.
-- `testdata/`: Contains data used for testing.
+## 3. Test (Verification)
 
-## Core Commands & Entrypoints
+- **Adhere to Local Standards:** Align all testing decisions with
+  [`doc/howwewritego.md` → Writing Tests](doc/howwewritego.md#writing-tests).
+- **Follow [Go Test Comments](https://go.dev/wiki/TestComments).**
+- **Requirement:** Every new feature or bug fix must include a test.
+- **Quality Gates:** Changes must not break `TestGolangCILint` and
+  `TestGoImports` in `all_test.go`.
+- **Test Context:** **ALWAYS** use `t.Context()` instead of
+  `context.Background()`.
+- **Temp Dirs:** **ALWAYS** use `t.TempDir()` for file system tests.
+- **Comparisons:** **ALWAYS** use
+  [`cmp.Diff`](https://pkg.go.dev/github.com/google/go-cmp/cmp) for assertions.
+  Do not use `reflect.DeepEqual`.
+  - Format: `t.Errorf("mismatch (-want +got):\n%s", diff)`
+- **Table-Driven Tests:** Use table-driven designs with `t.Run` for
+  logic-heavy functions.
+  ```go
+  for _, test := range []struct {
+      name string
+      arg  string
+      want string
+  }{
+      {"success", "input", "output"},
+  } {
+      t.Run(test.name, func(t *testing.T) {
+          got := Do(test.arg)
+          if diff := cmp.Diff(test.want, got); diff != "" {
+              t.Errorf("mismatch (-want +got):\n%s", diff)
+          }
+      })
+  }
+  ```
 
-The main entrypoint is `cmd/librarian/main.go`. The core commands are:
+## 4. Review & Refactor (The Audit)
 
-- `generate`: Generates client library code for a single API. It can operate in two modes:
-  - **Regeneration:** For existing, configured libraries. This uses the configuration in
-      `.librarian/state.yaml`.
-  - **Onboarding:** For new or unconfigured APIs, to get a baseline implementation.
-- `version`: Prints the version of the Librarian tool.
+- **Scope:** Keep changes focused and small. Do not perform massive
+  refactorings unless explicitly requested.
+- **Self-Correction:** Perform a secondary pass to ensure code follows
+  [Go Code Review Comments](https://go.dev/wiki/CodeReviewComments).
+- **DRY Check:** Reuse existing project utilities (especially
+  `internal/command` and `internal/testhelper`).
+- **Simplification:** Refactor complex logic for readability. Prioritize
+  being clear over clever.
 
-## Important Files & Configuration
+## 5. Commit (Documentation)
 
-- `.librarian/state.yaml`: The main state file for the pipeline, tracking the status of managed libraries. It is
-  automatically managed and should not be edited manually. See the schema in `doc/state-schema.md`.
+- **Atomic Commits:** Keep commits small and atomic. Each commit should
+  represent a single logical change.
+- **Formatting:** Follow
+  [`CONTRIBUTING.md` → Commit Messages](../CONTRIBUTING.md#commit-messages).
+- **Structure:** `<type>(<scope>): <description>` (e.g., `feat(internal/git):
+  add diff helper`).
+- **Imperative Mood:** Use the imperative mood for the summary line (e.g.,
+  "fix bug", not "fixed bug").
+- **Referencing Issues:** Use "Fixes #123" to close or "For #123" for partials.
+  Never "Fix #123".
 
-- `generate-request.json`: A JSON file provided to the language specific container that describes which library
-  to generate. See the schema in `doc/generate-request-schema.md`.
+## 6. Tool Usage & Formatting
 
-## Development & Testing Workflow
-
-- **Running tests:** Use `go test -race ./...` to run all tests.
-- **Running tests and generate coverage**: Use `go test -race -coverprofile=coverage.out -covermode=atomic ./...`.
-- **Analyze coverage report**: Use `go tool cover -func=coverage.out` to check more details about coverage.
-- **Building code:** Use `go build ./...` to build the project and check for compilation errors.
-- **Formatting:** Use `gofmt` to format the code. The CI checks for unformatted files.
-
-## Contribution Guidelines
-
-- **Commits:** Commit messages should follow the [Conventional Commits](https://www.conventionalcommits.org/)
-  specification. The format is `<type>(<package>): <description>`. The type should be one of the following: fix, feat,
-  build, chore, docs, test, or refactor. The package should refer to the relative path the Go package where the change
-  is being made.
-- **Issues:** All significant changes should start with a GitHub issue.
-- **Pull Requests:** All code changes must be submitted via a pull request and require review.
-- **Code Style:** Follow the guidelines in `doc/howwewritego.md`.
-- **Testing:** All new logic should be accompanied by tests. Use table-driven tests and `cmp.Diff` for comparisons.
-- For more details, see `CONTRIBUTING.md`.
+- **Auto-Format:** AFTER using `replace` or `write_file` on source code, you
+  **MUST** immediately run the appropriate formatter (e.g., `gofmt -w` and
+  `goimports -w`). Do not leave this for later.
+- **Vertical Density:** Group related lines of code tightly. Use blank lines
+  sparingly to separate logical steps, like paragraphs in writing.
+  **Formatters like `gofmt` do not fix this for you; you must author dense
+  code.**
+  - Group related variable declarations of the same type on one line (e.g.,
+    `var a, b []string`) or use a `var (...)` block for multiple declarations.
+- **Whitespace Hygiene:** When constructing `replace` blocks, ensure
+  `new_string` has the exact same surrounding vertical whitespace as the code
+  it replaces unless you specifically intend to add/remove lines.
+- **YAML Files:** Run `yamlfmt` for all YAML files.
+- **Markdown Files:** Run `go run ./tool/cmd/mdformat -w` for all Markdown
+  files.
