@@ -143,6 +143,12 @@ Use the format:
 This helps provide context for future readers and keeps the TODO relevant and
 actionable as the project evolves.
 
+## Documentation
+
+All documentation should live in the root of the repository or in the `doc/`
+directory. Markdown files should follow the
+[Google Style Guide](https://google.github.io/styleguide/docguide/style.html).
+
 ## Sending a pull request
 
 All code changes must go through a pull request. First-time contributors should
