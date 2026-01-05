@@ -19,6 +19,8 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strconv"
+	"time"
 
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/librarian/rust"
@@ -86,9 +88,10 @@ func runCreate(ctx context.Context, name, output string, channel ...string) erro
 
 func addLibraryToLibrarianConfig(cfg *config.Config, name, output string, channel ...string) error {
 	lib := &config.Library{
-		Name:    name,
-		Output:  output,
-		Version: "0.1.0",
+		Name:          name,
+		CopyrightYear: strconv.Itoa(time.Now().Year()),
+		Output:        output,
+		Version:       "0.1.0",
 	}
 
 	for _, c := range channel {

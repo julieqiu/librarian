@@ -21,8 +21,7 @@ import (
 	sidekickconfig "github.com/googleapis/librarian/internal/sidekick/config"
 )
 
-func toSidekickConfig(library *config.Library, channel *config.Channel,
-	googleapisDir, discoveryDir, protobufDir, conformanceDir, showcaseDir, copyrightYear string) *sidekickconfig.Config {
+func toSidekickConfig(library *config.Library, channel *config.Channel, googleapisDir, discoveryDir, protobufRootDir, conformanceDir, showcaseDir string) *sidekickconfig.Config {
 	source := map[string]string{}
 	specFormat := "protobuf"
 	if library.SpecificationFormat != "" {
@@ -45,7 +44,7 @@ func toSidekickConfig(library *config.Library, channel *config.Channel,
 			"googleapis":   {path: googleapisDir, key: "googleapis-root"},
 			"discovery":    {path: discoveryDir, key: "discovery-root"},
 			"showcase":     {path: showcaseDir, key: "showcase-root"},
-			"protobuf-src": {path: protobufDir, key: "protobuf-src-root"},
+			"protobuf-src": {path: protobufRootDir, key: "protobuf-src-root"},
 			"conformance":  {path: conformanceDir, key: "conformance-root"},
 		}
 		for _, root := range library.Roots {
@@ -74,7 +73,7 @@ func toSidekickConfig(library *config.Library, channel *config.Channel,
 			SpecificationSource: channel.Path,
 		},
 		Source: source,
-		Codec:  buildCodec(library, copyrightYear),
+		Codec:  buildCodec(library),
 	}
 	if library.Rust != nil {
 		if len(library.Rust.DocumentationOverrides) > 0 {
@@ -113,8 +112,8 @@ func toSidekickConfig(library *config.Library, channel *config.Channel,
 	return sidekickCfg
 }
 
-func buildCodec(library *config.Library, copyrightYear string) map[string]string {
-	codec := newLibraryCodec(library, copyrightYear)
+func buildCodec(library *config.Library) map[string]string {
+	codec := newLibraryCodec(library)
 	if library.Version != "" {
 		codec["version"] = library.Version
 	}
@@ -168,10 +167,10 @@ func buildCodec(library *config.Library, copyrightYear string) map[string]string
 	return codec
 }
 
-func newLibraryCodec(library *config.Library, copyrightYear string) map[string]string {
+func newLibraryCodec(library *config.Library) map[string]string {
 	codec := make(map[string]string)
-	if copyrightYear != "" {
-		codec["copyright-year"] = copyrightYear
+	if library.CopyrightYear != "" {
+		codec["copyright-year"] = library.CopyrightYear
 	}
 	if library.Name != "" {
 		codec["package-name-override"] = library.Name
@@ -228,7 +227,7 @@ func formatPackageDependency(dep *config.RustPackageDependency) string {
 	return strings.Join(parts, ",")
 }
 
-func moduleToSidekickConfig(library *config.Library, module *config.RustModule, googleapisDir, protobufSrcDir, copyrightYear string) *sidekickconfig.Config {
+func moduleToSidekickConfig(library *config.Library, module *config.RustModule, googleapisDir, protobufSrcDir string) *sidekickconfig.Config {
 	source := map[string]string{
 		"googleapis-root":   googleapisDir,
 		"protobuf-src-root": protobufSrcDir,
@@ -261,7 +260,7 @@ func moduleToSidekickConfig(library *config.Library, module *config.RustModule, 
 			SpecificationSource: module.Source,
 		},
 		Source: source,
-		Codec:  buildModuleCodec(library, module, copyrightYear),
+		Codec:  buildModuleCodec(library, module),
 	}
 	if len(module.DocumentationOverrides) > 0 {
 		sidekickCfg.CommentOverrides = make([]sidekickconfig.DocumentationOverride, len(module.DocumentationOverrides))
@@ -276,8 +275,8 @@ func moduleToSidekickConfig(library *config.Library, module *config.RustModule, 
 	return sidekickCfg
 }
 
-func buildModuleCodec(library *config.Library, module *config.RustModule, copyrightYear string) map[string]string {
-	codec := newLibraryCodec(library, copyrightYear)
+func buildModuleCodec(library *config.Library, module *config.RustModule) map[string]string {
+	codec := newLibraryCodec(library)
 	if module.GenerateSetterSamples {
 		codec["generate-setter-samples"] = "true"
 	}
