@@ -66,6 +66,10 @@ func RunTidy(ctx context.Context) error {
 		if lib.Output != "" && len(lib.Channels) == 1 && isDerivableOutput(cfg, lib) {
 			lib.Output = ""
 		}
+		if lib.Veneer {
+			// Veneers are never generated, so ensure skip_generate is false.
+			lib.SkipGenerate = false
+		}
 		for _, ch := range lib.Channels {
 			if isDerivableChannelPath(cfg.Language, lib.Name, ch.Path) {
 				ch.Path = ""
@@ -77,7 +81,6 @@ func RunTidy(ctx context.Context) error {
 		lib.Channels = slices.DeleteFunc(lib.Channels, func(ch *config.Channel) bool {
 			return ch.Path == "" && ch.ServiceConfig == ""
 		})
-
 		tidyLanguageConfig(lib, cfg.Language)
 	}
 	return yaml.Write(librarianConfigPath, formatConfig(cfg))
