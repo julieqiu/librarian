@@ -67,8 +67,7 @@ func RunTidy(ctx context.Context) error {
 			lib.Output = ""
 		}
 		if lib.Veneer {
-			// Veneers are never generated, so remove this field is if it is
-			// set.
+			// Veneers are never generated, so ensure skip_generate is false.
 			lib.SkipGenerate = false
 		}
 		for _, ch := range lib.Channels {
