@@ -383,6 +383,9 @@ func TestRunConfigureCommand(t *testing.T) {
 }
 
 func TestGenerateScenarios(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: multiple git operations and scenarios are slow (~5.5s)")
+	}
 	t.Parallel()
 	for _, test := range []struct {
 		name                     string
