@@ -15,6 +15,7 @@
 package git
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 	"path"
@@ -322,5 +323,31 @@ func TestChangesInDirectorySinceTag(t *testing.T) {
 				t.Errorf("ChangesInDirectorySinceTag() = %d, want %d", got, test.want)
 			}
 		})
+	}
+}
+
+func TestShowFile(t *testing.T) {
+	testhelper.RequireCommand(t, "git")
+	remoteDir := testhelper.SetupRepo(t)
+	testhelper.CloneRepository(t, remoteDir)
+	got, err := ShowFile(t.Context(), "git", "origin", "main", testhelper.ReadmeFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if diff := cmp.Diff(testhelper.ReadmeContents, got); diff != "" {
+		t.Errorf("mismatch (-want, +got):\n%s", diff)
+	}
+}
+
+func TestShowFile_Error(t *testing.T) {
+	testhelper.RequireCommand(t, "git")
+	remoteDir := testhelper.SetupRepo(t)
+	testhelper.CloneRepository(t, remoteDir)
+	_, err := ShowFile(t.Context(), "git", "origin", "main", "does_not_exist")
+	if err == nil {
+		t.Fatal("expected an error showing file that should not exist")
+	}
+	if !errors.Is(err, errGitShow) {
+		t.Errorf("expected errGitShow but got %v", err)
 	}
 }
