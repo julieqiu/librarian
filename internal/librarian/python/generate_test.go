@@ -321,7 +321,9 @@ func TestRunPostProcessor(t *testing.T) {
 }
 
 func TestGenerateChannel(t *testing.T) {
-
+	if testing.Short() {
+		t.Skip("integration test: Python GAPIC code generation is slow (~24s)")
+	}
 	testhelper.RequireCommand(t, "protoc")
 	testhelper.RequireCommand(t, "protoc-gen-python_gapic")
 	repoRoot := t.TempDir()
@@ -338,6 +340,9 @@ func TestGenerateChannel(t *testing.T) {
 }
 
 func TestGenerate(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: Python code generation with post-processing is slow")
+	}
 	testhelper.RequireCommand(t, "protoc")
 	testhelper.RequireCommand(t, "protoc-gen-python_gapic")
 	testhelper.RequireCommand(t, "python3")
