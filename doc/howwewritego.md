@@ -61,11 +61,19 @@ https://go.dev/wiki/Spelling. See
 - **Good**: `unmarshaling`, `marshaling`, `canceled`
 - **Bad**: `unmarshalling`, `marshalling`, `cancelled`
 
-### Avoid Redundancy with Package Names
+### Package Names
 
-Go uses package names to provide context. Avoid repeating the package name within a type or function name.
-- **Good**: `git.ShowFile`, `client.New`
-- **Bad**: `git.GitShowFile`, `client.NewClient`
+When naming packages, follow these two principles:
+
+1.  **Avoid redundancy.** Go uses package names to provide context, so avoid repeating the package name within a type or function name.
+    - **Good**: `git.ShowFile`, `client.New`
+    - **Bad**: `git.GitShowFile`, `client.NewClient`
+
+2.  **Describe the purpose.** Good package names are short and descriptive. Avoid generic names.
+    - **Good:** `command`, `fetch`
+    - **Bad:** `common`, `helper`, `util`
+
+See [details](https://go.dev/doc/effective_go#package-names).
 
 ## Go Doc Comments
 
