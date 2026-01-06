@@ -140,6 +140,9 @@ func TestNewUpdateImageRunner(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
+			if testing.Short() && test.name == "empty API source" {
+				t.Skip("integration test: clones googleapis repo (~4.3s)")
+			}
 			t.Parallel()
 
 			// custom setup
