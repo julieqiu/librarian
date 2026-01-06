@@ -36,6 +36,7 @@ import (
 const (
 	testGitHubDn       = "https://localhost:12345"
 	tarballPathTrailer = "/archive/5d5b1bf126485b0e2c972bac41b376438601e266.tar.gz"
+	closedServerURL    = "https://127.0.0.1:54321"
 )
 
 func TestRepoFromTarballLink(t *testing.T) {
@@ -117,7 +118,7 @@ func TestSha256Error(t *testing.T) {
 		},
 		{
 			name: "invalid url",
-			url:  newClosedServerURL(t),
+			url:  closedServerURL,
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -175,7 +176,7 @@ func TestLatestShaError(t *testing.T) {
 		},
 		{
 			name: "invalid url",
-			url:  newClosedServerURL(t),
+			url:  closedServerURL,
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -733,11 +734,4 @@ func TestLatestCommitAndChecksumFailure(t *testing.T) {
 			t.Error("expected an error when Sha256 fails, but got nil")
 		}
 	})
-}
-
-func newClosedServerURL(t *testing.T) string {
-	t.Helper()
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
-	server.Close()
-	return server.URL
 }
