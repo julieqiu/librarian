@@ -21,6 +21,9 @@ import (
 )
 
 func TestGoGenerateLibrarianDoc(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: runs go generate which is slow (~10s)")
+	}
 	for _, test := range []struct {
 		name    string
 		docFile string
