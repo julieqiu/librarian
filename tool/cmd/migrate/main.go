@@ -89,13 +89,26 @@ func run(ctx context.Context, args []string) error {
 	if err != nil {
 		return err
 	}
+
+	// Get current working directory
+	cwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	// Calculate relative path from cwd to repo
+	relPath, err := filepath.Rel(cwd, abs)
+	if err != nil {
+		return err
+	}
+
 	base := filepath.Base(abs)
 	switch base {
 	case "google-cloud-rust", "google-cloud-dart":
-		return runSidekickMigration(ctx, abs, *outputPath)
+		return runSidekickMigration(ctx, relPath, *outputPath)
 	case "google-cloud-python", "google-cloud-go":
 		parts := strings.SplitN(base, "-", 3)
-		return runLibrarianMigration(ctx, parts[2], abs, *outputPath)
+		return runLibrarianMigration(ctx, parts[2], relPath, *outputPath)
 	default:
 		return fmt.Errorf("invalid path: %q", repoPath)
 	}
@@ -324,9 +337,9 @@ func buildGAPIC(files []string, repoPath string) (map[string]*config.Library, er
 			libraries[libraryName] = lib
 		}
 		lib.SpecificationFormat = specificationFormat
-		relativePath, err := filepath.Rel(repoPath, dir)
+		relativePath, err := relativeOutput(repoPath, dir)
 		if err != nil {
-			return nil, fmt.Errorf("failed to calculate relative path: %w", errUnableToCalculateOutputPath)
+			return nil, fmt.Errorf("failed to calculate relative path: %w", err)
 		}
 		lib.Output = relativePath
 
@@ -524,7 +537,7 @@ func buildVeneer(files []string, repoPath string) (map[string]*config.Library, e
 		if err != nil {
 			return nil, err
 		}
-		relativePath, err := filepath.Rel(repoPath, dir)
+		relativePath, err := relativeOutput(repoPath, dir)
 		if err != nil {
 			return nil, fmt.Errorf("failed to calculate relative path: %w", err)
 		}
@@ -615,7 +628,7 @@ func buildModules(rootDir string, repoPath string) ([]*config.RustModule, error)
 				Replace: do.Replace,
 			})
 		}
-		relativePath, err := filepath.Rel(repoPath, filepath.Dir(path))
+		relativePath, err := relativeOutput(repoPath, filepath.Dir(path))
 		if err != nil {
 			return fmt.Errorf("failed to calculate relative path: %w", err)
 		}
@@ -719,6 +732,23 @@ func parsePackageDependencies(codec map[string]string) []*config.RustPackageDepe
 
 func strToBool(s string) bool {
 	return s == "true"
+}
+
+// relativeOutput calculates the output path relative to repoPath.
+// If repoPath is empty, returns dir as-is.
+// If dir equals repoPath, returns ".".
+// If dir is not under repoPath, returns an error.
+func relativeOutput(repoPath, dir string) (string, error) {
+	if repoPath == "" {
+		return dir, nil
+	}
+	if dir == repoPath {
+		return ".", nil
+	}
+	if !strings.HasPrefix(dir, repoPath+string(filepath.Separator)) {
+		return "", errUnableToCalculateOutputPath
+	}
+	return strings.TrimPrefix(dir, repoPath+string(filepath.Separator)), nil
 }
 
 // strToSlice converts a comma-separated string into a slice of strings.

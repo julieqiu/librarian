@@ -75,7 +75,7 @@ func runLibrarianMigration(ctx context.Context, language, repoPath, outputPath s
 		return err
 	}
 
-	cfg, err := buildConfigFromLibrarian(ctx, &MigrationInput{
+	cfg, err := buildConfigFromLibrarian(ctx, repoPath, &MigrationInput{
 		librarianState:  librarianState,
 		librarianConfig: librarianConfig,
 		repoConfig:      repoConfig,
@@ -95,6 +95,7 @@ func runLibrarianMigration(ctx context.Context, language, repoPath, outputPath s
 
 func buildConfigFromLibrarian(
 	ctx context.Context,
+	repoPath string,
 	input *MigrationInput) (*config.Config, error) {
 	repo := "googleapis/google-cloud-go"
 	if input.lang == "python" {
@@ -117,8 +118,11 @@ func buildConfigFromLibrarian(
 		},
 	}
 
-	cfg.Libraries = buildLibraries(input)
-
+	libraries, err := buildLibraries(repoPath, input)
+	if err != nil {
+		return nil, fmt.Errorf("failed to calculate relative path: %w", errUnableToCalculateOutputPath)
+	}
+	cfg.Libraries = libraries
 	return cfg, nil
 }
 
@@ -149,7 +153,7 @@ func fetchGoogleapis(ctx context.Context) (*config.Source, error) {
 	}, nil
 }
 
-func buildLibraries(input *MigrationInput) []*config.Library {
+func buildLibraries(repoPath string, input *MigrationInput) ([]*config.Library, error) {
 	var libraries []*config.Library
 	idToLibraryState := sliceToMap[legacyconfig.LibraryState](
 		input.librarianState.Libraries,
@@ -177,6 +181,12 @@ func buildLibraries(input *MigrationInput) []*config.Library {
 	for id, libState := range idToLibraryState {
 		library := &config.Library{}
 		library.Name = id
+		libraryDir := filepath.Join(repoPath, id)
+		relativePath, err := filepath.Rel(repoPath, libraryDir)
+		if err != nil {
+			return nil, err
+		}
+		library.Output = relativePath
 		library.Version = libState.Version
 		if libState.APIs != nil {
 			library.Channels = toChannels(libState.APIs)
@@ -220,7 +230,7 @@ func buildLibraries(input *MigrationInput) []*config.Library {
 		return libraries[i].Name < libraries[j].Name
 	})
 
-	return libraries
+	return libraries, nil
 }
 
 func sliceToMap[T any](slice []*T, keyFunc func(t *T) string) map[string]*T {

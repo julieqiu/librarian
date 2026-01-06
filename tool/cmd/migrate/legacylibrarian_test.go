@@ -180,10 +180,12 @@ func TestBuildConfigFromLibrarian(t *testing.T) {
 				},
 				Libraries: []*config.Library{
 					{
-						Name: "another-library",
+						Name:   "another-library",
+						Output: "another-library",
 					},
 					{
 						Name:    "example-library",
+						Output:  "example-library",
 						Version: "1.0.0",
 						Channels: []*config.Channel{
 							{
@@ -239,10 +241,12 @@ func TestBuildConfigFromLibrarian(t *testing.T) {
 				Libraries: []*config.Library{
 					{
 						Name:    "another-library",
+						Output:  "another-library",
 						Version: "2.0.0",
 					},
 					{
 						Name:         "example-library",
+						Output:       "example-library",
 						Version:      "1.0.0",
 						SkipGenerate: true,
 						SkipRelease:  true,
@@ -265,7 +269,7 @@ func TestBuildConfigFromLibrarian(t *testing.T) {
 				librarianConfig: test.cfg,
 				lang:            test.lang,
 			}
-			got, err := buildConfigFromLibrarian(t.Context(), input)
+			got, err := buildConfigFromLibrarian(t.Context(), "", input)
 			if test.wantErr != nil {
 				if !errors.Is(err, test.wantErr) {
 					t.Errorf("expected error containing %q, got: %v", test.wantErr, err)
@@ -319,7 +323,8 @@ func TestBuildLibraries(t *testing.T) {
 			},
 			want: []*config.Library{
 				{
-					Name: "another-library",
+					Name:   "another-library",
+					Output: "another-library",
 					Channels: []*config.Channel{
 						{
 							Path: "google/another/api/v1",
@@ -327,7 +332,8 @@ func TestBuildLibraries(t *testing.T) {
 					},
 				},
 				{
-					Name: "example-library",
+					Name:   "example-library",
+					Output: "example-library",
 					Channels: []*config.Channel{
 						{
 							Path: "google/example/api/v1",
@@ -385,7 +391,8 @@ func TestBuildLibraries(t *testing.T) {
 			},
 			want: []*config.Library{
 				{
-					Name: "another-library",
+					Name:   "another-library",
+					Output: "another-library",
 					Channels: []*config.Channel{
 						{
 							Path: "google/another/api/v1",
@@ -393,7 +400,8 @@ func TestBuildLibraries(t *testing.T) {
 					},
 				},
 				{
-					Name: "example-library",
+					Name:   "example-library",
+					Output: "example-library",
 					Channels: []*config.Channel{
 						{
 							Path: "google/example/api/v1",
@@ -419,7 +427,10 @@ func TestBuildLibraries(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			got := buildLibraries(test.input)
+			got, err := buildLibraries("", test.input)
+			if err != nil {
+				t.Fatal(err)
+			}
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("mismatch (-want +got):\n%s", diff)
 			}
