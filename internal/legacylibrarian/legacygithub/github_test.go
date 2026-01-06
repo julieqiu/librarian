@@ -1041,7 +1041,11 @@ func TestRetryableTransport(t *testing.T) {
 			defer server.Close()
 
 			repo := &Repository{Owner: "owner", Name: "repo"}
-			client := newClientWithHTTP("fake-token", repo, server.Client())
+			httpClient := server.Client()
+			client := newClientWithHTTP("fake-token", repo, httpClient)
+			if rt, ok := httpClient.Transport.(*retryableTransport); ok {
+				rt.delay = 1 * time.Millisecond
+			}
 			client.BaseURL, _ = url.Parse(server.URL + "/")
 
 			req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, server.URL, nil)
