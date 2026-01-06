@@ -522,7 +522,7 @@ func buildVeneer(files []string, repoPath string) (map[string]*config.Library, e
 		dir := filepath.Dir(file)
 		rustModules, err := buildModules(dir, repoPath)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to build modules in %q: %w", dir, err)
 		}
 		relativePath, err := filepath.Rel(repoPath, dir)
 		if err != nil {
