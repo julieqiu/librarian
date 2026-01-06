@@ -429,10 +429,11 @@ func TestFindCargos(t *testing.T) {
 
 func TestBuildVeneer(t *testing.T) {
 	for _, test := range []struct {
-		name    string
-		files   []string
-		want    map[string]*config.Library
-		wantErr error
+		name     string
+		files    []string
+		repoPath string
+		want     map[string]*config.Library
+		wantErr  error
 	}{
 		{
 			name: "success",
@@ -440,11 +441,12 @@ func TestBuildVeneer(t *testing.T) {
 				"testdata/build-veneer/success/lib-1/Cargo.toml",
 				"testdata/build-veneer/success/lib-2/Cargo.toml",
 			},
+			repoPath: "testdata/build-veneer/success",
 			want: map[string]*config.Library{
 				"google-cloud-storage": {
 					Name:          "google-cloud-storage",
 					Veneer:        true,
-					Output:        "testdata/build-veneer/success/lib-1",
+					Output:        "lib-1",
 					Version:       "1.5.0",
 					CopyrightYear: "2025",
 					Rust: &config.RustCrate{
@@ -462,7 +464,7 @@ func TestBuildVeneer(t *testing.T) {
 								},
 								IncludeGrpcOnlyMethods: true,
 								NameOverrides:          ".google.storage.v2.Storage=StorageControl",
-								Output:                 "testdata/build-veneer/success/lib-1/dir-1",
+								Output:                 "lib-1/dir-1",
 								RoutingRequired:        true,
 								ServiceConfig:          "google/storage/v2/storage_v2.yaml",
 								SkippedIds:             []string{".google.iam.v1.ResourcePolicyMember"},
@@ -477,7 +479,7 @@ func TestBuildVeneer(t *testing.T) {
 									"project-root": ".",
 								},
 								NameOverrides: ".google.storage.control.v2.IntelligenceConfig.Filter.cloud_storage_buckets=CloudStorageBucketsOneOf",
-								Output:        "testdata/build-veneer/success/lib-1/dir-2/dirdir-2",
+								Output:        "lib-1/dir-2/dirdir-2",
 								Source:        "google/storage/control/v2",
 								Template:      "convert-prost",
 							},
@@ -487,10 +489,8 @@ func TestBuildVeneer(t *testing.T) {
 				"google-cloud-spanner": {
 					Name:          "google-cloud-spanner",
 					Veneer:        true,
-					Output:        "testdata/build-veneer/success/lib-2",
-					Version:       "0.0.0",
+					Output:        "lib-2",
 					CopyrightYear: "2025",
-					SkipGenerate:  true,
 				},
 			},
 		},
@@ -499,11 +499,12 @@ func TestBuildVeneer(t *testing.T) {
 			files: []string{
 				"testdata/build-veneer/with-overrides/lib-1/Cargo.toml",
 			},
+			repoPath: "testdata/build-veneer/with-overrides",
 			want: map[string]*config.Library{
 				"google-cloud-storage-overridden": {
 					Name:          "google-cloud-storage-overridden",
 					Veneer:        true,
-					Output:        "testdata/build-veneer/with-overrides/lib-1",
+					Output:        "lib-1",
 					Version:       "1.5.0",
 					CopyrightYear: "2025",
 					Rust: &config.RustCrate{
@@ -520,7 +521,7 @@ func TestBuildVeneer(t *testing.T) {
 								HasVeneer:              true,
 								IncludeGrpcOnlyMethods: true,
 								NameOverrides:          ".google.storage.v2.Storage=StorageControl",
-								Output:                 "testdata/build-veneer/with-overrides/lib-1/dir-1",
+								Output:                 "lib-1/dir-1",
 								RoutingRequired:        true,
 								ServiceConfig:          "google/storage/v2/storage_v2.yaml",
 								SkippedIds:             []string{".google.iam.v1.ResourcePolicyMember"},
@@ -541,14 +542,14 @@ func TestBuildVeneer(t *testing.T) {
 			files: []string{
 				"testdata/build-veneer/success/lib-2/Cargo.toml",
 			},
+			repoPath: "testdata/build-veneer/success",
 			want: map[string]*config.Library{
 				"google-cloud-spanner": {
 					Name:          "google-cloud-spanner",
 					Veneer:        true,
-					Output:        "testdata/build-veneer/success/lib-2",
+					Output:        "lib-2",
 					Version:       "0.0.0",
 					CopyrightYear: "2025",
-					SkipGenerate:  true,
 				},
 			},
 		},
@@ -558,11 +559,12 @@ func TestBuildVeneer(t *testing.T) {
 				"testdata/build-veneer/wkt/Cargo.toml",
 				"testdata/build-veneer/wkt/tests/common/Cargo.toml",
 			},
+			repoPath: "testdata/build-veneer/wkt",
 			want: map[string]*config.Library{
 				"common": {
 					Name:          "common",
 					Veneer:        true,
-					Output:        "testdata/build-veneer/wkt/tests/common",
+					Output:        "tests/common",
 					Version:       "0.0.0",
 					CopyrightYear: "2025",
 					Rust: &config.RustCrate{
@@ -573,7 +575,7 @@ func TestBuildVeneer(t *testing.T) {
 								ModuleRoots: map[string]string{
 									"project-root": ".",
 								},
-								Output:   "testdata/build-veneer/wkt/tests/common/src/generated",
+								Output:   "tests/common/src/generated",
 								Source:   "src/wkt/tests/protos",
 								Template: "mod",
 							},
@@ -583,7 +585,7 @@ func TestBuildVeneer(t *testing.T) {
 				"google-cloud-wkt": {
 					Name:          "google-cloud-wkt",
 					Veneer:        true,
-					Output:        "testdata/build-veneer/wkt",
+					Output:        ".",
 					Version:       "1.2.0",
 					CopyrightYear: "2025",
 					Rust: &config.RustCrate{
@@ -592,7 +594,7 @@ func TestBuildVeneer(t *testing.T) {
 								GenerateSetterSamples: true,
 								IncludeList:           "api.proto,source_context.proto,type.proto,descriptor.proto",
 								ModulePath:            "crate",
-								Output:                "testdata/build-veneer/wkt/src/generated",
+								Output:                "src/generated",
 								Source:                "google/protobuf",
 								Template:              "mod",
 							},
@@ -607,11 +609,12 @@ func TestBuildVeneer(t *testing.T) {
 				"testdata/build-veneer/success/lib-1/Cargo.toml",
 				"testdata/build-veneer/success/echo-server/Cargo.toml",
 			},
+			repoPath: "testdata/build-veneer/success",
 			want: map[string]*config.Library{
 				"google-cloud-storage": {
 					Name:          "google-cloud-storage",
 					Veneer:        true,
-					Output:        "testdata/build-veneer/success/lib-1",
+					Output:        "lib-1",
 					Version:       "1.5.0",
 					CopyrightYear: "2025",
 					Rust: &config.RustCrate{
@@ -629,7 +632,7 @@ func TestBuildVeneer(t *testing.T) {
 								},
 								IncludeGrpcOnlyMethods: true,
 								NameOverrides:          ".google.storage.v2.Storage=StorageControl",
-								Output:                 "testdata/build-veneer/success/lib-1/dir-1",
+								Output:                 "lib-1/dir-1",
 								RoutingRequired:        true,
 								ServiceConfig:          "google/storage/v2/storage_v2.yaml",
 								SkippedIds:             []string{".google.iam.v1.ResourcePolicyMember"},
@@ -644,7 +647,7 @@ func TestBuildVeneer(t *testing.T) {
 									"project-root": ".",
 								},
 								NameOverrides: ".google.storage.control.v2.IntelligenceConfig.Filter.cloud_storage_buckets=CloudStorageBucketsOneOf",
-								Output:        "testdata/build-veneer/success/lib-1/dir-2/dirdir-2",
+								Output:        "lib-1/dir-2/dirdir-2",
 								Source:        "google/storage/control/v2",
 								Template:      "convert-prost",
 							},
@@ -655,7 +658,7 @@ func TestBuildVeneer(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			got, err := buildVeneer(test.files)
+			got, err := buildVeneer(test.files, test.repoPath)
 			if test.wantErr != nil {
 				if !errors.Is(err, test.wantErr) {
 					t.Errorf("got error %v, want %v", err, test.wantErr)
@@ -664,8 +667,7 @@ func TestBuildVeneer(t *testing.T) {
 			}
 
 			if err != nil {
-				t.Errorf("got error %v, want nil", err)
-				return
+				t.Fatalf("got error %v, want nil", err)
 			}
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("mismatch (-want +got):\n%s", diff)

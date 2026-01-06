@@ -117,7 +117,7 @@ func TestSha256Error(t *testing.T) {
 		},
 		{
 			name: "invalid url",
-			url:  "http://invalid-url-that-does-not-exist-12345.local",
+			url:  newClosedServerURL(t),
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -175,7 +175,7 @@ func TestLatestShaError(t *testing.T) {
 		},
 		{
 			name: "invalid url",
-			url:  "http://invalid-url-that-does-not-exist-12345.local",
+			url:  newClosedServerURL(t),
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -733,4 +733,11 @@ func TestLatestCommitAndChecksumFailure(t *testing.T) {
 			t.Error("expected an error when Sha256 fails, but got nil")
 		}
 	})
+}
+
+func newClosedServerURL(t *testing.T) string {
+	t.Helper()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+	server.Close()
+	return server.URL
 }

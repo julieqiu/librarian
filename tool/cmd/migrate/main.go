@@ -119,7 +119,7 @@ func runSidekickMigration(ctx context.Context, repoPath, outputPath string) erro
 	if err != nil {
 		return fmt.Errorf("failed to find Cargo.toml files: %w", err)
 	}
-	veneers, err := buildVeneer(cargoFiles)
+	veneers, err := buildVeneer(cargoFiles, repoPath)
 	if err != nil {
 		return fmt.Errorf("failed to build veneers: %w", err)
 	}
@@ -337,9 +337,9 @@ func buildGAPIC(files []string, repoPath string) (map[string]*config.Library, er
 		})
 
 		// Set version from Cargo.toml (more authoritative than sidekick)
-		if cargo.Package.Version != "" {
+		if cargo.Package.Version != "" && cargo.Package.Version != "0.0.0" {
 			lib.Version = cargo.Package.Version
-		} else if version, ok := sidekick.Codec["version"]; ok && lib.Version == "" {
+		} else if version, ok := sidekick.Codec["version"]; ok && lib.Version == "" && version != "0.0.0" {
 			lib.Version = version
 		}
 
@@ -507,7 +507,7 @@ func findCargos(path string) ([]string, error) {
 	return files, err
 }
 
-func buildVeneer(files []string) (map[string]*config.Library, error) {
+func buildVeneer(files []string, repoPath string) (map[string]*config.Library, error) {
 	veneers := make(map[string]*config.Library)
 	for _, file := range files {
 		cargo, err := readCargoConfig(filepath.Dir(file))
@@ -520,31 +520,35 @@ func buildVeneer(files []string) (map[string]*config.Library, error) {
 		}
 
 		dir := filepath.Dir(file)
-		rustModules, err := buildModules(dir)
+		rustModules, err := buildModules(dir, repoPath)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to build modules in %q: %w", dir, err)
+		}
+		relativePath, err := filepath.Rel(repoPath, dir)
+		if err != nil {
+			return nil, fmt.Errorf("failed to calculate relative path: %w", err)
 		}
 		name := cargo.Package.Name
-		veneers[name] = &config.Library{
+		veneer := &config.Library{
 			Name:          name,
 			Veneer:        true,
-			Output:        dir,
-			Version:       cargo.Package.Version,
+			Output:        relativePath,
 			CopyrightYear: "2025",
 		}
+		if cargo.Package.Version != "" && cargo.Package.Version != "0.0.0" {
+			veneer.Version = cargo.Package.Version
+		}
+		veneers[name] = veneer
 		if len(rustModules) > 0 {
 			veneers[name].Rust = &config.RustCrate{
 				Modules: rustModules,
 			}
-		} else {
-			veneers[name].SkipGenerate = true
 		}
 	}
-
 	return veneers, nil
 }
 
-func buildModules(rootDir string) ([]*config.RustModule, error) {
+func buildModules(rootDir string, repoPath string) ([]*config.RustModule, error) {
 	var modules []*config.RustModule
 	err := filepath.WalkDir(rootDir, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -614,6 +618,10 @@ func buildModules(rootDir string) ([]*config.RustModule, error) {
 				Replace: do.Replace,
 			})
 		}
+		relativePath, err := filepath.Rel(repoPath, filepath.Dir(path))
+		if err != nil {
+			return fmt.Errorf("failed to calculate relative path: %w", err)
+		}
 		module := &config.RustModule{
 			DocumentationOverrides: documentationOverrides,
 			GenerateSetterSamples:  strToBool(generateSetterSamples),
@@ -623,7 +631,7 @@ func buildModules(rootDir string) ([]*config.RustModule, error) {
 			IncludeList:            includeList,
 			ModulePath:             modulePath,
 			NameOverrides:          nameOverrides,
-			Output:                 filepath.Dir(path),
+			Output:                 relativePath,
 			PostProcessProtos:      postProcessProtos,
 			RoutingRequired:        strToBool(routingRequired),
 			ExtendGrpcTransport:    strToBool(extendGrpcTransport),
