@@ -24,6 +24,9 @@ import (
 )
 
 func TestRustProstFromProtobuf(t *testing.T) {
+	if testing.Short() {
+		t.Skip("integration test: Rust Prost code generation is slow (~7s)")
+	}
 	testhelper.RequireCommand(t, "cargo")
 	testhelper.RequireCommand(t, "protoc")
 	outDir := t.TempDir()
