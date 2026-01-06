@@ -38,26 +38,9 @@ type cargoManifest struct {
 
 // ReleaseLibrary bumps version for Cargo.toml files and updates librarian config version.
 func ReleaseLibrary(library *config.Library, srcPath string) error {
-	cargoFile := filepath.Join(srcPath, "Cargo.toml")
-	currentVersion := library.Version
-	var newVersion string
-	if currentVersion == "" {
-		newVersion = defaultVersion
-		if _, err := os.Stat(cargoFile); os.IsNotExist(err) {
-			cargo := fmt.Sprintf(`[package]
-name                   = "%s"
-version                = "%s"
-edition                = "2021"
-`, library.Name, newVersion)
-			if err := os.WriteFile(cargoFile, []byte(cargo), 0644); err != nil {
-				return err
-			}
-		} else if err := UpdateCargoVersion(cargoFile, newVersion); err != nil {
-			return err
-		}
-	} else {
-		var err error
-		newVersion, err = semver.DeriveNext(semver.Minor, currentVersion,
+	newVersion := defaultVersion
+	if library.Version != "" {
+		v, err := semver.DeriveNext(semver.Minor, library.Version,
 			semver.DeriveNextOptions{
 				BumpVersionCore:       true,
 				DowngradePreGAChanges: true,
@@ -65,10 +48,28 @@ edition                = "2021"
 		if err != nil {
 			return err
 		}
+		newVersion = v
+	}
+
+	cargoFile := filepath.Join(srcPath, "Cargo.toml")
+	if _, err := os.Stat(cargoFile); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	if os.IsNotExist(err) {
+		cargo := fmt.Sprintf(`[package]
+name    = "%s"
+version = "%s"
+edition = "2021"
+`, library.Name, newVersion)
+		if err := os.WriteFile(cargoFile, []byte(cargo), 0644); err != nil {
+			return err
+		}
+	} else {
 		if err := UpdateCargoVersion(cargoFile, newVersion); err != nil {
 			return err
 		}
 	}
+
 	library.Version = newVersion
 	return nil
 }
