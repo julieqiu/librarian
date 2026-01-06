@@ -592,6 +592,16 @@ func (annotate *annotateModel) annotateService(s *api.Service) {
 }
 
 func (annotate *annotateModel) annotateMessage(m *api.Message) {
+	if _, omit := omitGeneration[m.ID]; omit && !m.IsMap {
+		// If the message is allowlisted as omitted, and it's not a map,
+		// skip it completely. Map messages still need to be processed for their
+		// value types to generate imports.
+		m.Codec = &messageAnnotation{
+			OmitGeneration: true,
+		}
+		return
+	}
+
 	for _, f := range m.Fields {
 		annotate.annotateField(f)
 	}
@@ -615,14 +625,12 @@ func (annotate *annotateModel) annotateMessage(m *api.Message) {
 
 	toStringLines := createToStringLines(m)
 
-	_, omit := omitGeneration[m.ID]
-
 	m.Codec = &messageAnnotation{
 		Parent:          m,
 		Name:            messageName(m),
 		QualifiedName:   qualifiedName(m),
 		DocLines:        formatDocComments(m.Documentation, annotate.state),
-		OmitGeneration:  omit || m.IsMap,
+		OmitGeneration:  m.IsMap,
 		ConstructorBody: constructorBody,
 		ToStringLines:   toStringLines,
 		Model:           annotate.model,
