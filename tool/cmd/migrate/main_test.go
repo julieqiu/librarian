@@ -548,7 +548,6 @@ func TestBuildVeneer(t *testing.T) {
 					Name:          "google-cloud-spanner",
 					Veneer:        true,
 					Output:        "lib-2",
-					Version:       "0.0.0",
 					CopyrightYear: "2025",
 				},
 			},
@@ -565,7 +564,6 @@ func TestBuildVeneer(t *testing.T) {
 					Name:          "common",
 					Veneer:        true,
 					Output:        "tests/common",
-					Version:       "0.0.0",
 					CopyrightYear: "2025",
 					Rust: &config.RustCrate{
 						Modules: []*config.RustModule{
