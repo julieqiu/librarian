@@ -180,6 +180,10 @@ func TestReleaseLibraryNoVersion(t *testing.T) {
 	testhelper.RequireCommand(t, "cargo")
 	testhelper.RequireCommand(t, "taplo")
 
+	const (
+		libDir  = "src/test-lib"
+		libName = "test-library"
+	)
 	for _, test := range []struct {
 		name        string
 		createCargo bool
@@ -202,13 +206,9 @@ func TestReleaseLibraryNoVersion(t *testing.T) {
 			dir := t.TempDir()
 			t.Chdir(dir)
 
-			libDir := "src/test-lib"
-			libName := "test-library"
-
 			if err := os.MkdirAll(libDir, 0755); err != nil {
 				t.Fatal(err)
 			}
-
 			if test.createCargo {
 				createCrate(t, libDir, libName, test.cargoVer)
 			}
@@ -217,12 +217,9 @@ func TestReleaseLibraryNoVersion(t *testing.T) {
 				Name:   libName,
 				Output: libDir,
 			}
-
-			err := ReleaseLibrary(lib, libDir)
-			if err != nil {
+			if err := ReleaseLibrary(lib, libDir); err != nil {
 				t.Fatal(err)
 			}
-
 			checkLibraryVersion(t, lib, test.wantVersion)
 			checkCargoVersion(t, filepath.Join(libDir, "Cargo.toml"), test.wantVersion)
 		})

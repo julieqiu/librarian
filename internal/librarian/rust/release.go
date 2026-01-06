@@ -27,15 +27,6 @@ import (
 
 const defaultVersion = "0.1.0"
 
-type cargoPackage struct {
-	Name    string `toml:"name"`
-	Version string `toml:"version"`
-}
-
-type cargoManifest struct {
-	Package *cargoPackage `toml:"package"`
-}
-
 // ReleaseLibrary bumps version for Cargo.toml files and updates librarian config version.
 func ReleaseLibrary(library *config.Library, srcPath string) error {
 	newVersion := defaultVersion
@@ -52,19 +43,20 @@ func ReleaseLibrary(library *config.Library, srcPath string) error {
 	}
 
 	cargoFile := filepath.Join(srcPath, "Cargo.toml")
-	if _, err := os.Stat(cargoFile); err != nil && !os.IsNotExist(err) {
+	_, err := os.Stat(cargoFile)
+	switch {
+	case err != nil && !os.IsNotExist(err):
 		return err
-	}
-	if os.IsNotExist(err) {
+	case os.IsNotExist(err):
 		cargo := fmt.Sprintf(`[package]
-name    = "%s"
-version = "%s"
-edition = "2021"
+name                   = "%s"
+version                = "%s"
+edition                = "2021"
 `, library.Name, newVersion)
 		if err := os.WriteFile(cargoFile, []byte(cargo), 0644); err != nil {
 			return err
 		}
-	} else {
+	default:
 		if err := UpdateCargoVersion(cargoFile, newVersion); err != nil {
 			return err
 		}
