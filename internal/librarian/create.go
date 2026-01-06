@@ -80,14 +80,39 @@ func runCreate(ctx context.Context, name, output string, channel ...string) erro
 	}
 	switch cfg.Language {
 	case languageFake:
-		return runGenerate(ctx, false, name)
+		if err := runGenerateAndTidy(ctx, cfg, false, name); err != nil {
+			return err
+		}
 	case languageRust:
-		return rust.Create(ctx, output, func(ctx context.Context) error {
-			return runGenerate(ctx, false, name)
-		})
+		if err := rust.Create(ctx, output, func(ctx context.Context) error {
+			return runGenerateAndTidy(ctx, cfg, false, name)
+		}); err != nil {
+			return err
+		}
 	default:
 		return errUnsupportedLanguage
 	}
+	return yaml.Write(librarianConfigPath, formatConfig(cfg))
+}
+
+func runGenerateAndTidy(ctx context.Context, cfg *config.Config, all bool, libraryName string) error {
+	if err := runGenerate(ctx, all, libraryName); err != nil {
+		return err
+	}
+	if cfg.Sources == nil || cfg.Sources.Googleapis == nil {
+		return errNoGoogleapiSourceInfo
+	}
+	googleapisDir, err := fetchSource(ctx, cfg.Sources.Googleapis, googleapisRepo)
+	if err != nil {
+		return err
+	}
+	for _, lib := range cfg.Libraries {
+		err = tidyLibrary(cfg, lib, googleapisDir)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func addLibraryToLibrarianConfig(cfg *config.Config, name, output string, channel ...string) error {

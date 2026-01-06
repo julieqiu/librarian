@@ -18,7 +18,10 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"sort"
+	"strconv"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/librarian/internal/config"
@@ -26,62 +29,99 @@ import (
 )
 
 func TestCreateLibrary(t *testing.T) {
+	copyrightYear := strconv.Itoa(time.Now().Year())
 	for _, test := range []struct {
-		name            string
-		libName         string
-		output          string
-		existingLibrary *config.Library
-		wantOutput      string
-		wantError       error
+		name                   string
+		libName                string
+		output                 string
+		initialLibraries       []*config.Library
+		wantFinalLibraries     []*config.Library
+		wantGeneratedOutputDir string
+		wantError              error
 	}{
 		{
-			name:       "create new library",
-			libName:    "newlib",
-			output:     "newlib-output",
-			wantOutput: "newlib-output",
+			name:                   "create new library",
+			libName:                "google-cloud-secretmanager",
+			output:                 "newlib-output",
+			initialLibraries:       []*config.Library{},
+			wantGeneratedOutputDir: "newlib-output",
+			wantFinalLibraries: []*config.Library{
+				{
+					Name:          "google-cloud-secretmanager",
+					CopyrightYear: copyrightYear,
+					Output:        "newlib-output",
+					Version:       "0.1.0",
+				},
+			},
 		},
 		{
 			name:    "fail create existing library",
-			libName: "existinglib",
-			existingLibrary: &config.Library{
-				Name: "existinglib",
+			libName: "google-cloud-secretmanager",
+			initialLibraries: []*config.Library{
+				{
+					Name:   "google-cloud-secretmanager",
+					Output: "existing-output",
+				},
 			},
-			wantError: errLibraryAlreadyExists,
+			wantGeneratedOutputDir: "existing-output",
+			wantError:              errLibraryAlreadyExists,
+		},
+		{
+			name:    "create new library and tidy existing",
+			libName: "google-cloud-secretmanager",
+			output:  "newlib-output",
+			initialLibraries: []*config.Library{
+				{
+					Name:   "existinglib",
+					Output: "output",
+					Channels: []*config.Channel{
+						{Path: "google/cloud/secretmanager/v1",
+							ServiceConfig: "google/cloud/secretmanager/v1/secretmanager_grpc_service_config.json"},
+					},
+				},
+			},
+			wantGeneratedOutputDir: "newlib-output",
+			wantFinalLibraries: []*config.Library{
+				{
+					Name: "existinglib",
+					Channels: []*config.Channel{
+						{Path: "google/cloud/secretmanager/v1",
+							ServiceConfig: "google/cloud/secretmanager/v1/secretmanager_grpc_service_config.json"},
+					},
+				},
+				{
+					Name:          "google-cloud-secretmanager",
+					CopyrightYear: copyrightYear,
+					Output:        "newlib-output",
+					Version:       "0.1.0",
+				},
+			},
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
+			googleapisDir, err := filepath.Abs("testdata/googleapis")
+			if err != nil {
+				t.Fatal(err)
+			}
 			tmpDir := t.TempDir()
 			t.Chdir(tmpDir)
-
-			// Create service config file for the library
-			serviceConfigDir := filepath.Join(tmpDir, test.libName)
-			if err := os.MkdirAll(serviceConfigDir, 0755); err != nil {
-				t.Fatal(err)
-			}
-			serviceConfigPath := filepath.Join(serviceConfigDir, test.libName+".yaml")
-			serviceConfigContent := "type: google.api.Service\nconfig_version: 3\n"
-			if err := os.WriteFile(serviceConfigPath, []byte(serviceConfigContent), 0644); err != nil {
-				t.Fatal(err)
-			}
 
 			cfg := &config.Config{
 				Language: languageFake,
 				Default: &config.Default{
 					Output: "output",
 				},
+				Libraries: test.initialLibraries,
 				Sources: &config.Sources{
 					Googleapis: &config.Source{
-						Dir: tmpDir,
+						Dir: googleapisDir,
 					},
 				},
-			}
-			if test.existingLibrary != nil {
-				cfg.Libraries = []*config.Library{test.existingLibrary}
 			}
 			if err := yaml.Write(librarianConfigPath, cfg); err != nil {
 				t.Fatal(err)
 			}
-			err := runCreate(t.Context(), test.libName, test.output)
+			err = runCreate(t.Context(), test.libName, test.output)
 			if test.wantError != nil {
 				if !errors.Is(err, test.wantError) {
 					t.Errorf("expected error %v, got %v", test.wantError, err)
@@ -92,44 +132,32 @@ func TestCreateLibrary(t *testing.T) {
 				t.Fatalf("runCreate() failed with unexpected error: %v", err)
 			}
 
-			cfg, err = yaml.Read[config.Config](librarianConfigPath)
+			gotCfg, err := yaml.Read[config.Config](librarianConfigPath)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			found := findLibrary(cfg, test.libName)
-			if found == nil {
-				t.Fatal("library not found in config")
-			}
-			if found.Output != test.wantOutput {
-				t.Fatalf("output = %q, want %q", found.Output, test.wantOutput)
-			}
+			sort.Slice(gotCfg.Libraries, func(i, j int) bool {
+				return gotCfg.Libraries[i].Name < gotCfg.Libraries[j].Name
+			})
 
-			readmePath := filepath.Join(test.wantOutput, "README.md")
+			if diff := cmp.Diff(test.wantFinalLibraries, gotCfg.Libraries); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+			readmePath := filepath.Join(test.wantGeneratedOutputDir, "README.md")
 			if _, err := os.Stat(readmePath); err != nil {
 				t.Errorf("expected README.md at %s: %v", readmePath, err)
 			}
-
-			versionPath := filepath.Join(test.wantOutput, "VERSION")
+			versionPath := filepath.Join(test.wantGeneratedOutputDir, "VERSION")
 			content, err := os.ReadFile(versionPath)
 			if err != nil {
 				t.Fatal(err)
 			}
-			want := "0.0.0"
+			const want = "0.0.0"
 			if diff := cmp.Diff(want, string(content)); diff != "" {
 				t.Errorf("VERSION mismatch (-want +got):\n%s", diff)
 			}
 		})
-	}
-}
-
-func TestCreateLibraryNoYaml(t *testing.T) {
-	tmpDir := t.TempDir()
-	t.Chdir(tmpDir)
-
-	err := runCreate(t.Context(), "newlib", "output/newlib")
-	if !errors.Is(err, errNoYaml) {
-		t.Errorf("want error %v, got %v", errNoYaml, err)
 	}
 }
 
