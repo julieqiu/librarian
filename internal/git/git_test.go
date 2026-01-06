@@ -137,6 +137,7 @@ func TestFilesBadRef(t *testing.T) {
 }
 
 func TestFilterNoFilter(t *testing.T) {
+	t.Parallel()
 	input := []string{
 		"src/storage/src/lib.rs",
 		"src/storage/Cargo.toml",
@@ -155,6 +156,7 @@ func TestFilterNoFilter(t *testing.T) {
 }
 
 func TestFilterBasic(t *testing.T) {
+	t.Parallel()
 	input := []string{
 		"src/storage/src/lib.rs",
 		"src/storage/Cargo.toml",
@@ -183,6 +185,7 @@ func TestFilterBasic(t *testing.T) {
 }
 
 func TestFilterSomeGlobs(t *testing.T) {
+	t.Parallel()
 	input := []string{
 		"doc/howto-1.md",
 		"doc/howto-2.md",
