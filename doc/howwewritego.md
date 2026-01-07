@@ -280,6 +280,43 @@ func TestSendMessage_Error(t *testing.T) {
 }
 ```
 
+### Running tests in parallel
+
+Large table-driven tests and/or those that are I/O bound e.g. by making
+filesystem reads or network requests are good candidates for parallelization via
+[`t.Parallel()`](https://pkg.go.dev/testing#T.Parallel). Do not
+parallelize lightweight, millisecond-level tests.
+
+**Important:** A test cannot be parallelized if it depends on shared resources,
+mutates the process as a whole e.g. by invoking `t.Chdir()`, or is dependent on
+execution order.
+
+When using `t.Parallel()` in table-driven tests, you must capture the range
+variable to avoid race conditions. This ensures each subtest gets the correct
+data from its corresponding test case.
+
+```go
+func TestTransform(t *testing.T) {
+	for _, test := range []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{"uppercase", "hello", "HELLO"},
+		{"empty", "", ""},
+	} {
+		test := test // capture range variable
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel() // Mark subtest for parallel execution.
+			got := Transform(test.input)
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+```
+
 ## Need Help? Just Ask!
 
 This guide will continue to evolve. If something feels unclear or is missing,
