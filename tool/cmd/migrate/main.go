@@ -340,9 +340,9 @@ func buildGAPIC(files []string, repoPath string) (map[string]*config.Library, er
 		})
 
 		// Set version from Cargo.toml (more authoritative than sidekick)
-		if cargo.Package.Version != "" {
+		if cargo.Package.Version != "" && cargo.Package.Version != "0.0.0" {
 			lib.Version = cargo.Package.Version
-		} else if version, ok := sidekick.Codec["version"]; ok && lib.Version == "" {
+		} else if version, ok := sidekick.Codec["version"]; ok && lib.Version == "" && version != "0.0.0" {
 			lib.Version = version
 		}
 
@@ -532,13 +532,16 @@ func buildVeneer(files []string, repoPath string) (map[string]*config.Library, e
 			return nil, fmt.Errorf("failed to calculate relative path: %w", err)
 		}
 		name := cargo.Package.Name
-		veneers[name] = &config.Library{
+		veneer := &config.Library{
 			Name:          name,
 			Veneer:        true,
 			Output:        relativePath,
-			Version:       cargo.Package.Version,
 			CopyrightYear: "2025",
 		}
+		if cargo.Package.Version != "" && cargo.Package.Version != "0.0.0" {
+			veneer.Version = cargo.Package.Version
+		}
+		veneers[name] = veneer
 		if len(rustModules) > 0 {
 			veneers[name].Rust = &config.RustCrate{
 				Modules: rustModules,
