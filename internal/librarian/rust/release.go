@@ -26,8 +26,9 @@ import (
 
 const defaultVersion = "0.1.0"
 
-// ReleaseLibrary bumps version for Cargo.toml files and updates librarian config version.
-func ReleaseLibrary(library *config.Library) error {
+// ReleaseLibrary bumps version for Cargo.toml and .sidekick.toml files.
+// It returns the updated library to make the mutation explicit.
+func ReleaseLibrary(library *config.Library) (*config.Library, error) {
 	newVersion := defaultVersion
 	if library.Version != "" {
 		v, err := semver.DeriveNext(semver.Minor, library.Version,
@@ -36,13 +37,25 @@ func ReleaseLibrary(library *config.Library) error {
 				DowngradePreGAChanges: true,
 			})
 		if err != nil {
-			return err
+			return nil, err
 		}
 		newVersion = v
 	}
 
-	cargoFile := filepath.Join(library.Output, "Cargo.toml")
-	_, err := os.Stat(cargoFile)
+	cargoPath := filepath.Join(library.Output, "Cargo.toml")
+	if err := updateOrCreateCargo(cargoPath, library.Name, newVersion); err != nil {
+		return nil, err
+	}
+	if err := updateSidekickConfig(cargoPath, newVersion); err != nil {
+		return nil, err
+	}
+	library.Version = newVersion
+	return library, nil
+}
+
+// updateOrCreateCargo updates the Cargo.toml version, or creates it if it doesn't exist.
+func updateOrCreateCargo(cargoPath, packageName, version string) error {
+	_, err := os.Stat(cargoPath)
 	switch {
 	case err != nil && !os.IsNotExist(err):
 		return err
@@ -51,16 +64,9 @@ func ReleaseLibrary(library *config.Library) error {
 name                   = "%s"
 version                = "%s"
 edition                = "2021"
-`, library.Name, newVersion)
-		if err := os.WriteFile(cargoFile, []byte(cargo), 0644); err != nil {
-			return err
-		}
+`, packageName, version)
+		return os.WriteFile(cargoPath, []byte(cargo), 0644)
 	default:
-		if err := updateCargoVersion(cargoFile, newVersion); err != nil {
-			return err
-		}
+		return updateCargoVersion(cargoPath, version)
 	}
-
-	library.Version = newVersion
-	return nil
 }

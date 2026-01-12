@@ -280,7 +280,7 @@ func TestRelease(t *testing.T) {
 			libConfg := &config.Library{
 				Output: test.srcPath,
 			}
-			err := releaseLibrary(t.Context(), cfg, libConfg, test.lastTag, "git", "")
+			err := releaseLibrary(t.Context(), cfg, libConfg, test.lastTag, "git")
 			if err != nil {
 				t.Fatalf("releaseLibrary() error = %v", err)
 			}
@@ -351,7 +351,7 @@ func TestReleaseAll(t *testing.T) {
 			}
 			remoteDir := testhelper.SetupRepoWithChange(t, tag)
 			testhelper.CloneRepository(t, remoteDir)
-			err := releaseAll(t.Context(), config, tag, "git", "")
+			err := releaseAll(t.Context(), config, tag, "git")
 			if err != nil {
 				t.Fatal(err)
 			}

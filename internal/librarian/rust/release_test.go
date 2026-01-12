@@ -40,7 +40,8 @@ const (
 
 func TestReleaseOne(t *testing.T) {
 	cfg := setupRelease(t)
-	if err := ReleaseLibrary(cfg.Libraries[0]); err != nil {
+	lib, err := ReleaseLibrary(cfg.Libraries[0])
+	if err != nil {
 		t.Fatal(err)
 	}
 
@@ -113,7 +114,7 @@ func checkLibraryVersion(t *testing.T, library *config.Library, wantVersion stri
 }
 
 func TestNoCargoFile(t *testing.T) {
-	err := ReleaseLibrary(&config.Library{Version: "1.0.0", Output: "nonexistent/path"})
+	_, err := ReleaseLibrary(&config.Library{Version: "1.0.0", Output: "nonexistent/path"})
 	if err == nil {
 		t.Error("expected error when Cargo.toml doesn't exist")
 	}
@@ -160,7 +161,7 @@ func TestReleaseLibraryNoVersion(t *testing.T) {
 				Name:   libName,
 				Output: libDir,
 			}
-			if err := ReleaseLibrary(lib); err != nil {
+			if _, err := ReleaseLibrary(lib); err != nil {
 				t.Fatal(err)
 			}
 			checkLibraryVersion(t, lib, test.wantVersion)
