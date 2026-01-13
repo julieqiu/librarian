@@ -16,6 +16,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Prerequisites:
+#   To build this image, you must have access to marketplace.gcr.io. Run the
+#   following command to configure Docker to use your gcloud credentials:
+#
+#   gcloud auth configure-docker marketplace.gcr.io
+#
 # Build:
 #   docker build --target rust -t librarian:rust -f cmd/librarian/Dockerfile .
 #   docker build --target python -t librarian:python -f cmd/librarian/Dockerfile .
@@ -23,7 +29,7 @@
 # Usage:
 #   docker run --rm -v "$(pwd)":/workspace -w /workspace librarian:rust generate
 #   docker run --rm -v "$(pwd)":/workspace -w /workspace librarian:python generate
-
+#
 # ============== Build Stage ==============
 # Use the MOSS-compliant base image.
 FROM marketplace.gcr.io/google/debian12@sha256:326ccf35aa72f7cc8cbd25b69e819a81c5fd9ed675c6c9ffb51f3214a64f23cf AS build
