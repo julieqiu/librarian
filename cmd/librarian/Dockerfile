@@ -25,7 +25,23 @@
 #   docker run --rm -v "$(pwd)":/workspace -w /workspace librarian:python generate
 
 # ============== Build Stage ==============
-FROM golang:1.25.5 AS build
+# Use the MOSS-compliant base image.
+FROM marketplace.gcr.io/google/debian12@sha256:326ccf35aa72f7cc8cbd25b69e819a81c5fd9ed675c6c9ffb51f3214a64f23cf AS build
+
+ENV GO_VERSION=1.25.5
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    ca-certificates \
+    curl \
+    git \
+    wget && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN wget -q https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz -O go.tar.gz && \
+    tar -C /usr/local -xzf go.tar.gz && \
+    rm go.tar.gz
+ENV PATH=/usr/local/go/bin:$PATH
 
 WORKDIR /src
 COPY go.mod go.sum ./
