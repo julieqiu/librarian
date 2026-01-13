@@ -24,7 +24,7 @@
 #   docker run --rm -v "$(pwd)":/workspace -w /workspace librarian:rust generate
 #   docker run --rm -v "$(pwd)":/workspace -w /workspace librarian:python generate
 
-# ============== Build Stage ============== 
+# ============== Build Stage ==============
 FROM golang:1.25.5 AS build
 
 WORKDIR /src
@@ -36,7 +36,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /go/bin/librarian ./cmd/librarian
 
-# ============== Base Stage ============== 
+# ============== Base Stage ==============
 FROM debian:bookworm-slim AS base
 
 WORKDIR /app
@@ -56,7 +56,7 @@ RUN curl -fsSL -o /tmp/protoc.zip \
 COPY --from=build /go/bin/librarian .
 ENTRYPOINT ["/app/librarian"]
 
-# ============== Rust Stage ============== 
+# ============== Rust Stage ==============
 FROM base AS rust
 
 # Install Rust toolchain
@@ -71,7 +71,7 @@ RUN curl -fsSL https://github.com/tamasfe/taplo/releases/download/${TAPLO_VERSIO
     echo "${TAPLO_CHECKSUM} /usr/local/bin/taplo" | sha512sum -c - && \
     chmod +x /usr/local/bin/taplo
 
-# ============== Python Stage ============== 
+# ============== Python Stage ==============
 FROM base AS python
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
