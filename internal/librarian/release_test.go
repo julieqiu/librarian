@@ -277,8 +277,10 @@ func TestRelease(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			libConfg := &config.Library{}
-			err := releaseLibrary(t.Context(), cfg, libConfg, test.srcPath, test.lastTag, "git", "")
+			libConfg := &config.Library{
+				Output: test.srcPath,
+			}
+			err := releaseLibrary(t.Context(), cfg, libConfg, test.lastTag, "git", "")
 			if err != nil {
 				t.Fatalf("releaseLibrary() error = %v", err)
 			}
