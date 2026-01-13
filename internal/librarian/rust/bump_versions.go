@@ -27,7 +27,7 @@ import (
 // BumpVersions finds all the crates that need a version bump and performs the
 // bump, changing both the Cargo.toml and sidekick.toml files.
 func BumpVersions(ctx context.Context, config *config.Release) error {
-	if err := PreFlight(ctx, config.Preinstalled, config.Remote, ToConfigTools(config.Tools["cargo"])); err != nil {
+	if err := preFlight(ctx, config.Preinstalled, config.Remote, ToConfigTools(config.Tools["cargo"])); err != nil {
 		return err
 	}
 	gitPath := command.GetExecutablePath(config.Preinstalled, "git")
@@ -40,8 +40,8 @@ func BumpVersions(ctx context.Context, config *config.Release) error {
 		return err
 	}
 	var crates []string
-	for _, manifest := range FindCargoManifests(files) {
-		names, err := UpdateManifest(gitPath, lastTag, manifest)
+	for _, manifest := range findCargoManifests(files) {
+		names, err := updateManifest(gitPath, lastTag, manifest)
 		if err != nil {
 			return err
 		}

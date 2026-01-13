@@ -56,7 +56,7 @@ edition                = "2021"
 			return err
 		}
 	default:
-		if err := UpdateCargoVersion(cargoFile, newVersion); err != nil {
+		if err := updateCargoVersion(cargoFile, newVersion); err != nil {
 			return err
 		}
 	}
