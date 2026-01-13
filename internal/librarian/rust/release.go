@@ -27,7 +27,7 @@ import (
 const defaultVersion = "0.1.0"
 
 // ReleaseLibrary bumps version for Cargo.toml files and updates librarian config version.
-func ReleaseLibrary(library *config.Library, srcPath string) error {
+func ReleaseLibrary(library *config.Library) error {
 	newVersion := defaultVersion
 	if library.Version != "" {
 		v, err := semver.DeriveNext(semver.Minor, library.Version,
@@ -41,7 +41,7 @@ func ReleaseLibrary(library *config.Library, srcPath string) error {
 		newVersion = v
 	}
 
-	cargoFile := filepath.Join(srcPath, "Cargo.toml")
+	cargoFile := filepath.Join(library.Output, "Cargo.toml")
 	_, err := os.Stat(cargoFile)
 	switch {
 	case err != nil && !os.IsNotExist(err):
