@@ -15,13 +15,15 @@
 package rust
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/googleapis/librarian/internal/config"
+	"github.com/googleapis/librarian/internal/serviceconfig"
 	sidekickconfig "github.com/googleapis/librarian/internal/sidekick/config"
 )
 
-func toSidekickConfig(library *config.Library, channel *config.Channel, sources *Sources) *sidekickconfig.Config {
+func toSidekickConfig(library *config.Library, channel *config.Channel, googleapisDir, discoveryDir, protobufRootDir, conformanceDir, showcaseDir string) (*sidekickconfig.Config, error) {
 	source := map[string]string{}
 	specFormat := "protobuf"
 	if library.SpecificationFormat != "" {
@@ -31,9 +33,9 @@ func toSidekickConfig(library *config.Library, channel *config.Channel, sources 
 		specFormat = "disco"
 	}
 
-	if len(library.Roots) == 0 && sources.Googleapis != "" {
+	if len(library.Roots) == 0 && googleapisDir != "" {
 		// Default to googleapis if no roots are specified.
-		source["googleapis-root"] = sources.Googleapis
+		source["googleapis-root"] = googleapisDir
 		source["roots"] = "googleapis"
 	} else {
 		source["roots"] = strings.Join(library.Roots, ",")
@@ -41,11 +43,11 @@ func toSidekickConfig(library *config.Library, channel *config.Channel, sources 
 			path string
 			key  string
 		}{
-			"googleapis":   {path: sources.Googleapis, key: "googleapis-root"},
-			"discovery":    {path: sources.Discovery, key: "discovery-root"},
-			"showcase":     {path: sources.Showcase, key: "showcase-root"},
-			"protobuf-src": {path: sources.ProtobufSrc, key: "protobuf-src-root"},
-			"conformance":  {path: sources.Conformance, key: "conformance-root"},
+			"googleapis":   {path: googleapisDir, key: "googleapis-root"},
+			"discovery":    {path: discoveryDir, key: "discovery-root"},
+			"showcase":     {path: showcaseDir, key: "showcase-root"},
+			"protobuf-src": {path: protobufRootDir, key: "protobuf-src-root"},
+			"conformance":  {path: conformanceDir, key: "conformance-root"},
 		}
 		for _, root := range library.Roots {
 			if r, ok := rootMap[root]; ok && r.path != "" {
@@ -57,10 +59,14 @@ func toSidekickConfig(library *config.Library, channel *config.Channel, sources 
 	if library.DescriptionOverride != "" {
 		source["description-override"] = library.DescriptionOverride
 	}
+	api, err := serviceconfig.Find(googleapisDir, channel.Path)
+	if err != nil {
+		return nil, err
+	}
+	if api.Title != "" {
+		source["title-override"] = api.Title
+	}
 	if library.Rust != nil {
-		if library.Rust.TitleOverride != "" {
-			source["title-override"] = library.Rust.TitleOverride
-		}
 		if len(library.Rust.SkippedIds) > 0 {
 			source["skipped-ids"] = strings.Join(library.Rust.SkippedIds, ",")
 		}
@@ -69,7 +75,7 @@ func toSidekickConfig(library *config.Library, channel *config.Channel, sources 
 		General: sidekickconfig.GeneralConfig{
 			Language:            "rust",
 			SpecificationFormat: specFormat,
-			ServiceConfig:       channel.ServiceConfig,
+			ServiceConfig:       api.ServiceConfig,
 			SpecificationSource: channel.Path,
 		},
 		Source: source,
@@ -109,7 +115,7 @@ func toSidekickConfig(library *config.Library, channel *config.Channel, sources 
 			}
 		}
 	}
-	return sidekickCfg
+	return sidekickCfg, nil
 }
 
 func buildCodec(library *config.Library) map[string]string {
@@ -227,13 +233,10 @@ func formatPackageDependency(dep *config.RustPackageDependency) string {
 	return strings.Join(parts, ",")
 }
 
-func moduleToSidekickConfig(library *config.Library, module *config.RustModule, sources *Sources) *sidekickconfig.Config {
+func moduleToSidekickConfig(library *config.Library, module *config.RustModule, googleapisDir, protobufSrcDir string) (*sidekickconfig.Config, error) {
 	source := map[string]string{
-		"conformance-root":  sources.Conformance,
-		"discovery-root":    sources.Discovery,
-		"googleapis-root":   sources.Googleapis,
-		"protobuf-src-root": sources.ProtobufSrc,
-		"showcase-root":     sources.Showcase,
+		"googleapis-root":   googleapisDir,
+		"protobuf-src-root": protobufSrcDir,
 	}
 	for root, dir := range module.ModuleRoots {
 		source[root] = dir
@@ -247,8 +250,14 @@ func moduleToSidekickConfig(library *config.Library, module *config.RustModule, 
 	if module.IncludeList != "" {
 		source["include-list"] = module.IncludeList
 	}
-	if module.TitleOverride != "" {
-		source["title-override"] = module.TitleOverride
+	if module.Source != "" {
+		api, err := serviceconfig.Find(googleapisDir, module.Source)
+		if err != nil {
+			return nil, fmt.Errorf("serviceconfig.Find(%s, %s): %w", googleapisDir, module.Source, err)
+		}
+		if api != nil && api.Title != "" {
+			source["title-override"] = api.Title
+		}
 	}
 
 	language := "rust"
@@ -282,7 +291,7 @@ func moduleToSidekickConfig(library *config.Library, module *config.RustModule, 
 			}
 		}
 	}
-	return sidekickCfg
+	return sidekickCfg, nil
 }
 
 func buildModuleCodec(library *config.Library, module *config.RustModule) map[string]string {

@@ -25,6 +25,7 @@ import (
 
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/repometadata"
+	"github.com/googleapis/librarian/internal/serviceconfig"
 )
 
 // Generate generates a Python client library.
@@ -71,7 +72,11 @@ func Generate(ctx context.Context, library *config.Library, googleapisDir string
 	// channel.
 	// TODO(https://github.com/googleapis/librarian/issues/3159): stop
 	// hardcoding the language and repo name, instead getting it passed in.
-	absoluteServiceConfig := filepath.Join(googleapisDir, library.Channels[0].Path, library.Channels[0].ServiceConfig)
+	api, err := serviceconfig.Find(googleapisDir, library.Channels[0].Path)
+	if err != nil {
+		return fmt.Errorf("failed to lookup service config: %w", err)
+	}
+	absoluteServiceConfig := filepath.Join(googleapisDir, api.ServiceConfig)
 	if err := repometadata.GenerateRepoMetadata(library, "python", "googleapis/google-cloud-python", absoluteServiceConfig, defaultVersion, outdir); err != nil {
 		return fmt.Errorf("failed to generate .repo-metadata.json: %w", err)
 	}
@@ -197,9 +202,12 @@ func createProtocOptions(channel *config.Channel, library *config.Library, googl
 	if grpcConfigPath != "" {
 		opts = append(opts, fmt.Sprintf("retry-config=%s", grpcConfigPath))
 	}
-	// Add service YAML (API metadata) if provided
-	if channel.ServiceConfig != "" {
-		opts = append(opts, fmt.Sprintf("service-yaml=%s", filepath.Join(channel.Path, channel.ServiceConfig)))
+	api, err := serviceconfig.Find(googleapisDir, channel.Path)
+	if err != nil {
+		return nil, err
+	}
+	if api != nil && api.ServiceConfig != "" {
+		opts = append(opts, fmt.Sprintf("service-yaml=%s", api.ServiceConfig))
 	}
 
 	return []string{
