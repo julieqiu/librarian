@@ -23,8 +23,6 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/googleapis/librarian/internal/config"
-	"github.com/googleapis/librarian/internal/librarian/rust"
 )
 
 func TestGenerateCommand(t *testing.T) {
@@ -350,4 +348,3 @@ func TestCleanOutput(t *testing.T) {
 		})
 	}
 }
-
