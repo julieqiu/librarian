@@ -151,7 +151,7 @@ func shouldRelease(library *config.Library, filesChanged []string) bool {
 		pathWithTrailingSlash = pathWithTrailingSlash + "/"
 	}
 	for _, path := range filesChanged {
-		if strings.Contains(path, pathWithTrailingSlash) {
+		if strings.HasPrefix(path, pathWithTrailingSlash) {
 			return true
 		}
 	}
