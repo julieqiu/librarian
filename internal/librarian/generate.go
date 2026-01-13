@@ -28,6 +28,7 @@ import (
 	"github.com/googleapis/librarian/internal/librarian/rust"
 	"github.com/googleapis/librarian/internal/yaml"
 	"github.com/urfave/cli/v3"
+	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -191,28 +192,11 @@ func generate(ctx context.Context, language string, library *config.Library, cfg
 			return nil, err
 		}
 	case languageRust:
-		sources := &rust.Sources{
-			Googleapis: googleapisDir,
-		}
-		sources.Discovery, err = fetchSource(ctx, cfgSources.Discovery, discoveryRepo)
+		sources, err := fetchRustSources(ctx, cfgSources)
 		if err != nil {
 			return nil, err
 		}
-		sources.Conformance, err = fetchSource(ctx, cfgSources.Conformance, protobufRepo)
-		if err != nil {
-			return nil, err
-		}
-		sources.Showcase, err = fetchSource(ctx, cfgSources.Showcase, showcaseRepo)
-		if err != nil {
-			return nil, err
-		}
-		if cfgSources.ProtobufSrc != nil {
-			dir, err := fetchSource(ctx, cfgSources.ProtobufSrc, protobufRepo)
-			if err != nil {
-				return nil, err
-			}
-			sources.ProtobufSrc = filepath.Join(dir, cfgSources.ProtobufSrc.Subpath)
-		}
+		sources.Googleapis = googleapisDir
 		keep, err := rust.Keep(library)
 		if err != nil {
 			return nil, fmt.Errorf("library %s: %w", library.Name, err)
@@ -228,6 +212,53 @@ func generate(ctx context.Context, language string, library *config.Library, cfg
 	}
 	fmt.Printf("✓ Successfully generated %s\n", library.Name)
 	return library, nil
+}
+
+// fetchRustSources fetches all source repositories needed for Rust generation
+// in parallel. It returns a rust.Sources struct with all directories populated.
+func fetchRustSources(ctx context.Context, cfgSources *config.Sources) (*rust.Sources, error) {
+	sources := &rust.Sources{}
+
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		dir, err := fetchSource(ctx, cfgSources.Discovery, discoveryRepo)
+		if err != nil {
+			return err
+		}
+		sources.Discovery = dir
+		return nil
+	})
+	g.Go(func() error {
+		dir, err := fetchSource(ctx, cfgSources.Conformance, protobufRepo)
+		if err != nil {
+			return err
+		}
+		sources.Conformance = dir
+		return nil
+	})
+	g.Go(func() error {
+		dir, err := fetchSource(ctx, cfgSources.Showcase, showcaseRepo)
+		if err != nil {
+			return err
+		}
+		sources.Showcase = dir
+		return nil
+	})
+
+	if cfgSources.ProtobufSrc != nil {
+		g.Go(func() error {
+			dir, err := fetchSource(ctx, cfgSources.ProtobufSrc, protobufRepo)
+			if err != nil {
+				return err
+			}
+			sources.ProtobufSrc = filepath.Join(dir, cfgSources.ProtobufSrc.Subpath)
+			return nil
+		})
+	}
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
+	return sources, nil
 }
 
 func formatLibrary(ctx context.Context, language string, library *config.Library) error {
