@@ -18,8 +18,10 @@
 
 # Prerequisites:
 #   To build this image, you must have access to marketplace.gcr.io. Run the
-#   following command to configure Docker to use your gcloud credentials:
+#   following commands to authenticate and configure Docker to use your gcloud
+#   credentials:
 #
+#   gcloud auth login
 #   gcloud auth configure-docker marketplace.gcr.io
 #
 # Build:
@@ -34,6 +36,7 @@
 # Use the MOSS-compliant base image.
 FROM marketplace.gcr.io/google/debian12@sha256:326ccf35aa72f7cc8cbd25b69e819a81c5fd9ed675c6c9ffb51f3214a64f23cf AS build
 
+ARG TARGETARCH
 ENV GO_VERSION=1.25.5
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -44,7 +47,7 @@ RUN apt-get update && \
     wget && \
     rm -rf /var/lib/apt/lists/*
 
-RUN wget -q https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz -O go.tar.gz && \
+RUN wget -q https://go.dev/dl/go${GO_VERSION}.linux-${TARGETARCH}.tar.gz -O go.tar.gz && \
     tar -C /usr/local -xzf go.tar.gz && \
     rm go.tar.gz
 ENV PATH=/usr/local/go/bin:$PATH
@@ -56,7 +59,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 COPY . .
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /go/bin/librarian ./cmd/librarian
+    CGO_ENABLED=0 go build -o /go/bin/librarian ./cmd/librarian
 
 # ============== Base Stage ==============
 FROM debian:bookworm-slim AS base
@@ -85,13 +88,16 @@ FROM base AS rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-# Install taplo
-ENV TAPLO_VERSION=0.10.0 \
-    TAPLO_CHECKSUM=33587a0beb692561b1bc411f484f088117b45d14e993cdb8e5d66dd967026d9e166ab8b23ec7c4791d1c17ec8bd9f1d6b05a16e742c70c6a6f16dc5f7ca3ff53
-RUN curl -fsSL https://github.com/tamasfe/taplo/releases/download/${TAPLO_VERSION}/taplo-linux-x86_64.gz \
-        | gunzip -c - > /usr/local/bin/taplo && \
-    echo "${TAPLO_CHECKSUM} /usr/local/bin/taplo" | sha512sum -c - && \
-    chmod +x /usr/local/bin/taplo
+# Install Rust 1.92 and components
+RUN rustup install 1.92 && \
+    rustup default 1.92 && \
+    rustup component add clippy rustfmt
+
+# Install Rust tools
+RUN cargo install --locked taplo-cli@0.10.0 && \
+    cargo install --locked cargo-workspaces@0.4.0 && \
+    cargo install --locked cargo-semver-checks@0.44.0 \
+    cargo clean # make the image smaller
 
 # ============== Python Stage ==============
 FROM base AS python
