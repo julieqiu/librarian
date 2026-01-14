@@ -18,8 +18,10 @@
 
 # Prerequisites:
 #   To build this image, you must have access to marketplace.gcr.io. Run the
-#   following command to configure Docker to use your gcloud credentials:
+#   following commands to authenticate and configure Docker to use your gcloud
+#   credentials:
 #
+#   gcloud auth login
 #   gcloud auth configure-docker marketplace.gcr.io
 #
 # Build:
@@ -85,13 +87,15 @@ FROM base AS rust
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-# Install taplo
-ENV TAPLO_VERSION=0.10.0 \
-    TAPLO_CHECKSUM=33587a0beb692561b1bc411f484f088117b45d14e993cdb8e5d66dd967026d9e166ab8b23ec7c4791d1c17ec8bd9f1d6b05a16e742c70c6a6f16dc5f7ca3ff53
-RUN curl -fsSL https://github.com/tamasfe/taplo/releases/download/${TAPLO_VERSION}/taplo-linux-x86_64.gz \
-        | gunzip -c - > /usr/local/bin/taplo && \
-    echo "${TAPLO_CHECKSUM} /usr/local/bin/taplo" | sha512sum -c - && \
-    chmod +x /usr/local/bin/taplo
+# Install Rust 1.92 and components
+RUN rustup install 1.92 && \
+    rustup default 1.92 && \
+    rustup component add clippy rustfmt
+
+# Install Rust tools
+RUN cargo install --locked taplo-cli@0.10.0 && \
+    cargo install --locked cargo-workspaces && \
+    cargo install --locked cargo-semver-checks
 
 # ============== Python Stage ==============
 FROM base AS python
