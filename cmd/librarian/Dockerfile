@@ -36,6 +36,7 @@
 # Use the MOSS-compliant base image.
 FROM marketplace.gcr.io/google/debian12@sha256:326ccf35aa72f7cc8cbd25b69e819a81c5fd9ed675c6c9ffb51f3214a64f23cf AS build
 
+ARG TARGETARCH
 ENV GO_VERSION=1.25.5
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -46,7 +47,7 @@ RUN apt-get update && \
     wget && \
     rm -rf /var/lib/apt/lists/*
 
-RUN wget -q https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz -O go.tar.gz && \
+RUN wget -q https://go.dev/dl/go${GO_VERSION}.linux-${TARGETARCH}.tar.gz -O go.tar.gz && \
     tar -C /usr/local -xzf go.tar.gz && \
     rm go.tar.gz
 ENV PATH=/usr/local/go/bin:$PATH
@@ -58,7 +59,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
 COPY . .
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /go/bin/librarian ./cmd/librarian
+    CGO_ENABLED=0 go build -o /go/bin/librarian ./cmd/librarian
 
 # ============== Base Stage ==============
 FROM debian:bookworm-slim AS base
