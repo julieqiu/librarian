@@ -95,8 +95,9 @@ RUN rustup install 1.92 && \
 
 # Install Rust tools
 RUN cargo install --locked taplo-cli@0.10.0 && \
-    cargo install --locked cargo-workspaces && \
-    cargo install --locked cargo-semver-checks
+    cargo install --locked cargo-workspaces@0.4.0 && \
+    cargo install --locked cargo-semver-checks@0.44.0 \
+    cargo clean # make the image smaller
 
 # ============== Python Stage ==============
 FROM base AS python
