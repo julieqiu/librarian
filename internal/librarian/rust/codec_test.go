@@ -766,7 +766,14 @@ func TestToSidekickConfig(t *testing.T) {
 					t.Errorf("mismatch (-want +got):\n%s", diff)
 				}
 			} else {
-				got, err := toSidekickConfig(test.library, test.channel, googleapisDir, discoveryDir, protobufDir, conformanceDir, showcaseDir)
+				sources := &Sources{
+					Googleapis:  googleapisDir,
+					Discovery:   discoveryDir,
+					ProtobufSrc: protobufDir,
+					Conformance: conformanceDir,
+					Showcase:    showcaseDir,
+				}
+				got, err := toSidekickConfig(test.library, test.channel, sources)
 				if err != nil {
 					t.Fatal(err)
 				}

@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"github.com/googleapis/librarian/internal/config"
-	"github.com/googleapis/librarian/internal/librarian/rust"
 	"github.com/googleapis/librarian/internal/yaml"
 	"github.com/urfave/cli/v3"
 )
@@ -78,34 +77,8 @@ func runAdd(ctx context.Context, name, output string, channel ...string) error {
 	if err := addLibraryToLibrarianConfig(cfg, name, output, channel...); err != nil {
 		return err
 	}
-	switch cfg.Language {
-	case languageFake:
-		if err := runGenerateAndTidy(ctx, cfg, false, name); err != nil {
-			return err
-		}
-	case languageRust:
-		if err := rust.Create(ctx, output, func(ctx context.Context) error {
-			return runGenerateAndTidy(ctx, cfg, false, name)
-		}); err != nil {
-			return err
-		}
-	default:
-		return errUnsupportedLanguage
-	}
-	return yaml.Write(librarianConfigPath, formatConfig(cfg))
-}
-
-func runGenerateAndTidy(ctx context.Context, cfg *config.Config, all bool, libraryName string) error {
-	if cfg.Sources == nil || cfg.Sources.Googleapis == nil {
-		return errNoGoogleapiSourceInfo
-	}
-	if err := routeGenerate(ctx, all, cfg, libraryName); err != nil {
+	if err := RunTidyOnConfig(ctx, cfg); err != nil {
 		return err
-	}
-	for _, lib := range cfg.Libraries {
-		if err := tidyLibrary(cfg, lib); err != nil {
-			return err
-		}
 	}
 	return nil
 }
