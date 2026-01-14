@@ -19,12 +19,12 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/googleapis/librarian/internal/librarian/rust"
 	"github.com/googleapis/librarian/internal/sidekick/api"
 	"github.com/googleapis/librarian/internal/sidekick/codec_sample"
 	"github.com/googleapis/librarian/internal/sidekick/config"
 	"github.com/googleapis/librarian/internal/sidekick/dart"
 	"github.com/googleapis/librarian/internal/sidekick/parser"
-	"github.com/googleapis/librarian/internal/sidekick/rust"
 	"github.com/googleapis/librarian/internal/sidekick/rust_prost"
 )
 
@@ -78,7 +78,7 @@ func refreshDir(ctx context.Context, rootConfig *config.Config, cmdLine *Command
 
 	switch config.General.Language {
 	case "rust":
-		return rust.Generate(ctx, model, output, config)
+		return rust.GenerateFromModel(ctx, model, output, config)
 	case "rust_storage":
 		// The StorageControl client depends on multiple specification sources.
 		// We load them both here manually, and pass them along to

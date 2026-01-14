@@ -95,7 +95,7 @@ func TestCodecError(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := Generate(t.Context(), model, outDir, errorConfig); err == nil {
+	if err := GenerateFromModel(t.Context(), model, outDir, errorConfig); err == nil {
 		t.Errorf("expected an error with invalid Codec options")
 	}
 
@@ -122,7 +122,7 @@ func TestRustFromOpenAPI(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := Generate(t.Context(), model, outDir, cfg); err != nil {
+	if err := GenerateFromModel(t.Context(), model, outDir, cfg); err != nil {
 		t.Fatal(err)
 	}
 	for _, expected := range expectedInCrate {
@@ -156,7 +156,7 @@ func TestRustFromProtobuf(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := Generate(t.Context(), model, outDir, cfg); err != nil {
+	if err := GenerateFromModel(t.Context(), model, outDir, cfg); err != nil {
 		t.Fatal(err)
 	}
 	for _, expected := range expectedInCrate {
@@ -195,7 +195,7 @@ func TestRustClient(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if err := Generate(t.Context(), model, outDir, cfg); err != nil {
+		if err := GenerateFromModel(t.Context(), model, outDir, cfg); err != nil {
 			t.Fatal(err)
 		}
 		for _, expected := range expectedInClient {
@@ -240,7 +240,7 @@ func TestRustNosvc(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := Generate(t.Context(), model, outDir, cfg); err != nil {
+	if err := GenerateFromModel(t.Context(), model, outDir, cfg); err != nil {
 		t.Fatal(err)
 	}
 	for _, expected := range expectedInNosvc {
@@ -278,7 +278,7 @@ func TestRustModuleRpc(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := Generate(t.Context(), model, path.Join(outDir, "rpc"), cfg); err != nil {
+	if err := GenerateFromModel(t.Context(), model, path.Join(outDir, "rpc"), cfg); err != nil {
 		t.Fatal(err)
 	}
 
@@ -318,7 +318,7 @@ func TestRustBootstrapWkt(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := Generate(t.Context(), model, path.Join(outDir, "wkt"), cfg); err != nil {
+	if err := GenerateFromModel(t.Context(), model, path.Join(outDir, "wkt"), cfg); err != nil {
 		t.Fatal(err)
 	}
 

@@ -27,8 +27,8 @@ import (
 //go:embed all:templates
 var templates embed.FS
 
-// Generate generates Rust code from the model.
-func Generate(ctx context.Context, model *api.API, outdir string, cfg *config.Config) error {
+// GenerateFromModel generates Rust code from the model.
+func GenerateFromModel(ctx context.Context, model *api.API, outdir string, cfg *config.Config) error {
 	codec, err := newCodec(cfg.General.SpecificationFormat, cfg.Codec)
 	if err != nil {
 		return err

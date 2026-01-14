@@ -24,7 +24,6 @@ import (
 	"github.com/googleapis/librarian/internal/command"
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/sidekick/parser"
-	sidekickrust "github.com/googleapis/librarian/internal/sidekick/rust"
 	"github.com/googleapis/librarian/internal/sidekick/rust_prost"
 )
 
@@ -53,7 +52,7 @@ func Generate(ctx context.Context, library *config.Library, sources *Sources) er
 	if err != nil {
 		return err
 	}
-	if err := sidekickrust.Generate(ctx, model, library.Output, sidekickConfig); err != nil {
+	if err := GenerateFromModel(ctx, model, library.Output, sidekickConfig); err != nil {
 		return err
 	}
 	return nil
@@ -84,7 +83,7 @@ func generateVeneer(ctx context.Context, library *config.Library, googleapisDir,
 		}
 		switch sidekickConfig.General.Language {
 		case "rust":
-			err = sidekickrust.Generate(ctx, model, module.Output, sidekickConfig)
+			err = GenerateFromModel(ctx, model, module.Output, sidekickConfig)
 		case "rust_storage":
 			return generateRustStorage(ctx, library, module.Output, googleapisDir, protobufSrcDir)
 		case "rust+prost":
@@ -180,7 +179,7 @@ func generateRustStorage(ctx context.Context, library *config.Library, moduleOut
 		return fmt.Errorf("failed to create control model: %w", err)
 	}
 
-	return sidekickrust.GenerateStorage(ctx, moduleOutput, storageModel, storageConfig, controlModel, controlConfig)
+	return GenerateStorage(ctx, moduleOutput, storageModel, storageConfig, controlModel, controlConfig)
 }
 
 func findModuleByOutput(library *config.Library, output string) *config.RustModule {
