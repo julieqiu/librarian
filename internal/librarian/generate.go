@@ -77,18 +77,14 @@ func runGenerate(ctx context.Context, all bool, libraryName string) error {
 	if cfg.Sources == nil {
 		return errEmptySources
 	}
-	googleapisDir, err := fetchSource(ctx, cfg.Sources.Googleapis, googleapisRepo)
-	if err != nil {
-		return err
-	}
-	return routeGenerate(ctx, all, cfg, googleapisDir, libraryName)
+	return routeGenerate(ctx, all, cfg, libraryName)
 }
 
-func routeGenerate(ctx context.Context, all bool, cfg *config.Config, googleapisDir, libraryName string) error {
+func routeGenerate(ctx context.Context, all bool, cfg *config.Config, libraryName string) error {
 	if all {
-		return generateAll(ctx, cfg, googleapisDir)
+		return generateAll(ctx, cfg)
 	}
-	lib, err := generateLibrary(ctx, cfg, googleapisDir, libraryName)
+	lib, err := generateLibrary(ctx, cfg, libraryName)
 	if err != nil {
 		return err
 	}
@@ -99,9 +95,9 @@ func routeGenerate(ctx context.Context, all bool, cfg *config.Config, googleapis
 	return formatLibrary(ctx, cfg.Language, lib)
 }
 
-func generateAll(ctx context.Context, cfg *config.Config, googleapisDir string) error {
+func generateAll(ctx context.Context, cfg *config.Config) error {
 	for _, lib := range cfg.Libraries {
-		lib, err := generateLibrary(ctx, cfg, googleapisDir, lib.Name)
+		lib, err := generateLibrary(ctx, cfg, lib.Name)
 		if err != nil {
 			return err
 		}
@@ -134,13 +130,13 @@ func deriveChannelPath(language, name string) string {
 	}
 }
 
-func generateLibrary(ctx context.Context, cfg *config.Config, googleapisDir, libraryName string) (*config.Library, error) {
+func generateLibrary(ctx context.Context, cfg *config.Config, libraryName string) (*config.Library, error) {
 	for _, lib := range cfg.Libraries {
 		if lib.Name == libraryName {
 			if lib.SkipGenerate {
 				return nil, nil
 			}
-			lib, err := prepareLibrary(cfg.Language, lib, cfg.Default, googleapisDir, true)
+			lib, err := prepareLibrary(cfg.Language, lib, cfg.Default, true)
 			if err != nil {
 				return nil, err
 			}

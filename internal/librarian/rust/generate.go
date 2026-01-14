@@ -47,7 +47,10 @@ func Generate(ctx context.Context, library *config.Library, sources *Sources) er
 		return fmt.Errorf("the Rust generator only supports a single channel per library")
 	}
 
-	sidekickConfig := toSidekickConfig(library, library.Channels[0], sources)
+	sidekickConfig, err := toSidekickConfig(library, library.Channels[0], sources)
+	if err != nil {
+		return err
+	}
 	model, err := parser.CreateModel(sidekickConfig)
 	if err != nil {
 		return err
@@ -76,7 +79,10 @@ func generateVeneer(ctx context.Context, library *config.Library, sources *Sourc
 		return nil
 	}
 	for _, module := range library.Rust.Modules {
-		sidekickConfig := moduleToSidekickConfig(library, module, sources)
+		sidekickConfig, err := moduleToSidekickConfig(library, module, sources.Googleapis, sources.ProtobufSrc)
+		if err != nil {
+			return fmt.Errorf("module %s: %w", module.Output, err)
+		}
 		model, err := parser.CreateModel(sidekickConfig)
 		if err != nil {
 			return fmt.Errorf("module %s: %w", module.Output, err)
@@ -162,7 +168,10 @@ func generateRustStorage(ctx context.Context, library *config.Library, moduleOut
 	if storageModule == nil {
 		return fmt.Errorf("could not find module with output %s in library %s", output, library.Name)
 	}
-	storageConfig := moduleToSidekickConfig(library, storageModule, sources)
+	storageConfig, err := moduleToSidekickConfig(library, storageModule, sources.Googleapis, sources.ProtobufSrc)
+	if err != nil {
+		return fmt.Errorf("failed to create storage sidekick config: %w", err)
+	}
 	storageModel, err := parser.CreateModel(storageConfig)
 	if err != nil {
 		return fmt.Errorf("failed to create storage model: %w", err)
@@ -173,7 +182,10 @@ func generateRustStorage(ctx context.Context, library *config.Library, moduleOut
 	if controlModule == nil {
 		return fmt.Errorf("could not find module with output %s in library %s", output, library.Name)
 	}
-	controlConfig := moduleToSidekickConfig(library, controlModule, sources)
+	controlConfig, err := moduleToSidekickConfig(library, controlModule, sources.Googleapis, sources.ProtobufSrc)
+	if err != nil {
+		return fmt.Errorf("failed to create control sidekick config: %w", err)
+	}
 	controlModel, err := parser.CreateModel(controlConfig)
 	if err != nil {
 		return fmt.Errorf("failed to create control model: %w", err)

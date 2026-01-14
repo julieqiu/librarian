@@ -121,9 +121,6 @@ type RustModule struct {
 	// Template specifies which generator template to use.
 	// Valid values: "grpc-client", "http-client", "prost", "convert-prost", "mod".
 	Template string `yaml:"template"`
-
-	// TitleOverride overrides the crate title.
-	TitleOverride string `yaml:"title_override,omitempty"`
 }
 
 // RustCrate contains Rust-specific library configuration.
@@ -143,9 +140,6 @@ type RustCrate struct {
 
 	// TemplateOverride overrides the default template.
 	TemplateOverride string `yaml:"template_override,omitempty"`
-
-	// TitleOverride overrides the crate title.
-	TitleOverride string `yaml:"title_override,omitempty"`
 
 	// PackageNameOverride overrides the package name.
 	PackageNameOverride string `yaml:"package_name_override,omitempty"`
