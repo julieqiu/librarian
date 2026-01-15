@@ -732,6 +732,14 @@ func TestToSidekickConfig(t *testing.T) {
 				}
 			}
 
+			sources := &Sources{
+				Conformance: conformanceDir,
+				Discovery:   discoveryDir,
+				Googleapis:  googleapisDir,
+				ProtobufSrc: protobufDir,
+				Showcase:    showcaseDir,
+			}
+
 			// Create a copy of want.Source with actual temp directories
 			wantSource := make(map[string]string)
 			for k, v := range test.want.Source {
@@ -756,7 +764,7 @@ func TestToSidekickConfig(t *testing.T) {
 			if test.library.Rust != nil && test.library.Rust.Modules != nil {
 				var commentOverrides []sidekickconfig.DocumentationOverride
 				for _, module := range test.library.Rust.Modules {
-					got, err := moduleToSidekickConfig(test.library, module, googleapisDir, protobufDir)
+					got, err := moduleToSidekickConfig(test.library, module, sources)
 					if err != nil {
 						t.Fatal(err)
 					}
@@ -918,5 +926,51 @@ func TestFormatPackageDependency(t *testing.T) {
 				t.Errorf("formatPackageDependency() = %q, want %q", got, test.want)
 			}
 		})
+	}
+}
+
+func TestModuleToSidekickConfig_FoundServiceConfig(t *testing.T) {
+	tmpDir := t.TempDir()
+	googleapisDir := filepath.Join(tmpDir, "googleapis")
+	protobufDir := filepath.Join(tmpDir, "protobuf")
+	sources := &Sources{
+		Googleapis:  googleapisDir,
+		ProtobufSrc: protobufDir,
+	}
+
+	serviceConfigDir := filepath.Join(protobufDir, "google/example/v1")
+	err := os.MkdirAll(serviceConfigDir, 0755)
+	if err != nil {
+		t.Fatalf("failed to create dummy dir: %v", err)
+	}
+	dummyYaml := filepath.Join(serviceConfigDir, "example_v1.yaml")
+	content := []byte("type: google.api.Service")
+	if err := os.WriteFile(dummyYaml, content, 0644); err != nil {
+		t.Fatalf("failed to write dummy yaml: %v", err)
+	}
+
+	library := &config.Library{
+		CopyrightYear: "2025",
+	}
+
+	module := &config.RustModule{
+		Source: "google/example/v1",
+	}
+
+	_, err = moduleToSidekickConfig(library, module, sources)
+	if err != nil {
+		t.Fatalf("moduleToSidekickConfig failed: %v", err)
+	}
+}
+
+func TestModuleToSidekickConfig_ServiceConfigNotFound(t *testing.T) {
+	library := &config.Library{}
+	module := &config.RustModule{
+		Source: "non/existent/path",
+	}
+
+	_, err := moduleToSidekickConfig(library, module, &Sources{})
+	if err == nil {
+		t.Error("expected error for non-existent source, got nil")
 	}
 }
