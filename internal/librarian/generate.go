@@ -96,11 +96,34 @@ func routeGenerate(ctx context.Context, all bool, cfg *config.Config, libraryNam
 }
 
 func generateAll(ctx context.Context, cfg *config.Config) error {
-	for _, lib := range cfg.Libraries {
-		lib, err := generateLibrary(ctx, cfg, lib.Name)
-		if err != nil {
+	if _, err := fetchSource(ctx, cfg.Sources.Googleapis, googleapisRepo); err != nil {
+		return err
+	}
+	if cfg.Language == languageRust {
+		if _, err := fetchRustSources(ctx, cfg.Sources); err != nil {
 			return err
 		}
+	}
+
+	g, ctx := errgroup.WithContext(ctx)
+	libraries := make([]*config.Library, len(cfg.Libraries))
+	for i, lib := range cfg.Libraries {
+		i := i
+		name := lib.Name
+		g.Go(func() error {
+			lib, err := generateLibrary(ctx, cfg, name)
+			if err != nil {
+				return err
+			}
+			libraries[i] = lib
+			return nil
+		})
+	}
+	if err := g.Wait(); err != nil {
+		return err
+	}
+
+	for _, lib := range libraries {
 		if lib == nil {
 			// Skip formatting if generation skipped.
 			continue
