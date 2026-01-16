@@ -206,7 +206,6 @@ func generate(ctx context.Context, language string, library *config.Library, cfg
 	default:
 		return nil, fmt.Errorf("generate not implemented for %q", language)
 	}
-	fmt.Printf("✓ Successfully generated %s\n", library.Name)
 	return library, nil
 }
 
