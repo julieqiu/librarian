@@ -109,8 +109,21 @@ func runRelease(ctx context.Context, cmd *cli.Command) error {
 		return errNoGoogleapiSourceInfo
 	}
 
+	googleapisDir, err := fetchSource(ctx, cfg.Sources.Googleapis, googleapisRepo)
+	if err != nil {
+		return err
+	}
+	var rustSources *rust.Sources
+	if cfg.Language == languageRust {
+		rustSources, err = fetchRustSources(ctx, cfg.Sources)
+		if err != nil {
+			return err
+		}
+		rustSources.Googleapis = googleapisDir
+	}
+
 	if all {
-		if err = releaseAll(ctx, cfg, lastTag, gitExe); err != nil {
+		if err = releaseAll(ctx, cfg, lastTag, gitExe, googleapisDir, rustSources); err != nil {
 			return err
 		}
 	} else {
@@ -122,7 +135,7 @@ func runRelease(ctx context.Context, cmd *cli.Command) error {
 		if err != nil {
 			return err
 		}
-		if err = releaseLibrary(ctx, cfg, libConfg, lastTag, gitExe); err != nil {
+		if err = releaseLibrary(ctx, cfg, libConfg, lastTag, gitExe, googleapisDir, rustSources); err != nil {
 			return err
 		}
 	}
@@ -133,7 +146,7 @@ func runRelease(ctx context.Context, cmd *cli.Command) error {
 	return RunTidyOnConfig(ctx, cfg)
 }
 
-func releaseAll(ctx context.Context, cfg *config.Config, lastTag, gitExe string) error {
+func releaseAll(ctx context.Context, cfg *config.Config, lastTag, gitExe string, googleapisDir string, rustSources *rust.Sources) error {
 	filesChanged, err := git.FilesChangedSince(ctx, lastTag, gitExe, cfg.Release.IgnoredChanges)
 	if err != nil {
 		return err
@@ -144,7 +157,7 @@ func releaseAll(ctx context.Context, cfg *config.Config, lastTag, gitExe string)
 			return err
 		}
 		if shouldRelease(library, filesChanged) {
-			if err := releaseLibrary(ctx, cfg, library, lastTag, gitExe); err != nil {
+			if err := releaseLibrary(ctx, cfg, library, lastTag, gitExe, googleapisDir, rustSources); err != nil {
 				return err
 			}
 		}
@@ -168,7 +181,7 @@ func shouldRelease(library *config.Library, filesChanged []string) bool {
 	return false
 }
 
-func releaseLibrary(ctx context.Context, cfg *config.Config, libConfig *config.Library, lastTag, gitExe string) error {
+func releaseLibrary(ctx context.Context, cfg *config.Config, libConfig *config.Library, lastTag, gitExe string, googleapisDir string, rustSources *rust.Sources) error {
 	// If the language doesn't have bespoke versioning options, a default
 	// [semver.DeriveNextOptions] instance is returned.
 	opts := languageVersioningOptions[cfg.Language]
@@ -191,7 +204,7 @@ func releaseLibrary(ctx context.Context, cfg *config.Config, libConfig *config.L
 		if err := rust.ReleaseLibrary(libConfig, nextVersion); err != nil {
 			return err
 		}
-		if _, err := generateLibrary(ctx, cfg, libConfig.Name); err != nil {
+		if _, err := generateLibrary(ctx, cfg, libConfig.Name, googleapisDir, rustSources); err != nil {
 			return err
 		}
 		if err := formatLibrary(ctx, cfg.Language, libConfig); err != nil {
