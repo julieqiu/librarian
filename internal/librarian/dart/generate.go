@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package dart provides functionality for generating and releasing Dart client
+// libraries.
 package dart
 
 import (
