@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/googleapis/librarian/internal/config"
+	"github.com/googleapis/librarian/internal/librarian/dart"
 	"github.com/googleapis/librarian/internal/librarian/python"
 	"github.com/googleapis/librarian/internal/librarian/rust"
 	"github.com/googleapis/librarian/internal/yaml"
@@ -216,6 +217,13 @@ func generate(ctx context.Context, language string, library *config.Library, goo
 		if err := fakeGenerate(library); err != nil {
 			return nil, err
 		}
+	case languageDart:
+		if err := cleanOutput(library.Output, library.Keep); err != nil {
+			return nil, err
+		}
+		if err := dart.Generate(ctx, library, googleapisDir); err != nil {
+			return nil, err
+		}
 	case languagePython:
 		if err := cleanOutput(library.Output, library.Keep); err != nil {
 			return nil, err
@@ -291,6 +299,8 @@ func formatLibrary(ctx context.Context, language string, library *config.Library
 	switch language {
 	case languageFake:
 		return fakeFormat(library)
+	case languageDart:
+		return dart.Format(ctx, library)
 	case languageRust:
 		return rust.Format(ctx, library)
 	}
