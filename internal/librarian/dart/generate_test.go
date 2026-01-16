@@ -44,6 +44,22 @@ func TestGenerate(t *testing.T) {
 				Path: "google/cloud/secretmanager/v1",
 			},
 		},
+		Dart: &config.DartPackage{
+			APIKeysEnvironmentVariables: "GOOGLE_API_KEY",
+			IssueTrackerURL:             "https://github.com/googleapis/google-cloud-dart/issues",
+			Packages: map[string]string{
+				"googleapis_auth":            "^2.0.0",
+				"http":                       "^1.3.0",
+				"google_cloud_api":           "^0.4.0",
+				"google_cloud_iam_v1":        "^0.4.0",
+				"google_cloud_protobuf":      "^0.4.0",
+				"google_cloud_location":      "^0.4.0",
+				"google_cloud_longrunning":   "^0.4.0",
+				"google_cloud_logging_type":  "^0.4.0",
+				"google_cloud_rpc":           "^0.4.0",
+				"google_cloud_type":          "^0.4.0",
+			},
+		},
 	}
 	if err := Generate(t.Context(), library, googleapisDir); err != nil {
 		t.Fatal(err)

@@ -67,6 +67,65 @@ func toSidekickConfig(library *config.Library, ch *config.Channel, googleapisDir
 			SpecificationSource: ch.Path,
 		},
 		Source: source,
+		Codec:  buildCodec(library),
 	}
 	return sidekickCfg, nil
+}
+
+func buildCodec(library *config.Library) map[string]string {
+	codec := make(map[string]string)
+	if library.CopyrightYear != "" {
+		codec["copyright-year"] = library.CopyrightYear
+	}
+	if library.Version != "" {
+		codec["version"] = library.Version
+	}
+	if library.Dart == nil {
+		return codec
+	}
+
+	dart := library.Dart
+	if dart.APIKeysEnvironmentVariables != "" {
+		codec["api-keys-environment-variables"] = dart.APIKeysEnvironmentVariables
+	}
+	if dart.Dependencies != "" {
+		codec["dependencies"] = dart.Dependencies
+	}
+	if dart.DevDependencies != "" {
+		codec["dev-dependencies"] = dart.DevDependencies
+	}
+	if dart.ExtraImports != "" {
+		codec["extra-imports"] = dart.ExtraImports
+	}
+	if dart.IssueTrackerURL != "" {
+		codec["issue-tracker-url"] = dart.IssueTrackerURL
+	}
+	if dart.LibraryPathOverride != "" {
+		codec["library-path-override"] = dart.LibraryPathOverride
+	}
+	if dart.NotForPublication != "" {
+		codec["not-for-publication"] = dart.NotForPublication
+	}
+	if dart.PartFile != "" {
+		codec["part-file"] = dart.PartFile
+	}
+	if dart.ReadmeAfterTitleText != "" {
+		codec["readme-after-title-text"] = dart.ReadmeAfterTitleText
+	}
+	if dart.ReadmeQuickstartText != "" {
+		codec["readme-quickstart-text"] = dart.ReadmeQuickstartText
+	}
+	if dart.RepositoryURL != "" {
+		codec["repository-url"] = dart.RepositoryURL
+	}
+	for key, value := range dart.Packages {
+		codec["package:"+key] = value
+	}
+	for key, value := range dart.Prefixes {
+		codec["prefix:"+key] = value
+	}
+	for key, value := range dart.Protos {
+		codec["proto:"+key] = value
+	}
+	return codec
 }
