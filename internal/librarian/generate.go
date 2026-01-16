@@ -1,4 +1,4 @@
-// Copyright 2025 Google LLC
+// Copyright 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/googleapis/librarian/internal/config"
+	"github.com/googleapis/librarian/internal/librarian/golang"
 	"github.com/googleapis/librarian/internal/librarian/python"
 	"github.com/googleapis/librarian/internal/librarian/rust"
 	"github.com/googleapis/librarian/internal/yaml"
@@ -145,7 +146,7 @@ func generateLibrary(ctx context.Context, cfg *config.Config, libraryName string
 					return nil, err
 				}
 			}
-			return generate(ctx, cfg.Language, lib, cfg.Sources)
+			return generate(ctx, cfg.Language, cfg.Repo, lib, cfg.Sources)
 		}
 	}
 	return nil, fmt.Errorf("library %q not found", libraryName)
@@ -169,22 +170,30 @@ func generateNewLibrarySkeleton(ctx context.Context, cfg *config.Config, lib *co
 	return nil
 }
 
-func generate(ctx context.Context, language string, library *config.Library, cfgSources *config.Sources) (_ *config.Library, err error) {
+func generate(ctx context.Context, language, repo string, library *config.Library, cfgSources *config.Sources) (_ *config.Library, err error) {
 	googleapisDir, err := fetchSource(ctx, cfgSources.Googleapis, googleapisRepo)
 	if err != nil {
 		return nil, err
 	}
 
+	defaultVer := computeDefaultVersion(library)
 	switch language {
 	case languageFake:
 		if err := fakeGenerate(library); err != nil {
+			return nil, err
+		}
+	case languageGo:
+		if err := cleanOutput(library.Output, library.Keep); err != nil {
+			return nil, err
+		}
+		if err := golang.Generate(ctx, library, googleapisDir, language, repo, defaultVer); err != nil {
 			return nil, err
 		}
 	case languagePython:
 		if err := cleanOutput(library.Output, library.Keep); err != nil {
 			return nil, err
 		}
-		if err := python.Generate(ctx, library, googleapisDir); err != nil {
+		if err := python.Generate(ctx, library, googleapisDir, language, repo, defaultVer); err != nil {
 			return nil, err
 		}
 	case languageRust:
@@ -208,6 +217,16 @@ func generate(ctx context.Context, language string, library *config.Library, cfg
 	}
 	fmt.Printf("✓ Successfully generated %s\n", library.Name)
 	return library, nil
+}
+
+// computeDefaultVersion computes the default version for a library from its
+// first channel.
+//
+// TODO(https://github.com/googleapis/librarian/issues/3146):
+// compute the default version inside GenerateRepoMetadata, since that is the
+// only place where it is used.
+func computeDefaultVersion(library *config.Library) string {
+	return filepath.Base(library.Channels[0].Path)
 }
 
 // fetchRustSources fetches all source repositories needed for Rust generation
@@ -261,6 +280,8 @@ func formatLibrary(ctx context.Context, language string, library *config.Library
 	switch language {
 	case languageFake:
 		return fakeFormat(library)
+	case languageGo:
+		return golang.Format(ctx, library)
 	case languageRust:
 		return rust.Format(ctx, library)
 	}

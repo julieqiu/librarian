@@ -74,10 +74,11 @@ func Read(serviceConfigPath string) (*Service, error) {
 // Find looks up the service config path and title override for a given API path.
 // It first checks the API allowlist for overrides, then searches for YAML files
 // containing "type: google.api.Service", skipping any files ending in _gapic.yaml.
+// It also discovers gRPC service config files matching *_grpc_service_config.json.
 //
 // The path should be relative to sourceRoot (e.g., "google/cloud/secretmanager/v1").
-// Returns an API struct with Path, ServiceConfig, and Title fields populated.
-// ServiceConfig and Title may be empty strings if not found or not configured.
+// Returns an API struct with Path, ServiceConfig, GRPCServiceConfig, and Title fields populated.
+// ServiceConfig, GRPCServiceConfig, and Title may be empty strings if not found or not configured.
 func Find(sourceRoot, path string) (*API, error) {
 	result := &API{Path: path}
 
@@ -92,6 +93,12 @@ func Find(sourceRoot, path string) (*API, error) {
 
 	// If service config is overridden in allowlist, use it
 	if result.ServiceConfig != "" {
+		// Still discover gRPC service config even when service config is overridden
+		grpcConfig, err := findGRPCServiceConfig(sourceRoot, path)
+		if err != nil {
+			return nil, err
+		}
+		result.GRPCServiceConfig = grpcConfig
 		return result, nil
 	}
 
@@ -120,10 +127,41 @@ func Find(sourceRoot, path string) (*API, error) {
 		}
 		if isServiceConfig {
 			result.ServiceConfig = filepath.Join(path, name)
-			return result, nil
+			break
 		}
 	}
+
+	// Discover gRPC service config
+	grpcConfig, err := findGRPCServiceConfig(sourceRoot, path)
+	if err != nil {
+		return nil, err
+	}
+	result.GRPCServiceConfig = grpcConfig
+
 	return result, nil
+}
+
+// findGRPCServiceConfig looks for gRPC service config files matching
+// *_grpc_service_config.json in the directory specified by path.
+// It returns the path relative to sourceRoot if exactly one file is found,
+// an empty string if no files are found, or an error if multiple files are found.
+func findGRPCServiceConfig(sourceRoot, path string) (string, error) {
+	apiDir := filepath.Join(sourceRoot, path)
+	matches, err := filepath.Glob(filepath.Join(apiDir, "*_grpc_service_config.json"))
+	if err != nil {
+		return "", err
+	}
+	if len(matches) == 0 {
+		return "", nil
+	}
+	if len(matches) > 1 {
+		return "", fmt.Errorf("multiple _grpc_service_config.json files found in %s", apiDir)
+	}
+	rel, err := filepath.Rel(sourceRoot, matches[0])
+	if err != nil {
+		return "", fmt.Errorf("unable to make path relative: %s", matches[0])
+	}
+	return rel, nil
 }
 
 // isServiceConfigFile checks if the file contains "type: google.api.Service".

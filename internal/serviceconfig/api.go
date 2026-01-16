@@ -52,6 +52,11 @@ type API struct {
 	// If empty, the service config is discovered in the directory specified by Path.
 	ServiceConfig string
 
+	// GRPCServiceConfig is the path to the gRPC service config file
+	// (retry/timeout settings) for this API.
+	// It is discovered by looking for files matching *_grpc_service_config.json.
+	GRPCServiceConfig string
+
 	// Title overrides the API title from the service config.
 	Title string
 }

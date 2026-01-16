@@ -91,8 +91,9 @@ func TestFind(t *testing.T) {
 			name:    "found",
 			channel: "google/cloud/secretmanager/v1",
 			want: &API{
-				Path:          "google/cloud/secretmanager/v1",
-				ServiceConfig: "google/cloud/secretmanager/v1/secretmanager_v1.yaml",
+				Path:              "google/cloud/secretmanager/v1",
+				ServiceConfig:     "google/cloud/secretmanager/v1/secretmanager_v1.yaml",
+				GRPCServiceConfig: "google/cloud/secretmanager/v1/secretmanager_grpc_service_config.json",
 			},
 		},
 		{
