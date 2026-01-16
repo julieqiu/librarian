@@ -68,6 +68,10 @@ func toSidekickConfig(library *config.Library, ch *config.Channel, sources *Sour
 	if channel.Title != "" {
 		source["title-override"] = channel.Title
 	}
+	specSource := ch.Path
+	if specFormat == "disco" {
+		specSource = channel.Discovery
+	}
 	if library.Rust != nil {
 		if len(library.Rust.SkippedIds) > 0 {
 			source["skipped-ids"] = strings.Join(library.Rust.SkippedIds, ",")
@@ -78,7 +82,7 @@ func toSidekickConfig(library *config.Library, ch *config.Channel, sources *Sour
 			Language:            "rust",
 			SpecificationFormat: specFormat,
 			ServiceConfig:       channel.ServiceConfig,
-			SpecificationSource: ch.Path,
+			SpecificationSource: specSource,
 		},
 		Source: source,
 		Codec:  buildCodec(library),
