@@ -74,10 +74,11 @@ func Read(serviceConfigPath string) (*Service, error) {
 // FindByDiscovery finds an API entry by its discovery file path.
 // Returns nil if not found.
 func FindByDiscovery(discoveryPath string) *API {
-	for _, api := range APIs {
-		if api.Discovery == discoveryPath {
-			return &api
+for i := range APIs {
+		if APIs[i].Discovery == discoveryPath {
+			return &APIs[i]
 		}
+	}
 	}
 	return nil
 }
