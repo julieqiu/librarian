@@ -23,6 +23,9 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/googleapis/librarian/internal/config"
+	"github.com/googleapis/librarian/internal/librarian/rust"
+	"github.com/googleapis/librarian/internal/testhelper"
 )
 
 func TestGenerateCommand(t *testing.T) {
@@ -360,5 +363,241 @@ func TestCleanOutput(t *testing.T) {
 				t.Errorf("got %v, want %v", got, test.want)
 			}
 		})
+	}
+}
+
+func TestGenerateUnsupportedLanguage(t *testing.T) {
+	library := &config.Library{
+		Name:   "test-lib",
+		Output: t.TempDir(),
+	}
+
+	_, err := generate(t.Context(), "unsupported", library, "", nil)
+	if err == nil {
+		t.Fatal("expected error for unsupported language")
+	}
+	want := `generate not implemented for "unsupported"`
+	if diff := cmp.Diff(want, err.Error()); diff != "" {
+		t.Errorf("mismatch (-want +got):\n%s", diff)
+	}
+}
+
+func TestFormatLibraryDart(t *testing.T) {
+	testhelper.RequireCommand(t, "dart")
+	tempDir := t.TempDir()
+	library := &config.Library{
+		Name:   "test-dart",
+		Output: tempDir,
+	}
+
+	if err := os.WriteFile(filepath.Join(tempDir, "lib.dart"), []byte("void main(){}"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	err := formatLibrary(t.Context(), languageDart, library)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestFormatLibraryRust(t *testing.T) {
+	testhelper.RequireCommand(t, "cargo")
+	testhelper.RequireCommand(t, "taplo")
+	tempDir := t.TempDir()
+	t.Chdir(tempDir)
+
+	library := &config.Library{
+		Name:   "test-rust",
+		Output: filepath.Join(tempDir, "rust-output"),
+	}
+
+	if err := os.MkdirAll(library.Output, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	cargoToml := `[package]
+name = "test-rust"
+version = "0.1.0"
+edition = "2021"
+`
+	if err := os.WriteFile(filepath.Join(library.Output, "Cargo.toml"), []byte(cargoToml), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	workspaceCargoToml := `[workspace]
+members = ["rust-output"]
+`
+	if err := os.WriteFile(filepath.Join(tempDir, "Cargo.toml"), []byte(workspaceCargoToml), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	srcDir := filepath.Join(library.Output, "src")
+	if err := os.MkdirAll(srcDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(srcDir, "lib.rs"), []byte("fn main(){}"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	err := formatLibrary(t.Context(), languageRust, library)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestFormatLibraryUnsupportedLanguage(t *testing.T) {
+	library := &config.Library{
+		Name:   "test-lib",
+		Output: t.TempDir(),
+	}
+
+	err := formatLibrary(t.Context(), "unsupported", library)
+	if err == nil {
+		t.Fatal("expected error for unsupported language")
+	}
+	want := `format not implemented for "unsupported"`
+	if diff := cmp.Diff(want, err.Error()); diff != "" {
+		t.Errorf("mismatch (-want +got):\n%s", diff)
+	}
+}
+
+func TestGenerateNewLibrarySkeletonFake(t *testing.T) {
+	tempDir := t.TempDir()
+
+	cfg := &config.Config{
+		Language: languageFake,
+	}
+
+	library := &config.Library{
+		Name:   "test-fake-skeleton",
+		Output: filepath.Join(tempDir, "fake-lib"),
+	}
+
+	err := generateNewLibrarySkeleton(t.Context(), cfg, library)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	starterPath := filepath.Join(library.Output, "STARTER.md")
+	if _, err := os.Stat(starterPath); os.IsNotExist(err) {
+		t.Fatal("expected STARTER.md to be created")
+	}
+
+	content, err := os.ReadFile(starterPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := "# test-fake-skeleton\n\nThis is a starter file.\n"
+	if diff := cmp.Diff(want, string(content)); diff != "" {
+		t.Errorf("mismatch (-want +got):\n%s", diff)
+	}
+}
+
+func TestGenerateNewLibrarySkeletonUnsupportedLanguage(t *testing.T) {
+	cfg := &config.Config{
+		Language: "unsupported",
+	}
+	library := &config.Library{
+		Name:   "test-lib",
+		Output: t.TempDir(),
+	}
+	err := generateNewLibrarySkeleton(t.Context(), cfg, library)
+	if err == nil {
+		t.Fatal("expected error for unsupported language")
+	}
+	want := "library addition is not supported for the specified language"
+	if diff := cmp.Diff(want, err.Error()); diff != "" {
+		t.Errorf("mismatch (-want +got):\n%s", diff)
+	}
+}
+
+func TestFetchRustSources(t *testing.T) {
+	tempDir := t.TempDir()
+
+	discoveryDir := filepath.Join(tempDir, "discovery")
+	conformanceDir := filepath.Join(tempDir, "conformance")
+	showcaseDir := filepath.Join(tempDir, "showcase")
+	protobufDir := filepath.Join(tempDir, "protobuf")
+	for _, dir := range []string{discoveryDir, conformanceDir, showcaseDir, protobufDir} {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	cfgSources := &config.Sources{
+		Discovery: &config.Source{
+			Dir: discoveryDir,
+		},
+		Conformance: &config.Source{
+			Dir: conformanceDir,
+		},
+		Showcase: &config.Source{
+			Dir: showcaseDir,
+		},
+		ProtobufSrc: &config.Source{
+			Dir:     protobufDir,
+			Subpath: "src",
+		},
+	}
+
+	protobufSrcDir := filepath.Join(protobufDir, "src")
+	if err := os.MkdirAll(protobufSrcDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := fetchRustSources(t.Context(), cfgSources)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := &rust.Sources{
+		Discovery:   discoveryDir,
+		Conformance: conformanceDir,
+		Showcase:    showcaseDir,
+		ProtobufSrc: protobufSrcDir,
+	}
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("mismatch (-want +got):\n%s", diff)
+	}
+}
+
+func TestFetchRustSourcesWithoutProtobufSrc(t *testing.T) {
+	tempDir := t.TempDir()
+
+	discoveryDir := filepath.Join(tempDir, "discovery")
+	conformanceDir := filepath.Join(tempDir, "conformance")
+	showcaseDir := filepath.Join(tempDir, "showcase")
+
+	for _, dir := range []string{discoveryDir, conformanceDir, showcaseDir} {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	cfgSources := &config.Sources{
+		Discovery: &config.Source{
+			Dir: discoveryDir,
+		},
+		Conformance: &config.Source{
+			Dir: conformanceDir,
+		},
+		Showcase: &config.Source{
+			Dir: showcaseDir,
+		},
+	}
+
+	got, err := fetchRustSources(t.Context(), cfgSources)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := &rust.Sources{
+		Discovery:   discoveryDir,
+		Conformance: conformanceDir,
+		Showcase:    showcaseDir,
+	}
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("mismatch (-want +got):\n%s", diff)
 	}
 }
