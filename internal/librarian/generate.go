@@ -301,6 +301,8 @@ func formatLibrary(ctx context.Context, language string, library *config.Library
 		return fakeFormat(library)
 	case languageDart:
 		return dart.Format(ctx, library)
+	case languagePython:
+		return nil
 	case languageRust:
 		return rust.Format(ctx, library)
 	}
