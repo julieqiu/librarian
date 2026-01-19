@@ -184,20 +184,9 @@ func createProtocOptions(ch *config.Channel, library *config.Library, googleapis
 		opts = append(opts, fmt.Sprintf("gapic-version=%s", library.Version))
 	}
 
-	// Add gRPC service config (retry/timeout settings)
-	// Auto-discover: look for *_grpc_service_config.json in the API directory
-	apiDir := filepath.Join(googleapisDir, ch.Path)
-	grpcConfigPath := ""
-	matches, err := filepath.Glob(filepath.Join(apiDir, "*_grpc_service_config.json"))
-	if err == nil && len(matches) > 0 {
-		if len(matches) > 1 {
-			return nil, fmt.Errorf("multiple _grpc_service_config.json files found in %s", apiDir)
-		}
-		rel, err := filepath.Rel(googleapisDir, matches[0])
-		if err != nil {
-			return nil, fmt.Errorf("unable to make path relative: %s", matches[0])
-		}
-		grpcConfigPath = rel
+	grpcConfigPath, err := serviceconfig.FindGRPCServiceConfig(googleapisDir, ch.Path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find gRPC service config: %w", err)
 	}
 	if grpcConfigPath != "" {
 		opts = append(opts, fmt.Sprintf("retry-config=%s", grpcConfigPath))
