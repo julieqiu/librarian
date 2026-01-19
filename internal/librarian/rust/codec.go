@@ -61,9 +61,34 @@ func toSidekickConfig(library *config.Library, ch *config.Channel, sources *Sour
 	if library.DescriptionOverride != "" {
 		source["description-override"] = library.DescriptionOverride
 	}
-	channel, err := serviceconfig.Find(sources.Googleapis, ch.Path)
+
+	// Determine which source directory to use for serviceconfig.Find
+	sourceDir := sources.Googleapis
+	if len(library.Roots) == 1 {
+		switch library.Roots[0] {
+		case "showcase":
+			sourceDir = sources.Showcase
+		case "discovery":
+			sourceDir = sources.Discovery
+		case "conformance":
+			sourceDir = sources.Conformance
+		}
+	}
+
+	channel, err := serviceconfig.Find(sourceDir, ch.Path)
 	if err != nil {
 		return nil, err
+	}
+
+	// Special handling for showcase - it lives in a separate repo
+	// (https://github.com/googleapis/gapic-showcase) and has a known service config path
+	if strings.Contains(ch.Path, "showcase") && channel.ServiceConfig == "" {
+		// Construct the expected service config path for showcase
+		parts := strings.Split(ch.Path, "/")
+		if len(parts) >= 3 {
+			version := parts[len(parts)-1]
+			channel.ServiceConfig = ch.Path + "/" + "showcase_" + version + ".yaml"
+		}
 	}
 	if channel.Title != "" {
 		source["title-override"] = channel.Title
