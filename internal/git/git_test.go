@@ -296,11 +296,11 @@ func TestMatchesDirtyCloneError(t *testing.T) {
 	}
 }
 
-func TestShowFile(t *testing.T) {
+func TestShowFileAtRemoteBranch(t *testing.T) {
 	testhelper.RequireCommand(t, "git")
 	remoteDir := testhelper.SetupRepo(t)
 	testhelper.CloneRepository(t, remoteDir)
-	got, err := ShowFile(t.Context(), "git", "origin", "main", testhelper.ReadmeFile)
+	got, err := ShowFileAtRemoteBranch(t.Context(), "git", "origin", "main", testhelper.ReadmeFile)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -309,11 +309,64 @@ func TestShowFile(t *testing.T) {
 	}
 }
 
-func TestShowFile_Error(t *testing.T) {
+func TestShowFileAtRemoteBranch_Error(t *testing.T) {
 	testhelper.RequireCommand(t, "git")
 	remoteDir := testhelper.SetupRepo(t)
 	testhelper.CloneRepository(t, remoteDir)
-	_, err := ShowFile(t.Context(), "git", "origin", "main", "does_not_exist")
+	_, err := ShowFileAtRemoteBranch(t.Context(), "git", "origin", "main", "does_not_exist")
+	if err == nil {
+		t.Fatal("expected an error showing file that should not exist")
+	}
+	if !errors.Is(err, errGitShow) {
+		t.Errorf("expected errGitShow but got %v", err)
+	}
+}
+
+func TestShowFileAtRevision(t *testing.T) {
+	testhelper.RequireCommand(t, "git")
+	opts := testhelper.SetupOptions{
+		WithChanges: []string{testhelper.ReadmeFile},
+	}
+	testhelper.Setup(t, opts)
+
+	contentOnDisk, err := os.ReadFile(testhelper.ReadmeFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	modifiedContent := strings.TrimSuffix(string(contentOnDisk), "\n")
+
+	for _, test := range []struct {
+		name     string
+		revision string
+		want     string
+	}{
+		{
+			name:     "original README content at HEAD~",
+			revision: "HEAD~",
+			want:     testhelper.ReadmeContents,
+		},
+		{
+			name:     "modified README content at HEAD",
+			revision: "HEAD",
+			want:     modifiedContent,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := ShowFileAtRevision(t.Context(), "git", test.revision, testhelper.ReadmeFile)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("mismatch (-want, +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestShowFileAtRevision_Error(t *testing.T) {
+	testhelper.RequireCommand(t, "git")
+	testhelper.SetupRepo(t)
+	_, err := ShowFileAtRevision(t.Context(), "git", "HEAD", "does_not_exist")
 	if err == nil {
 		t.Fatal("expected an error showing file that should not exist")
 	}
