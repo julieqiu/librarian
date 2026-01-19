@@ -117,7 +117,11 @@ For each repository, librarianops will:
 				return fmt.Errorf("cannot use -C flag with --all flag")
 			}
 			if workDir != "" && repoName == "" {
-				repoName = filepath.Base(workDir)
+				absPath, err := filepath.Abs(workDir)
+				if err != nil {
+					return fmt.Errorf("failed to resolve directory path: %w", err)
+				}
+				repoName = filepath.Base(absPath)
 			}
 			if !all && repoName == "" {
 				return fmt.Errorf("must specify either repository, --all flag, or -C flag")
@@ -241,5 +245,8 @@ func runCommand(ctx context.Context, name string, args ...string) error {
 
 func runLibrarian(ctx context.Context, args ...string) error {
 	fmt.Printf("Running: %s\n", strings.Join(args, " "))
-	return librarian.Run(ctx, args...)
+	if err := librarian.Run(ctx, args...); err != nil {
+		return fmt.Errorf("librarian: %w", err)
+	}
+	return nil
 }

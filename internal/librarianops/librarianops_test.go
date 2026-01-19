@@ -190,6 +190,61 @@ libraries:
 	}
 }
 
+func TestGenerateCommand_InferRepoNameFromCurrentDir(t *testing.T) {
+	tmpDir := t.TempDir()
+	repoDir := filepath.Join(tmpDir, repoFake)
+	if err := os.Mkdir(repoDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	setupGitRepo(t, repoDir)
+	if err := command.Run(t.Context(), "git", "-C", repoDir, "checkout", "-b", "main"); err != nil {
+		t.Fatal(err)
+	}
+
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	googleapisDir := filepath.Join(wd, "..", "testdata", "googleapis")
+	configContent := fmt.Sprintf(`language: fake
+sources:
+  googleapis:
+    dir: %s
+libraries:
+  - name: test-library
+    output: output
+    channels:
+      - path: google/cloud/secretmanager/v1
+`, googleapisDir)
+	if err := os.WriteFile(filepath.Join(repoDir, "librarian.yaml"), []byte(configContent), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := command.Run(t.Context(), "git", "-C", repoDir, "add", "."); err != nil {
+		t.Fatal(err)
+	}
+	if err := command.Run(t.Context(), "git", "-C", repoDir, "commit", "-m", "initial commit"); err != nil {
+		t.Fatal(err)
+	}
+
+	originalWD, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(repoDir); err != nil {
+		t.Fatal(err)
+	}
+	defer os.Chdir(originalWD)
+
+	args := []string{"librarianops", "generate", "-C", "."}
+	if err := Run(t.Context(), args...); err != nil {
+		t.Fatal(err)
+	}
+	readmePath := filepath.Join(repoDir, "output", "README.md")
+	if _, err := os.Stat(readmePath); err != nil {
+		t.Errorf("expected README.md to be generated: %v", err)
+	}
+}
+
 func TestCommitChanges(t *testing.T) {
 	repoDir := t.TempDir()
 	setupGitRepo(t, repoDir)
