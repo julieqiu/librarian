@@ -143,6 +143,33 @@ func Find(googleapisDir, path string) (*API, error) {
 	return &result, nil
 }
 
+// FindGRPCServiceConfig finds the gRPC service config file for an API.
+// It searches for files matching *_grpc_service_config.json in the API directory.
+// Returns the path relative to googleapisDir, or empty string if not found.
+// Returns an error if multiple matching files are found.
+//
+// TODO(https://github.com/googleapis/librarian/issues/3004): Move this data to
+// api.go or service config YAML files instead of discovering it from the filesystem.
+func FindGRPCServiceConfig(googleapisDir, path string) (string, error) {
+	apiDir := filepath.Join(googleapisDir, path)
+	pattern := filepath.Join(apiDir, "*_grpc_service_config.json")
+	matches, err := filepath.Glob(pattern)
+	if err != nil {
+		return "", err
+	}
+	if len(matches) == 0 {
+		return "", nil
+	}
+	if len(matches) > 1 {
+		return "", fmt.Errorf("multiple gRPC service config files found in %s", path)
+	}
+	rel, err := filepath.Rel(googleapisDir, matches[0])
+	if err != nil {
+		return "", fmt.Errorf("failed to make path relative: %w", err)
+	}
+	return rel, nil
+}
+
 // isServiceConfigFile checks if the file contains "type: google.api.Service".
 func isServiceConfigFile(path string) (found bool, err error) {
 	f, err := os.Open(path)
