@@ -71,73 +71,92 @@ func Read(serviceConfigPath string) (*Service, error) {
 	return cfg, nil
 }
 
-// Find looks up the service config path and title override for a given API path.
-// It first checks the API allowlist for overrides, then searches for YAML files
-// containing "type: google.api.Service", skipping any files ending in _gapic.yaml.
+// Find looks up the service config path and title for a given API path.
+// It first checks the API allowlist (defined in api.go) for overrides, then
+// searches for YAML files containing "type: google.api.Service", skipping any
+// files ending in _gapic.yaml. If a service config is found and no title override
+// exists, it reads the service config to extract the title.
 //
 // The path should be relative to googleapisDir (e.g., "google/cloud/secretmanager/v1").
 // Returns an API struct with Path, ServiceConfig, and Title fields populated.
 // ServiceConfig and Title may be empty strings if not found or not configured.
 func Find(googleapisDir, path string) (*API, error) {
-	result := &API{Path: path}
+	var result API
 
-	// Check allowlist for overrides
-	for _, api := range APIs {
-		if api.Path == path {
-			result.ServiceConfig = api.ServiceConfig
-			result.Title = api.Title
-			result.Discovery = api.Discovery
-			result.OpenAPI = api.OpenAPI
+	for i := range APIs {
+		if APIs[i].Path == path {
+			result = APIs[i]
 			break
 		}
 	}
 
-	// If service config is overridden in allowlist, use it
-	if result.ServiceConfig != "" {
-		return result, nil
+	// TODO(https://github.com/googleapis/librarian/issues/3627): Once we have verified
+	// everything in api.go is in librarian.yaml for google-cloud-rust, delete this fallback.
+	if result.Path == "" {
+		result.Path = path
 	}
 
-	// Search filesystem for service config
-	dir := filepath.Join(googleapisDir, path)
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return nil, err
-	}
-	for _, entry := range entries {
-		if entry.IsDir() {
-			continue
-		}
-		name := entry.Name()
-		if !strings.HasSuffix(name, ".yaml") {
-			continue
-		}
-		if strings.HasSuffix(name, "_gapic.yaml") {
-			continue
-		}
-
-		filePath := filepath.Join(dir, name)
-		isServiceConfig, err := isServiceConfigFile(filePath)
+	if result.ServiceConfig == "" {
+		dir := filepath.Join(googleapisDir, result.Path)
+		entries, err := os.ReadDir(dir)
 		if err != nil {
 			return nil, err
 		}
-		if isServiceConfig {
-			result.ServiceConfig = filepath.Join(path, name)
-			return result, nil
+		for _, entry := range entries {
+			if entry.IsDir() {
+				continue
+			}
+			name := entry.Name()
+			if !strings.HasSuffix(name, ".yaml") {
+				continue
+			}
+			if strings.HasSuffix(name, "_gapic.yaml") {
+				continue
+			}
+
+			filePath := filepath.Join(dir, name)
+			isServiceConfig, err := isServiceConfigFile(filePath)
+			if err != nil {
+				return nil, err
+			}
+			if isServiceConfig {
+				result.ServiceConfig = filepath.Join(result.Path, name)
+				break
+			}
 		}
 	}
-	return result, nil
+
+	if result.ServiceConfig == "" {
+		return &result, nil
+	}
+
+	if result.Title == "" {
+		serviceConfigPath := filepath.Join(googleapisDir, result.ServiceConfig)
+		sc, err := Read(serviceConfigPath)
+		if err == nil {
+			result.Title = sc.Title
+		}
+		// If Read fails, we just leave Title empty rather than failing.
+		// This makes Find more resilient to missing or invalid service config files.
+	}
+
+	return &result, nil
 }
 
 // isServiceConfigFile checks if the file contains "type: google.api.Service".
-func isServiceConfigFile(path string) (bool, error) {
+func isServiceConfigFile(path string) (found bool, err error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return false, err
 	}
-	defer f.Close()
+	defer func() {
+		if cerr := f.Close(); cerr != nil && err == nil {
+			err = cerr
+		}
+	}()
 
 	scanner := bufio.NewScanner(f)
-	for i := 0; i < 20 && scanner.Scan(); i++ {
+	for scanner.Scan() {
 		if strings.TrimSpace(scanner.Text()) == "type: google.api.Service" {
 			return true, nil
 		}
