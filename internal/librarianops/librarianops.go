@@ -12,14 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package librarianops provides orchestration for running librarian across
-// multiple repositories.
+// Package librarianops orchestrates librarian operations across multiple
+// repositories, including cloning, updating, generating, and creating pull
+// requests.
 package librarianops
 
 import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/googleapis/librarian/internal/command"
@@ -35,9 +38,23 @@ const (
 	commitTitle  = "chore: run librarian update and generate --all"
 )
 
-var supportedRepositories = map[string]bool{
-	repoRust: true,
-	repoFake: true, // used for testing
+var supportedRepositories = map[string]struct{}{
+	repoRust: {},
+	repoFake: {},
+}
+
+type repoConfig struct {
+	updateDiscovery bool
+	runCargoUpdate  bool
+}
+
+func getRepoConfig(name string) repoConfig {
+	switch name {
+	case repoRust:
+		return repoConfig{updateDiscovery: true, runCargoUpdate: true}
+	default:
+		return repoConfig{}
+	}
 }
 
 // Run executes the librarianops command with the given arguments.
@@ -45,7 +62,7 @@ func Run(ctx context.Context, args ...string) error {
 	cmd := &cli.Command{
 		Name:      "librarianops",
 		Usage:     "orchestrate librarian operations across multiple repositories",
-		UsageText: "librarianops [command]",
+		UsageText: "librarianops [command] [flags]",
 		Commands: []*cli.Command{
 			generateCommand(),
 		},
@@ -57,16 +74,15 @@ func generateCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "generate",
 		Usage:     "generate libraries across repositories",
-		UsageText: "librarianops generate [<repo> | --all]",
+		UsageText: "librarianops generate [<repo> | --all | -C <directory>]",
 		Description: `Examples:
   librarianops generate google-cloud-rust
   librarianops generate --all
-  librarianops generate -C ~/workspace/google-cloud-rust google-cloud-rust
+  librarianops generate -C ~/workspace/google-cloud-rust
 
 Specify a repository name (e.g., google-cloud-rust) to process a single repository,
-or use --all to process all repositories.
-
-Use -C to work in a specific directory (assumes repository already exists there).
+or use --all to process all repositories, or use -C to work in a specific directory
+(repository name is inferred from directory name).
 
 For each repository, librarianops will:
   1. Clone the repository to a temporary directory
@@ -95,13 +111,16 @@ For each repository, librarianops will:
 				repoName = cmd.Args().Get(0)
 			}
 			if all && repoName != "" {
-				return fmt.Errorf("cannot specify both <repo> and --all")
-			}
-			if !all && repoName == "" {
-				return fmt.Errorf("usage: librarianops generate [<repo> | --all]")
+				return fmt.Errorf("cannot specify both repository and --all flag")
 			}
 			if all && workDir != "" {
-				return fmt.Errorf("cannot use -C with --all")
+				return fmt.Errorf("cannot use -C flag with --all flag")
+			}
+			if workDir != "" && repoName == "" {
+				repoName = filepath.Base(workDir)
+			}
+			if !all && repoName == "" {
+				return fmt.Errorf("must specify either repository, --all flag, or -C flag")
 			}
 			return runGenerate(ctx, all, repoName, workDir)
 		},
@@ -118,13 +137,10 @@ func runGenerate(ctx context.Context, all bool, repoName, repoDir string) error 
 		return nil
 	}
 
-	if !supportedRepositories[repoName] {
-		return fmt.Errorf("repository %q not found in supported repositories list", repoName)
+	if _, ok := supportedRepositories[repoName]; !ok {
+		return fmt.Errorf("unsupported repository %q", repoName)
 	}
-	if err := processRepo(ctx, repoName, repoDir); err != nil {
-		return err
-	}
-	return nil
+	return processRepo(ctx, repoName, repoDir)
 }
 
 func processRepo(ctx context.Context, repoName, repoDir string) (err error) {
@@ -150,23 +166,29 @@ func processRepo(ctx context.Context, repoName, repoDir string) (err error) {
 	if err := os.Chdir(repoDir); err != nil {
 		return fmt.Errorf("failed to change directory to %s: %w", repoDir, err)
 	}
-	defer os.Chdir(originalWD)
+	defer func() {
+		if cerr := os.Chdir(originalWD); cerr != nil && err == nil {
+			err = cerr
+		}
+	}()
 
 	if err := createBranch(ctx, time.Now()); err != nil {
 		return err
 	}
-	if repoName == repoRust {
-		if err := librarian.Run(ctx, "librarian", "update", "discovery"); err != nil {
+
+	cfg := getRepoConfig(repoName)
+	if cfg.updateDiscovery {
+		if err := runLibrarian(ctx, "librarian", "update", "discovery"); err != nil {
 			return err
 		}
 	}
-	if err := librarian.Run(ctx, "librarian", "update", "googleapis"); err != nil {
+	if err := runLibrarian(ctx, "librarian", "update", "googleapis"); err != nil {
 		return err
 	}
-	if err := librarian.Run(ctx, "librarian", "generate", "--all"); err != nil {
+	if err := runLibrarian(ctx, "librarian", "generate", "--all"); err != nil {
 		return err
 	}
-	if repoName == repoRust {
+	if cfg.runCargoUpdate {
 		if err := runCargoUpdate(ctx); err != nil {
 			return err
 		}
@@ -184,32 +206,40 @@ func processRepo(ctx context.Context, repoName, repoDir string) (err error) {
 }
 
 func cloneRepo(ctx context.Context, repoDir, repoName string) error {
-	return command.Run(ctx, "gh", "repo", "clone", fmt.Sprintf("googleapis/%s", repoName), repoDir)
+	return runCommand(ctx, "gh", "repo", "clone", fmt.Sprintf("googleapis/%s", repoName), repoDir)
 }
 
 func createBranch(ctx context.Context, now time.Time) error {
 	branchName := fmt.Sprintf("%s%s", branchPrefix, now.Format("2006-01-02"))
-	return command.Run(ctx, "git", "checkout", "-b", branchName)
+	return runCommand(ctx, "git", "checkout", "-b", branchName)
 }
 
 func commitChanges(ctx context.Context) error {
-	if err := command.Run(ctx, "git", "add", "."); err != nil {
+	if err := runCommand(ctx, "git", "add", "."); err != nil {
 		return err
 	}
-	return command.Run(ctx, "git", "commit", "-m", commitTitle)
+	return runCommand(ctx, "git", "commit", "-m", commitTitle)
 }
 
 func createPR(ctx context.Context, repoName string) error {
-	var body string
+	sources := "googleapis/googleapis"
 	if repoName == repoRust {
-		body = `Update googleapis/googleapis and googleapis/discovery-artifact-manager
-to the latest commit and regenerate all client libraries.`
-	} else {
-		body = `Update googleapis/googleapis to the latest commit and regenerate all client libraries.`
+		sources += " and googleapis/discovery-artifact-manager"
 	}
-	return command.Run(ctx, "gh", "pr", "create", "--title", commitTitle, "--body", body)
+	body := fmt.Sprintf("Update %s to the latest commit and regenerate all client libraries.", sources)
+	return runCommand(ctx, "gh", "pr", "create", "--title", commitTitle, "--body", body)
 }
 
 func runCargoUpdate(ctx context.Context) error {
-	return command.Run(ctx, "cargo", "update", "--workspace")
+	return runCommand(ctx, "cargo", "update", "--workspace")
+}
+
+func runCommand(ctx context.Context, name string, args ...string) error {
+	fmt.Printf("Running: %s %s\n", name, strings.Join(args, " "))
+	return command.Run(ctx, name, args...)
+}
+
+func runLibrarian(ctx context.Context, args ...string) error {
+	fmt.Printf("Running: %s\n", strings.Join(args, " "))
+	return librarian.Run(ctx, args...)
 }
