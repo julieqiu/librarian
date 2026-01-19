@@ -88,20 +88,29 @@ func TestFind(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:    "found",
+			name:    "in allowlist with service config",
 			channel: "google/cloud/secretmanager/v1",
 			want: &API{
 				Path:          "google/cloud/secretmanager/v1",
 				ServiceConfig: "google/cloud/secretmanager/v1/secretmanager_v1.yaml",
 				OpenAPI:       "testdata/secretmanager_openapi_v1.json",
+				Title:         "Secret Manager API",
 			},
 		},
 		{
-			name:    "not found",
+			name:    "in allowlist without service config",
 			channel: "google/cloud/compute/v1",
 			want: &API{
 				Path:      "google/cloud/compute/v1",
 				Discovery: "discoveries/compute.v1.json",
+			},
+		},
+		{
+			name:    "in allowlist with title override",
+			channel: "google/cloud/orgpolicy/v1",
+			want: &API{
+				Path:  "google/cloud/orgpolicy/v1",
+				Title: "Organization Policy Types",
 			},
 		},
 		{
@@ -111,14 +120,6 @@ func TestFind(t *testing.T) {
 				Path: "google/cloud/nonexistent/v1",
 			},
 			wantErr: true,
-		},
-		{
-			name:    "override",
-			channel: "google/cloud/aiplatform/v1/schema/predict/instance",
-			want: &API{
-				Path:          "google/cloud/aiplatform/v1/schema/predict/instance",
-				ServiceConfig: "google/cloud/aiplatform/v1/schema/aiplatform_v1.yaml",
-			},
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
