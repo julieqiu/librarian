@@ -445,5 +445,6 @@ var APIs = []API{
 	{Path: "google/storagetransfer/v1"},
 	{Path: "google/type"},
 	{Path: "grafeas/v1"},
+	// Showcase lives in the gapic-showcase repo (https://github.com/googleapis/gapic-showcase)
 	{Path: "schema/google/showcase/v1beta1", ServiceConfig: "schema/google/showcase/v1beta1/showcase_v1beta1.yaml"},
 }

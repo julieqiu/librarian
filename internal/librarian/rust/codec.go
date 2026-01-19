@@ -61,7 +61,15 @@ func toSidekickConfig(library *config.Library, ch *config.Channel, sources *Sour
 	if library.DescriptionOverride != "" {
 		source["description-override"] = library.DescriptionOverride
 	}
-	channel, err := serviceconfig.Find(sources.Googleapis, ch.Path)
+
+	// Showcase lives in a separate repo (gapic-showcase), so use its source directory.
+	// Everything else (including discovery, conformance, etc.) is in googleapis.
+	sourceDir := sources.Googleapis
+	if len(library.Roots) == 1 && library.Roots[0] == "showcase" {
+		sourceDir = sources.Showcase
+	}
+
+	channel, err := serviceconfig.Find(sourceDir, ch.Path)
 	if err != nil {
 		return nil, err
 	}
