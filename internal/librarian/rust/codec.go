@@ -221,6 +221,14 @@ func formatPackageDependency(dep *config.RustPackageDependency) string {
 
 func moduleToSidekickConfig(library *config.Library, module *config.RustModule, sources *Sources) (*sidekickconfig.Config, error) {
 	source := addLibraryRoots(library, sources)
+	if len(module.ModuleRoots) > 0 {
+		for key, value := range module.ModuleRoots {
+			source[key] = value
+		}
+		if _, hasProjectRoot := module.ModuleRoots["project-root"]; hasProjectRoot {
+			source["roots"] = "project"
+		}
+	}
 	if len(module.IncludedIds) > 0 {
 		source["included-ids"] = strings.Join(module.IncludedIds, ",")
 	}
