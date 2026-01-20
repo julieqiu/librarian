@@ -145,7 +145,7 @@ func isServiceConfigFile(path string) (bool, error) {
 	defer f.Close()
 
 	scanner := bufio.NewScanner(f)
-	for i := 0; i < 20 && scanner.Scan(); i++ {
+	for scanner.Scan() {
 		if strings.TrimSpace(scanner.Text()) == "type: google.api.Service" {
 			return true, nil
 		}
