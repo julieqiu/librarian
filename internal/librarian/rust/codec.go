@@ -15,7 +15,6 @@
 package rust
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/googleapis/librarian/internal/config"
@@ -36,7 +35,7 @@ func toSidekickConfig(library *config.Library, ch *config.Channel, sources *Sour
 	if library.DescriptionOverride != "" {
 		source["description-override"] = library.DescriptionOverride
 	}
-	channel, err := serviceconfig.Find(sources.Googleapis, ch.Path)
+	channel, err := findAPI(ch.Path, sources)
 	if err != nil {
 		return nil, err
 	}
@@ -102,6 +101,17 @@ func toSidekickConfig(library *config.Library, ch *config.Channel, sources *Sour
 		}
 	}
 	return sidekickCfg, nil
+}
+
+// findAPI looks up API configuration for the given path.
+// Paths starting with "schema/" are looked up in the showcase repository,
+// otherwise in googleapis.
+func findAPI(path string, sources *Sources) (*serviceconfig.API, error) {
+	rootDir := sources.Googleapis
+	if strings.HasPrefix(path, "schema/") {
+		rootDir = sources.Showcase
+	}
+	return serviceconfig.Find(rootDir, path)
 }
 
 func buildCodec(library *config.Library) map[string]string {
@@ -231,11 +241,11 @@ func moduleToSidekickConfig(library *config.Library, module *config.RustModule, 
 		source["include-list"] = module.IncludeList
 	}
 	if module.Source != "" {
-		api, err := serviceconfig.Find(sources.Googleapis, module.Source)
+		api, err := findAPI(module.Source, sources)
 		if err != nil {
-			return nil, fmt.Errorf("serviceconfig.Find(%s, %s): %w", sources.Googleapis, module.Source, err)
+			return nil, err
 		}
-		if api != nil && api.Title != "" {
+		if api.Title != "" {
 			source["title-override"] = api.Title
 		}
 	}

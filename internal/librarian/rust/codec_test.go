@@ -731,12 +731,12 @@ func TestToSidekickConfig(t *testing.T) {
 		{
 			name: "with api source and title",
 			library: &config.Library{
-				Name: "google-cloud-logging",
+				Name: "google-cloud-rpc",
 				Rust: &config.RustCrate{
 					Modules: []*config.RustModule{
 						{
 							Template: "prost",
-							Source:   "google/logging/type",
+							Source:   "google/rpc/context",
 						},
 					},
 				},
@@ -745,11 +745,11 @@ func TestToSidekickConfig(t *testing.T) {
 				General: sidekickconfig.GeneralConfig{
 					Language:            "rust+prost",
 					SpecificationFormat: "protobuf",
-					SpecificationSource: "google/logging/type",
+					SpecificationSource: "google/rpc/context",
 				},
 				Source: map[string]string{
-					"roots":          "",
-					"title-override": "Logging types",
+					"roots":          "googleapis",
+					"title-override": "RPC Audit and Logging Attributes",
 				},
 			},
 		},
@@ -790,6 +790,14 @@ func TestToSidekickConfig(t *testing.T) {
 			// because serviceconfig.Find always uses it, even if googleapis is not in Roots.
 			if test.channel != nil && test.channel.Path != "" {
 				googleapisDir = setupTestDir(t, test.channel.Path)
+			}
+			// Also set up googleapis for module sources
+			if test.library.Rust != nil && test.library.Rust.Modules != nil {
+				for _, module := range test.library.Rust.Modules {
+					if module.Source != "" && googleapisDir == "" {
+						googleapisDir = setupTestDir(t, module.Source)
+					}
+				}
 			}
 
 			// Determine which directories need to be created based on test.library.Roots
