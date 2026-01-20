@@ -25,7 +25,7 @@ import (
 
 const fakePublishedFile = "PUBLISHED"
 
-func fakeReleaseLibrary(lib *config.Library, nextVersion string) error {
+func fakeBumpLibrary(lib *config.Library, nextVersion string) error {
 	lib.Version = nextVersion
 	return nil
 }
