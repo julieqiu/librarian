@@ -66,7 +66,41 @@ func fillRust(lib *config.Library, d *config.Default) *config.Library {
 			mod.GenerateRpcSamples = lib.Rust.GenerateRpcSamples
 		}
 	}
+	if isEmptyRustCrate(lib.Rust) {
+		lib.Rust = nil
+	}
 	return lib
+}
+
+// isEmptyRustCrate checks if a RustCrate contains only zero values.
+func isEmptyRustCrate(r *config.RustCrate) bool {
+	if r == nil {
+		return true
+	}
+	return len(r.PackageDependencies) == 0 &&
+		len(r.DisabledRustdocWarnings) == 0 &&
+		r.GenerateSetterSamples == "" &&
+		r.GenerateRpcSamples == "" &&
+		len(r.Modules) == 0 &&
+		!r.PerServiceFeatures &&
+		r.ModulePath == "" &&
+		r.TemplateOverride == "" &&
+		r.PackageNameOverride == "" &&
+		r.RootName == "" &&
+		len(r.DefaultFeatures) == 0 &&
+		len(r.IncludeList) == 0 &&
+		len(r.IncludedIds) == 0 &&
+		len(r.SkippedIds) == 0 &&
+		len(r.DisabledClippyWarnings) == 0 &&
+		!r.HasVeneer &&
+		!r.RoutingRequired &&
+		!r.IncludeGrpcOnlyMethods &&
+		r.PostProcessProtos == "" &&
+		!r.DetailedTracingAttributes &&
+		len(r.DocumentationOverrides) == 0 &&
+		len(r.PaginationOverrides) == 0 &&
+		r.NameOverrides == "" &&
+		r.Discovery == nil
 }
 
 // mergePackageDependencies merges default and library package dependencies,

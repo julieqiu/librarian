@@ -237,11 +237,120 @@ func TestFillDefaults_Rust(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "library without rust config stays without rust config when defaults are present",
+			lib:  &config.Library{},
+			want: &config.Library{
+				Rust: &config.RustCrate{
+					RustDefault: config.RustDefault{
+						PackageDependencies: []*config.RustPackageDependency{
+							{Name: "wkt", Package: "google-cloud-wkt", Source: "google.protobuf"},
+							{Name: "iam_v1", Package: "google-cloud-iam-v1", Source: "google.iam.v1"},
+						},
+						DisabledRustdocWarnings: []string{"broken_intra_doc_links"},
+						GenerateSetterSamples:   "true",
+						GenerateRpcSamples:      "true",
+					},
+				},
+			},
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			got := fillDefaults(test.lib, defaults)
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestFillDefaults_RustEmpty(t *testing.T) {
+	emptyDefaults := &config.Default{
+		Rust: &config.RustDefault{},
+	}
+	for _, test := range []struct {
+		name string
+		lib  *config.Library
+		want *config.Library
+	}{
+		{
+			name: "empty rust defaults result in nil rust config",
+			lib:  &config.Library{},
+			want: &config.Library{},
+		},
+		{
+			name: "library with rust config but all zero values results in nil",
+			lib: &config.Library{
+				Rust: &config.RustCrate{},
+			},
+			want: &config.Library{},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got := fillDefaults(test.lib, emptyDefaults)
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+			if got.Rust != nil {
+				t.Errorf("expected Rust to be nil, but got %+v", got.Rust)
+			}
+		})
+	}
+}
+
+func TestIsEmptyRustCrate(t *testing.T) {
+	for _, test := range []struct {
+		name  string
+		crate *config.RustCrate
+		want  bool
+	}{
+		{
+			name:  "nil crate is empty",
+			crate: nil,
+			want:  true,
+		},
+		{
+			name:  "zero value crate is empty",
+			crate: &config.RustCrate{},
+			want:  true,
+		},
+		{
+			name: "crate with package dependencies is not empty",
+			crate: &config.RustCrate{
+				RustDefault: config.RustDefault{
+					PackageDependencies: []*config.RustPackageDependency{
+						{Name: "test"},
+					},
+				},
+			},
+			want: false,
+		},
+		{
+			name: "crate with modules is not empty",
+			crate: &config.RustCrate{
+				Modules: []*config.RustModule{{}},
+			},
+			want: false,
+		},
+		{
+			name: "crate with boolean field set is not empty",
+			crate: &config.RustCrate{
+				PerServiceFeatures: true,
+			},
+			want: false,
+		},
+		{
+			name: "crate with string field set is not empty",
+			crate: &config.RustCrate{
+				ModulePath: "test/path",
+			},
+			want: false,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got := isEmptyRustCrate(test.crate)
+			if got != test.want {
+				t.Errorf("isEmptyRustCrate() = %v, want %v", got, test.want)
 			}
 		})
 	}

@@ -120,6 +120,14 @@ func TestFind(t *testing.T) {
 				ServiceConfig: "google/cloud/aiplatform/v1/schema/aiplatform_v1.yaml",
 			},
 		},
+		{
+			name:    "find by discovery path",
+			channel: "discoveries/compute.v1.json",
+			want: &API{
+				Path:      "google/cloud/compute/v1",
+				Discovery: "discoveries/compute.v1.json",
+			},
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			got, err := Find(googleapisDir, test.channel)

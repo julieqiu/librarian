@@ -84,7 +84,8 @@ func Find(googleapisDir, path string) (*API, error) {
 
 	// Check allowlist for overrides
 	for _, api := range APIs {
-		if api.Path == path {
+		if api.Path == path || api.Discovery == path || api.OpenAPI == path {
+			result.Path = api.Path
 			result.ServiceConfig = api.ServiceConfig
 			result.Title = api.Title
 			result.Discovery = api.Discovery

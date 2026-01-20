@@ -15,6 +15,7 @@
 package parser
 
 import (
+	"fmt"
 	"os"
 	"path"
 
@@ -38,6 +39,13 @@ func ParseDisco(cfg *config.Config) (*api.API, error) {
 			source = fullName
 			break
 		}
+	}
+	// Check if source is a directory
+	if info, err := os.Stat(source); err == nil && info.IsDir() {
+		return nil, fmt.Errorf("attempted to read a directory as a discovery specification file: %s\n"+
+			"This usually means the SpecificationSource field is empty or misconfigured.\n"+
+			"Please check your library configuration in librarian.yaml to ensure the discovery field or source is properly set.",
+			source)
 	}
 	contents, err := os.ReadFile(source)
 	if err != nil {
