@@ -143,10 +143,6 @@ func runBump(ctx context.Context, cmd *cli.Command) error {
 		if err != nil {
 			return err
 		}
-		_, err = prepareLibrary(cfg.Language, libConfg, cfg.Default, false)
-		if err != nil {
-			return err
-		}
 		if err = bumpLibrary(ctx, cfg, libConfg, lastTag, gitExe, versionOverride); err != nil {
 			return err
 		}
@@ -164,10 +160,6 @@ func bumpAll(ctx context.Context, cfg *config.Config, lastTag, gitExe string) er
 		return err
 	}
 	for _, library := range cfg.Libraries {
-		_, err := prepareLibrary(cfg.Language, library, cfg.Default, false)
-		if err != nil {
-			return err
-		}
 		if shouldRelease(library, filesChanged) {
 			if err := bumpLibrary(ctx, cfg, library, lastTag, gitExe, ""); err != nil {
 				return err
