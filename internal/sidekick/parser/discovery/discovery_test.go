@@ -240,5 +240,19 @@ func ComputeDiscoWithLros(t *testing.T, cfg *config.Config) (*api.API, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewAPI(nil, contents, cfg)
+	var discovery *Discovery
+	if cfg.Discovery != nil {
+		var pollers []*Poller
+		for _, poller := range cfg.Discovery.Pollers {
+			pollers = append(pollers, &Poller{
+				Prefix:   poller.Prefix,
+				MethodID: poller.MethodID,
+			})
+		}
+		discovery = &Discovery{
+			OperationID: cfg.Discovery.OperationID,
+			Pollers:     pollers,
+		}
+	}
+	return NewAPI(nil, contents, discovery)
 }

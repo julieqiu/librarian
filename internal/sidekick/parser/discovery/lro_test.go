@@ -111,13 +111,11 @@ func TestLroAnnotations(t *testing.T) {
 }
 
 func TestLroAnnotationsError(t *testing.T) {
-	cfg := &config.Config{
-		Discovery: &config.Discovery{
-			OperationID: "..Operation",
-			Pollers: []*config.Poller{
-				{Prefix: "p/{project}/l/{zone}", MethodID: "..Operations.get_1"},
-				{Prefix: "p/{project}/l/{region}", MethodID: "..Operations.get_2"},
-			},
+	cfg := &Discovery{
+		OperationID: "..Operation",
+		Pollers: []*Poller{
+			{Prefix: "p/{project}/l/{zone}", MethodID: "..Operations.get_1"},
+			{Prefix: "p/{project}/l/{region}", MethodID: "..Operations.get_2"},
 		},
 	}
 

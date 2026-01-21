@@ -19,24 +19,23 @@ import (
 	"strings"
 
 	"github.com/googleapis/librarian/internal/sidekick/api"
-	"github.com/googleapis/librarian/internal/sidekick/config"
 )
 
-func lroAnnotations(model *api.API, cfg *config.Config) error {
-	if cfg == nil || cfg.Discovery == nil {
+func lroAnnotations(model *api.API, discovery *Discovery) error {
+	if discovery == nil {
 		return nil
 	}
-	lroServices := cfg.Discovery.LroServices()
+	lroServices := discovery.LroServices()
 	for _, svc := range model.Services {
 		if _, ok := lroServices[svc.ID]; ok {
 			continue
 		}
 		var svcMixin *api.Method
 		for _, method := range svc.Methods {
-			if method.OutputTypeID != cfg.Discovery.OperationID {
+			if method.OutputTypeID != discovery.OperationID {
 				continue
 			}
-			mixin, pathParams := lroFindPoller(method, model, cfg.Discovery)
+			mixin, pathParams := lroFindPoller(method, model, discovery)
 			if mixin == nil {
 				continue
 			}
@@ -72,7 +71,7 @@ func lroAnnotations(model *api.API, cfg *config.Config) error {
 	return nil
 }
 
-func lroFindPoller(method *api.Method, model *api.API, discoveryConfig *config.Discovery) (*api.Method, []string) {
+func lroFindPoller(method *api.Method, model *api.API, discoveryConfig *Discovery) (*api.Method, []string) {
 	var flatPath []string
 	for _, binding := range method.PathInfo.Bindings {
 		flatPath = append(flatPath, binding.PathTemplate.FlatPath())

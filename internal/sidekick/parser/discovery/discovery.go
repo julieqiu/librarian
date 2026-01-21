@@ -26,12 +26,51 @@ import (
 
 	"github.com/googleapis/librarian/internal/serviceconfig"
 	"github.com/googleapis/librarian/internal/sidekick/api"
-	"github.com/googleapis/librarian/internal/sidekick/config"
 	"github.com/googleapis/librarian/internal/sidekick/parser/svcconfig"
 )
 
+// Discovery defines the configuration for discovery docs.
+type Discovery struct {
+	OperationID string
+	Pollers     []*Poller
+}
+
+// Poller defines how to find a suitable poller RPC.
+type Poller struct {
+	Prefix   string
+	MethodID string
+}
+
+// LroServices returns the set of Discovery LRO services.
+func (d *Discovery) LroServices() map[string]bool {
+	found := map[string]bool{}
+	for _, poller := range d.Pollers {
+		found[poller.serviceID()] = true
+	}
+	return found
+}
+
+// PathParameters returns the list of path parameters associated with a LRO poller.
+func (p *Poller) PathParameters() []string {
+	var parameters []string
+	for _, segment := range strings.Split(p.Prefix, "/") {
+		if strings.HasPrefix(segment, "{") && strings.HasSuffix(segment, "}") {
+			parameters = append(parameters, segment[1:len(segment)-1])
+		}
+	}
+	return parameters
+}
+
+func (p *Poller) serviceID() string {
+	idx := strings.LastIndex(p.MethodID, ".")
+	if idx == -1 {
+		return p.MethodID
+	}
+	return p.MethodID[:idx]
+}
+
 // NewAPI parses the discovery doc in `contents` and returns the corresponding `api.API` model.
-func NewAPI(serviceConfig *serviceconfig.Service, contents []byte, cfg *config.Config) (*api.API, error) {
+func NewAPI(serviceConfig *serviceconfig.Service, contents []byte, discovery *Discovery) (*api.API, error) {
 	doc, err := newDiscoDocument(contents)
 	if err != nil {
 		return nil, err
@@ -102,7 +141,7 @@ func NewAPI(serviceConfig *serviceconfig.Service, contents []byte, cfg *config.C
 	// output on each run.
 	slices.SortStableFunc(result.Services, compareServices)
 
-	lroAnnotations(result, cfg)
+	lroAnnotations(result, discovery)
 
 	return result, nil
 }

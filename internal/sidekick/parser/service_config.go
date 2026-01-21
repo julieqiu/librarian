@@ -22,9 +22,9 @@ import (
 	"github.com/googleapis/librarian/internal/sidekick/config"
 )
 
-func loadServiceConfig(cfg *config.Config) (*serviceconfig.Service, error) {
-	if name := cfg.General.ServiceConfig; name != "" {
-		return serviceconfig.Read(findServiceConfigPath(name, cfg.Source))
+func loadServiceConfig(serviceConfigPath string, sourceOptions map[string]string) (*serviceconfig.Service, error) {
+	if serviceConfigPath != "" {
+		return serviceconfig.Read(findServiceConfigPath(serviceConfigPath, sourceOptions))
 	}
 	return nil, nil
 }

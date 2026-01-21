@@ -51,7 +51,7 @@ func Generate(ctx context.Context, library *config.Library, sources *Sources) er
 	if err != nil {
 		return err
 	}
-	model, err := parser.CreateModel(sidekickConfig)
+	model, err := parser.CreateModel(parser.NewConfig(sidekickConfig))
 	if err != nil {
 		return err
 	}
@@ -83,7 +83,7 @@ func generateVeneer(ctx context.Context, library *config.Library, sources *Sourc
 		if err != nil {
 			return fmt.Errorf("module %s: %w", module.Output, err)
 		}
-		model, err := parser.CreateModel(sidekickConfig)
+		model, err := parser.CreateModel(parser.NewConfig(sidekickConfig))
 		if err != nil {
 			return fmt.Errorf("module %s: %w", module.Output, err)
 		}
@@ -172,7 +172,7 @@ func generateRustStorage(ctx context.Context, library *config.Library, moduleOut
 	if err != nil {
 		return fmt.Errorf("failed to create storage sidekick config: %w", err)
 	}
-	storageModel, err := parser.CreateModel(storageConfig)
+	storageModel, err := parser.CreateModel(parser.NewConfig(storageConfig))
 	if err != nil {
 		return fmt.Errorf("failed to create storage model: %w", err)
 	}
@@ -186,7 +186,7 @@ func generateRustStorage(ctx context.Context, library *config.Library, moduleOut
 	if err != nil {
 		return fmt.Errorf("failed to create control sidekick config: %w", err)
 	}
-	controlModel, err := parser.CreateModel(controlConfig)
+	controlModel, err := parser.CreateModel(parser.NewConfig(controlConfig))
 	if err != nil {
 		return fmt.Errorf("failed to create control model: %w", err)
 	}

@@ -1280,7 +1280,7 @@ func TestOpenAPI_ParseBadFiles(t *testing.T) {
 		cfg := &config.Config{
 			General: general,
 		}
-		if got, err := ParseOpenAPI(cfg); err == nil {
+		if got, err := ParseOpenAPI(NewConfig(cfg)); err == nil {
 			t.Fatalf("expected error with missing source file, got=%v", got)
 		}
 	}

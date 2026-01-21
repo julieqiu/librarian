@@ -23,10 +23,27 @@ import (
 	"github.com/googleapis/librarian/internal/sidekick/parser/discovery"
 )
 
+func convertDiscovery(cfg *Discovery) *discovery.Discovery {
+	if cfg == nil {
+		return nil
+	}
+	var pollers []*discovery.Poller
+	for _, poller := range cfg.Pollers {
+		pollers = append(pollers, &discovery.Poller{
+			Prefix:   poller.Prefix,
+			MethodID: poller.MethodID,
+		})
+	}
+	return &discovery.Discovery{
+		OperationID: cfg.OperationID,
+		Pollers:     pollers,
+	}
+}
+
 // ParseDisco reads discovery docs specifications and converts them into
 // the `api.API` model.
-func ParseDisco(cfg *config.Config) (*api.API, error) {
-	source := cfg.General.SpecificationSource
+func ParseDisco(cfg *Config) (*api.API, error) {
+	source := cfg.SpecificationSource
 	for _, opt := range config.SourceRoots(cfg.Source) {
 		location, ok := cfg.Source[opt]
 		if !ok {
@@ -43,11 +60,11 @@ func ParseDisco(cfg *config.Config) (*api.API, error) {
 	if err != nil {
 		return nil, err
 	}
-	serviceConfig, err := loadServiceConfig(cfg)
+	serviceConfig, err := loadServiceConfig(cfg.ServiceConfig, cfg.Source)
 	if err != nil {
 		return nil, err
 	}
-	result, err := discovery.NewAPI(serviceConfig, contents, cfg)
+	result, err := discovery.NewAPI(serviceConfig, contents, convertDiscovery(cfg.Discovery))
 	if err != nil {
 		return nil, err
 	}

@@ -2058,7 +2058,7 @@ func TestProtobuf_ParseBadFiles(t *testing.T) {
 		cfg := &config.Config{
 			General: general,
 		}
-		if got, err := ParseProtobuf(cfg); err == nil {
+		if got, err := ParseProtobuf(NewConfig(cfg)); err == nil {
 			t.Fatalf("expected error with missing source file, got=%v", got)
 		}
 	}

@@ -19,7 +19,6 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/librarian/internal/sidekick/api"
-	"github.com/googleapis/librarian/internal/sidekick/config"
 )
 
 func TestPageSimple(t *testing.T) {
@@ -165,7 +164,7 @@ func TestPageWithOverride(t *testing.T) {
 		Methods: []*api.Method{method},
 	}
 	model := api.NewTestAPI([]*api.Message{request, response, resource}, []*api.Enum{}, []*api.Service{service})
-	overrides := []config.PaginationOverride{
+	overrides := []PaginationOverride{
 		{ID: ".package.Service.List", ItemField: "items"},
 	}
 	updateMethodPagination(overrides, model)
@@ -627,14 +626,14 @@ func TestPaginationResponseItemMatchingPreferRepeatedOverMap(t *testing.T) {
 }
 
 func TestPaginationResponseItemNotMatching(t *testing.T) {
-	overrides := []config.PaginationOverride{
+	overrides := []PaginationOverride{
 		{ID: ".package.Service.List", ItemField: "--invalid--"},
 	}
 	for _, test := range []struct {
 		Name      string
 		Repeated  bool
 		Typez     api.Typez
-		Overrides []config.PaginationOverride
+		Overrides []PaginationOverride
 	}{
 		{"badRepeated", false, api.MESSAGE_TYPE, nil},
 		{"badType", true, api.STRING_TYPE, nil},
