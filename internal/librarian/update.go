@@ -123,6 +123,9 @@ func updateSource(endpoints *fetch.Endpoints, repo fetch.Repo, source *config.So
 	if source == nil {
 		return nil
 	}
+	if source.Dir != "" {
+		return nil
+	}
 
 	// Source configuration specifically references a branch of the
 	// source repository.
