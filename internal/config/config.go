@@ -21,7 +21,14 @@ type Config struct {
 	// Language is the language for this workspace (go, python, rust).
 	Language string `yaml:"language"`
 
+	// Version is the librarian tool version to use.
+	// Example: "v0.1.0"
+	Version string `yaml:"version,omitempty"`
+
 	// Repo is the repository name, such as "googleapis/google-cloud-python".
+	//
+	// TODO(https://github.com/googleapis/librarian/issues/3003): Remove this
+	// field when .repo-metadata.json generation is removed.
 	Repo string `yaml:"repo,omitempty"`
 
 	// Sources references external source repositories.

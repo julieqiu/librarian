@@ -16,6 +16,7 @@ package librarian
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -24,6 +25,8 @@ import (
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/yaml"
 )
+
+const testLibrarianVersion = "v0.1.0"
 
 func TestValidateLibraries(t *testing.T) {
 	for _, test := range []struct {
@@ -161,7 +164,8 @@ func TestTidyCommand(t *testing.T) {
 	tempDir := t.TempDir()
 	t.Chdir(tempDir)
 	configPath := filepath.Join(tempDir, librarianConfigPath)
-	configContent := `language: rust
+	configContent := fmt.Sprintf(`language: rust
+version: %s
 sources:
   googleapis:
     commit: 94ccedca05acb0bb60780789e93371c9e4100ddc
@@ -171,7 +175,7 @@ libraries:
     version: "1.0.0"
   - name: google-cloud-bigquery-v1
     version: "2.0.0"
-`
+`, testLibrarianVersion)
 	if err := os.WriteFile(configPath, []byte(configContent), 0644); err != nil {
 		t.Fatal(err)
 	}
@@ -182,6 +186,9 @@ libraries:
 	cfg, err := yaml.Read[config.Config](configPath)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if cfg.Version != testLibrarianVersion {
+		t.Errorf("version = %q, want %q", cfg.Version, testLibrarianVersion)
 	}
 
 	var got []string
