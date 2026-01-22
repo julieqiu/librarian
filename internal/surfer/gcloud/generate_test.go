@@ -68,9 +68,9 @@ func TestGenerateService(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			tmpDir := t.TempDir()
-			err := generateService(test.service, &Config{}, test.model, tmpDir)
+			err := GenerateService(test.service, &Config{}, test.model, tmpDir)
 			if (err != nil) != test.wantErr {
-				t.Errorf("generateService() error = %v, wantErr %v", err, test.wantErr)
+				t.Errorf("GenerateService() error = %v, wantErr %v", err, test.wantErr)
 			}
 		})
 	}

@@ -16,7 +16,6 @@ package gcloud
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -33,32 +32,8 @@ import (
 // for command definitions. This allows for sharing definitions across release tracks.
 const partialsHeader = "_PARTIALS_: true\n"
 
-// Generate generates gcloud commands for a service.
-func Generate(_ context.Context, googleapis, gcloudconfig, output, includeList string) error {
-	overrides, err := readGcloudConfig(gcloudconfig)
-	if err != nil {
-		return err
-	}
-
-	model, err := createAPIModel(googleapis, includeList)
-	if err != nil {
-		return err
-	}
-
-	if len(model.Services) == 0 {
-		return fmt.Errorf("no services found in the provided protos")
-	}
-
-	for _, service := range model.Services {
-		// TODO(https://github.com/googleapis/librarian/issues/3291): Ensure output directories don't collide if multiple services share a name.
-		if err := generateService(service, overrides, model, output); err != nil {
-			return fmt.Errorf("failed to generate commands for service %q: %w", service.Name, err)
-		}
-	}
-	return nil
-}
-
-func generateService(service *api.Service, overrides *Config, model *api.API, output string) error {
+// GenerateService generates gcloud commands for a single API service.
+func GenerateService(service *api.Service, overrides *Config, model *api.API, output string) error {
 	// Determine short service name for directory structure.
 	// The `shortServiceName` is derived from `service.DefaultHost` (e.g., "parallelstore.googleapis.com" -> "parallelstore").
 	// `service.DefaultHost`  matches the name field in the service config file
