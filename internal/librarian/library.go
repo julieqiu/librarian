@@ -90,7 +90,7 @@ func mergePackageDependencies(defaults, lib []*config.RustPackageDependency) []*
 
 // libraryOutput returns the output path for a library. If the library has an
 // explicit output path, it returns that. Otherwise, it computes the default
-// output path based on the channel path and default configuration.
+// output path based on the api path and default configuration.
 func libraryOutput(language string, lib *config.Library, defaults *config.Default) string {
 	if lib.Output != "" {
 		return lib.Output
@@ -99,23 +99,23 @@ func libraryOutput(language string, lib *config.Library, defaults *config.Defaul
 		// Veneers require explicit output, so return empty if not set.
 		return ""
 	}
-	channelPath := deriveAPIPath(language, lib.Name)
+	apiPath := deriveAPIPath(language, lib.Name)
 	if len(lib.APIs) > 0 && lib.APIs[0].Path != "" {
-		channelPath = lib.APIs[0].Path
+		apiPath = lib.APIs[0].Path
 	}
 	defaultOut := ""
 	if defaults != nil {
 		defaultOut = defaults.Output
 	}
-	return defaultOutput(language, channelPath, defaultOut)
+	return defaultOutput(language, apiPath, defaultOut)
 }
 
 // prepareLibrary applies language-specific derivations and fills defaults.
 // For Rust libraries without an explicit output path, it derives the output
-// from the first channel path.
+// from the first api path.
 func prepareLibrary(language string, lib *config.Library, defaults *config.Default, fillInDefaults bool) (*config.Library, error) {
 	if len(lib.APIs) == 0 {
-		// If no channels are specified, create an empty channel first
+		// If no apis are specified, create an empty api first
 		lib.APIs = append(lib.APIs, &config.API{})
 	}
 
