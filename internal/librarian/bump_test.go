@@ -205,7 +205,7 @@ func TestBumpCommand_Error(t *testing.T) {
 		{
 			name:    "missing librarian yaml file",
 			args:    []string{"librarian", "bump", "--all"},
-			wantErr: errNoYaml,
+			wantErr: errConfigNotFound,
 		},
 		{
 			name:    "local repo is dirty",
@@ -264,7 +264,7 @@ func TestLibraryByName(t *testing.T) {
 			name:        "no_library_in_config",
 			libraryName: "example-library",
 			cfg:         &config.Config{},
-			wantErr:     errLibraryNotFound,
+			wantErr:     ErrLibraryNotFound,
 		},
 		{
 			name:        "does_not_find_a_library",
@@ -275,7 +275,7 @@ func TestLibraryByName(t *testing.T) {
 					{Name: "another-library"},
 				},
 			},
-			wantErr: errLibraryNotFound,
+			wantErr: ErrLibraryNotFound,
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {

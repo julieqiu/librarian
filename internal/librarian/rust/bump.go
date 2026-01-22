@@ -25,7 +25,7 @@ import (
 )
 
 var (
-	errMissingVersion = errors.New("version must not be empty")
+	errMissingVersion = errors.New("must provide version")
 )
 
 // Bump bumps version for Cargo.toml files and updates librarian config version

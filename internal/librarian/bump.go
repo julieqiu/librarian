@@ -39,10 +39,9 @@ const (
 )
 
 var (
-	errLibraryNotFound       = errors.New("library not found")
-	errReleaseConfigEmpty    = errors.New("librarian Release.Config field empty")
-	errBothVersionAndAllFlag = errors.New("cannot specify both --version and --all flag")
-	errReleaseCommitNotFound = errors.New("release commit not found")
+	errBothVersionAndAllFlag = errors.New("cannot specify both --version and --all")
+	errReleaseCommitNotFound = errors.New("no release commit found")
+	errReleaseConfigEmpty    = errors.New("release config not set in librarian.yaml")
 
 	// languageVersioningOptions contains language-specific SemVer versioning
 	// options. Over time, languages should align on versioning semantics and
@@ -99,7 +98,7 @@ func runBump(ctx context.Context, cmd *cli.Command) error {
 	}
 	cfg, err := yaml.Read[config.Config](librarianConfigPath)
 	if err != nil {
-		return errors.Join(errNoYaml, err)
+		return errors.Join(errConfigNotFound, err)
 	}
 	gitExe := "git"
 	if cfg.Release != nil {
@@ -210,7 +209,7 @@ func bumpLibrary(ctx context.Context, cfg *config.Config, libConfig *config.Libr
 		}
 		return nil
 	default:
-		return fmt.Errorf("language not supported for bump: %q", cfg.Language)
+		return fmt.Errorf("%q does not support bump", cfg.Language)
 	}
 }
 
@@ -232,14 +231,14 @@ func postBump(ctx context.Context, cfg *config.Config) error {
 // libraryByName returns a library with the given name from the config.
 func libraryByName(c *config.Config, name string) (*config.Library, error) {
 	if c.Libraries == nil {
-		return nil, errLibraryNotFound
+		return nil, fmt.Errorf("%w: %q", ErrLibraryNotFound, name)
 	}
 	for _, library := range c.Libraries {
 		if library.Name == name {
 			return library, nil
 		}
 	}
-	return nil, errLibraryNotFound
+	return nil, fmt.Errorf("%w: %q", ErrLibraryNotFound, name)
 }
 
 func deriveNextVersion(ctx context.Context, gitExe string, cfg *config.Config, libConfig *config.Library, opts semver.DeriveNextOptions, versionOverride string) (string, error) {
@@ -262,7 +261,7 @@ func deriveNextVersion(ctx context.Context, gitExe string, cfg *config.Config, l
 
 	if cfg.Release.Branch == defaultPreviewBranch {
 		stableVersion, err := loadBranchLibraryVersion(ctx, gitExe, cfg.Release.Remote, defaultMainBranch, libConfig.Name)
-		if errors.Is(err, errLibraryNotFound) {
+		if errors.Is(err, ErrLibraryNotFound) {
 			// If the preview setup precedes the stable setup, ensure stable is always behind.
 			stableVersion = zeroVersion
 		} else if err != nil {
@@ -301,7 +300,7 @@ func findReleasedLibraries(cfgBefore, cfgAfter *config.Config) ([]string, error)
 		candidateBefore, err := libraryByName(cfgBefore, candidate.Name)
 		if err != nil {
 			// Any error other than "not found" is effectively fatal.
-			if !errors.Is(err, errLibraryNotFound) {
+			if !errors.Is(err, ErrLibraryNotFound) {
 				return nil, err
 			}
 			if candidate.Version != "" {
@@ -314,7 +313,7 @@ func findReleasedLibraries(cfgBefore, cfgAfter *config.Config) ([]string, error)
 		}
 		if candidate.Version == "" {
 			if candidateBefore.Version != "" {
-				return nil, fmt.Errorf("library %s has no version; was at version %s", candidate.Name, candidateBefore.Version)
+				return nil, fmt.Errorf("library %q has no version; was at version %q", candidate.Name, candidateBefore.Version)
 			}
 			continue
 		}

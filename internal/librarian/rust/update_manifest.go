@@ -47,7 +47,7 @@ func updateCargoVersion(path, newVersion string) error {
 	lines := strings.Split(string(contents), "\n")
 	idx := slices.IndexFunc(lines, func(a string) bool { return strings.HasPrefix(a, "version ") })
 	if idx == -1 {
-		return fmt.Errorf("expected a line starting with `version ` in %v", lines)
+		return fmt.Errorf("no version field found in %q", path)
 	}
 	// The number of spaces may seem weird. They match the number of spaces in
 	// the mustache template.
