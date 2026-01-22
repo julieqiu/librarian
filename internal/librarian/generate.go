@@ -39,9 +39,6 @@ const (
 	showcaseRepo   = "github.com/googleapis/gapic-showcase"
 )
 
-// ErrLibraryNotFound is returned when the specified library is not found in config.
-var ErrLibraryNotFound = errors.New("no library found")
-
 var (
 	errMissingLibraryOrAllFlag = errors.New("must specify library name or use --all flag")
 	errBothLibraryAndAllFlag   = errors.New("cannot specify both library name and --all flag")

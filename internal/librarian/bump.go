@@ -39,10 +39,9 @@ const (
 )
 
 var (
-	errLibraryNotFound       = errors.New("no library found")
-	errReleaseConfigEmpty    = errors.New("release config not set in librarian.yaml")
 	errBothVersionAndAllFlag = errors.New("cannot specify both --version and --all")
 	errReleaseCommitNotFound = errors.New("no release commit found")
+	errReleaseConfigEmpty    = errors.New("release config not set in librarian.yaml")
 
 	// languageVersioningOptions contains language-specific SemVer versioning
 	// options. Over time, languages should align on versioning semantics and
@@ -232,14 +231,14 @@ func postBump(ctx context.Context, cfg *config.Config) error {
 // libraryByName returns a library with the given name from the config.
 func libraryByName(c *config.Config, name string) (*config.Library, error) {
 	if c.Libraries == nil {
-		return nil, errLibraryNotFound
+		return nil, fmt.Errorf("%w: %q", ErrLibraryNotFound, name)
 	}
 	for _, library := range c.Libraries {
 		if library.Name == name {
 			return library, nil
 		}
 	}
-	return nil, errLibraryNotFound
+	return nil, fmt.Errorf("%w: %q", ErrLibraryNotFound, name)
 }
 
 func deriveNextVersion(ctx context.Context, gitExe string, cfg *config.Config, libConfig *config.Library, opts semver.DeriveNextOptions, versionOverride string) (string, error) {
@@ -262,7 +261,7 @@ func deriveNextVersion(ctx context.Context, gitExe string, cfg *config.Config, l
 
 	if cfg.Release.Branch == defaultPreviewBranch {
 		stableVersion, err := loadBranchLibraryVersion(ctx, gitExe, cfg.Release.Remote, defaultMainBranch, libConfig.Name)
-		if errors.Is(err, errLibraryNotFound) {
+		if errors.Is(err, ErrLibraryNotFound) {
 			// If the preview setup precedes the stable setup, ensure stable is always behind.
 			stableVersion = zeroVersion
 		} else if err != nil {
@@ -301,7 +300,7 @@ func findReleasedLibraries(cfgBefore, cfgAfter *config.Config) ([]string, error)
 		candidateBefore, err := libraryByName(cfgBefore, candidate.Name)
 		if err != nil {
 			// Any error other than "not found" is effectively fatal.
-			if !errors.Is(err, errLibraryNotFound) {
+			if !errors.Is(err, ErrLibraryNotFound) {
 				return nil, err
 			}
 			if candidate.Version != "" {

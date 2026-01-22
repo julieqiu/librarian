@@ -18,10 +18,14 @@ package librarian
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/urfave/cli/v3"
 )
+
+// ErrLibraryNotFound is returned when the specified library is not found in config.
+var ErrLibraryNotFound = errors.New("library not found")
 
 const (
 	librarianConfigPath = "librarian.yaml"
