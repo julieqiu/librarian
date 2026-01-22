@@ -31,14 +31,14 @@ import (
 // Generate generates a Python client library.
 func Generate(ctx context.Context, library *config.Library, googleapisDir string) error {
 	if len(library.Channels) == 0 {
-		return fmt.Errorf("no channels specified for library %s", library.Name)
+		return fmt.Errorf("no channels configured for library %q", library.Name)
 	}
 
 	// Convert library.Output to absolute path since protoc runs from a
 	// different directory.
 	outdir, err := filepath.Abs(library.Output)
 	if err != nil {
-		return fmt.Errorf("failed to get absolute path for output directory: %w", err)
+		return fmt.Errorf("failed to resolve output directory path: %w", err)
 	}
 
 	// Create output directory in case it's a new library
@@ -54,7 +54,7 @@ func Generate(ctx context.Context, library *config.Library, googleapisDir string
 	// Generate each channel separately.
 	for _, channel := range library.Channels {
 		if err := generateChannel(ctx, channel, library, googleapisDir, repoRoot); err != nil {
-			return fmt.Errorf("failed to generate channel %s: %w", channel.Path, err)
+			return fmt.Errorf("failed to generate channel %q: %w", channel.Path, err)
 		}
 	}
 
@@ -74,7 +74,7 @@ func Generate(ctx context.Context, library *config.Library, googleapisDir string
 	// hardcoding the language and repo name, instead getting it passed in.
 	channel, err := serviceconfig.Find(googleapisDir, library.Channels[0].Path)
 	if err != nil {
-		return fmt.Errorf("failed to lookup service config: %w", err)
+		return fmt.Errorf("failed to find service config: %w", err)
 	}
 	absoluteServiceConfig := filepath.Join(googleapisDir, channel.ServiceConfig)
 	if err := repometadata.Generate(library, "python", "googleapis/google-cloud-python", absoluteServiceConfig, defaultVersion, outdir); err != nil {
@@ -122,17 +122,17 @@ func generateChannel(ctx context.Context, channel *config.Channel, library *conf
 	apiDir := filepath.Join(googleapisDir, channel.Path)
 	protos, err := filepath.Glob(apiDir + "/*.proto")
 	if err != nil {
-		return fmt.Errorf("globbing for protos failed: %w", err)
+		return fmt.Errorf("failed to find protos: %w", err)
 	}
 	if len(protos) == 0 {
-		return fmt.Errorf("channel has no protos: %s", channel.Path)
+		return fmt.Errorf("no protos found in channel %q", channel.Path)
 	}
 
 	// We want the proto filenames to be relative to googleapisDir
 	for index, protoFile := range protos {
 		rel, err := filepath.Rel(googleapisDir, protoFile)
 		if err != nil {
-			return fmt.Errorf("can't find relative path to proto")
+			return fmt.Errorf("failed to compute relative path for %q: %w", protoFile, err)
 		}
 		protos[index] = rel
 	}
@@ -191,11 +191,11 @@ func createProtocOptions(ch *config.Channel, library *config.Library, googleapis
 	matches, err := filepath.Glob(filepath.Join(apiDir, "*_grpc_service_config.json"))
 	if err == nil && len(matches) > 0 {
 		if len(matches) > 1 {
-			return nil, fmt.Errorf("multiple _grpc_service_config.json files found in %s", apiDir)
+			return nil, fmt.Errorf("multiple grpc service config files found in %q", apiDir)
 		}
 		rel, err := filepath.Rel(googleapisDir, matches[0])
 		if err != nil {
-			return nil, fmt.Errorf("unable to make path relative: %s", matches[0])
+			return nil, fmt.Errorf("failed to compute relative path for %q: %w", matches[0], err)
 		}
 		grpcConfigPath = rel
 	}

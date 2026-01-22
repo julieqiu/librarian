@@ -205,7 +205,7 @@ func TestBumpCommand_Error(t *testing.T) {
 		{
 			name:    "missing librarian yaml file",
 			args:    []string{"librarian", "bump", "--all"},
-			wantErr: errNoYaml,
+			wantErr: errConfigNotFound,
 		},
 		{
 			name:    "local repo is dirty",
