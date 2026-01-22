@@ -22,7 +22,6 @@ type Config struct {
 	Language string `yaml:"language"`
 
 	// Version is the librarian tool version to use.
-	// Example: "v0.1.0"
 	Version string `yaml:"version,omitempty"`
 
 	// Repo is the repository name, such as "googleapis/google-cloud-python".
