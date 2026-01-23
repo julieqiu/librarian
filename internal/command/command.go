@@ -28,8 +28,8 @@ import (
 // config.
 var Verbose bool
 
-// Run executes a program (with arguments) and captures any error output. It is
-// a convenience wrapper around RunWithEnv.
+// Run executes a program (with arguments). On error, stderr is included in the
+// error message. It is a convenience wrapper around RunWithEnv.
 func Run(ctx context.Context, command string, arg ...string) error {
 	return RunWithEnv(ctx, nil, command, arg...)
 }
