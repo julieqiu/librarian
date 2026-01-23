@@ -151,7 +151,20 @@ func generateAll(ctx context.Context, cfg *config.Config) error {
 			return err
 		}
 	}
-	return nil
+	return postGenerate(ctx, cfg.Language)
+}
+
+// postGenerate performs repository-level actions after all individual
+// libraries have been generated.
+func postGenerate(ctx context.Context, language string) error {
+	switch language {
+	case languageRust:
+		return rust.UpdateWorkspace(ctx)
+	case languageFake:
+		return fakePostGenerate()
+	default:
+		return nil
+	}
 }
 
 func defaultOutput(language, channel, defaultOut string) string {

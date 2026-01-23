@@ -48,10 +48,11 @@ func TestGenerateCommand(t *testing.T) {
 	}
 
 	for _, test := range []struct {
-		name    string
-		args    []string
-		wantErr error
-		want    []string
+		name             string
+		args             []string
+		wantErr          error
+		want             []string
+		wantPostGenerate bool
 	}{
 		{
 			name:    "no args",
@@ -69,9 +70,10 @@ func TestGenerateCommand(t *testing.T) {
 			want: []string{lib1},
 		},
 		{
-			name: "all flag",
-			args: []string{"librarian", "generate", "--all"},
-			want: []string{lib1, lib2},
+			name:             "all flag",
+			args:             []string{"librarian", "generate", "--all"},
+			want:             []string{lib1, lib2},
+			wantPostGenerate: true,
 		},
 		{
 			name: "skip generate",
@@ -159,6 +161,13 @@ libraries:
 				wantStarter := fmt.Sprintf("# %s\n\nThis is a starter file.\n", libName)
 				if diff := cmp.Diff(wantStarter, string(gotStarter)); diff != "" {
 					t.Errorf("mismatch for STARTER.md for %q (-want +got):\n%s", libName, diff)
+				}
+			}
+
+			if test.wantPostGenerate {
+				postGeneratePath := filepath.Join(tempDir, "POST_GENERATE_README.md")
+				if _, err := os.Stat(postGeneratePath); err != nil {
+					t.Errorf("expected POST_GENERATE_README.md to exist, but got error: %v", err)
 				}
 			}
 		})

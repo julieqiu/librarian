@@ -77,6 +77,11 @@ func Generate(ctx context.Context, library *config.Library, sources *Sources) er
 	return nil
 }
 
+// UpdateWorkspace updates dependencies for the entire Rust workspace.
+func UpdateWorkspace(ctx context.Context) error {
+	return command.Run(ctx, "cargo", "update", "--workspace")
+}
+
 // Format formats a generated Rust library. Must be called sequentially;
 // parallel calls cause race conditions as cargo fmt runs cargo metadata,
 // which competes for locks on the workspace Cargo.toml and Cargo.lock.
