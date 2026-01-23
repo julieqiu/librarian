@@ -167,10 +167,10 @@ func postGenerate(ctx context.Context, language string) error {
 	}
 }
 
-func defaultOutput(language, channel, defaultOut string) string {
+func defaultOutput(language, api, defaultOut string) string {
 	switch language {
 	case languageRust:
-		return rust.DefaultOutput(channel, defaultOut)
+		return rust.DefaultOutput(api, defaultOut)
 	default:
 		return defaultOut
 	}
