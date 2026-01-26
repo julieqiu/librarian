@@ -175,8 +175,10 @@ func processRepo(ctx context.Context, repoName, repoDir string) (err error) {
 			return err
 		}
 	}
-	if err := runLibrarianWithVersion(ctx, version, "update", "googleapis"); err != nil {
-		return err
+	if repoName != repoFake {
+		if err := runLibrarianWithVersion(ctx, version, "update", "googleapis"); err != nil {
+			return err
+		}
 	}
 	if err := runLibrarianWithVersion(ctx, version, "generate", "--all"); err != nil {
 		return err
