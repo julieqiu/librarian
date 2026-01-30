@@ -89,19 +89,23 @@ func TestGenerateCommand(t *testing.T) {
 					t.Fatal(err)
 				}
 				os.Stdout = w
+				t.Cleanup(func() { os.Stdout = old })
 
-				if err := Run(t.Context(), args...); err != nil {
-					w.Close()
-					os.Stdout = old
+				runErr := Run(t.Context(), args...)
+				if err := w.Close(); err != nil {
+					// Close writer to signal EOF to reader.
 					t.Fatal(err)
 				}
 
-				w.Close()
-				os.Stdout = old
 				var buf bytes.Buffer
-				io.Copy(&buf, r)
-				output := buf.String()
+				if _, err := io.Copy(&buf, r); err != nil {
+					t.Fatalf("failed to read from pipe: %v", err)
+				}
+				if runErr != nil {
+					t.Fatal(runErr)
+				}
 
+				output := buf.String()
 				if !strings.Contains(output, "librarian@") {
 					t.Errorf("expected output to contain librarian command, got: %s", output)
 				}
