@@ -82,3 +82,72 @@ func TestVersion(t *testing.T) {
 		})
 	}
 }
+
+func TestNewPseudoVersion(t *testing.T) {
+	baseVersion := strings.TrimSpace(versionString)
+	for _, test := range []struct {
+		name      string
+		want      string
+		buildinfo *debug.BuildInfo
+	}{
+		{
+			name: "full pseudo-version",
+			want: fmt.Sprintf("%s-123456789012-20230125195754", baseVersion),
+			buildinfo: &debug.BuildInfo{
+				Settings: []debug.BuildSetting{
+					{Key: "vcs.revision", Value: "1234567890123456"},
+					{Key: "vcs.time", Value: "2023-01-25T19:57:54Z"},
+				},
+			},
+		},
+		{
+			name: "only revision",
+			want: fmt.Sprintf("%s-123456789012", baseVersion),
+			buildinfo: &debug.BuildInfo{
+				Settings: []debug.BuildSetting{
+					{Key: "vcs.revision", Value: "1234567890123456"},
+				},
+			},
+		},
+		{
+			name: "only time",
+			want: fmt.Sprintf("%s-20230125195754", baseVersion),
+			buildinfo: &debug.BuildInfo{
+				Settings: []debug.BuildSetting{
+					{Key: "vcs.time", Value: "2023-01-25T19:57:54Z"},
+				},
+			},
+		},
+		{
+			name: "invalid time format",
+			want: fmt.Sprintf("%s-123456789012", baseVersion),
+			buildinfo: &debug.BuildInfo{
+				Settings: []debug.BuildSetting{
+					{Key: "vcs.revision", Value: "1234567890123456"},
+					{Key: "vcs.time", Value: "invalid-time"},
+				},
+			},
+		},
+		{
+			name: "short revision",
+			want: fmt.Sprintf("%s-abc123-20230125195754", baseVersion),
+			buildinfo: &debug.BuildInfo{
+				Settings: []debug.BuildSetting{
+					{Key: "vcs.revision", Value: "abc123"},
+					{Key: "vcs.time", Value: "2023-01-25T19:57:54Z"},
+				},
+			},
+		},
+		{
+			name:      "no VCS info",
+			want:      versionNotAvailable,
+			buildinfo: &debug.BuildInfo{},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if got := newPseudoVersion(test.buildinfo); got != test.want {
+				t.Errorf("got %s; want %s", got, test.want)
+			}
+		})
+	}
+}
