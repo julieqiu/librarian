@@ -100,6 +100,9 @@ func bumpAction(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return errors.Join(errConfigNotFound, err)
 	}
+	if err := checkVersion(cfg); err != nil {
+		return err
+	}
 	return runBump(ctx, cfg, all, libraryName, versionOverride)
 }
 

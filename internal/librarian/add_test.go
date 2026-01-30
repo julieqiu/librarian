@@ -96,6 +96,7 @@ func TestAddLibrary(t *testing.T) {
 
 			cfg := &config.Config{
 				Language: languageFake,
+				Version:  "v0.1.0",
 				Default: &config.Default{
 					Output: "output",
 				},
@@ -205,6 +206,7 @@ func TestAddCommand(t *testing.T) {
 
 			cfg := &config.Config{
 				Language: languageFake,
+				Version:  "v0.1.0",
 				Default: &config.Default{
 					Output: "output",
 				},

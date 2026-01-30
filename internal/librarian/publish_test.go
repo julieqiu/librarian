@@ -77,6 +77,7 @@ func TestPublish(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			cfg := &config.Config{
 				Language: languageFake,
+				Version:  "v0.1.0",
 				Libraries: []*config.Library{
 					{Name: sample.Lib1Name, Version: "1.0.0"},
 					{Name: sample.Lib2Name, Version: "1.2.0"},
@@ -157,6 +158,7 @@ func TestPublish_Error(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			cfg := &config.Config{
 				Language: languageFake,
+				Version:  "v0.1.0",
 				Libraries: []*config.Library{
 					{Name: sample.Lib1Name, Version: "1.0.0"},
 					{Name: sample.Lib2Name, Version: "1.2.0"},
@@ -180,6 +182,7 @@ func TestPublish_Error(t *testing.T) {
 func TestPublishCommand(t *testing.T) {
 	cfg := &config.Config{
 		Language: languageFake,
+		Version:  "v0.1.0",
 		Libraries: []*config.Library{
 			{Name: sample.Lib1Name, Version: "1.0.0"},
 			{Name: sample.Lib2Name, Version: "1.2.0"},

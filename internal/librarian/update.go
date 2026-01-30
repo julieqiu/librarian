@@ -89,6 +89,9 @@ func runUpdate(all bool, sourceName string) error {
 	if err != nil {
 		return err
 	}
+	if err := checkVersion(cfg); err != nil {
+		return err
+	}
 	if cfg.Sources == nil {
 		return errEmptySources
 	}

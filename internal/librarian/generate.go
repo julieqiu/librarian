@@ -76,6 +76,9 @@ func runGenerate(ctx context.Context, all bool, libraryName string) error {
 	if err != nil {
 		return err
 	}
+	if err := checkVersion(cfg); err != nil {
+		return err
+	}
 	if cfg.Sources == nil {
 		return errEmptySources
 	}

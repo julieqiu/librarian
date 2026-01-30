@@ -49,6 +49,9 @@ func RunTidy(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	if err := checkVersion(cfg); err != nil {
+		return err
+	}
 	return RunTidyOnConfig(ctx, cfg)
 }
 

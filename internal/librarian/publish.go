@@ -58,6 +58,9 @@ func publishCommand() *cli.Command {
 			if err != nil {
 				return err
 			}
+			if err := checkVersion(cfg); err != nil {
+				return err
+			}
 			if cfg.Language == languageRust {
 				return legacyRustPublish(ctx, cfg, cmd)
 			}

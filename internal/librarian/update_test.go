@@ -136,6 +136,7 @@ func TestUpdateCommand(t *testing.T) {
 			args: []string{"librarian", "update", "googleapis"},
 			initialConfig: &config.Config{
 				Language: "go",
+				Version:  "v0.1.0",
 				Sources: &config.Sources{
 					Googleapis: &config.Source{
 						Commit: "this-should-be-changed",
@@ -161,6 +162,7 @@ func TestUpdateCommand(t *testing.T) {
 			},
 			wantConfig: &config.Config{
 				Language: "go",
+				Version:  "v0.1.0",
 				Sources: &config.Sources{
 					Googleapis: &config.Source{
 						Commit: googleapisTestCommit,
@@ -190,6 +192,7 @@ func TestUpdateCommand(t *testing.T) {
 			args: []string{"librarian", "update", "discovery"},
 			initialConfig: &config.Config{
 				Language: "go",
+				Version:  "v0.1.0",
 				Sources: &config.Sources{
 					Googleapis: &config.Source{
 						Commit: "this-should-not-change",
@@ -215,6 +218,7 @@ func TestUpdateCommand(t *testing.T) {
 			},
 			wantConfig: &config.Config{
 				Language: "go",
+				Version:  "v0.1.0",
 				Sources: &config.Sources{
 					Googleapis: &config.Source{
 						Commit: "this-should-not-change",
@@ -244,6 +248,7 @@ func TestUpdateCommand(t *testing.T) {
 			args: []string{"librarian", "update", "conformance"},
 			initialConfig: &config.Config{
 				Language: "go",
+				Version:  "v0.1.0",
 				Sources: &config.Sources{
 					Googleapis: &config.Source{
 						Commit: "this-should-not-change",
@@ -269,6 +274,7 @@ func TestUpdateCommand(t *testing.T) {
 			},
 			wantConfig: &config.Config{
 				Language: "go",
+				Version:  "v0.1.0",
 				Sources: &config.Sources{
 					Googleapis: &config.Source{
 						Commit: "this-should-not-change",
@@ -298,6 +304,7 @@ func TestUpdateCommand(t *testing.T) {
 			args: []string{"librarian", "update", "protobuf"},
 			initialConfig: &config.Config{
 				Language: "go",
+				Version:  "v0.1.0",
 				Sources: &config.Sources{
 					Googleapis: &config.Source{
 						Commit: "this-should-not-change",
@@ -326,6 +333,7 @@ func TestUpdateCommand(t *testing.T) {
 			},
 			wantConfig: &config.Config{
 				Language: "go",
+				Version:  "v0.1.0",
 				Sources: &config.Sources{
 					Googleapis: &config.Source{
 						Commit: "this-should-not-change",
@@ -356,6 +364,7 @@ func TestUpdateCommand(t *testing.T) {
 			args: []string{"librarian", "update", "showcase"},
 			initialConfig: &config.Config{
 				Language: "go",
+				Version:  "v0.1.0",
 				Sources: &config.Sources{
 					Googleapis: &config.Source{
 						Commit: "this-should-not-change",
@@ -382,6 +391,7 @@ func TestUpdateCommand(t *testing.T) {
 			},
 			wantConfig: &config.Config{
 				Language: "go",
+				Version:  "v0.1.0",
 				Sources: &config.Sources{
 					Googleapis: &config.Source{
 						Commit: "this-should-not-change",
@@ -412,6 +422,7 @@ func TestUpdateCommand(t *testing.T) {
 			args: []string{"librarian", "update", "--all"},
 			initialConfig: &config.Config{
 				Language: "go",
+				Version:  "v0.1.0",
 				Sources: &config.Sources{
 					Googleapis: &config.Source{
 						Commit: "this-should-be-changed",
@@ -438,6 +449,7 @@ func TestUpdateCommand(t *testing.T) {
 			},
 			wantConfig: &config.Config{
 				Language: "go",
+				Version:  "v0.1.0",
 				Sources: &config.Sources{
 					Googleapis: &config.Source{
 						Commit: googleapisTestCommit,
@@ -468,6 +480,7 @@ func TestUpdateCommand(t *testing.T) {
 			args: []string{"librarian", "update", "googleapis"},
 			initialConfig: &config.Config{
 				Language: "go",
+				Version:  "v0.1.0",
 				Sources: &config.Sources{
 					Googleapis: &config.Source{
 						Branch: testBranch,
@@ -494,6 +507,7 @@ func TestUpdateCommand(t *testing.T) {
 			},
 			wantConfig: &config.Config{
 				Language: "go",
+				Version:  "v0.1.0",
 				Sources: &config.Sources{
 					Googleapis: &config.Source{
 						Branch: testBranch,
@@ -568,6 +582,7 @@ func TestUpdateCommand_Errors(t *testing.T) {
 			args: []string{"librarian", "update", "googleapis"},
 			conf: &config.Config{
 				Language: "go",
+				Version:  "v0.1.0",
 			},
 			wantErr: errEmptySources,
 		},

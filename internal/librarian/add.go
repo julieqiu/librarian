@@ -59,6 +59,9 @@ func runAdd(ctx context.Context, name string, api ...string) error {
 	if err != nil {
 		return fmt.Errorf("%w: %w", errConfigNotFound, err)
 	}
+	if err := checkVersion(cfg); err != nil {
+		return err
+	}
 	// check for existing libraries, if it exists return an error
 	exists := slices.ContainsFunc(cfg.Libraries, func(lib *config.Library) bool {
 		return lib.Name == name
