@@ -162,102 +162,81 @@ func TestBuildGAPIC(t *testing.T) {
 	for _, test := range []struct {
 		name     string
 		files    []string
-		repoName string
-		want     map[string]*config.Library
+		repoPath string
+		want     []*config.Library
 		wantErr  error
 	}{
 		{
 			name: "read_sidekick_files",
 			files: []string{
-				"testdata/read-sidekick-files/success-read/.sidekick.toml",
-				"testdata/read-sidekick-files/success-read/nested/.sidekick.toml",
+				"testdata/read-sidekick-files/success-read/library-a/.sidekick.toml",
+				"testdata/read-sidekick-files/success-read/library-b/.sidekick.toml",
 			},
-			want: map[string]*config.Library{
-				"google-cloud-security-publicca-v1": {
-					Name: "google-cloud-security-publicca-v1",
+			want: []*config.Library{
+				{
+					Name: "google_cloud_ai_generativelanguage_v1beta",
 					APIs: []*config.API{
 						{
-							Path: "google/cloud/security/publicca/v1",
+							Path: "google/ai/generativelanguage/v1beta",
 						},
 					},
-					Version:       "1.1.0",
-					CopyrightYear: "2025",
-					Keep: []string{
-						"src/errors.rs",
-						"src/operation.rs",
-					},
-					DescriptionOverride: "Description override",
-					SpecificationFormat: "discovery",
-					Output:              "testdata/read-sidekick-files/success-read/nested",
-					Rust: &config.RustCrate{
-						RustDefault: config.RustDefault{
-							DisabledRustdocWarnings: []string{"bare_urls", "broken_intra_doc_links", "redundant_explicit_links"},
-							GenerateSetterSamples:   "true",
-							GenerateRpcSamples:      "true",
-						},
-						PerServiceFeatures:        true,
-						ModulePath:                "crate",
-						TemplateOverride:          "templates/mod",
-						PackageNameOverride:       "google-cloud-security-publicca-v1",
-						RootName:                  "conformance-root",
-						Roots:                     []string{"discovery", "googleapis"},
-						DefaultFeatures:           []string{"instances", "projects"},
-						IncludeList:               []string{"api.proto", "source_context.proto", "type.proto", "descriptor.proto"},
-						IncludedIds:               []string{".google.iam.v2.Resource"},
-						SkippedIds:                []string{".google.iam.v1.ResourcePolicyMember"},
-						DisabledClippyWarnings:    []string{"doc_lazy_continuation"},
-						HasVeneer:                 true,
-						RoutingRequired:           true,
-						IncludeGrpcOnlyMethods:    true,
-						PostProcessProtos:         "example post processing",
-						DetailedTracingAttributes: true,
-						NameOverrides:             ".google.cloud.security/publicca.v1.Storage=StorageControl",
+					CopyrightYear:       "2025",
+					Output:              "testdata/read-sidekick-files/success-read/library-a",
+					SpecificationFormat: "protobuf",
+					Dart: &config.DartPackage{
+						APIKeysEnvironmentVariables: "GOOGLE_API_KEY,GEMINI_API_KEY",
+						DevDependencies:             "googleapis_auth,test,test_utils",
+						IssueTrackerURL:             "https://github.com/googleapis/google-cloud-dart/issues",
+						ReadmeAfterTitleText: `> [!TIP]
+> Flutter applications should use
+> [Firebase AI Logic](https://firebase.google.com/products/firebase-ai-logic).
+>
+> The Generative Language API is meant for Dart command-line, cloud, and server applications.
+> For mobile and web applications, see instead
+> [Firebase AI Logic](https://firebase.google.com/products/firebase-ai-logic), which provides
+> client-side access to both the Gemini Developer API and Vertex AI.`,
+						ReadmeQuickstartText: `## Quickstart
+
+This quickstart shows you how to install the package and make your first
+Gemini API request.
+
+### Before you begin
+
+You need a Gemini API key. If you don't already have one, you can get it for
+free in [Google AI Studio](https://aistudio.google.com/app/api-keys)
+([step-by-step instructions](https://ai.google.dev/gemini-api/docs/api-key)).
+
+### Installing the package into your application
+
+> [!TIP]
+> You can create a skeleton application by running the terminal command: ` + "`dart create myapp`\n\n" +
+							`Run the terminal command:
+` + "\n```sh\ndart pub add google_cloud_ai_generativelanguage_v1beta\n```\n\n" +
+							`### Make your first request
+
+Here is an example that uses the generateContent method to send a request to
+the Gemini API using the Gemini 2.5 Flash model.
+
+If you set your API key as the environment variable ` + "`GEMINI_API_KEY` or\n" +
+							"`GOOGLE_API_KEY`" + `, the API key will be picked up automatically by the client
+when using the Gemini API libraries. Otherwise you will need to pass your
+API key as an argument when initializing the client.
+`,
+						RepositoryURL: "https://github.com/googleapis/google-cloud-dart/tree/main/generated/google_cloud_ai_generativelanguage_v1beta",
 					},
 				},
-				"google-cloud-sql-v1": {
-					Name: "google-cloud-sql-v1",
-					APIs: []*config.API{
-						{
-							Path: "google/cloud/sql/v1",
-						},
-					},
-					SkipPublish:         true,
-					Version:             "1.2.0",
+				{
+					Name:                "google_cloud_rpc",
+					APIs:                []*config.API{{Path: "google/rpc"}},
 					CopyrightYear:       "2025",
-					SpecificationFormat: "openapi",
-					Output:              "testdata/read-sidekick-files/success-read",
-					Rust: &config.RustCrate{
-						RustDefault: config.RustDefault{
-							PackageDependencies: []*config.RustPackageDependency{
-								{
-									Feature: "_internal-http-client",
-									Name:    "gaxi",
-									Package: "google-cloud-gax-internal",
-									Source:  "internal",
-									UsedIf:  "services",
-								},
-								{
-									ForceUsed: true,
-									Name:      "lazy_static",
-									Package:   "lazy_static",
-									UsedIf:    "services",
-									Ignore:    true,
-								},
-							},
-						},
-						DocumentationOverrides: []config.RustDocumentationOverride{
-							{
-								ID:      ".google.api.ProjectProperties",
-								Match:   "example match",
-								Replace: "example replace",
-							},
-						},
-						PaginationOverrides: []config.RustPaginationOverride{
-							{
-								ID:        ".google.cloud.sql.v1.SqlInstancesService.List",
-								ItemField: "items",
-							},
-						},
+					Output:              "testdata/read-sidekick-files/success-read/library-b",
+					SpecificationFormat: "protobuf",
+					Dart: &config.DartPackage{
+						Dependencies:    "googleapis_auth,http",
+						DevDependencies: "test",
+						IssueTrackerURL: "https://github.com/googleapis/google-cloud-dart/issues",
+						PartFile:        "src/rpc.p.dart",
+						RepositoryURL:   "https://github.com/googleapis/google-cloud-dart/tree/main/generated/google_cloud_rpc",
 					},
 				},
 			},
@@ -265,9 +244,9 @@ func TestBuildGAPIC(t *testing.T) {
 		{
 			name: "unable_to_calculate_output_path",
 			files: []string{
-				"testdata/read-sidekick-files/success-read/.sidekick.toml",
+				"testdata/read-sidekick-files/success-read/library-a/.sidekick.toml",
 			},
-			repoName: "/invalid/repo/path",
+			repoPath: "/invalid/repo/path",
 			wantErr:  errUnableToCalculateOutputPath,
 		},
 		{
@@ -275,52 +254,11 @@ func TestBuildGAPIC(t *testing.T) {
 			files: []string{
 				"testdata/read-sidekick-files/no-api-path/.sidekick.toml",
 			},
-			want: map[string]*config.Library{},
-		},
-		{
-			name: "no_package_name",
-			files: []string{
-				"testdata/read-sidekick-files/no-package-name/.sidekick.toml",
-			},
-			want: map[string]*config.Library{},
-		},
-		{
-			name: "with_discovery",
-			files: []string{
-				"testdata/read-sidekick-files/discovery/.sidekick.toml",
-			},
-			want: map[string]*config.Library{
-				"google-cloud-compute-v1": {
-					Name: "google-cloud-compute-v1",
-					APIs: []*config.API{
-						{
-							Path: "google/cloud/compute/v1",
-						},
-					},
-					Version:             "0.1.0",
-					SpecificationFormat: "discovery",
-					Output:              "testdata/read-sidekick-files/discovery",
-					Rust: &config.RustCrate{
-						Discovery: &config.RustDiscovery{
-							OperationID: ".google.cloud.compute.v1.Operation",
-							Pollers: []config.RustPoller{
-								{
-									Prefix:   "compute/v1/projects/{project}/global/operations",
-									MethodID: ".google.cloud.compute.v1.globalOperations.get",
-								},
-								{
-									Prefix:   "compute/v1/projects/{project}/regions/{region}/operations",
-									MethodID: ".google.cloud.compute.v1.regionOperations.get",
-								},
-							},
-						},
-					},
-				},
-			},
+			want: nil,
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			got, err := buildGAPIC(test.files, test.repoName)
+			got, err := buildGAPIC(test.files, test.repoPath)
 			if test.wantErr != nil {
 				if !errors.Is(err, test.wantErr) {
 					t.Errorf("got error %v, want %v", err, test.wantErr)
@@ -332,237 +270,6 @@ func TestBuildGAPIC(t *testing.T) {
 				t.Errorf("got error %v, want nil", err)
 				return
 			}
-			if diff := cmp.Diff(test.want, got); diff != "" {
-				t.Errorf("mismatch (-want +got):\n%s", diff)
-			}
-		})
-	}
-}
-
-func TestDeriveLibraryName(t *testing.T) {
-	for _, test := range []struct {
-		name string
-		api  string
-		want string
-	}{
-		{
-			name: "strip_google_prefix",
-			api:  "google/cloud/secretmanager/v1",
-			want: "google-cloud-secretmanager-v1",
-		},
-		{
-			name: "strip_devtools_prefix",
-			api:  "google/devtools/artifactregistry/v1",
-			want: "google-cloud-artifactregistry-v1",
-		},
-		{
-			name: "strip_api_prefix",
-			api:  "google/api/apikeys/v1",
-			want: "google-cloud-apikeys-v1",
-		},
-		{
-			name: "do_not_strip_api_prefix",
-			api:  "google/api/servicecontrol/v1",
-			want: "google-cloud-api-servicecontrol-v1",
-		},
-		{
-			name: "no_google_prefix",
-			api:  "grafeas/v1",
-			want: "google-cloud-grafeas-v1",
-		},
-		{
-			name: "no_cloud_prefix",
-			api:  "spanner/admin/instances/v1",
-			want: "google-cloud-spanner-admin-instances-v1",
-		},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			got := deriveLibraryName(test.api)
-			if diff := cmp.Diff(test.want, got); diff != "" {
-				t.Errorf("mismatch (-want +got):\n%s", diff)
-			}
-		})
-	}
-}
-
-func TestFindCargos(t *testing.T) {
-	for _, test := range []struct {
-		name    string
-		path    string
-		want    []string
-		wantErr error
-	}{
-		{
-			name: "success",
-			path: "testdata/find-cargos/success",
-			want: []string{
-				"testdata/find-cargos/success/Cargo.toml",
-				"testdata/find-cargos/success/dir-1/Cargo.toml",
-				"testdata/find-cargos/success/dir-2/dirdir-2/Cargo.toml",
-			},
-		},
-		{
-			name:    "invalid_path",
-			path:    "testdata/find-cargos/non-existent-path",
-			wantErr: os.ErrNotExist,
-		},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			got, err := findCargos(test.path)
-			if test.wantErr != nil {
-				if !errors.Is(err, test.wantErr) {
-					t.Errorf("got error %v, want %v", err, test.wantErr)
-				}
-				return
-			}
-
-			if err != nil {
-				t.Errorf("got error %v, want nil", err)
-				return
-			}
-			if diff := cmp.Diff(test.want, got); diff != "" {
-				t.Errorf("mismatch (-want +got):\n%s", diff)
-			}
-		})
-	}
-}
-
-func TestBuildConfig(t *testing.T) {
-	for _, test := range []struct {
-		name      string
-		libraries map[string]*config.Library
-		defaults  *config.Config
-		want      *config.Config
-		wantErr   error
-	}{
-		{
-			name: "rust_defaults",
-			defaults: &config.Config{
-				Default: &config.Default{
-					Output: "src/generated/",
-					Rust: &config.RustDefault{
-						DisabledRustdocWarnings: []string{"bare_urls", "broken_intra_doc_links", "redundant_explicit_links"},
-					},
-				},
-			},
-			want: &config.Config{
-				Default: &config.Default{
-					Output: "src/generated/",
-					Rust: &config.RustDefault{
-						DisabledRustdocWarnings: []string{"bare_urls", "broken_intra_doc_links", "redundant_explicit_links"},
-					},
-				},
-			},
-		},
-		{
-			name:     "copy_libraries",
-			defaults: &config.Config{},
-			libraries: map[string]*config.Library{
-				"google-cloud-security-publicca-v1": {
-					Name: "google-cloud-security-publicca-v1",
-					APIs: []*config.API{
-						{
-							Path: "google/cloud/security/publicca/v1",
-						},
-					},
-					Version:       "1.1.0",
-					CopyrightYear: "2025",
-					Rust: &config.RustCrate{
-						RustDefault: config.RustDefault{
-							DisabledRustdocWarnings: []string{"bare_urls", "broken_intra_doc_links", "redundant_explicit_links"},
-							GenerateSetterSamples:   "true",
-							GenerateRpcSamples:      "true",
-						},
-						PerServiceFeatures: true,
-						NameOverrides:      ".google.cloud.security/publicca.v1.Storage=StorageControl",
-					},
-				},
-				"skipped": {
-					Name: "google-cloud-sql-v1",
-					APIs: []*config.API{
-						{
-							Path: "google/cloud/sql/v1",
-						},
-					},
-					SkipPublish: true,
-					Version:     "1.2.0",
-				},
-			},
-			want: &config.Config{
-				Libraries: []*config.Library{
-					{
-						Name: "google-cloud-security-publicca-v1",
-						APIs: []*config.API{
-							{
-								Path: "google/cloud/security/publicca/v1",
-							},
-						},
-						Version:       "1.1.0",
-						CopyrightYear: "2025",
-						Rust: &config.RustCrate{
-							RustDefault: config.RustDefault{
-								DisabledRustdocWarnings: []string{"bare_urls", "broken_intra_doc_links", "redundant_explicit_links"},
-								GenerateSetterSamples:   "true",
-								GenerateRpcSamples:      "true",
-							},
-							PerServiceFeatures: true,
-							NameOverrides:      ".google.cloud.security/publicca.v1.Storage=StorageControl",
-						},
-					},
-				},
-			},
-		},
-		{
-			name:     "service does not exist",
-			defaults: &config.Config{},
-			libraries: map[string]*config.Library{
-				"google-cloud-orgpolicy-v1": {
-					Name: "google-cloud-orgpolicy-v1",
-					APIs: []*config.API{
-						{
-							Path: "google/cloud/orgpolicy/v1",
-						},
-					},
-					Version:       "1.1.0",
-					CopyrightYear: "2025",
-					Rust: &config.RustCrate{
-						RustDefault: config.RustDefault{
-							DisabledRustdocWarnings: []string{"bare_urls", "broken_intra_doc_links", "redundant_explicit_links"},
-							GenerateSetterSamples:   "true",
-							GenerateRpcSamples:      "true",
-						},
-						PerServiceFeatures: true,
-						NameOverrides:      ".google.cloud.orgpolicy.v1.OrgPolicy=OrgPolicyControl",
-					},
-				},
-			},
-			want: &config.Config{
-				Libraries: []*config.Library{
-					{
-						Name: "google-cloud-orgpolicy-v1",
-						APIs: []*config.API{
-							{
-								Path: "google/cloud/orgpolicy/v1",
-							},
-						},
-						Version:       "1.1.0",
-						CopyrightYear: "2025",
-						Rust: &config.RustCrate{
-							RustDefault: config.RustDefault{
-								DisabledRustdocWarnings: []string{"bare_urls", "broken_intra_doc_links", "redundant_explicit_links"},
-								GenerateSetterSamples:   "true",
-								GenerateRpcSamples:      "true",
-							},
-							PerServiceFeatures: true,
-							NameOverrides:      ".google.cloud.orgpolicy.v1.OrgPolicy=OrgPolicyControl",
-						},
-					},
-				},
-			},
-		},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			got := buildConfig(test.libraries, test.defaults)
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("mismatch (-want +got):\n%s", diff)
 			}
@@ -579,10 +286,8 @@ func TestRunMigrateCommand(t *testing.T) {
 		checkDocumentOverrideMatch   []string
 	}{
 		{
-			name:                         "success",
-			path:                         "testdata/run/success",
-			checkDocumentOverrideMatch:   []string{"example match", "Ancestry subtrees must be in one of the following formats:"},
-			checkDocumentOverrideReplace: []string{"example replace", " \nAncestry subtrees must be in one of the following formats:"},
+			name: "success",
+			path: "testdata/run/success",
 		},
 		{
 			name:    "tidy_command_fails",
@@ -625,19 +330,6 @@ func TestRunMigrateCommand(t *testing.T) {
 				if len(librarianConfig.Libraries) != 1 {
 					t.Fatalf("librarian yaml does not contain library")
 				}
-				if len(test.checkDocumentOverrideReplace) > 0 {
-					for index, expected := range test.checkDocumentOverrideReplace {
-						got := librarianConfig.Libraries[0].Rust.DocumentationOverrides[index].Replace
-						if got != expected {
-							t.Fatalf("expected checkDocumentOverrideValue: %s got: %s", expected, got)
-						}
-						gotMatch := librarianConfig.Libraries[0].Rust.DocumentationOverrides[index].Match
-						if expected := test.checkDocumentOverrideMatch[index]; gotMatch != expected {
-							t.Fatalf("expected checkDocumentOverrideMatch: %s got: %s", expected, gotMatch)
-						}
-
-					}
-				}
 			}
 
 		})
@@ -679,6 +371,32 @@ func TestParseWithPrefix(t *testing.T) {
 				"proto:google.protobuf":      "package:google_cloud_protobuf/protobuf.dart",
 			}
 			got := parseKeyWithPrefix(codec, test.prefix)
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestGenLibraryName(t *testing.T) {
+	for _, test := range []struct {
+		name string
+		path string
+		want string
+	}{
+		{
+			name: "google/ as prefix",
+			path: "google/ai/generativelanguage/v1beta",
+			want: "google_cloud_ai_generativelanguage_v1beta",
+		},
+		{
+			name: "google/cloud/ as prefix",
+			path: "google/cloud/example/nested/v1",
+			want: "google_cloud_example_nested_v1",
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got := genLibraryName(test.path)
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("mismatch (-want +got):\n%s", diff)
 			}

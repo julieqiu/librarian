@@ -29,15 +29,12 @@ import (
 
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/librarian"
-	"github.com/googleapis/librarian/internal/librarian/rust"
 	sidekickconfig "github.com/googleapis/librarian/internal/sidekick/config"
 	"github.com/pelletier/go-toml/v2"
 )
 
 const (
 	sidekickFile             = ".sidekick.toml"
-	cargoFile                = "Cargo.toml"
-	discoveryArchivePrefix   = "https://github.com/googleapis/discovery-artifact-manager/archive/"
 	googleapisArchivePrefix  = "https://github.com/googleapis/googleapis/archive/"
 	showcaseArchivePrefix    = "https://github.com/googleapis/gapic-showcase/archive/"
 	protobufArchivePrefix    = "https://github.com/protocolbuffers/protobuf/archive/"
@@ -101,7 +98,7 @@ func runSidekickMigration(ctx context.Context, repoPath string) error {
 		return fmt.Errorf("failed to read root .sidekick.toml from %q: %w", repoPath, err)
 	}
 
-	sidekickFiles, err := findSidekickFiles(filepath.Join(repoPath, "src", "generated"))
+	sidekickFiles, err := findSidekickFiles(filepath.Join(repoPath, "generated"))
 	if err != nil {
 		return fmt.Errorf("failed to find sidekick.toml files: %w", err)
 	}
@@ -197,40 +194,6 @@ func readRootSidekick(repoPath string) (*config.Config, error) {
 	return cfg, nil
 }
 
-// parsePackageDependency parses a package dependency spec.
-// Format: "package=name,source=path,force-used=true,used-if=condition".
-func parsePackageDependency(name, spec string) *config.RustPackageDependency {
-	dep := &config.RustPackageDependency{
-		Name: name,
-	}
-
-	parts := strings.Split(spec, ",")
-	for _, part := range parts {
-		kv := strings.Split(part, "=")
-		if len(kv) != 2 {
-			continue
-		}
-		key, value := strings.TrimSpace(kv[0]), strings.TrimSpace(kv[1])
-
-		switch key {
-		case "package":
-			dep.Package = value
-		case "source":
-			dep.Source = value
-		case "force-used":
-			dep.ForceUsed = value == "true"
-		case "used-if":
-			dep.UsedIf = value
-		case "feature":
-			dep.Feature = value
-		case "ignore":
-			dep.Ignore = value == "true"
-		}
-	}
-
-	return dep
-}
-
 // findSidekickFiles finds all .sidekick.toml files within the given path.
 func findSidekickFiles(path string) ([]string, error) {
 	var files []string
@@ -255,8 +218,8 @@ func findSidekickFiles(path string) ([]string, error) {
 	return files, nil
 }
 
-func buildGAPIC(files []string, repoPath string) (map[string]*config.Library, error) {
-	libraries := make(map[string]*config.Library)
+func buildGAPIC(files []string, repoPath string) ([]*config.Library, error) {
+	var libraries []*config.Library
 
 	for _, file := range files {
 		data, err := os.ReadFile(file)
@@ -269,278 +232,100 @@ func buildGAPIC(files []string, repoPath string) (map[string]*config.Library, er
 			return nil, fmt.Errorf("failed to unmarshal %s: %w", file, err)
 		}
 
-		// Get API path
 		apiPath := sidekick.General.SpecificationSource
 		if apiPath == "" {
 			continue
 		}
 
 		specificationFormat := sidekick.General.SpecificationFormat
-		if specificationFormat == "disco" {
-			specificationFormat = "discovery"
+		if specificationFormat == "" {
+			specificationFormat = "protobuf"
 		}
 
-		// Read Cargo.toml in the same directory to get the actual library name
-		dir := filepath.Dir(file)
-		cargo, err := readCargoConfig(dir)
-		if err != nil {
-			return nil, err
+		// Library name or package name is derived from api path by packageName function in dart package.
+		// However, each library in the librarian configuration should have a name.
+		libraryName := genLibraryName(apiPath)
+		lib := &config.Library{
+			Name: libraryName,
+			APIs: []*config.API{
+				{
+					Path: apiPath,
+				},
+			},
 		}
 
-		libraryName := cargo.Package.Name
-		if libraryName == "" {
-			continue
+		if copyrightYear, ok := sidekick.Codec["copyright-year"]; ok && copyrightYear != "" {
+			lib.CopyrightYear = copyrightYear
 		}
-
-		// Create or update library
-		lib, exists := libraries[libraryName]
-		if !exists {
-			lib = &config.Library{
-				Name: libraryName,
-			}
-			libraries[libraryName] = lib
-		}
-		lib.SpecificationFormat = specificationFormat
-		relativePath, err := filepath.Rel(repoPath, dir)
+		relativePath, err := filepath.Rel(repoPath, filepath.Dir(file))
 		if err != nil {
 			return nil, fmt.Errorf("failed to calculate relative path: %w", errUnableToCalculateOutputPath)
 		}
 		lib.Output = relativePath
-		lib.APIs = append(lib.APIs, &config.API{
-			Path: apiPath,
-		})
-
-		// Set version from Cargo.toml (more authoritative than sidekick)
-		if cargo.Package.Version != "" && cargo.Package.Version != "0.0.0" {
-			lib.Version = cargo.Package.Version
-		} else if version, ok := sidekick.Codec["version"]; ok && lib.Version == "" && version != "0.0.0" {
-			lib.Version = version
-		}
-
-		// Set publish disabled from Cargo.toml
-		if !cargo.Package.Publish {
+		if _, ok := sidekick.Codec["not-for-publication"]; ok {
 			lib.SkipPublish = true
 		}
 
-		// Parse library-level configuration
-		if copyrightYear, ok := sidekick.Codec["copyright-year"]; ok && copyrightYear != "" {
-			lib.CopyrightYear = copyrightYear
+		lib.SpecificationFormat = specificationFormat
+
+		dartPackage := &config.DartPackage{}
+		if titleOverride, ok := sidekick.Source["title-override"]; ok && titleOverride != "" {
+			dartPackage.TitleOverride = titleOverride
+		}
+		if nameOverride, ok := sidekick.Source["name-override"]; ok && nameOverride != "" {
+			dartPackage.NameOverride = nameOverride
 		}
 
-		if extraModules, ok := sidekick.Codec["extra-modules"]; ok {
-			for _, module := range strToSlice(extraModules) {
-				if module == "" {
-					continue
-				}
-				lib.Keep = append(lib.Keep, fmt.Sprintf("src/%s.rs", module))
-			}
+		if apiKeys, ok := sidekick.Codec["api-keys-environment-variables"]; ok && apiKeys != "" {
+			dartPackage.APIKeysEnvironmentVariables = apiKeys
+		}
+		if deps, ok := sidekick.Codec["dependencies"]; ok && deps != "" {
+			dartPackage.Dependencies = deps
+		}
+		if devDeps, ok := sidekick.Codec["dev-dependencies"]; ok && devDeps != "" {
+			dartPackage.DevDependencies = devDeps
+		}
+		dartPackage.IssueTrackerURL = "https://github.com/googleapis/google-cloud-dart/issues"
+		if extraImports, ok := sidekick.Codec["extra-imports"]; ok && extraImports != "" {
+			dartPackage.ExtraImports = extraImports
+		}
+		if partFile, ok := sidekick.Codec["part-file"]; ok && partFile != "" {
+			dartPackage.PartFile = partFile
+		}
+		if repoURL, ok := sidekick.Codec["repository-url"]; ok && repoURL != "" {
+			dartPackage.RepositoryURL = repoURL
+		}
+		if afterTitle, ok := sidekick.Codec["readme-after-title-text"]; ok && afterTitle != "" {
+			dartPackage.ReadmeAfterTitleText = afterTitle
+		}
+		if quickStart, ok := sidekick.Codec["readme-quickstart-text"]; ok && quickStart != "" {
+			dartPackage.ReadmeQuickstartText = quickStart
 		}
 
-		// Parse Rust-specific configuration from .sidekick.toml source section
-		if descriptionOverride, ok := sidekick.Source["description-override"]; ok {
-			lib.DescriptionOverride = descriptionOverride
+		if !isEmptyDartPackage(dartPackage) {
+			lib.Dart = dartPackage
 		}
 
-		includeList := sidekick.Source["include-list"]
-		includeIds := sidekick.Source["include-ids"]
-		skippedIds := sidekick.Source["skipped-ids"]
-		roots := sidekick.Source["roots"]
-
-		// Parse Rust-specific configuration from sidekick.toml codec section
-		disabledRustdocWarnings := sidekick.Codec["disabled-rustdoc-warnings"]
-		perServiceFeatures := sidekick.Codec["per-service-features"]
-		modulePath := sidekick.Codec["module-path"]
-		templateOverride := sidekick.Codec["template-override"]
-		packageNameOverride := sidekick.Codec["package-name-override"]
-		rootName := sidekick.Codec["root-name"]
-		defaultFeatures := sidekick.Codec["default-features"]
-		disabledClippyWarnings := sidekick.Codec["disabled-clippy-warnings"]
-		hasVeneer := sidekick.Codec["has-veneer"]
-		routingRequired := sidekick.Codec["routing-required"]
-		includeGrpcOnlyMethods := sidekick.Codec["include-grpc-only-methods"]
-		generateSetterSamples := sidekick.Codec["generate-setter-samples"]
-		generateRpcSamples := sidekick.Codec["generate-rpc-samples"]
-		postProcessProtos := sidekick.Codec["post-process-protos"]
-		detailedTracingAttributes := sidekick.Codec["detailed-tracing-attributes"]
-		nameOverrides := sidekick.Codec["name-overrides"]
-
-		// Parse package dependencies
-		packageDeps := parsePackageDependencies(sidekick.Codec)
-
-		// Parse documentation overrides
-		var documentationOverrides []config.RustDocumentationOverride
-		for _, do := range sidekick.CommentOverrides {
-			if strings.HasPrefix(do.Replace, "\n") {
-				// this ensures that newline is preserved in yaml format
-				do.Replace = " " + do.Replace
-			}
-			documentationOverrides = append(documentationOverrides, config.RustDocumentationOverride{
-				ID:      do.ID,
-				Match:   do.Match,
-				Replace: do.Replace,
-			})
-		}
-
-		// Parse pagination overrides
-		var paginationOverrides []config.RustPaginationOverride
-		for _, po := range sidekick.PaginationOverrides {
-			paginationOverrides = append(paginationOverrides, config.RustPaginationOverride{
-				ID:        po.ID,
-				ItemField: po.ItemField,
-			})
-		}
-
-		// Set Rust-specific configuration only if there's actual config
-		rustCrate := &config.RustCrate{
-			RustDefault: config.RustDefault{
-				PackageDependencies:     packageDeps,
-				DisabledRustdocWarnings: strToSlice(disabledRustdocWarnings),
-				GenerateSetterSamples:   generateSetterSamples,
-				GenerateRpcSamples:      generateRpcSamples,
-			},
-			PerServiceFeatures:        strToBool(perServiceFeatures),
-			ModulePath:                modulePath,
-			TemplateOverride:          templateOverride,
-			PackageNameOverride:       packageNameOverride,
-			RootName:                  rootName,
-			Roots:                     strToSlice(roots),
-			DefaultFeatures:           strToSlice(defaultFeatures),
-			IncludeList:               strToSlice(includeList),
-			IncludedIds:               strToSlice(includeIds),
-			SkippedIds:                strToSlice(skippedIds),
-			DisabledClippyWarnings:    strToSlice(disabledClippyWarnings),
-			HasVeneer:                 strToBool(hasVeneer),
-			RoutingRequired:           strToBool(routingRequired),
-			IncludeGrpcOnlyMethods:    strToBool(includeGrpcOnlyMethods),
-			PostProcessProtos:         postProcessProtos,
-			DetailedTracingAttributes: strToBool(detailedTracingAttributes),
-			DocumentationOverrides:    documentationOverrides,
-			PaginationOverrides:       paginationOverrides,
-			NameOverrides:             nameOverrides,
-		}
-
-		if sidekick.Discovery != nil {
-			if lib.Rust == nil {
-				lib.Rust = &config.RustCrate{}
-			}
-			pollers := make([]config.RustPoller, len(sidekick.Discovery.Pollers))
-			for i, p := range sidekick.Discovery.Pollers {
-				pollers[i] = config.RustPoller{
-					Prefix:   p.Prefix,
-					MethodID: p.MethodID,
-				}
-			}
-			rustCrate.Discovery = &config.RustDiscovery{
-				OperationID: sidekick.Discovery.OperationID,
-				Pollers:     pollers,
-			}
-		}
-
-		if !isEmptyRustCrate(rustCrate) {
-			lib.Rust = rustCrate
-		}
+		libraries = append(libraries, lib)
 	}
+
+	sort.Slice(libraries, func(i, j int) bool {
+		return libraries[i].Name < libraries[j].Name
+	})
 
 	return libraries, nil
 }
 
-// deriveLibraryName derives a library name from an API path.
-// For Rust: see go/cloud-rust:on-crate-names.
-func deriveLibraryName(apiPath string) string {
-	trimmedPath := strings.TrimPrefix(apiPath, "google/")
-	trimmedPath = strings.TrimPrefix(trimmedPath, "cloud/")
-	trimmedPath = strings.TrimPrefix(trimmedPath, "devtools/")
-	if strings.HasPrefix(trimmedPath, "api/apikeys/") {
-		trimmedPath = strings.TrimPrefix(trimmedPath, "api/")
-	}
-
-	return "google-cloud-" + strings.ReplaceAll(trimmedPath, "/", "-")
-}
-
-// findCargos returns all Cargo.toml files within the given path.
-//
-// A file is filtered if the file lives in a path that contains src/generated.
-func findCargos(path string) ([]string, error) {
-	var files []string
-	err := filepath.WalkDir(path, func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if d.IsDir() && strings.Contains(path, "src/generated") {
-			return filepath.SkipDir
-		}
-
-		if d.IsDir() || d.Name() != cargoFile {
-			return nil
-		}
-
-		files = append(files, path)
-
-		return nil
-	})
-	return files, err
-}
-
 // buildConfig builds the complete config from libraries.
-func buildConfig(libraries map[string]*config.Library, defaults *config.Config) *config.Config {
-	cfg := defaults
-	// Convert libraries map to sorted slice, applying new schema logic
-	var libList []*config.Library
-
-	for _, lib := range libraries {
-		// Get the API path for this library
-		apiPath := ""
-		if len(lib.APIs) > 0 {
-			apiPath = lib.APIs[0].Path
-		}
-
-		// Derive expected library name from API path
-		expectedName := deriveLibraryName(apiPath)
-		nameMatchesConvention := lib.Name == expectedName
-		// Check if library has extra configuration beyond just name/api/version
-		hasExtraConfig := lib.CopyrightYear != "" ||
-			(lib.Rust != nil && (lib.Rust.PerServiceFeatures || len(lib.Rust.DisabledRustdocWarnings) > 0 ||
-				lib.Rust.GenerateSetterSamples != "" || lib.Rust.GenerateRpcSamples != "" ||
-				len(lib.Rust.PackageDependencies) > 0 || len(lib.Rust.PaginationOverrides) > 0 ||
-				lib.Rust.NameOverrides != ""))
-		// Only include in libraries section if specific data needs to be retained
-		if !nameMatchesConvention || hasExtraConfig || len(lib.APIs) > 1 {
-			libCopy := *lib
-			libList = append(libList, &libCopy)
-		}
-	}
-
-	// Sort libraries by name
-	sort.Slice(libList, func(i, j int) bool {
-		return libList[i].Name < libList[j].Name
-	})
-
-	cfg.Libraries = libList
-
-	return cfg
+func buildConfig(libraries []*config.Library, defaults *config.Config) *config.Config {
+	defaults.Libraries = libraries
+	return defaults
 }
 
-func parsePackageDependencies(codec map[string]string) []*config.RustPackageDependency {
-	var packageDeps []*config.RustPackageDependency
-	for key, value := range codec {
-		if !strings.HasPrefix(key, "package:") {
-			continue
-		}
-		pkgName := strings.TrimPrefix(key, "package:")
-
-		dep := parsePackageDependency(pkgName, value)
-		if dep != nil {
-			packageDeps = append(packageDeps, dep)
-		}
-	}
-
-	// Sort package dependencies by name
-	sort.Slice(packageDeps, func(i, j int) bool {
-		return packageDeps[i].Name < packageDeps[j].Name
-	})
-
-	return packageDeps
+func genLibraryName(path string) string {
+	path = strings.TrimPrefix(path, "google/cloud/")
+	path = strings.TrimPrefix(path, "google/")
+	return "google_cloud_" + strings.ReplaceAll(path, "/", "_")
 }
 
 func parseKeyWithPrefix(codec map[string]string, prefix string) map[string]string {
@@ -554,35 +339,6 @@ func parseKeyWithPrefix(codec map[string]string, prefix string) map[string]strin
 	return res
 }
 
-func strToBool(s string) bool {
-	return s == "true"
-}
-
-// strToSlice converts a comma-separated string into a slice of strings.
-// Returns nil if the string is empty.
-func strToSlice(s string) []string {
-	if s == "" {
-		return nil
-	}
-	return strings.Split(s, ",")
-}
-
-func isEmptyRustCrate(r *config.RustCrate) bool {
-	return reflect.DeepEqual(r, &config.RustCrate{})
-}
-
-func readCargoConfig(dir string) (*rust.Cargo, error) {
-	cargoData, err := os.ReadFile(filepath.Join(dir, cargoFile))
-	if err != nil {
-		return nil, fmt.Errorf("failed to read cargo: %w", err)
-	}
-	cargo := rust.Cargo{
-		Package: &rust.CrateInfo{
-			Publish: true,
-		},
-	}
-	if err := toml.Unmarshal(cargoData, &cargo); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal cargo: %w", err)
-	}
-	return &cargo, nil
+func isEmptyDartPackage(r *config.DartPackage) bool {
+	return reflect.DeepEqual(r, &config.DartPackage{})
 }
