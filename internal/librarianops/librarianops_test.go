@@ -180,3 +180,33 @@ func TestUpdateLibrarianVersion(t *testing.T) {
 		t.Errorf("mismatch (-want +got):\n%s", diff)
 	}
 }
+
+func TestVerboseFlagSetsCommandVerbose(t *testing.T) {
+	origVerbose := command.Verbose
+	defer func() { command.Verbose = origVerbose }()
+
+	for _, test := range []struct {
+		name        string
+		args        []string
+		wantVerbose bool
+	}{
+		{
+			name:        "without -v flag",
+			args:        []string{"librarianops", "generate", "fake-repo"},
+			wantVerbose: false,
+		},
+		{
+			name:        "with -v flag",
+			args:        []string{"librarianops", "generate", "-v", "fake-repo"},
+			wantVerbose: true,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			command.Verbose = false
+			Run(t.Context(), test.args...)
+			if command.Verbose != test.wantVerbose {
+				t.Errorf("command.Verbose = %v, want %v", command.Verbose, test.wantVerbose)
+			}
+		})
+	}
+}
