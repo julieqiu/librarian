@@ -47,9 +47,6 @@ type protocConfig struct {
 	// HasGoGRPC indicates whether go_grpc_library is used.
 	HasGoGRPC bool
 
-	// HasLegacyGRPC indicates whether go_proto_library uses the legacy gRPC compiler.
-	HasLegacyGRPC bool
-
 	// Metadata enables generation of gapic_metadata.json (metadata).
 	Metadata bool
 
@@ -86,7 +83,7 @@ func buildProtocCommand(cfg *protocConfig) ([]string, error) {
 		"-I=" + cfg.GoogleapisDir,
 	}
 
-	if cfg.HasGoGRPC || cfg.HasLegacyGRPC {
+	if cfg.HasGoGRPC {
 		args = append(args,
 			"--go-grpc_out="+cfg.OutputDir,
 			"--go-grpc_opt=require_unimplemented_servers=false",

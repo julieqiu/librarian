@@ -78,19 +78,6 @@ func TestBuildProtocCommand(t *testing.T) {
 			},
 		},
 		{
-			name: "with legacy grpc",
-			cfg: &protocConfig{
-				OutputDir:     "/output",
-				GoogleapisDir: testdataDir,
-				APIPath:       "google/cloud/secretmanager/v1",
-				HasLegacyGRPC: true,
-			},
-			wantContains: []string{
-				"--go-grpc_out=/output",
-				"--go-grpc_opt=require_unimplemented_servers=false",
-			},
-		},
-		{
 			name: "with service configs",
 			cfg: &protocConfig{
 				OutputDir:         "/output",
