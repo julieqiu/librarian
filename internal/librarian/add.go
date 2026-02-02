@@ -21,6 +21,7 @@ import (
 	"slices"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/googleapis/librarian/internal/config"
@@ -56,8 +57,6 @@ func addCommand() *cli.Command {
 
 func runAdd(ctx context.Context, cfg *config.Config, apis ...string) error {
 	name := deriveLibraryName(cfg.Language, apis[0])
-
-	// check for existing libraries, if it exists return an error
 	exists := slices.ContainsFunc(cfg.Libraries, func(lib *config.Library) bool {
 		return lib.Name == name
 	})
@@ -76,12 +75,14 @@ func runAdd(ctx context.Context, cfg *config.Config, apis ...string) error {
 // The derivation is language-specific.
 func deriveLibraryName(language, api string) string {
 	switch language {
-	case languageRust:
-		return rust.DefaultLibraryName(api)
+	case languageFake:
+		return fakeDefaultLibraryName(api)
 	case languagePython:
 		return python.DefaultLibraryName(api)
+	case languageRust:
+		return rust.DefaultLibraryName(api)
 	default:
-		return fakeDefaultLibraryName(api)
+		return strings.ReplaceAll(api, "/", "-")
 	}
 }
 
