@@ -46,14 +46,14 @@ func Run(ctx context.Context, args ...string) error {
 		UsageText: "librarian [command]",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
-				Name:    "verbose",
-				Aliases: []string{"v"},
-				Usage:   "enable verbose logging",
-			},
-			&cli.BoolFlag{
 				Name:    "force",
 				Aliases: []string{"f"},
 				Usage:   "skip binary version check",
+			},
+			&cli.BoolFlag{
+				Name:    "verbose",
+				Aliases: []string{"v"},
+				Usage:   "enable verbose logging",
 			},
 		},
 		Before: func(ctx context.Context, cmd *cli.Command) (context.Context, error) {
