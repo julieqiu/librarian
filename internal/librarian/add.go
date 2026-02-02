@@ -48,7 +48,7 @@ func addCommand() *cli.Command {
 			if len(args.Slice()) > 1 {
 				apis = args.Slice()[1:]
 			}
-			cfg, err := loadConfig()
+			cfg, err := loadConfig(ctx)
 			if err != nil {
 				return err
 			}
