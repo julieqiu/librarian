@@ -29,8 +29,6 @@ import (
 	"github.com/googleapis/librarian/internal/yaml"
 )
 
-const testLibrarianVersion = "v0.1.0"
-
 func TestGenerateCommand(t *testing.T) {
 	for _, test := range []struct {
 		name    string
@@ -158,13 +156,13 @@ func TestUpdateLibrarianVersion(t *testing.T) {
 	configPath := filepath.Join(repoDir, "librarian.yaml")
 	initialConfig := &config.Config{
 		Language: "rust",
-		Version:  "v0.1.0",
+		Version:  sample.LibrarianVersion,
 	}
 	if err := yaml.Write(configPath, initialConfig); err != nil {
 		t.Fatal(err)
 	}
 
-	newVersion := testLibrarianVersion
+	newVersion := "v0.2.0"
 	if err := updateLibrarianVersion(newVersion, repoDir); err != nil {
 		t.Fatal(err)
 	}
