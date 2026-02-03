@@ -13,7 +13,18 @@
 # limitations under the License.
 
 [general]
-specification-source = 'google/appengine/v1'
+specification-source = 'google/protobuf'
 
 [source]
-roots                = 'protobuf'
+# Don't generate 'any.proto'; use the hand-written version in protobuf.p.dart.
+include-list = """\
+  api.proto,\
+  duration.proto,\
+  empty.proto,\
+  field_mask.proto,\
+  source_context.proto,\
+  struct.proto,\
+  timestamp.proto,\
+  type.proto,\
+  wrappers.proto\
+"""

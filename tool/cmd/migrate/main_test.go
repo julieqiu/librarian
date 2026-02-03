@@ -297,10 +297,10 @@ API key as an argument when initializing the client.
 			},
 			want: []*config.Library{
 				{
-					Name: "google_cloud_protobuf",
+					Name: "google_cloud_appengine_v1",
 					APIs: []*config.API{
 						{
-							Path: "google/protobuf",
+							Path: "google/appengine/v1",
 						},
 					},
 					Output: "testdata/read-sidekick-files/roots-update",
@@ -339,6 +339,37 @@ API key as an argument when initializing the client.
 						Dependencies:    "googleapis_auth,http",
 						DevDependencies: "test",
 						RepositoryURL:   "https://github.com/googleapis/google-cloud-dart/tree/main/generated/google_cloud_rpc",
+					},
+				},
+			},
+		},
+		{
+			name: "with include list",
+			files: []string{
+				"testdata/read-sidekick-files/include-list/.sidekick.toml",
+			},
+			want: []*config.Library{
+				{
+					Name: "google_cloud_protobuf",
+					APIs: []*config.API{
+						{
+							Path: "google/protobuf",
+						},
+					},
+					Output:              "testdata/read-sidekick-files/include-list",
+					SpecificationFormat: "protobuf",
+					Dart: &config.DartPackage{
+						IncludeList: []string{
+							"api.proto",
+							"duration.proto",
+							"empty.proto",
+							"field_mask.proto",
+							"source_context.proto",
+							"struct.proto",
+							"timestamp.proto",
+							"type.proto",
+							"wrappers.proto",
+						},
 					},
 				},
 			},
