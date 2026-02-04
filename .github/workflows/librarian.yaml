@@ -27,6 +27,8 @@ jobs:
       - uses: ./.github/actions/install-protoc
       - name: Display Go version
         run: go version
+      - name: Install Go tools
+        run: go install tool
       - name: Check go generate
         run: |
           go generate ./...
@@ -35,8 +37,6 @@ jobs:
             git diff
             exit 1
           fi
-      - name: Install Go tools
-        run: go install tool
       - name: Run tests
         run: |
           go test -race -coverprofile=coverage.out -covermode=atomic \
