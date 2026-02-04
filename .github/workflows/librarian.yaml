@@ -27,6 +27,14 @@ jobs:
       - uses: ./.github/actions/install-protoc
       - name: Display Go version
         run: go version
+      - name: Check go generate
+        run: |
+          go generate ./...
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "go generate produced diffs:"
+            git diff
+            exit 1
+          fi
       - name: Install Go tools
         run: go install tool
       - name: Run tests
