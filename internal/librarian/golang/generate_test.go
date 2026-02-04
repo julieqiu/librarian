@@ -20,11 +20,16 @@ import (
 	"testing"
 
 	"github.com/googleapis/librarian/internal/config"
+	"github.com/googleapis/librarian/internal/testhelper"
 )
 
 const googleapisDir = "../../testdata/googleapis"
 
 func TestGenerate(t *testing.T) {
+	testhelper.RequireCommand(t, "protoc")
+	testhelper.RequireCommand(t, "protoc-gen-go")
+	testhelper.RequireCommand(t, "protoc-gen-go-grpc")
+	testhelper.RequireCommand(t, "protoc-gen-go_gapic")
 	for _, test := range []struct {
 		name         string
 		libraryName  string
