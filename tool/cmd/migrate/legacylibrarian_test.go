@@ -86,12 +86,13 @@ func TestBuildConfigFromLibrarian(t *testing.T) {
 		return &config.Source{
 			Commit: "abcd123",
 			SHA256: "sha123",
-			Dir:    "path/to/repo",
+			Dir:    "testdata/googleapis",
 		}, nil
 	}
 	for _, test := range []struct {
 		name        string
 		lang        string
+		repoPath    string
 		state       *legacyconfig.LibrarianState
 		cfg         *legacyconfig.LibrarianConfig
 		fetchSource func(ctx context.Context) (*config.Source, error)
@@ -147,22 +148,19 @@ func TestBuildConfigFromLibrarian(t *testing.T) {
 			state: &legacyconfig.LibrarianState{
 				Libraries: []*legacyconfig.LibraryState{
 					{
-						ID:      "example-library",
+						ID:      "google-cloud-secret-manager",
 						Version: "1.0.0",
 						APIs: []*legacyconfig.API{
 							{
-								Path: "google/example/api/v1",
+								Path: "google/cloud/secretmanager/v1",
 							},
 						},
-					},
-					{
-						ID:                  "another-library",
-						LastGeneratedCommit: "abcd123",
 					},
 				},
 			},
 			cfg:         &legacyconfig.LibrarianConfig{},
 			fetchSource: defaultFetchSource,
+			repoPath:    "testdata/google-cloud-python",
 			want: &config.Config{
 				Language: "python",
 				Repo:     "googleapis/google-cloud-python",
@@ -180,14 +178,12 @@ func TestBuildConfigFromLibrarian(t *testing.T) {
 				},
 				Libraries: []*config.Library{
 					{
-						Name: "another-library",
-					},
-					{
-						Name:    "example-library",
-						Version: "1.0.0",
+						Name:                "google-cloud-secret-manager",
+						Version:             "1.0.0",
+						DescriptionOverride: "Stores, manages, and secures access to application secrets.",
 						APIs: []*config.API{
 							{
-								Path: "google/example/api/v1",
+								Path: "google/cloud/secretmanager/v1",
 							},
 						},
 					},
@@ -252,6 +248,25 @@ func TestBuildConfigFromLibrarian(t *testing.T) {
 			},
 			wantErr: errFetchSource,
 		},
+		{
+			// This is just one example of how python migration can fail,
+			// used to check that when it does, the error is propagated.
+			name: "python migration fails - source root doesn't exist",
+			lang: "python",
+			state: &legacyconfig.LibrarianState{
+				Libraries: []*legacyconfig.LibraryState{
+					{
+						ID:            "example-library",
+						Version:       "1.0.0",
+						SourceRoots:   []string{"packages/non-existent"},
+						PreserveRegex: []string{"docs/CHANGELOG.md"},
+					},
+				},
+			},
+			cfg:         &legacyconfig.LibrarianConfig{},
+			fetchSource: defaultFetchSource,
+			wantErr:     os.ErrNotExist,
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			fetchSource = test.fetchSource
@@ -259,6 +274,7 @@ func TestBuildConfigFromLibrarian(t *testing.T) {
 				librarianState:  test.state,
 				librarianConfig: test.cfg,
 				lang:            test.lang,
+				repoPath:        test.repoPath,
 			}
 			got, err := buildConfigFromLibrarian(t.Context(), input)
 			if test.wantErr != nil {
