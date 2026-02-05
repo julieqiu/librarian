@@ -37,6 +37,10 @@ func Generate(ctx context.Context, library *config.Library, googleapisDir string
 	if err != nil {
 		return err
 	}
+
+	_, statErr := os.Stat(outdir)
+	isNewLibrary := os.IsNotExist(statErr)
+
 	if err := os.MkdirAll(outdir, 0755); err != nil {
 		return err
 	}
@@ -66,6 +70,24 @@ func Generate(ctx context.Context, library *config.Library, googleapisDir string
 			if err := os.RemoveAll(filepath.Join(outdir, p)); err != nil {
 				return err
 			}
+		}
+	}
+
+	// Format generated code.
+	if err := command.RunInDir(ctx, outdir, "goimports", "-w", "."); err != nil {
+		return fmt.Errorf("goimports: %w", err)
+	}
+
+	if isNewLibrary {
+		moduleRoot := filepath.Join(outdir, library.Name)
+		if err := addSnippetsReplaceDirective(ctx, library); err != nil {
+			return err
+		}
+		if err := command.RunInDir(ctx, moduleRoot, "go", "mod", "init", modulePath(library)); err != nil {
+			return fmt.Errorf("go mod init: %w", err)
+		}
+		if err := command.RunInDir(ctx, moduleRoot, "go", "mod", "tidy"); err != nil {
+			return fmt.Errorf("go mod tidy: %w", err)
 		}
 	}
 	return nil
@@ -263,4 +285,14 @@ func collectProtoFiles(googleapisDir, apiPath string, nestedProtos []string) ([]
 		return nil, fmt.Errorf("no .proto files found in %s", apiDir)
 	}
 	return files, nil
+}
+
+func addSnippetsReplaceDirective(ctx context.Context, library *config.Library) error {
+	snippetsDir := filepath.Join(library.Output, "internal", "generated", "snippets")
+	if err := os.MkdirAll(snippetsDir, 0755); err != nil {
+		return err
+	}
+	modPath := modulePath(library)
+	relativeDir := "../../../" + library.Name
+	return command.RunInDir(ctx, snippetsDir, "go", "mod", "edit", "-replace", modPath+"="+relativeDir)
 }

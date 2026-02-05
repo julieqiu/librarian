@@ -17,6 +17,7 @@ package golang
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/googleapis/librarian/internal/config"
@@ -167,5 +168,34 @@ func TestGenerate(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestAddSnippetsReplaceDirective(t *testing.T) {
+	dir := t.TempDir()
+	snippetsDir := filepath.Join(dir, "internal", "generated", "snippets")
+	if err := os.MkdirAll(snippetsDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	// Create a go.mod file so go mod edit works
+	if err := os.WriteFile(filepath.Join(snippetsDir, "go.mod"), []byte("module snippets\n"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	library := &config.Library{
+		Name:   "secretmanager",
+		Output: dir,
+	}
+
+	if err := addSnippetsReplaceDirective(t.Context(), library); err != nil {
+		t.Fatal(err)
+	}
+
+	content, err := os.ReadFile(filepath.Join(snippetsDir, "go.mod"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(content), "replace cloud.google.com/go/secretmanager") {
+		t.Errorf("want replace directive in go.mod, got:\n%s", content)
 	}
 }
