@@ -126,9 +126,14 @@ func buildGAPICOpts(apiPath string, library *config.Library, goAPI *config.GoAPI
 	if gc != "" {
 		opts = append(opts, "grpc-service-config="+filepath.Join(googleapisDir, gc))
 	}
-	if library.Transport != "" {
-		opts = append(opts, "transport="+library.Transport)
+	// TODO(https://github.com/googleapis/librarian/issues/3775): assuming
+	// transport is library-wide for now, until we have figured out the config
+	// for transports.
+	transport := library.Transport
+	if transport == "" {
+		transport = "grpc+rest"
 	}
+	opts = append(opts, "transport="+transport)
 	if library.ReleaseLevel != "" {
 		opts = append(opts, "release-level="+library.ReleaseLevel)
 	}
