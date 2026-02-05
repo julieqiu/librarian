@@ -19,6 +19,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/testhelper"
 )
@@ -157,6 +158,9 @@ func TestGenerate(t *testing.T) {
 			if err := Generate(t.Context(), library, googleapisDir); err != nil {
 				t.Fatal(err)
 			}
+			if err := Format(t.Context(), library); err != nil {
+				t.Fatal(err)
+			}
 
 			for _, path := range test.want {
 				if _, err := os.Stat(filepath.Join(outdir, path)); err != nil {
@@ -169,5 +173,38 @@ func TestGenerate(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestFormat(t *testing.T) {
+	testhelper.RequireCommand(t, "gofmt")
+	outDir := t.TempDir()
+	goFile := filepath.Join(outDir, "test.go")
+	if err := os.WriteFile(goFile, []byte("package main\n\n\n\nfunc main() { \n\nfmt.Print(\"hello world\") \n\n}"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	library := &config.Library{
+		Output: outDir,
+	}
+	if err := Format(t.Context(), library); err != nil {
+		t.Fatal(err)
+	}
+
+	gotBytes, err := os.ReadFile(goFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := string(gotBytes)
+	want := `package main
+
+func main() {
+
+	fmt.Print("hello world")
+
+}
+`
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("mismatch (-want +got):\n%s", diff)
 	}
 }
