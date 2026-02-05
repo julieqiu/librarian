@@ -17,6 +17,7 @@ package golang
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/googleapis/librarian/internal/config"
@@ -167,5 +168,31 @@ func TestGenerate(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestUpdateSnippetsVersion(t *testing.T) {
+	dir := t.TempDir()
+	snippetsDir := filepath.Join(dir, "internal", "generated", "snippets", "test", "apiv1")
+	if err := os.MkdirAll(snippetsDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	content := `{"clientLibrary": {"version": "$VERSION"}}`
+	metadataPath := filepath.Join(snippetsDir, "snippet_metadata.test.v1.json")
+	if err := os.WriteFile(metadataPath, []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := updateSnippetsVersion(dir, "1.2.3"); err != nil {
+		t.Fatal(err)
+	}
+
+	updated, err := os.ReadFile(metadataPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(updated), `"version": "1.2.3"`) {
+		t.Errorf("want version 1.2.3, got:\n%s", updated)
 	}
 }

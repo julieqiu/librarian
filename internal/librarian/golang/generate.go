@@ -18,6 +18,7 @@ package golang
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -67,6 +68,10 @@ func Generate(ctx context.Context, library *config.Library, googleapisDir string
 				return err
 			}
 		}
+	}
+
+	if err := updateSnippetsVersion(outdir, library.Version); err != nil {
+		return err
 	}
 	return nil
 }
@@ -263,4 +268,34 @@ func collectProtoFiles(googleapisDir, apiPath string, nestedProtos []string) ([]
 		return nil, fmt.Errorf("no .proto files found in %s", apiDir)
 	}
 	return files, nil
+}
+
+// updateSnippetsVersion replaces $VERSION placeholders in snippet metadata files.
+func updateSnippetsVersion(outdir, version string) error {
+	if version == "" {
+		version = "0.0.0"
+	}
+	snippetsDir := filepath.Join(outdir, "internal", "generated", "snippets")
+	return filepath.WalkDir(snippetsDir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			if os.IsNotExist(err) {
+				return nil
+			}
+			return err
+		}
+		if d.IsDir() || !strings.HasPrefix(d.Name(), "snippet_metadata.") {
+			return nil
+		}
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		updated := strings.ReplaceAll(string(content), `"$VERSION"`, `"`+version+`"`)
+		if updated != string(content) {
+			if err := os.WriteFile(path, []byte(updated), 0644); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
