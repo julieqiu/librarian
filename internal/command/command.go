@@ -34,6 +34,20 @@ func Run(ctx context.Context, command string, arg ...string) error {
 	return RunWithEnv(ctx, nil, command, arg...)
 }
 
+// RunInDir executes a program in a specific directory.
+func RunInDir(ctx context.Context, dir, command string, arg ...string) error {
+	cmd := exec.CommandContext(ctx, command, arg...)
+	cmd.Dir = dir
+	if Verbose {
+		fmt.Fprintf(os.Stdout, "%s\n", cmd.String())
+	}
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%s: %v\n%s", cmd, err, output)
+	}
+	return nil
+}
+
 // RunWithEnv executes a program (with arguments) and optional environment
 // variables and captures any error output. If env is nil or empty, the command
 // inherits the environment of the calling process.

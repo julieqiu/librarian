@@ -41,6 +41,13 @@ func TestRunError(t *testing.T) {
 	}
 }
 
+func TestRunInDir(t *testing.T) {
+	dir := t.TempDir()
+	if err := RunInDir(t.Context(), dir, "go", "version"); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestRunWithEnv_SetsAndVerifiesVariable(t *testing.T) {
 	ctx := t.Context()
 	const (
