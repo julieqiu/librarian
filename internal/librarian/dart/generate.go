@@ -58,6 +58,16 @@ func DeriveAPIPath(name string) string {
 	return strings.ReplaceAll(name, "_", "/")
 }
 
+// DefaultLibraryName derives a library name from an api path.
+// For example: google/cloud/secretmanager/v1 -> google_cloud_secretmanager_v1.
+func DefaultLibraryName(api string) string {
+	name := strings.TrimPrefix(api, "google/cloud/")
+	if name == api {
+		name = strings.TrimPrefix(api, "google/")
+	}
+	return "google_cloud_" + strings.ReplaceAll(name, "/", "_")
+}
+
 // DefaultOutput returns the default output directory for a Dart library.
 func DefaultOutput(name, defaultOutput string) string {
 	return filepath.Join(defaultOutput, name)
