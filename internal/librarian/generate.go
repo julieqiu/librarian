@@ -126,7 +126,6 @@ func generateLibraries(ctx context.Context, all bool, cfg *config.Config, librar
 	// Generate all libraries in parallel.
 	g, gctx := errgroup.WithContext(ctx)
 	for _, lib := range libraries {
-		lib := lib
 		g.Go(func() error {
 			return generate(gctx, cfg.Language, lib, googleapisDir, rustSources)
 		})
