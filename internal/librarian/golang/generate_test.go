@@ -245,3 +245,47 @@ func TestGenerateREADME(t *testing.T) {
 		t.Errorf("want module path in README, got:\n%s", s)
 	}
 }
+
+func TestUpdateSnippetMetadata(t *testing.T) {
+	library := &config.Library{
+		Name:    "accessapproval",
+		Version: "1.2.3",
+	}
+
+	tmpDir := t.TempDir()
+	metadataDir := filepath.Join(tmpDir, "internal", "generated", "snippets", "accessapproval", "apiv1")
+	err := os.MkdirAll(metadataDir, 0755)
+	if err != nil {
+		t.Fatal(err)
+	}
+	metadataFile := filepath.Join(metadataDir, "snippet_metadata.google.cloud.accessapproval.v1.json")
+	data := `{ 
+ "clientLibrary": {
+    "name": "cloud.google.com/go/accessapproval/apiv1",
+    "version": "$VERSION",
+    "language": "GO",
+    "apis": [
+      {
+        "id": "google.cloud.accessapproval.v1",
+        "version": "v1"
+      }
+    ]
+ }
+}
+`
+	if err := os.WriteFile(metadataFile, []byte(data), 0755); err != nil {
+		return
+	}
+	if err := updateSnippetMetadata(library, tmpDir); err != nil {
+		t.Fatal(err)
+	}
+
+	content, err := os.ReadFile(metadataFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(content)
+	if !strings.Contains(s, "1.2.3") {
+		t.Errorf("want version in snippet metadata, got:\n%s", s)
+	}
+}
