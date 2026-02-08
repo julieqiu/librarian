@@ -115,7 +115,8 @@ func TestBuildConfigFromLibrarian(t *testing.T) {
 					},
 				},
 				Default: &config.Default{
-					TagFormat: defaultTagFormat,
+					TagFormat:    defaultTagFormat,
+					ReleaseLevel: "ga",
 				},
 			},
 		},
@@ -230,7 +231,8 @@ func TestBuildConfigFromLibrarian(t *testing.T) {
 					},
 				},
 				Default: &config.Default{
-					TagFormat: defaultTagFormat,
+					TagFormat:    defaultTagFormat,
+					ReleaseLevel: "ga",
 				},
 				Libraries: []*config.Library{
 					{
@@ -384,6 +386,37 @@ func TestBuildGoLibraries(t *testing.T) {
 						},
 						ModulePathVersion: "v2",
 					},
+				},
+			},
+		},
+		{
+			name: "go_libraries with non-default release level",
+			input: &MigrationInput{
+				librarianState: &legacyconfig.LibrarianState{
+					Libraries: []*legacyconfig.LibraryState{
+						{
+							ID: "ai",
+							APIs: []*legacyconfig.API{
+								{
+									Path:          "google/another/api/v1",
+									ServiceConfig: "another/config.yaml",
+								},
+							},
+						},
+					},
+				},
+				librarianConfig: &legacyconfig.LibrarianConfig{},
+				repoConfig:      nil,
+			},
+			want: []*config.Library{
+				{
+					Name: "ai",
+					APIs: []*config.API{
+						{
+							Path: "google/another/api/v1",
+						},
+					},
+					ReleaseLevel: "beta",
 				},
 			},
 		},
