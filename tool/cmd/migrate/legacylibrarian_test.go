@@ -390,17 +390,15 @@ func TestBuildGoLibraries(t *testing.T) {
 			},
 		},
 		{
-			name: "go_libraries with non-default release level",
+			name: "additional go module",
 			input: &MigrationInput{
 				librarianState: &legacyconfig.LibrarianState{
 					Libraries: []*legacyconfig.LibraryState{
 						{
 							ID: "ai",
 							APIs: []*legacyconfig.API{
-								{
-									Path:          "google/another/api/v1",
-									ServiceConfig: "another/config.yaml",
-								},
+								{Path: "google/ai/generativelanguage/v1"},
+								{Path: "google/ai/generativelanguage/v1alpha"},
 							},
 						},
 					},
@@ -412,11 +410,34 @@ func TestBuildGoLibraries(t *testing.T) {
 				{
 					Name: "ai",
 					APIs: []*config.API{
-						{
-							Path: "google/another/api/v1",
-						},
+						{Path: "google/ai/generativelanguage/v1"},
+						{Path: "google/ai/generativelanguage/v1alpha"},
 					},
 					ReleaseLevel: "beta",
+					Go: &config.GoModule{
+						GoAPIs: []*config.GoAPI{
+							{
+								Path:            "google/ai/generativelanguage/v1",
+								ClientDirectory: "generativelanguage",
+								ImportPath:      "ai/generativelanguage",
+							},
+							{
+								Path:            "google/ai/generativelanguage/v1alpha",
+								ClientDirectory: "generativelanguage",
+								ImportPath:      "ai/generativelanguage",
+							},
+							{
+								Path:            "google/ai/generativelanguage/v1beta",
+								ClientDirectory: "generativelanguage",
+								ImportPath:      "ai/generativelanguage",
+							},
+							{
+								Path:            "google/ai/generativelanguage/v1beta2",
+								ClientDirectory: "generativelanguage",
+								ImportPath:      "ai/generativelanguage",
+							},
+						},
+					},
 				},
 			},
 		},
