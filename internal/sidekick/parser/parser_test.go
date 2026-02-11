@@ -37,7 +37,7 @@ var (
 )
 
 func TestCreateModelDisco(t *testing.T) {
-	cfg := ModelConfig{
+	cfg := &ModelConfig{
 		SpecificationFormat: config.SpecDiscovery,
 		ServiceConfig:       secretManagerYamlFullPath,
 		SpecificationSource: discoSourceFile,
@@ -71,7 +71,7 @@ func TestCreateModelDisco(t *testing.T) {
 }
 
 func TestCreateModelOpenAPI(t *testing.T) {
-	cfg := ModelConfig{
+	cfg := &ModelConfig{
 		SpecificationFormat: config.SpecOpenAPI,
 		ServiceConfig:       secretManagerYamlFullPath,
 		SpecificationSource: openAPIFile,
@@ -89,7 +89,7 @@ func TestCreateModelOpenAPI(t *testing.T) {
 
 func TestCreateModelProtobuf(t *testing.T) {
 	requireProtoc(t)
-	cfg := ModelConfig{
+	cfg := &ModelConfig{
 		SpecificationFormat: config.SpecProtobuf,
 		ServiceConfig:       secretManagerYamlRelative,
 		SpecificationSource: "google/cloud/secretmanager/v1",
@@ -110,7 +110,7 @@ func TestCreateModelProtobuf(t *testing.T) {
 
 func TestCreateModelOverrides(t *testing.T) {
 	requireProtoc(t)
-	cfg := ModelConfig{
+	cfg := &ModelConfig{
 		SpecificationFormat: config.SpecProtobuf,
 		ServiceConfig:       secretManagerYamlRelative,
 		SpecificationSource: "google/cloud/secretmanager/v1",
@@ -143,7 +143,7 @@ func TestCreateModelOverrides(t *testing.T) {
 
 func TestCreateModelNone(t *testing.T) {
 	requireProtoc(t)
-	cfg := ModelConfig{
+	cfg := &ModelConfig{
 		SpecificationFormat: "none",
 		ServiceConfig:       secretManagerYamlRelative,
 		SpecificationSource: "none",
@@ -164,7 +164,7 @@ func TestCreateModelNone(t *testing.T) {
 }
 
 func TestCreateModelUnknown(t *testing.T) {
-	cfg := ModelConfig{
+	cfg := &ModelConfig{
 		SpecificationFormat: "--unknown--",
 		ServiceConfig:       secretManagerYamlRelative,
 		SpecificationSource: "none",
@@ -181,7 +181,7 @@ func TestCreateModelUnknown(t *testing.T) {
 }
 
 func TestCreateModelBadParse(t *testing.T) {
-	cfg := ModelConfig{
+	cfg := &ModelConfig{
 		SpecificationFormat: config.SpecOpenAPI,
 		ServiceConfig:       secretManagerYamlRelative,
 		// Note the mismatch between the format and the file contents.
