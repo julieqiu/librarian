@@ -27,7 +27,32 @@ jobs:
       - name: Run tests
         run: |
           go test -race -coverprofile=coverage.out -covermode=atomic \
-            $(go list ./... | grep -v -E 'internal/librarian/(python|rust|dart)|internal/sidekick')
+            $(go list ./cmd/... ./internal/... | grep -v -E 'internal/librarian/(python|rust|dart)|internal/sidekick|internal/legacylibrarian')
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: "go.mod"
+      - name: Install Go tools
+        run: go install tool
+      - name: Run linters
+        run: go test -v .
+  legacylibrarian:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: "go.mod"
+      - name: Run tests
+        run: |
+          go test -race -coverprofile=coverage.out -covermode=atomic ./internal/legacylibrarian/...
       - name: Upload coverage report
         uses: codecov/codecov-action@v5
         with:
@@ -52,7 +77,7 @@ jobs:
           fi
   create-issue-on-failure:
     runs-on: ubuntu-24.04
-    needs: [test, go-generate]
+    needs: [test, lint, legacylibrarian, go-generate]
     if: ${{ always() && contains(needs.*.result, 'failure') && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     steps:
       - name: Create an issue for push event to main
