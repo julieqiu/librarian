@@ -82,9 +82,19 @@ jobs:
           Note: This integration test only runs as a postsubmit test due to its long execution time.
 
           Workflow Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          ISSUE_LINK=$(gh issue create --title "$ISSUE_TITLE" --body "$BODY" --label ":rotating_light: critical" -R $GH_REPO)
-          ISSUE_NUM=${ISSUE_LINK##*/}
-          gh issue comment $ISSUE_NUM --body "@googleapis/cloud-sdk-librarian-team A critical issue has been created, please respond immediately."
+
+          # Check for an existing open issue
+          EXISTING_ISSUE=$(gh issue list --repo $GH_REPO --search "$ISSUE_TITLE in:title" --state open --json number --jq '.[0].number')
+
+          if [[ -n "$EXISTING_ISSUE" && "$EXISTING_ISSUE" != "null" ]]; then
+            echo "Found existing open issue #$EXISTING_ISSUE. Adding comment."
+            gh issue comment "$EXISTING_ISSUE" --repo $GH_REPO --body "The build failed again. Workflow Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          else
+            echo "Creating new issue."
+            ISSUE_LINK=$(gh issue create --title "$ISSUE_TITLE" --body "$BODY" --label ":rotating_light: critical" -R $GH_REPO)
+            ISSUE_NUM=${ISSUE_LINK##*/}
+            gh issue comment $ISSUE_NUM --body "@googleapis/cloud-sdk-librarian-team A critical issue has been created, please respond immediately."
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
