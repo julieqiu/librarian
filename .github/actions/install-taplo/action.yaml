@@ -5,9 +5,8 @@ runs:
     - name: Install taplo
       run: |
         set -e
-        curl -fsSL https://github.com/tamasfe/taplo/releases/download/$VERSION/taplo-linux-x86_64.gz | gunzip -c - | sudo tee /usr/local/bin/taplo > /dev/null
+        curl -fsSL https://github.com/tamasfe/taplo/releases/download/$VERSION/taplo-linux-x86_64.gz | gunzip -c - | sudo install -m 0755 /dev/stdin /usr/local/bin/taplo
         sha512sum -c <(echo "$CHECKSUM /usr/local/bin/taplo")
-        sudo chmod +x /usr/local/bin/taplo
         taplo --version
       shell: bash
       env:
