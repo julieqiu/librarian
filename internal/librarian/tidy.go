@@ -36,7 +36,7 @@ func tidyCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "tidy",
 		Usage:     "format and validate librarian.yaml",
-		UsageText: "librarian tidy [path]",
+		UsageText: "librarian tidy",
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			cfg, err := yaml.Read[config.Config](librarianConfigPath)
 			if err != nil {

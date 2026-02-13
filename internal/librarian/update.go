@@ -53,7 +53,7 @@ func updateCommand() *cli.Command {
   - googleapis
   - protobuf
   - showcase`,
-		UsageText: "librarian update [--all | source]",
+		UsageText: "librarian update <source | --all>",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name:  "all",
