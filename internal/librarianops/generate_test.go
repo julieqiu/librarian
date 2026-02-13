@@ -191,13 +191,6 @@ func TestSourcesToUpdate(t *testing.T) {
 		},
 		{
 			name: "no sources configured",
-			cfg: &config.Config{
-				Sources: &config.Sources{},
-			},
-			want: nil,
-		},
-		{
-			name: "nil sources",
 			cfg:  &config.Config{},
 			want: nil,
 		},
