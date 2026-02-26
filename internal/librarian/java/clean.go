@@ -26,7 +26,10 @@ import (
 	"github.com/googleapis/librarian/internal/config"
 )
 
-var itTestRegexp = regexp.MustCompile(`src/test/java/com/google/cloud/.*/v.*/it/IT.*Test\.java$`)
+var (
+	itTestRegexp          = regexp.MustCompile(`src/test/java/com/google/cloud/.*/v.*/it/IT.*Test\.java$`)
+	generatedSamplesPath = filepath.Join("samples", "snippets", "generated")
+)
 
 // Clean removes files in the library's output directory that are not in the keep list.
 // It targets patterns like proto-*, grpc-*, and the main GAPIC module.
@@ -39,7 +42,7 @@ func Clean(library *config.Library) error {
 		fmt.Sprintf("proto-%s-*", libraryName),
 		fmt.Sprintf("grpc-%s-*", libraryName),
 		libraryName,
-		filepath.Join("samples", "snippets", "generated"),
+		generatedSamplesPath,
 	}
 	keepSet := make(map[string]bool)
 	for _, k := range library.Keep {
