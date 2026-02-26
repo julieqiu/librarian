@@ -77,7 +77,7 @@ func collectJavaFiles(root string) ([]string, error) {
 			return nil
 		}
 		// exclude samples/snippets/generated
-		if strings.Contains(path, filepath.Join("samples", "snippets", "generated")) {
+		if strings.Contains(path, generatedSamplesPath) {
 			return nil
 		}
 		files = append(files, path)
