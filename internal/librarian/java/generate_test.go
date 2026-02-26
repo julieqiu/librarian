@@ -37,8 +37,8 @@ func TestGenerateLibraries(t *testing.T) {
 	}
 	googleapisDir := "/tmp/googleapis"
 
-	if err := GenerateLibraries(t.Context(), libraries, googleapisDir); err != nil {
-		t.Errorf("GenerateLibraries() error = %v, want nil", err)
+	if err := GenerateLibraries(t.Context(), libraries, googleapisDir); err == nil {
+		t.Error("GenerateLibraries() error = nil, want error (generation not yet implemented)")
 	}
 }
 
