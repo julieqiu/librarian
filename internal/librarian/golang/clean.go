@@ -25,21 +25,32 @@ import (
 	"github.com/googleapis/librarian/internal/config"
 )
 
-var (
-	generatedRegex = []*regexp.Regexp{
-		regexp.MustCompile(`.*/apiv(\d+).*/\.repo-metadata\.json$`),
-		regexp.MustCompile(`.*/apiv(\d+).*/auxiliary\.go$`),
-		regexp.MustCompile(`.*/apiv(\d+).*/auxiliary_go123\.go$`),
-		regexp.MustCompile(`.*/apiv(\d+).*/doc\.go$`),
-		regexp.MustCompile(`.*/apiv(\d+).*/.*_client\.go$`),
-		regexp.MustCompile(`.*/apiv(\d+).*/.*_client_example_go123_test\.go$`),
-		regexp.MustCompile(`.*/apiv(\d+).*/.*_client_example_test\.go$`),
-		regexp.MustCompile(`.*/apiv(\d+).*/gapic_metadata\.json$`),
-		regexp.MustCompile(`.*/apiv(\d+).*/helpers\.go$`),
-		regexp.MustCompile(`.*pb/.*\.pb\.go$`),
-		regexp.MustCompile(`.*/internal/generated/snippets/.*$`),
-	}
-)
+// generatedRegex matches files produced by the Go GAPIC and protobuf
+// generators. Files matching any of these patterns are removed during clean.
+var generatedRegex = []*regexp.Regexp{
+	// Repo metadata generated per API version.
+	regexp.MustCompile(`.*/apiv(\d+).*/\.repo-metadata\.json$`),
+	// GAPIC auxiliary helpers (type aliases, iterators).
+	regexp.MustCompile(`.*/apiv(\d+).*/auxiliary\.go$`),
+	// GAPIC auxiliary helpers for Go 1.23+ (range-over-func iterators).
+	regexp.MustCompile(`.*/apiv(\d+).*/auxiliary_go123\.go$`),
+	// GAPIC package documentation.
+	regexp.MustCompile(`.*/apiv(\d+).*/doc\.go$`),
+	// GAPIC client stubs.
+	regexp.MustCompile(`.*/apiv(\d+).*/.*_client\.go$`),
+	// GAPIC client examples for Go 1.23+.
+	regexp.MustCompile(`.*/apiv(\d+).*/.*_client_example_go123_test\.go$`),
+	// GAPIC client examples.
+	regexp.MustCompile(`.*/apiv(\d+).*/.*_client_example_test\.go$`),
+	// GAPIC metadata JSON.
+	regexp.MustCompile(`.*/apiv(\d+).*/gapic_metadata\.json$`),
+	// GAPIC LRO/operation helpers.
+	regexp.MustCompile(`.*/apiv(\d+).*/helpers\.go$`),
+	// Protobuf-generated Go files.
+	regexp.MustCompile(`.*pb/.*\.pb\.go$`),
+	// Generated code snippets.
+	regexp.MustCompile(`.*/internal/generated/snippets/.*$`),
+}
 
 // Clean cleans up a Go library and its associated snippets.
 func Clean(library *config.Library) error {
