@@ -38,12 +38,11 @@ func GenerateLibraries(ctx context.Context, libraries []*config.Library, googlea
 }
 
 // generate generates a Java client library.
-func generate(ctx context.Context, library *config.Library, googleapisDir string) error {
+func generate(_ context.Context, library *config.Library, _ string) error {
 	if len(library.APIs) == 0 {
 		return fmt.Errorf("no apis configured for library %q", library.Name)
 	}
-	fmt.Printf("to be implemented with: %v, %v, %v", ctx, library.Name, googleapisDir)
-	return nil
+	return fmt.Errorf("java generation is not yet implemented for library %q", library.Name)
 }
 
 // Format formats a Java client library using google-java-format.
