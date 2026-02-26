@@ -26,6 +26,7 @@ import (
 )
 
 func TestGenerateLibraries(t *testing.T) {
+	t.Parallel()
 	libraries := []*config.Library{
 		{
 			Name: "test-lib",
@@ -42,6 +43,7 @@ func TestGenerateLibraries(t *testing.T) {
 }
 
 func TestGenerateLibraries_Error(t *testing.T) {
+	t.Parallel()
 	for _, test := range []struct {
 		name      string
 		libraries []*config.Library
