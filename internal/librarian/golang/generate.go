@@ -99,10 +99,7 @@ func generate(ctx context.Context, library *config.Library, googleapisDir string
 	}
 
 	moduleRoot := filepath.Join(outdir, library.Name)
-	absModuleRoot, err := filepath.Abs(moduleRoot)
-	if err != nil {
-		return err
-	}
+	absModuleRoot := moduleRoot
 	if !strings.HasPrefix(absModuleRoot, outdir+string(filepath.Separator)) && absModuleRoot != outdir {
 		return fmt.Errorf("invalid library name: path traversal detected")
 	}
@@ -113,17 +110,17 @@ func generate(ctx context.Context, library *config.Library, googleapisDir string
 		if err := generateClientVersionFile(library, api.Path); err != nil {
 			return err
 		}
-		api, err := serviceconfig.Find(googleapisDir, api.Path, serviceconfig.LangGo)
+		sc, err := serviceconfig.Find(googleapisDir, api.Path, serviceconfig.LangGo)
 		if err != nil {
 			return err
 		}
-		if err := generateRepoMetadata(api, library); err != nil {
+		if err := generateRepoMetadata(sc, library); err != nil {
 			return err
 		}
 		if i != 0 {
 			continue
 		}
-		if err := generateREADME(library, api, moduleRoot); err != nil {
+		if err := generateREADME(library, sc, moduleRoot); err != nil {
 			return err
 		}
 	}
@@ -335,13 +332,13 @@ func generateREADME(library *config.Library, api *serviceconfig.API, moduleRoot 
 	if len(library.APIs) == 0 {
 		return fmt.Errorf("no APIs configured")
 	}
-	readmePath := filepath.Join(moduleRoot, "README.md")
+	readmePath := filepath.Clean(filepath.Join(moduleRoot, "README.md"))
 	// Skip generating README if it's in the keep list.
 	// Handwritten/veneer libraries should have the top-level README in the keep list.
 	// TODO(https://github.com/googleapis/librarian/issues/4113): investigate the difference between
 	// GAPIC and handwritten libraries.
 	for _, k := range library.Keep {
-		path := filepath.Join(moduleRoot, k)
+		path := filepath.Clean(filepath.Join(moduleRoot, k))
 		if path == readmePath {
 			return nil
 		}
