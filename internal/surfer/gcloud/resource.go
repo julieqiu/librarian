@@ -33,7 +33,6 @@ func getPluralFromSegments(segments []api.PathSegment) string {
 	if lastSegment.Variable == nil {
 		return ""
 	}
-	// The second to last segment should be the literal plural name
 	secondLastSegment := segments[len(segments)-2]
 	if secondLastSegment.Literal == nil {
 		return ""
@@ -49,8 +48,6 @@ func getParentFromSegments(segments []api.PathSegment) []api.PathSegment {
 	if len(segments) < 2 {
 		return nil
 	}
-	// We verify that the last segment is a variable and the second to last is a literal,
-	// consistent with standard AIP-122 patterns.
 	if segments[len(segments)-1].Variable != nil && segments[len(segments)-2].Literal != nil {
 		return segments[:len(segments)-2]
 	}
@@ -179,14 +176,12 @@ func getResourceForMethod(method *api.Method, model *api.API) *api.Resource {
 	// TODO(https://github.com/googleapis/librarian/issues/3363): Avoid this lookup by linking the ResourceReference
 	// to the Resource definition during model creation or post-processing.
 
-	// Use the API model's indexed maps for an efficient lookup.
 	for _, r := range model.ResourceDefinitions {
 		if r.Type == resourceType {
 			return r
 		}
 	}
 
-	// Also check resources defined on messages directly.
 	for _, m := range model.Messages {
 		if m.Resource != nil && m.Resource.Type == resourceType {
 			return m.Resource

@@ -40,15 +40,13 @@ func getCommandName(method *api.Method) (string, error) {
 	case isDelete(method):
 		return "delete", nil
 	default:
-		// For custom methods (AIP-136), we try to extract the custom verb from the HTTP path.
-		// The custom verb is the part after the colon (e.g., .../instances/*:exportData).
+		// Extract custom verb from HTTP path (e.g., .../instances/*:exportData).
 		if method.PathInfo != nil && len(method.PathInfo.Bindings) > 0 {
 			binding := method.PathInfo.Bindings[0]
 			if binding.PathTemplate != nil && binding.PathTemplate.Verb != nil {
 				return strcase.ToSnake(*binding.PathTemplate.Verb), nil
 			}
 		}
-		// Fallback: use the method name converted to snake_case.
 		return strcase.ToSnake(method.Name), nil
 	}
 }
@@ -66,11 +64,9 @@ func isCreate(m *api.Method) bool {
 
 // isGet determines if the method is a standard Get method (AIP-131).
 func isGet(m *api.Method) bool {
-	// Use sidekick's robust AIP check if available.
 	if m.IsAIPStandardGet {
 		return true
 	}
-	// Fallback heuristic
 	if !strings.HasPrefix(m.Name, "Get") {
 		return false
 	}
@@ -104,11 +100,9 @@ func isUpdate(m *api.Method) bool {
 
 // isDelete determines if the method is a standard Delete method (AIP-135).
 func isDelete(m *api.Method) bool {
-	// Use sidekick's robust AIP check if available.
 	if m.IsAIPStandardDelete {
 		return true
 	}
-	// Fallback heuristic
 	if !strings.HasPrefix(m.Name, "Delete") {
 		return false
 	}

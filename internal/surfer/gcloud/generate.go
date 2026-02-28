@@ -58,19 +58,15 @@ func Generate(_ context.Context, googleapis, gcloudconfig, output, includeList s
 }
 
 func generateService(service *api.Service, overrides *Config, model *api.API, output string) error {
-	// Determine short service name for directory structure.
-	// The `shortServiceName` is derived from `service.DefaultHost` (e.g., "parallelstore.googleapis.com" -> "parallelstore").
-	// `service.DefaultHost`  matches the name field in the service config file
-	// (e.g., `default_host` for parallelstore is derived from `parallelstore_v1.yaml` name field).
+	// shortServiceName is derived from service.DefaultHost (e.g.,
+	// "parallelstore.googleapis.com" -> "parallelstore"), which matches the
+	// name field in the service config file.
 	shortServiceName, _, found := strings.Cut(service.DefaultHost, ".")
 	if !found {
 		return fmt.Errorf("failed to determine short service name for service %q: default_host is empty", service.Name)
 	}
 
-	// The final output will be placed in a directory structure like:
-	// `{outdir}/{shortServiceName}/`
 	surfaceDir := filepath.Join(output, shortServiceName)
-
 	if err := os.MkdirAll(surfaceDir, 0755); err != nil {
 		return fmt.Errorf("failed to create surface directory for %q: %w", shortServiceName, err)
 	}
@@ -86,29 +82,17 @@ func generateService(service *api.Service, overrides *Config, model *api.API, ou
 		return fmt.Errorf("failed to write command group file for service %q: %w", shortServiceName, err)
 	}
 
-	// gcloud commands are resource-centric commands (e.g., `gcloud parallelstore instances create`),
-	// so we first need to group all the API methods by the resource they operate on.
-	// We'll create a map where the key is the resource's collection ID (e.g., "instances")
-	// and the value is a list of methods that act on that resource.
+	// gcloud commands are resource-centric (e.g., `gcloud parallelstore instances create`),
+	// so we group API methods by the resource they operate on.
 	methodsByResource := make(map[string][]*api.Method)
-
 	for _, method := range service.Methods {
-		// For each method, we determine the plural name of the resource it operates on.
-		// This plural name (e.g., "instances") will serve as our collection ID.
-		// Example: For the `CreateInstance` method, this will return "instances".
 		collectionID := getPluralResourceNameForMethod(method, model)
-
-		// If a collection ID is found, we add the method to our map.
 		if collectionID != "" {
 			methodsByResource[collectionID] = append(methodsByResource[collectionID], method)
 		}
 	}
 
-	// Now that we have grouped the methods by resource, we can generate the
-	// command files for each resource.
 	for collectionID, methods := range methodsByResource {
-		// The `generateResourceCommands` function will handle the creation of the
-		// directory structure and YAML files for this specific resource.
 		err := generateResourceCommands(collectionID, methods, surfaceDir, overrides, model, service)
 		if err != nil {
 			return err
@@ -127,17 +111,14 @@ func generateResourceCommands(collectionID string, methods []*api.Method, baseDi
 		return nil
 	}
 
-	// The main directory for the resource is named after its collection ID.
-	// Example: `{baseDir}/instances`
 	resourceDir := filepath.Join(baseDir, collectionID)
-
 	if err := os.MkdirAll(resourceDir, 0755); err != nil {
 		return fmt.Errorf("failed to create resource directory for %q: %w", collectionID, err)
 	}
 
 	singular := getSingularResourceNameForMethod(methods[0], model)
 
-	// We determine the short service name from the default host to use as a fallback title.
+	// Use the short service name from default host as a fallback title.
 	shortServiceName, _, _ := strings.Cut(service.DefaultHost, ".")
 
 	track := strings.ToUpper(inferTrackFromPackage(service.Package))
@@ -159,19 +140,12 @@ func generateResourceCommands(collectionID string, methods []*api.Method, baseDi
 		return fmt.Errorf("failed to create partials directory for %q: %w", collectionID, err)
 	}
 
-	// We iterate through each method associated with this resource.
 	for _, method := range methods {
-		// We map the API method to a standard gcloud command name.
-		// Example: `CreateInstance` -> "create"
 		verb, err := getCommandName(method)
 		if err != nil {
-			// Continue to the next method if we can't determine a command name,
-			// logging the issue might be useful here in the future.
 			continue
 		}
 
-		// We construct the complete command definition from the API method.
-		// This involves generating all the arguments, help text, and request details.
 		cmd, err := NewCommand(method, overrides, model, service)
 		if err != nil {
 			return err
@@ -181,25 +155,21 @@ func generateResourceCommands(collectionID string, methods []*api.Method, baseDi
 		// even if there is only one.
 		cmdList := []*Command{cmd}
 
-		// We create the main command file (e.g., `create.yaml`).
 		mainCmdPath := filepath.Join(resourceDir, fmt.Sprintf("%s.yaml", verb))
 		if err := os.WriteFile(mainCmdPath, []byte(partialsHeader), 0644); err != nil {
 			return fmt.Errorf("failed to write main command file for %q: %w", method.Name, err)
 		}
 
-		// Generate a partial file for each release track.
 		for _, track := range cmd.ReleaseTracks {
 			trackName := strings.ToLower(track)
 			partialFileName := fmt.Sprintf("_%s_%s.yaml", verb, trackName)
 			partialCmdPath := filepath.Join(partialsDir, partialFileName)
 
-			// We marshal the command definition struct into YAML format.
 			b, err := yaml.Marshal(cmdList)
 			if err != nil {
 				return fmt.Errorf("failed to marshal partial command for %q: %w", method.Name, err)
 			}
 
-			// Finally, we write the generated YAML to the partial file.
 			if err := os.WriteFile(partialCmdPath, b, 0644); err != nil {
 				return fmt.Errorf("failed to write partial command file for %q: %w", method.Name, err)
 			}
