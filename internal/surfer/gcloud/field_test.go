@@ -40,7 +40,10 @@ func TestGetGcloudType(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
-			got := getGcloudType(test.typez)
+			got, err := getGcloudType(test.typez)
+			if err != nil {
+				t.Fatal(err)
+			}
 			if got != test.want {
 				t.Errorf("getGcloudType(%v) = %q, want %q", test.typez, got, test.want)
 			}
@@ -72,12 +75,10 @@ func TestIsSafeName(t *testing.T) {
 	}
 }
 
-func TestGetGcloudType_Panic(t *testing.T) {
+func TestGetGcloudType_Error(t *testing.T) {
 	t.Parallel()
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("getGcloudType() did not panic for unsupported type")
-		}
-	}()
-	getGcloudType(api.Typez(999))
+	_, err := getGcloudType(api.Typez(999))
+	if err == nil {
+		t.Fatal("getGcloudType(999) returned nil error, want error for unsupported type")
+	}
 }

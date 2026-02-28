@@ -21,24 +21,24 @@ import (
 )
 
 // getGcloudType maps an API field type to the corresponding gcloud argparse type.
-func getGcloudType(t api.Typez) string {
+func getGcloudType(t api.Typez) (string, error) {
 	switch t {
 	case api.DOUBLE_TYPE, api.FLOAT_TYPE:
-		return "float"
+		return "float", nil
 	case api.INT64_TYPE, api.UINT64_TYPE, api.FIXED64_TYPE, api.SFIXED64_TYPE, api.SINT64_TYPE:
-		return "long"
+		return "long", nil
 	case api.INT32_TYPE, api.FIXED32_TYPE, api.UINT32_TYPE, api.SFIXED32_TYPE, api.SINT32_TYPE:
-		return "int"
+		return "int", nil
 	case api.BOOL_TYPE:
-		return "bool"
+		return "bool", nil
 	case api.STRING_TYPE, api.ENUM_TYPE:
-		return "str"
+		return "str", nil
 	case api.BYTES_TYPE:
-		return "bytes"
+		return "bytes", nil
 	case api.MESSAGE_TYPE, api.GROUP_TYPE:
-		return "arg_object"
+		return "arg_object", nil
 	default:
-		panic(fmt.Sprintf("unsupported API type: %v", t))
+		return "", fmt.Errorf("unsupported API type: %v", t)
 	}
 }
 

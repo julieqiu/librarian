@@ -226,7 +226,11 @@ func newParam(field *api.Field, apiField string, bc *buildContext) (Param, error
 			})
 		}
 	} else {
-		param.Type = getGcloudType(field.Typez)
+		gcloudType, err := getGcloudType(field.Typez)
+		if err != nil {
+			return Param{}, err
+		}
+		param.Type = gcloudType
 	}
 
 	// For Update commands, maps and repeated fields are often clearable.
