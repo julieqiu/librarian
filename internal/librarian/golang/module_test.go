@@ -198,7 +198,7 @@ func TestFindGoAPI(t *testing.T) {
 			apiPath: "google/cloud/secretmanager/v1",
 		},
 		{
-			name: "find an api",
+			name: "api not found",
 			library: &config.Library{
 				Name: "secretmanager",
 				Go: &config.GoModule{
