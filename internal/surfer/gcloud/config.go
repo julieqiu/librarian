@@ -15,6 +15,16 @@
 // Package gcloud generates gcloud command YAML files.
 package gcloud
 
+// Selector fields
+//
+// Several types below have a Selector field. A selector is a
+// comma-separated list of patterns for any API element (method, field,
+// enum value). Each pattern is a qualified name that may end in "*" as
+// a wildcard, but only for a whole component ("foo.*" is valid,
+// "foo.b*" is not).
+//
+// See http://google3/google/api/documentation.proto;l=253;rcl=525006895.
+
 // Config represents the top-level schema of a gcloud config YAML file.
 type Config struct {
 	// ServiceName is the name of a service. Each gcloud.yaml file should
@@ -94,22 +104,8 @@ type HelpTextRules struct {
 }
 
 // HelpTextRule maps an API selector to its corresponding HelpTextElement.
-// This allows for targeted help text customization based on specific API
-// elements.
 type HelpTextRule struct {
-	// Selector is a comma-separated list of patterns for any element such as a
-	// method, a field, an enum value. Each pattern is a qualified name of the
-	// element which may end in "*", indicating a wildcard. Wildcards are only
-	// allowed at the end and for a whole component of the qualified name, i.e.
-	// "foo.*" is ok, but not "foo.b*" or "foo.*.bar".
-	//
-	// Wildcard may not be applicable for some elements, in those cases an
-	// 'InvalidSelectorWildcardError' error will be thrown.  Additionally, some
-	// gcloud data elements expect a singular selector, if a comma separated
-	// selector string is passed, a 'InvalidSelectorList' error will be thrown.
-	//
-	// See http://google3/google/api/documentation.proto;l=253;rcl=525006895
-	// for API selector details.
+	// Selector is an API element selector. See "Selector fields" above.
 	Selector string `yaml:"selector,omitempty"`
 
 	// HelpText contains the detailed help text content for the selected
@@ -135,24 +131,10 @@ type HelpTextElement struct {
 	Examples []string `yaml:"examples,omitempty"`
 }
 
-// OutputFormatting contains a collection of command output formatting rules.
-// These rules are used to specify how the output of gcloud commands should be
-// presented.
+// OutputFormatting contains output formatting rules for commands.
 type OutputFormatting struct {
-	// Selector is a comma-separated list of patterns for any element such as a
-	// method, a field, an enum value. Each pattern is a qualified name of the
-	// element which may end in "*", indicating a wildcard. Wildcards are only
-	// allowed at the end and for a whole component of the qualified name, i.e.
-	// "foo.*" is ok, but not "foo.b*" or "foo.*.bar".
-	//
-	// Wildcard may not be applicable for some elements, in those cases an
-	// 'InvalidSelectorWildcardError' error will be thrown.  Additionally, some
-	// gcloud data elements expect a singular selector, if a comma separated
-	// selector string is passed, a 'InvalidSelectorList' error will be thrown.
-	//
-	// See http://google3/google/api/documentation.proto;l=253;rcl=525006895
-	// for API selector details.  Must point to a single RPC/command. Wildcards
-	// ('*') not allowed for output formatting.
+	// Selector is an API element selector pointing to a single RPC/command.
+	// Wildcards are not allowed. See "Selector fields" above.
 	Selector string `yaml:"selector"`
 
 	// Format is the output formatting string to apply. This string typically
@@ -161,23 +143,9 @@ type OutputFormatting struct {
 	Format string `yaml:"format"`
 }
 
-// CommandOperationsConfig contains a collection of command operations
-// configuration rules.  These rules govern the behavior of long-running
-// operations triggered by gcloud commands.
+// CommandOperationsConfig contains configuration for long-running operations.
 type CommandOperationsConfig struct {
-	// Selector is a comma-separated list of patterns for any element such as a
-	// method, a field, an enum value. Each pattern is a qualified name of the
-	// element which may end in "*", indicating a wildcard. Wildcards are only
-	// allowed at the end and for a whole component of the qualified name, i.e.
-	// "foo.*" is ok, but not "foo.b*" or "foo.*.bar".
-	//
-	// Wildcard may not be applicable for some elements, in those cases an
-	// 'InvalidSelectorWildcardError' error will be thrown.  Additionally, some
-	// gcloud data elements expect a singular selector, if a comma separated
-	// selector string is passed, a 'InvalidSelectorList' error will be thrown.
-	//
-	// See http://google3/google/api/documentation.proto;l=253;rcl=525006895
-	// for API selector details.
+	// Selector is an API element selector. See "Selector fields" above.
 	Selector string `yaml:"selector"`
 
 	// DisplayOperationResult determines whether to display the resource result
