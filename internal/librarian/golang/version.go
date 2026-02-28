@@ -33,6 +33,9 @@ var (
 
 	//go:embed template/_internal_version.go.txt
 	internalVersionTmpl string
+
+	internalVersionTmplParsed = template.Must(template.New("internalVersion").Parse(internalVersionTmpl))
+	clientVersionTmplParsed   = template.Must(template.New("clientVersion").Parse(clientVersionTmpl))
 )
 
 func generateInternalVersionFile(moduleDir, version string) (err error) {
@@ -56,8 +59,7 @@ func generateInternalVersionFile(moduleDir, version string) (err error) {
 	if err := writeLicenseHeader(f); err != nil {
 		return err
 	}
-	t := template.Must(template.New("version").Parse(internalVersionTmpl))
-	return t.Execute(f, map[string]any{
+	return internalVersionTmplParsed.Execute(f, map[string]any{
 		"Version": version,
 	})
 }
@@ -86,7 +88,6 @@ func generateClientVersionFile(library *config.Library, apiPath string) (err err
 	if err := writeLicenseHeader(f); err != nil {
 		return err
 	}
-	t := template.Must(template.New("version").Parse(clientVersionTmpl))
 	pkg := library.Name
 	if clientDir != "" {
 		pkg = clientDir
@@ -94,7 +95,7 @@ func generateClientVersionFile(library *config.Library, apiPath string) (err err
 	if goAPI != nil && goAPI.ClientPackageOverride != "" {
 		pkg = goAPI.ClientPackageOverride
 	}
-	return t.Execute(f, map[string]any{
+	return clientVersionTmplParsed.Execute(f, map[string]any{
 		"Package":    pkg,
 		"ModulePath": modulePath(library),
 	})
