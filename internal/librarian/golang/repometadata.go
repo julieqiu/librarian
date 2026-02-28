@@ -17,7 +17,6 @@ package golang
 import (
 	"fmt"
 	"path"
-	"path/filepath"
 
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/repometadata"
@@ -50,7 +49,7 @@ func generateRepoMetadata(api *serviceconfig.API, library *config.Library) error
 
 // clientDocURL builds the client documentation URL for Go SDK.
 func clientDocURL(library *config.Library, apiPath string) string {
-	suffix := fmt.Sprintf("api%s", filepath.Base(apiPath))
+	suffix := fmt.Sprintf("api%s", path.Base(apiPath))
 	clientDir := clientDirectory(library, apiPath)
 	if clientDir != "" {
 		suffix = path.Join(clientDir, suffix)
@@ -60,7 +59,7 @@ func clientDocURL(library *config.Library, apiPath string) string {
 
 // distributionName builds the distribution name for Go SDK.
 func distributionName(library *config.Library, apiPath, serviceName string) string {
-	version := filepath.Base(apiPath)
+	version := path.Base(apiPath)
 	clientDir := clientDirectory(library, apiPath)
 	if clientDir != "" {
 		serviceName = fmt.Sprintf("%s/%s", serviceName, clientDir)
