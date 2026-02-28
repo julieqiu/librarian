@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/googleapis/librarian/internal/config"
 )
 
@@ -132,13 +133,13 @@ func TestClean(t *testing.T) {
 			gotOutputFiles := getFilesInDir(t, outputPath, filepath.Join(root, libraryName))
 			slices.Sort(gotOutputFiles)
 			slices.Sort(test.wantOutput)
-			if !slices.Equal(gotOutputFiles, test.wantOutput) {
-				t.Errorf("output directory: got %v, want %v", gotOutputFiles, test.wantOutput)
+			if diff := cmp.Diff(test.wantOutput, gotOutputFiles, cmpopts.EquateEmpty()); diff != "" {
+				t.Errorf("output directory mismatch (-want +got):\n%s", diff)
 			}
 
 			gotSnippetFiles := getFilesInDir(t, snippetPath, root)
-			if !slices.Equal(gotSnippetFiles, test.wantSnippets) {
-				t.Errorf("snippet directory: got %v, want %v", gotSnippetFiles, test.wantSnippets)
+			if diff := cmp.Diff(test.wantSnippets, gotSnippetFiles, cmpopts.EquateEmpty()); diff != "" {
+				t.Errorf("snippet directory mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
