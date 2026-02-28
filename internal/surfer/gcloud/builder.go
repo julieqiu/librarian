@@ -72,7 +72,7 @@ func NewCommand(method *api.Method, overrides *Config, model *api.API, service *
 			IDField: "name",
 		}
 		// List commands should have a default output format.
-		cmd.Output = newOutputConfig(method, model)
+		cmd.Output = newOutputConfig(method, model, overrides)
 	}
 
 	if isUpdate(method) {
@@ -430,33 +430,35 @@ func newRequest(method *api.Method, overrides *Config, _ *api.API, service *api.
 }
 
 // newAsync creates the `Async` part of the command definition for long-running operations.
-func newAsync(method *api.Method, model *api.API, _ *Config, service *api.Service) *Async {
+func newAsync(method *api.Method, model *api.API, overrides *Config, service *api.Service) *Async {
 	async := &Async{
 		Collection: newCollectionPath(method, service, true),
 	}
 
 	// Determine if the operation result should be extracted as the resource.
 	// This is true if the operation response type matches the method's resource type.
-	// We reuse the 'resource' variable looked up earlier.
 	resource := getResourceForMethod(method, model)
-	if resource == nil {
-		return async
+	if resource != nil {
+		// Heuristic: Check if response type ID (e.g. ".google.cloud.parallelstore.v1.Instance")
+		// matches the resource singular name or type.
+		responseTypeID := method.OperationInfo.ResponseTypeID
+		// Extract short name from FQN (last element after dot)
+		responseTypeName := responseTypeID
+		if idx := strings.LastIndex(responseTypeID, "."); idx != -1 {
+			responseTypeName = responseTypeID[idx+1:]
+		}
+
+		singular := getSingularResourceNameForMethod(method, model)
+		if strings.EqualFold(responseTypeName, singular) || strings.HasSuffix(resource.Type, "/"+responseTypeName) {
+			async.ExtractResourceResult = true
+		} else {
+			async.ExtractResourceResult = false
+		}
 	}
 
-	// Heuristic: Check if response type ID (e.g. ".google.cloud.parallelstore.v1.Instance")
-	// matches the resource singular name or type.
-	responseTypeID := method.OperationInfo.ResponseTypeID
-	// Extract short name from FQN (last element after dot)
-	responseTypeName := responseTypeID
-	if idx := strings.LastIndex(responseTypeID, "."); idx != -1 {
-		responseTypeName = responseTypeID[idx+1:]
-	}
-
-	singular := getSingularResourceNameForMethod(method, model)
-	if strings.EqualFold(responseTypeName, singular) || strings.HasSuffix(resource.Type, "/"+responseTypeName) {
-		async.ExtractResourceResult = true
-	} else {
-		async.ExtractResourceResult = false
+	// Config override takes precedence over the heuristic.
+	if rule := findCommandOperationsConfig(method, overrides); rule != nil {
+		async.ExtractResourceResult = !rule.DisplayOperationResult
 	}
 
 	return async
@@ -504,10 +506,17 @@ func newCollectionPath(method *api.Method, service *api.Service, isAsync bool) [
 }
 
 // newOutputConfig generates the output configuration for List commands.
-func newOutputConfig(method *api.Method, _ *api.API) *OutputConfig {
+func newOutputConfig(method *api.Method, _ *api.API, overrides *Config) *OutputConfig {
 	// We only generate output config for list methods.
 	if !isList(method) {
 		return nil
+	}
+
+	// Check for a config override first.
+	if rule := findOutputFormatting(method, overrides); rule != nil {
+		return &OutputConfig{
+			Format: rule.Format,
+		}
 	}
 
 	resourceMsg := findResourceMessage(method.OutputType)
@@ -606,6 +615,36 @@ func findFieldHelpTextRule(field *api.Field, overrides *Config) *HelpTextRule {
 		}
 		for _, rule := range api.HelpText.FieldRules {
 			if rule.Selector == field.ID {
+				return rule
+			}
+		}
+	}
+	return nil
+}
+
+// findOutputFormatting finds the output formatting rule from the config that applies to the current method.
+func findOutputFormatting(method *api.Method, overrides *Config) *OutputFormatting {
+	if overrides.APIs == nil {
+		return nil
+	}
+	for _, api := range overrides.APIs {
+		for _, rule := range api.OutputFormatting {
+			if rule.Selector == strings.TrimPrefix(method.ID, ".") {
+				return rule
+			}
+		}
+	}
+	return nil
+}
+
+// findCommandOperationsConfig finds the command operations config rule from the config that applies to the current method.
+func findCommandOperationsConfig(method *api.Method, overrides *Config) *CommandOperationsConfig {
+	if overrides.APIs == nil {
+		return nil
+	}
+	for _, api := range overrides.APIs {
+		for _, rule := range api.CommandOperationsConfig {
+			if rule.Selector == strings.TrimPrefix(method.ID, ".") {
 				return rule
 			}
 		}

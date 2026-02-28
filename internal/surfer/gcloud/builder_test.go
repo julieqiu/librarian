@@ -349,7 +349,7 @@ func TestNewOutputConfig(t *testing.T) {
 			test.method.OutputType.Pagination = &api.PaginationInfo{
 				PageableItem: test.method.OutputType.Fields[0],
 			}
-			got := newOutputConfig(test.method, &api.API{})
+			got := newOutputConfig(test.method, &api.API{}, &Config{})
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("newOutputConfig() mismatch (-want +got):\n%s", diff)
 			}
@@ -378,7 +378,7 @@ func TestNewOutputConfig_Error(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
-			if got := newOutputConfig(test.method, &api.API{}); got != nil {
+			if got := newOutputConfig(test.method, &api.API{}, &Config{}); got != nil {
 				t.Errorf("newOutputConfig() = %v, want nil", got)
 			}
 		})
@@ -1068,6 +1068,275 @@ func TestFindFieldHelpTextRule(t *testing.T) {
 			got := findFieldHelpTextRule(field, test.overrides)
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("findFieldHelpTextRule() mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestFindOutputFormatting(t *testing.T) {
+	method := api.NewTestMethod("ListInstances")
+	method.ID = "google.cloud.test.v1.Service.ListInstances"
+
+	for _, test := range []struct {
+		name      string
+		overrides *Config
+		want      *OutputFormatting
+	}{
+		{
+			"no APIs in config",
+			&Config{},
+			nil,
+		},
+		{
+			"no matching rule",
+			&Config{
+				APIs: []API{
+					{
+						OutputFormatting: []*OutputFormatting{
+							{
+								Selector: "google.cloud.test.v1.Service.OtherMethod",
+								Format:   "table(name)",
+							},
+						},
+					},
+				},
+			},
+			nil,
+		},
+		{
+			"matching rule found",
+			&Config{
+				APIs: []API{
+					{
+						OutputFormatting: []*OutputFormatting{
+							{
+								Selector: "google.cloud.test.v1.Service.ListInstances",
+								Format:   "table(name,\nstatus)",
+							},
+						},
+					},
+				},
+			},
+			&OutputFormatting{
+				Selector: "google.cloud.test.v1.Service.ListInstances",
+				Format:   "table(name,\nstatus)",
+			},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			got := findOutputFormatting(method, test.overrides)
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestFindCommandOperationsConfig(t *testing.T) {
+	method := api.NewTestMethod("CreateInstance")
+	method.ID = "google.cloud.test.v1.Service.CreateInstance"
+
+	for _, test := range []struct {
+		name      string
+		overrides *Config
+		want      *CommandOperationsConfig
+	}{
+		{
+			"no APIs in config",
+			&Config{},
+			nil,
+		},
+		{
+			"no matching rule",
+			&Config{
+				APIs: []API{
+					{
+						CommandOperationsConfig: []*CommandOperationsConfig{
+							{
+								Selector:               "google.cloud.test.v1.Service.OtherMethod",
+								DisplayOperationResult: true,
+							},
+						},
+					},
+				},
+			},
+			nil,
+		},
+		{
+			"matching rule found",
+			&Config{
+				APIs: []API{
+					{
+						CommandOperationsConfig: []*CommandOperationsConfig{
+							{
+								Selector:               "google.cloud.test.v1.Service.CreateInstance",
+								DisplayOperationResult: true,
+							},
+						},
+					},
+				},
+			},
+			&CommandOperationsConfig{
+				Selector:               "google.cloud.test.v1.Service.CreateInstance",
+				DisplayOperationResult: true,
+			},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			got := findCommandOperationsConfig(method, test.overrides)
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestNewOutputConfig_WithOverride(t *testing.T) {
+	method := api.NewTestMethod("ListThings").WithVerb("GET").WithOutput(
+		api.NewTestMessage("ListResponse").WithFields(
+			api.NewTestField("things").WithType(api.MESSAGE_TYPE).WithRepeated().WithMessageType(
+				api.NewTestMessage("Thing").WithFields(
+					api.NewTestField("name").WithType(api.STRING_TYPE),
+					api.NewTestField("description").WithType(api.STRING_TYPE),
+				).WithResource(api.NewTestResource("test.googleapis.com/Thing")),
+			),
+		),
+	)
+	method.OutputType.Pagination = &api.PaginationInfo{
+		PageableItem: method.OutputType.Fields[0],
+	}
+	method.ID = "google.cloud.test.v1.Service.ListThings"
+
+	overrides := &Config{
+		APIs: []API{
+			{
+				OutputFormatting: []*OutputFormatting{
+					{
+						Selector: "google.cloud.test.v1.Service.ListThings",
+						Format:   "table(name,\ncustomField)",
+					},
+				},
+			},
+		},
+	}
+
+	got := newOutputConfig(method, &api.API{}, overrides)
+	want := &OutputConfig{
+		Format: "table(name,\ncustomField)",
+	}
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("mismatch (-want +got):\n%s", diff)
+	}
+}
+
+func TestNewAsync_WithOperationsConfigOverride(t *testing.T) {
+	service := api.NewTestService("TestService").WithPackage("google.cloud.test.v1")
+	service.DefaultHost = "test.googleapis.com"
+
+	for _, test := range []struct {
+		name      string
+		method    *api.Method
+		overrides *Config
+		want      *Async
+	}{
+		{
+			name: "override forces ExtractResourceResult to false",
+			method: func() *api.Method {
+				m := api.NewTestMethod("CreateThing").WithVerb("POST").WithPathTemplate(
+					api.NewPathTemplate().WithLiteral("v1").WithVariable(api.NewPathVariable("parent").WithLiteral("projects").WithMatch()).WithLiteral("things"),
+				).WithInput(
+					api.NewTestMessage("CreateRequest").WithFields(
+						api.NewTestField("thing").WithType(api.MESSAGE_TYPE).WithMessageType(
+							api.NewTestMessage("Thing").WithResource(api.NewTestResource("test.googleapis.com/Thing")),
+						),
+					),
+				)
+				m.OperationInfo = &api.OperationInfo{ResponseTypeID: "Thing"}
+				m.ID = "google.cloud.test.v1.Service.CreateThing"
+				return m
+			}(),
+			overrides: &Config{
+				APIs: []API{
+					{
+						CommandOperationsConfig: []*CommandOperationsConfig{
+							{
+								Selector:               "google.cloud.test.v1.Service.CreateThing",
+								DisplayOperationResult: true,
+							},
+						},
+					},
+				},
+			},
+			want: &Async{
+				Collection:            []string{"test.projects.operations"},
+				ExtractResourceResult: false,
+			},
+		},
+		{
+			name: "override forces ExtractResourceResult to true",
+			method: func() *api.Method {
+				m := api.NewTestMethod("DeleteThing").WithVerb("DELETE").WithPathTemplate(
+					api.NewPathTemplate().WithLiteral("v1").WithVariable(api.NewPathVariable("name").WithLiteral("projects").WithMatch().WithLiteral("things").WithMatch()),
+				)
+				m.OperationInfo = &api.OperationInfo{ResponseTypeID: ".google.protobuf.Empty"}
+				m.ID = "google.cloud.test.v1.Service.DeleteThing"
+				return m
+			}(),
+			overrides: &Config{
+				APIs: []API{
+					{
+						CommandOperationsConfig: []*CommandOperationsConfig{
+							{
+								Selector:               "google.cloud.test.v1.Service.DeleteThing",
+								DisplayOperationResult: false,
+							},
+						},
+					},
+				},
+			},
+			want: &Async{
+				Collection:            []string{"test.projects.operations"},
+				ExtractResourceResult: true,
+			},
+		},
+		{
+			name: "override applies even without resource",
+			method: func() *api.Method {
+				m := api.NewTestMethod("CustomMethod").WithVerb("POST").WithPathTemplate(
+					api.NewPathTemplate().WithLiteral("v1").WithVariable(api.NewPathVariable("name").WithLiteral("projects").WithMatch()).WithLiteral("things").WithVerb("doAction"),
+				)
+				m.OperationInfo = &api.OperationInfo{ResponseTypeID: "ActionResponse"}
+				m.ID = "google.cloud.test.v1.Service.CustomMethod"
+				return m
+			}(),
+			overrides: &Config{
+				APIs: []API{
+					{
+						CommandOperationsConfig: []*CommandOperationsConfig{
+							{
+								Selector:               "google.cloud.test.v1.Service.CustomMethod",
+								DisplayOperationResult: false,
+							},
+						},
+					},
+				},
+			},
+			want: &Async{
+				Collection:            []string{"test.projects.operations"},
+				ExtractResourceResult: true,
+			},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			model := api.NewTestAPI([]*api.Message{}, nil, []*api.Service{service})
+			test.method.Service = service
+
+			got := newAsync(test.method, model, test.overrides, service)
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
