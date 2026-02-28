@@ -401,7 +401,7 @@ func TestUpdateSnippetMetadata(t *testing.T) {
 }
 `
 	if err := os.WriteFile(metadataFile, []byte(data), 0755); err != nil {
-		return
+		t.Fatal(err)
 	}
 	if err := updateSnippetMetadata(library, tmpDir); err != nil {
 		t.Fatal(err)
@@ -650,8 +650,7 @@ func TestReleaseLevel_Success(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			got, err := releaseLevel(test.apiPath, test.version)
 			if err != nil {
-				t.Error(err)
-				return
+				t.Fatal(err)
 			}
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("mismatch (-want +got):\n%s", diff)
