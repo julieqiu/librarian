@@ -74,7 +74,7 @@ func TestGenerateRepoMetadata_Error(t *testing.T) {
 		name    string
 		api     *serviceconfig.API
 		library *config.Library
-		setup   func(library *config.Library, api *serviceconfig.API, output string)
+		setup   func(t *testing.T, library *config.Library, api *serviceconfig.API, output string)
 		wantErr error
 	}{
 		{
@@ -99,7 +99,7 @@ func TestGenerateRepoMetadata_Error(t *testing.T) {
 				Name:    "secretmanager",
 				Version: "1.2.3",
 			},
-			setup: func(library *config.Library, api *serviceconfig.API, output string) {
+			setup: func(t *testing.T, library *config.Library, api *serviceconfig.API, output string) {
 				library.Output = output
 				dir, _ := resolveClientPath(library, api.Path)
 				// Create a file where the directory should be so Write fails.
@@ -117,7 +117,7 @@ func TestGenerateRepoMetadata_Error(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			tempDir := t.TempDir()
 			if test.setup != nil {
-				test.setup(test.library, test.api, tempDir)
+				test.setup(t, test.library, test.api, tempDir)
 			}
 			err := generateRepoMetadata(test.api, test.library)
 			if !errors.Is(err, test.wantErr) {
