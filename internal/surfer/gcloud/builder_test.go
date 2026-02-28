@@ -53,7 +53,13 @@ func TestNewArguments(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
-			got, err := newArguments(test.method, &Config{}, model, service)
+			bc := &buildContext{
+				method:    test.method,
+				model:     model,
+				service:   service,
+				overrides: &Config{},
+			}
+			got, err := newArguments(bc)
 			if err != nil {
 				t.Fatalf("newArguments() unexpected error = %v", err)
 			}
@@ -89,7 +95,13 @@ func TestNewArguments_Error(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
-			_, err := newArguments(test.method, &Config{}, model, service)
+			bc := &buildContext{
+				method:    test.method,
+				model:     model,
+				service:   service,
+				overrides: &Config{},
+			}
+			_, err := newArguments(bc)
 			if err == nil {
 				t.Fatalf("newArguments() expected error, got nil")
 			}
@@ -191,7 +203,13 @@ func TestNewParam(t *testing.T) {
 			if overrides == nil {
 				overrides = &Config{}
 			}
-			got, err := newParam(test.field, test.apiField, overrides, model, service, test.method)
+			bc := &buildContext{
+				method:    test.method,
+				model:     model,
+				service:   service,
+				overrides: overrides,
+			}
+			got, err := newParam(test.field, test.apiField, bc)
 			if err != nil {
 				t.Errorf("newParam(%s) unexpected error: %v", test.name, err)
 				return
@@ -349,7 +367,10 @@ func TestNewOutputConfig(t *testing.T) {
 			test.method.OutputType.Pagination = &api.PaginationInfo{
 				PageableItem: test.method.OutputType.Fields[0],
 			}
-			got := newOutputConfig(test.method, &api.API{})
+			bc := &buildContext{
+				method: test.method,
+			}
+			got := newOutputConfig(bc)
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("newOutputConfig() mismatch (-want +got):\n%s", diff)
 			}
@@ -378,7 +399,10 @@ func TestNewOutputConfig_Error(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
-			if got := newOutputConfig(test.method, &api.API{}); got != nil {
+			bc := &buildContext{
+				method: test.method,
+			}
+			if got := newOutputConfig(bc); got != nil {
 				t.Errorf("newOutputConfig() = %v, want nil", got)
 			}
 		})
@@ -523,7 +547,13 @@ func TestNewPrimaryResourceParam(t *testing.T) {
 			test.method.Service = service
 			test.method.Model = model
 
-			got := newPrimaryResourceParam(test.field, test.method, model, &Config{}, service)
+			bc := &buildContext{
+				method:    test.method,
+				model:     model,
+				service:   service,
+				overrides: &Config{},
+			}
+			got := newPrimaryResourceParam(test.field, bc)
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("newPrimaryResourceParam() mismatch (-want +got):\n%s", diff)
 			}
@@ -571,10 +601,14 @@ func TestNewRequest(t *testing.T) {
 			t.Parallel()
 			service := api.NewTestService("TestService").WithPackage("google.cloud.test.v1")
 			service.DefaultHost = "test.googleapis.com"
-			model := api.NewTestAPI([]*api.Message{}, nil, []*api.Service{service})
 			test.method.Service = service
 
-			got := newRequest(test.method, &Config{}, model, service)
+			bc := &buildContext{
+				method:    test.method,
+				service:   service,
+				overrides: &Config{},
+			}
+			got := newRequest(bc)
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("newRequest() mismatch (-want +got):\n%s", diff)
 			}
@@ -668,7 +702,13 @@ func TestNewAsync(t *testing.T) {
 			model := api.NewTestAPI([]*api.Message{}, nil, []*api.Service{service})
 			test.method.Service = service
 
-			got := newAsync(test.method, model, &Config{}, service)
+			bc := &buildContext{
+				method:    test.method,
+				model:     model,
+				service:   service,
+				overrides: &Config{},
+			}
+			got := newAsync(bc)
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("newAsync() mismatch (-want +got):\n%s", diff)
 			}
@@ -755,7 +795,13 @@ func TestAddFlattenedParams(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 			args := &Arguments{}
-			err := addFlattenedParams(test.field, test.prefix, args, &Config{}, model, service, createMethod)
+			bc := &buildContext{
+				method:    createMethod,
+				model:     model,
+				service:   service,
+				overrides: &Config{},
+			}
+			err := addFlattenedParams(test.field, test.prefix, args, bc)
 			if err != nil {
 				t.Fatalf("addFlattenedParams() unexpected error = %v", err)
 			}
@@ -799,7 +845,13 @@ func TestAddFlattenedParams_Error(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
 			args := &Arguments{}
-			err := addFlattenedParams(test.field, test.prefix, args, &Config{}, model, service, createMethod)
+			bc := &buildContext{
+				method:    createMethod,
+				model:     model,
+				service:   service,
+				overrides: &Config{},
+			}
+			err := addFlattenedParams(test.field, test.prefix, args, bc)
 			if err == nil {
 				t.Fatalf("addFlattenedParams() expected error, got nil")
 			}
@@ -849,7 +901,11 @@ func TestNewResourceReferenceSpec(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
-			got, err := newResourceReferenceSpec(test.field, model, &Config{}, service)
+			bc := &buildContext{
+				model:   model,
+				service: service,
+			}
+			got, err := newResourceReferenceSpec(test.field, bc)
 			if err != nil {
 				t.Fatalf("newResourceReferenceSpec() unexpected error = %v", err)
 			}
@@ -874,7 +930,11 @@ func TestNewResourceReferenceSpec_Error(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
-			_, err := newResourceReferenceSpec(test.field, &api.API{}, &Config{}, service)
+			bc := &buildContext{
+				model:   &api.API{},
+				service: service,
+			}
+			_, err := newResourceReferenceSpec(test.field, bc)
 			if err == nil {
 				t.Fatalf("newResourceReferenceSpec() expected error, got nil")
 			}
