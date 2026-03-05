@@ -16,6 +16,7 @@ package golang
 
 import (
 	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -229,7 +230,7 @@ func TestGenerate(t *testing.T) {
 			libraryName: "secretmanager",
 			apis:        []*config.API{{Path: "google/cloud/secretmanager/v1"}},
 			goModule: &config.GoModule{
-				DeleteGenerationOutputPaths: []string{"secretmanager/apiv1/secretmanagerpb"},
+				DeleteGenerationOutputPaths: []string{"secretmanager/apiv1/secret_manager_client.go"},
 				GoAPIs: []*config.GoAPI{
 					{
 						ClientPackage: "secretmanager",
@@ -239,10 +240,10 @@ func TestGenerate(t *testing.T) {
 				},
 			},
 			want: []string{
-				"secretmanager/apiv1/secret_manager_client.go",
+				"secretmanager/apiv1/secretmanagerpb/service.pb.go",
 			},
 			removed: []string{
-				"secretmanager/apiv1/secretmanagerpb",
+				"secretmanager/apiv1/secret_manager_client.go",
 			},
 		},
 		{
@@ -1077,5 +1078,24 @@ func TestBuildGAPICOpts(t *testing.T) {
 				t.Errorf("mismatch (-want +got):\n%s", diff)
 			}
 		})
+	}
+}
+
+func TestInitModule(t *testing.T) {
+	testhelper.RequireCommand(t, "go")
+	outDir := t.TempDir()
+	// Write an import so go mod tidy can generate a go.sum file.
+	content := []byte("package main\nimport _ \"golang.org/x/text\"\n")
+	if err := os.WriteFile(filepath.Join(outDir, "main.go"), content, 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := initModule(t.Context(), outDir, "example.com/testmod"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(outDir, "go.mod")); errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("go.mod does not exist")
+	}
+	if _, err := os.Stat(filepath.Join(outDir, "go.sum")); errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("go.sum does not exist")
 	}
 }
