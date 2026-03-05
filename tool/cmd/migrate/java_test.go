@@ -15,6 +15,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"os"
 	"testing"
@@ -24,6 +25,13 @@ import (
 )
 
 func TestRunJavaMigration(t *testing.T) {
+	fetchSource = func(ctx context.Context) (*config.Source, error) {
+		return &config.Source{
+			Commit: "abcd123",
+			SHA256: "sha123",
+			Dir:    "../../internal/testdata/googleapis",
+		}, nil
+	}
 	for _, test := range []struct {
 		name     string
 		repoPath string
@@ -88,7 +96,7 @@ func TestBuildConfig(t *testing.T) {
 				Language: "java",
 				Default:  &config.Default{},
 				Sources: &config.Sources{
-					Googleapis: &config.Source{Dir: "../../googleapis"},
+					Googleapis: &config.Source{Dir: "../../internal/testdata/googleapis"},
 				},
 				Libraries: []*config.Library{
 					{
@@ -118,7 +126,7 @@ func TestBuildConfig(t *testing.T) {
 				Language: "java",
 				Default:  &config.Default{},
 				Sources: &config.Sources{
-					Googleapis: &config.Source{Dir: "../../googleapis"},
+					Googleapis: &config.Source{Dir: "../../internal/testdata/googleapis"},
 				},
 				Libraries: []*config.Library{
 					{
@@ -154,7 +162,7 @@ func TestBuildConfig(t *testing.T) {
 				Language: "java",
 				Default:  &config.Default{},
 				Sources: &config.Sources{
-					Googleapis: &config.Source{Dir: "../../googleapis"},
+					Googleapis: &config.Source{Dir: "../../internal/testdata/googleapis"},
 				},
 				Libraries: []*config.Library{
 					{
@@ -215,7 +223,7 @@ func TestBuildConfig(t *testing.T) {
 				Language: "java",
 				Default:  &config.Default{},
 				Sources: &config.Sources{
-					Googleapis: &config.Source{Dir: "../../googleapis"},
+					Googleapis: &config.Source{Dir: "../../internal/testdata/googleapis"},
 				},
 				Libraries: []*config.Library{
 					{
@@ -254,7 +262,48 @@ func TestBuildConfig(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			got := buildConfig(test.gen)
+			got := buildConfig(test.gen, "../../internal/testdata/googleapis")
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestParseJavaBazel(t *testing.T) {
+	for _, test := range []struct {
+		name          string
+		googleapisDir string
+		buildPath     string
+		want          *javaGAPICInfo
+	}{
+		{
+			name:          "success",
+			googleapisDir: "testdata/parse-bazel/success",
+			buildPath:     "google/cloud/bigquery/analyticshub/v1",
+			want: &javaGAPICInfo{
+				NoRestNumericEnums: true,
+				NoSamples:          false,
+				AdditionalProtos: []string{
+					"google/cloud/common_resources.proto",
+				},
+			},
+		},
+		{
+			name:          "no GAPIC rules",
+			googleapisDir: "testdata/parse-bazel/no-gapic-rule",
+			want: &javaGAPICInfo{
+				AdditionalProtos: []string{
+					"google/cloud/common_resources.proto",
+				},
+			},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := parseJavaBazel(test.googleapisDir, test.buildPath)
+			if err != nil {
+				t.Fatal(err)
+			}
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("mismatch (-want +got):\n%s", diff)
 			}
