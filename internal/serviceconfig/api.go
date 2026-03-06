@@ -20,30 +20,8 @@ import (
 	_ "embed"
 	"fmt"
 
+	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/yaml"
-)
-
-const (
-	// LangAll is the identifier for all languages.
-	LangAll = "all"
-	// LangCsharp is the language identifier for C#.
-	LangCsharp = "csharp"
-	// LangDart is the language identifier for Dart.
-	LangDart = "dart"
-	// LangGo is the language identifier for Go.
-	LangGo = "go"
-	// LangJava is the language identifier for Java.
-	LangJava = "java"
-	// LangNodejs is the language identifier for Node.js.
-	LangNodejs = "nodejs"
-	// LangPhp is the language identifier for PHP.
-	LangPhp = "php"
-	// LangPython is the language identifier for Python.
-	LangPython = "python"
-	// LangRuby is the language identifier for Ruby.
-	LangRuby = "ruby"
-	// LangRust is the language identifier for Rust.
-	LangRust = "rust"
 )
 
 // Transport defines the supported transport protocol.
@@ -123,7 +101,7 @@ func (api *API) Transport(language string) string {
 	if trans, ok := api.Transports[language]; ok {
 		return string(trans)
 	}
-	if trans, ok := api.Transports[LangAll]; ok {
+	if trans, ok := api.Transports[config.LanguageAll]; ok {
 		return string(trans)
 	}
 

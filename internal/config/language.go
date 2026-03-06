@@ -14,7 +14,38 @@
 
 package config
 
-import "github.com/googleapis/librarian/internal/yaml"
+import (
+	"github.com/googleapis/librarian/internal/yaml"
+)
+
+const (
+	// LanguageUnknown represents an unsupported or unspecified language.
+	LanguageUnknown = "unknown"
+	// LanguageAll is the identifier for all languages.
+	LanguageAll = "all"
+	// LanguageCsharp is the language identifier for C#.
+	LanguageCsharp = "csharp"
+	// LanguageDart is the language identifier for Dart.
+	LanguageDart = "dart"
+	// LanguageFake is the language identifier for Fakes.
+	LanguageFake = "fake"
+	// LanguageGo is the language identifier for Go.
+	LanguageGo = "go"
+	// LanguageJava is the language identifier for Java.
+	LanguageJava = "java"
+	// LanguageNodejs is the language identifier for Node.js.
+	LanguageNodejs = "nodejs"
+	// LanguagePhp is the language identifier for PHP.
+	LanguagePhp = "php"
+	// LanguagePython is the language identifier for Python.
+	LanguagePython = "python"
+	// LanguageRuby is the language identifier for Ruby.
+	LanguageRuby = "ruby"
+	// LanguageRust is the language identifier for Rust.
+	LanguageRust = "rust"
+	// LanguageRustStorage is a variation of the Rust generator for storage.
+	LanguageRustStorage = "rust_storage"
+)
 
 // GoModule represents the Go-specific configuration for a library.
 type GoModule struct {

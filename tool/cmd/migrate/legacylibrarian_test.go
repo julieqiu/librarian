@@ -102,13 +102,13 @@ func TestBuildConfigFromLibrarian(t *testing.T) {
 	}{
 		{
 			name:        "go_monorepo_defaults",
-			lang:        "go",
+			lang:        config.LanguageGo,
 			repoPath:    "testdata/google-cloud-go",
 			state:       &legacyconfig.LibrarianState{},
 			cfg:         &legacyconfig.LibrarianConfig{},
 			fetchSource: defaultFetchSource,
 			want: &config.Config{
-				Language: "go",
+				Language: config.LanguageGo,
 				Repo:     "googleapis/google-cloud-go",
 				Sources: &config.Sources{
 					Googleapis: &config.Source{
@@ -125,12 +125,12 @@ func TestBuildConfigFromLibrarian(t *testing.T) {
 		},
 		{
 			name:        "python_monorepo_defaults",
-			lang:        "python",
+			lang:        config.LanguagePython,
 			state:       &legacyconfig.LibrarianState{},
 			cfg:         &legacyconfig.LibrarianConfig{},
 			fetchSource: defaultFetchSource,
 			want: &config.Config{
-				Language: "python",
+				Language: config.LanguagePython,
 				Repo:     "googleapis/google-cloud-python",
 				Sources: &config.Sources{
 					Googleapis: &config.Source{
@@ -152,7 +152,7 @@ func TestBuildConfigFromLibrarian(t *testing.T) {
 		},
 		{
 			name: "no_librarian_config",
-			lang: "python",
+			lang: config.LanguagePython,
 			state: &legacyconfig.LibrarianState{
 				Libraries: []*legacyconfig.LibraryState{
 					{
@@ -170,7 +170,7 @@ func TestBuildConfigFromLibrarian(t *testing.T) {
 			fetchSource: defaultFetchSource,
 			repoPath:    "testdata/google-cloud-python",
 			want: &config.Config{
-				Language: "python",
+				Language: config.LanguagePython,
 				Repo:     "googleapis/google-cloud-python",
 				Sources: &config.Sources{
 					Googleapis: &config.Source{
@@ -239,7 +239,7 @@ func TestBuildConfigFromLibrarian(t *testing.T) {
 			},
 			fetchSource: defaultFetchSource,
 			want: &config.Config{
-				Language: "go",
+				Language: config.LanguageGo,
 				Repo:     "googleapis/google-cloud-go",
 				Sources: &config.Sources{
 					Googleapis: &config.Source{

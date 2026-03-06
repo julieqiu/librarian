@@ -420,7 +420,7 @@ func TestGenerateREADME(t *testing.T) {
 		APIs:   []*config.API{{Path: "google/cloud/secretmanager/v1"}},
 	}
 
-	api, err := serviceconfig.Find(googleapisDir, library.APIs[0].Path, serviceconfig.LangGo)
+	api, err := serviceconfig.Find(googleapisDir, library.APIs[0].Path, config.LanguageGo)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -455,7 +455,7 @@ func TestGenerateREADME_Skipped(t *testing.T) {
 		Keep:   []string{"README.md"},
 	}
 
-	api, err := serviceconfig.Find(googleapisDir, library.APIs[0].Path, serviceconfig.LangGo)
+	api, err := serviceconfig.Find(googleapisDir, library.APIs[0].Path, config.LanguageGo)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -849,7 +849,7 @@ func TestGetTransport(t *testing.T) {
 			name: "go specific transport",
 			sc: &serviceconfig.API{
 				Transports: map[string]serviceconfig.Transport{
-					"go": serviceconfig.GRPC,
+					config.LanguageGo: serviceconfig.GRPC,
 				},
 			},
 			want: "grpc",
@@ -858,7 +858,7 @@ func TestGetTransport(t *testing.T) {
 			name: "other language transport",
 			sc: &serviceconfig.API{
 				Transports: map[string]serviceconfig.Transport{
-					"python": serviceconfig.GRPC,
+					config.LanguagePython: serviceconfig.GRPC,
 				},
 			},
 			want: "grpc+rest",

@@ -160,7 +160,7 @@ func mergePackageDependencies(defaults, lib []*config.RustPackageDependency) []*
 // isVeneer reports whether the library has handwritten code wrapping generated
 // code.
 func isVeneer(language string, lib *config.Library) bool {
-	if language == languageRust {
+	if language == config.LanguageRust {
 		return rust.IsVeneer(lib)
 	}
 	return lib.Veneer
@@ -224,7 +224,7 @@ func mergeMaps(dst, src map[string]string) map[string]string {
 // fillLibraryDefaults populates language-specific default values for the library.
 func fillLibraryDefaults(language string, lib *config.Library) (*config.Library, error) {
 	switch language {
-	case languageGo:
+	case config.LanguageGo:
 		return golang.Fill(lib), nil
 	default:
 		return lib, nil
