@@ -94,26 +94,35 @@ func identifyHeuristicTarget(method *Method, binding *PathBinding, vocabulary ma
 		}
 
 		token := *tmpl.Segments[i-1].Literal
-		if !vocabulary[token] {
+		if !vocabulary[token] && !isVersionString(token) {
 			continue // continue scanning backward if not in vocabulary
+		}
+
+		// The default firstIndex is the current variable segment. If the preceding
+		// literal is a known collection, we'll try to walk backwards to find the
+		// beginning of a resource pattern chain.
+		firstIndex := i
+		if vocabulary[token] {
+			// Walk backwards to find the start of the (literal, variable) chain
+			firstIndex = i - 1
+			for firstIndex >= 2 {
+				if tmpl.Segments[firstIndex-1].Variable == nil || tmpl.Segments[firstIndex-2].Literal == nil {
+					break
+				}
+				// Stop matching if the preceding segment isn't a known collection.
+				if !vocabulary[*tmpl.Segments[firstIndex-2].Literal] {
+					// Include root-level resource variables immediately after version string.
+					if isVersionString(*tmpl.Segments[firstIndex-2].Literal) {
+						firstIndex -= 1
+					}
+					break
+				}
+				firstIndex -= 2
+			}
 		}
 
 		if method.InputType == nil {
 			return nil, fmt.Errorf("consistency error: method %q has no InputType", method.Name)
-		}
-
-		// Walk backwards to find the start of the (literal, variable) chain
-		firstIndex := i - 1
-		for firstIndex >= 2 {
-			if tmpl.Segments[firstIndex-1].Variable != nil && tmpl.Segments[firstIndex-2].Literal != nil {
-				// Stop matching if the preceding segment isn't a known collection.
-				if !vocabulary[*tmpl.Segments[firstIndex-2].Literal] {
-					break
-				}
-				firstIndex -= 2
-			} else {
-				break
-			}
 		}
 
 		// Verify the chain connects properly to the root of the path.
@@ -252,4 +261,10 @@ func getServiceHost(method *Method) (string, error) {
 		return method.Model.Name + ".googleapis.com", nil
 	}
 	return "", fmt.Errorf("consistency error: no service host found for method %q", method.Name)
+}
+
+// isVersionString checks if a string appears to be an API version segment,
+// such as "v1" or "v1beta1".
+func isVersionString(s string) bool {
+	return len(s) >= 2 && s[0] == 'v' && s[1] >= '0' && s[1] <= '9'
 }
