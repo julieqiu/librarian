@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -99,6 +100,12 @@ func generateAPI(ctx context.Context, cfg *config.Config, api *config.API, libra
 
 	isProtoOnly := library.Dotnet != nil && library.Dotnet.Generator == "proto"
 
+	// Create the library output subdirectory for generated files.
+	libOutDir := filepath.Join(outdir, library.Name)
+	if err := os.MkdirAll(libOutDir, 0755); err != nil {
+		return fmt.Errorf("failed to create library output directory: %w", err)
+	}
+
 	// Pass 1: proto messages and gRPC stubs (proto-only skips gRPC).
 	pass1Args := []string{
 		"protoc",
@@ -111,13 +118,16 @@ func generateAPI(ctx context.Context, cfg *config.Config, api *config.API, libra
 		pass1Args = append(pass1Args, "-I="+protoDir)
 	}
 	pass1Args = append(pass1Args,
-		fmt.Sprintf("--csharp_out=%s", filepath.Join(outdir, library.Name)),
+		fmt.Sprintf("--csharp_out=%s", libOutDir),
 		fmt.Sprintf("--csharp_opt=base_namespace=%s,file_extension=.g.cs", library.Name),
 	)
 	if !isProtoOnly {
-		grpcPlugin := command.GetExecutablePath(preinstalled, "grpc_csharp_plugin")
+		grpcPlugin, err := resolveExecutable(preinstalled, "grpc_csharp_plugin")
+		if err != nil {
+			return fmt.Errorf("failed to find grpc_csharp_plugin: %w", err)
+		}
 		pass1Args = append(pass1Args,
-			fmt.Sprintf("--grpc_out=%s", filepath.Join(outdir, library.Name)),
+			fmt.Sprintf("--grpc_out=%s", libOutDir),
 			fmt.Sprintf("--grpc_opt=base_namespace=%s,file_suffix=Grpc.g.cs", library.Name),
 			fmt.Sprintf("--plugin=protoc-gen-grpc=%s", grpcPlugin),
 		)
@@ -133,7 +143,10 @@ func generateAPI(ctx context.Context, cfg *config.Config, api *config.API, libra
 		return nil
 	}
 
-	gapicPlugin := command.GetExecutablePath(preinstalled, "Google.Api.Generator")
+	gapicPlugin, err := resolveExecutable(preinstalled, "Google.Api.Generator")
+	if err != nil {
+		return fmt.Errorf("failed to find Google.Api.Generator: %w", err)
+	}
 	pass2Args := []string{
 		"protoc",
 		"--experimental_allow_proto3_optional",
@@ -158,6 +171,12 @@ func generateAPI(ctx context.Context, cfg *config.Config, api *config.API, libra
 	}
 
 	pass2Args = append(pass2Args, apiProtos...)
+	// Include common resource definitions so the generator can resolve
+	// parent resource patterns (e.g., Location).
+	commonProtos := filepath.Join(googleapisDir, "google", "cloud", "common_resources.proto")
+	if _, err := os.Stat(commonProtos); err == nil {
+		pass2Args = append(pass2Args, commonProtos)
+	}
 
 	if err := command.Run(ctx, pass2Args[0], pass2Args[1:]...); err != nil {
 		return fmt.Errorf("failed to run protoc (pass 2): %w", err)
@@ -375,7 +394,10 @@ func runPostgeneration(ctx context.Context, cfg *config.Config, library *config.
 			}
 		}
 		if post.ExtraProto != "" {
-			grpcPlugin := command.GetExecutablePath(preinstalled, "grpc_csharp_plugin")
+			grpcPlugin, err := resolveExecutable(preinstalled, "grpc_csharp_plugin")
+			if err != nil {
+				return fmt.Errorf("failed to find grpc_csharp_plugin: %w", err)
+			}
 			protoPath := filepath.Join(googleapisDir, post.ExtraProto)
 			args := []string{
 				"protoc",
@@ -394,4 +416,16 @@ func runPostgeneration(ctx context.Context, cfg *config.Config, library *config.
 		}
 	}
 	return nil
+}
+
+// resolveExecutable returns the absolute path for a command, checking for an
+// override in the provided map first. Protoc's --plugin flag requires an
+// absolute path, so we resolve the command via [exec.LookPath] when no
+// override is configured.
+func resolveExecutable(overrides map[string]string, name string) (string, error) {
+	path := command.GetExecutablePath(overrides, name)
+	if filepath.IsAbs(path) {
+		return path, nil
+	}
+	return exec.LookPath(path)
 }
