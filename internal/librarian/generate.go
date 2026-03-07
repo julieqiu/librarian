@@ -23,6 +23,7 @@ import (
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/fetch"
 	"github.com/googleapis/librarian/internal/librarian/dart"
+	"github.com/googleapis/librarian/internal/librarian/dotnet"
 	"github.com/googleapis/librarian/internal/librarian/golang"
 	"github.com/googleapis/librarian/internal/librarian/java"
 	"github.com/googleapis/librarian/internal/librarian/python"
@@ -157,7 +158,7 @@ func cleanLibraries(language string, libraries []*config.Library) error {
 		switch language {
 		case config.LanguageFake:
 			// No cleaning needed.
-		case config.LanguageDart:
+		case config.LanguageDart, config.LanguageDotnet:
 			if err := checkAndClean(library.Output, library.Keep); err != nil {
 				return err
 			}
@@ -200,6 +201,8 @@ func generateLibraries(ctx context.Context, cfg *config.Config, libraries []*con
 		return golang.GenerateLibraries(ctx, libraries, googleapisDir)
 	case config.LanguageJava:
 		return java.GenerateLibraries(ctx, libraries, googleapisDir)
+	case config.LanguageDotnet:
+		return dotnet.GenerateLibraries(ctx, cfg, libraries, googleapisDir)
 	case config.LanguageRust:
 		return rust.GenerateLibraries(ctx, cfg, libraries, src)
 	default:
@@ -228,6 +231,8 @@ func formatLibraries(ctx context.Context, language string, libraries []*config.L
 			if err := rust.Format(ctx, library); err != nil {
 				return err
 			}
+		case config.LanguageDotnet:
+			return nil
 		case config.LanguagePython:
 			// TODO(https://github.com/googleapis/librarian/issues/3730): separate
 			// generation and formatting for Python.
@@ -260,6 +265,8 @@ func defaultOutput(language string, name, api, defaultOut string) string {
 	switch language {
 	case config.LanguageDart:
 		return dart.DefaultOutput(name, defaultOut)
+	case config.LanguageDotnet:
+		return dotnet.DefaultOutput(name, defaultOut)
 	case config.LanguageRust:
 		return rust.DefaultOutput(api, defaultOut)
 	case config.LanguagePython:
@@ -273,6 +280,8 @@ func deriveAPIPath(language string, name string) string {
 	switch language {
 	case config.LanguageDart:
 		return dart.DeriveAPIPath(name)
+	case config.LanguageDotnet:
+		return dotnet.DeriveAPIPath(name)
 	case config.LanguageRust:
 		return rust.DeriveAPIPath(name)
 	default:
