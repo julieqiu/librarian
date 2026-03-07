@@ -1773,6 +1773,7 @@
   path: google/cloud/scheduler/v1beta1
 - languages:
     - dart
+    - dotnet
     - go
     - java
     - python
