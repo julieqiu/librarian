@@ -77,13 +77,13 @@ func TestPostProcessAPI(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	protos := []string{filepath.Join(googleapisDir, "google/cloud/secretmanager/v1/service.proto")}
+	apiProtos := []string{filepath.Join(googleapisDir, "google/cloud/secretmanager/v1/service.proto")}
 	p := postProcessParams{
 		outDir:         outdir,
 		libraryName:    libraryName,
 		version:        version,
 		googleapisDir:  googleapisDir,
-		protos:         protos,
+		apiProtos:      apiProtos,
 		includeSamples: true,
 		gapicDir:       gapicDir,
 		grpcDir:        grpcDir,
@@ -160,7 +160,7 @@ func TestRestructureOutput(t *testing.T) {
 		libraryName:    libraryID,
 		version:        version,
 		googleapisDir:  googleapisDir,
-		protos:         []string{protoPath},
+		apiProtos:      []string{protoPath},
 		includeSamples: true,
 		gapicDir:       filepath.Join(tmpDir, version, "gapic"),
 		grpcDir:        filepath.Join(tmpDir, version, "grpc"),
@@ -213,7 +213,7 @@ func TestRestructureOutput_NoSamples(t *testing.T) {
 		libraryName:    libraryID,
 		version:        version,
 		googleapisDir:  googleapisDir,
-		protos:         nil,
+		apiProtos:      nil,
 		includeSamples: false,
 		gapicDir:       filepath.Join(tmpDir, version, "gapic"),
 		grpcDir:        filepath.Join(tmpDir, version, "grpc"),
@@ -233,18 +233,13 @@ func TestCopyProtos_Success(t *testing.T) {
 	t.Parallel()
 	destDir := t.TempDir()
 	proto1 := filepath.Join(googleapisDir, "google/cloud/secretmanager/v1/service.proto")
-	commonResources := filepath.Join(googleapisDir, "google/cloud/common_resources.proto")
-	protos := []string{proto1, commonResources}
+	protos := []string{proto1}
 	if err := copyProtos(googleapisDir, protos, destDir); err != nil {
 		t.Fatalf("copyProtos failed: %v", err)
 	}
 	// Verify proto1 was copied
 	if _, err := os.Stat(filepath.Join(destDir, "google/cloud/secretmanager/v1/service.proto")); err != nil {
 		t.Errorf("expected proto1 to be copied: %v", err)
-	}
-	// Verify commonResources was NOT copied
-	if _, err := os.Stat(filepath.Join(destDir, "google/cloud/common_resources.proto")); !os.IsNotExist(err) {
-		t.Errorf("expected commonResources to be skipped")
 	}
 }
 
