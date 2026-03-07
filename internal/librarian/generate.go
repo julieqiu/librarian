@@ -232,7 +232,7 @@ func formatLibraries(ctx context.Context, language string, libraries []*config.L
 				return err
 			}
 		case config.LanguageDotnet:
-			// gapic-generator-csharp produces well-formatted output.
+			return nil
 		case config.LanguagePython:
 			// TODO(https://github.com/googleapis/librarian/issues/3730): separate
 			// generation and formatting for Python.
