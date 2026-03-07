@@ -17,270 +17,158 @@ package dotnet
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/librarian/internal/config"
+	"github.com/googleapis/librarian/internal/testhelper"
 )
 
-func TestCopyProtoFiles(t *testing.T) {
-	src := t.TempDir()
-	dst := filepath.Join(t.TempDir(), "output")
+const googleapisDir = "../../testdata/googleapis"
 
-	if err := os.WriteFile(filepath.Join(src, "service.proto"), []byte("syntax = \"proto3\";"), 0644); err != nil {
-		t.Fatal(err)
+func TestGenerateAPI(t *testing.T) {
+	t.Parallel()
+	if testing.Short() {
+		t.Skip("slow test: .NET GAPIC code generation")
 	}
-	if err := os.WriteFile(filepath.Join(src, "types.proto"), []byte("syntax = \"proto3\";"), 0644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(src, "README.md"), []byte("# README"), 0644); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(src, "BUILD.bazel"), []byte("load()"), 0644); err != nil {
-		t.Fatal(err)
-	}
+	testhelper.RequireCommand(t, "protoc")
+	testhelper.RequireCommand(t, "grpc_csharp_plugin")
+	testhelper.RequireCommand(t, "Google.Api.Generator")
 
-	if err := copyProtoFiles(src, dst); err != nil {
+	outdir := t.TempDir()
+	cfg := &config.Config{
+		Language: config.LanguageDotnet,
+	}
+	library := &config.Library{
+		Name:   "Google.Cloud.SecretManager.V1",
+		Output: outdir,
+	}
+	api := &config.API{Path: "google/cloud/secretmanager/v1"}
+	if err := generateAPI(t.Context(), cfg, api, library, googleapisDir, outdir); err != nil {
 		t.Fatal(err)
 	}
-
-	entries, err := os.ReadDir(dst)
+	// Verify that some generated .g.cs files exist in the library output.
+	libDir := filepath.Join(outdir, library.Name)
+	entries, err := os.ReadDir(libDir)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	var got []string
+	var csFiles []string
 	for _, e := range entries {
-		got = append(got, e.Name())
+		if strings.HasSuffix(e.Name(), ".g.cs") {
+			csFiles = append(csFiles, e.Name())
+		}
 	}
-	want := []string{"service.proto", "types.proto"}
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
+	if len(csFiles) == 0 {
+		t.Error("expected generated .g.cs files, got none")
 	}
 }
 
-func TestApplyRenameMessage(t *testing.T) {
-	dir := t.TempDir()
-	proto := `syntax = "proto3";
-package google.cloud.aiplatform.v1;
+func TestGenerateAPI_ProtoOnly(t *testing.T) {
+	t.Parallel()
+	if testing.Short() {
+		t.Skip("slow test: .NET proto-only code generation")
+	}
+	testhelper.RequireCommand(t, "protoc")
 
-message Schema {
-  string name = 1;
-  Schema nested = 2;
-}
-
-message PredictRequest {
-  Schema schema = 1;
-}
-`
-	if err := os.WriteFile(filepath.Join(dir, "schema.proto"), []byte(proto), 0644); err != nil {
+	outdir := t.TempDir()
+	cfg := &config.Config{
+		Language: config.LanguageDotnet,
+	}
+	library := &config.Library{
+		Name:   "Google.Cloud.SecretManager.V1",
+		Output: outdir,
+		Dotnet: &config.DotnetPackage{
+			Generator: "proto",
+		},
+	}
+	api := &config.API{Path: "google/cloud/secretmanager/v1"}
+	if err := generateAPI(t.Context(), cfg, api, library, googleapisDir, outdir); err != nil {
 		t.Fatal(err)
 	}
-
-	rename := &config.DotnetRenameMessage{
-		From: "Schema",
-		To:   "OpenApiSchema",
-	}
-	if err := applyRenameMessage(dir, rename); err != nil {
-		t.Fatal(err)
-	}
-
-	got, err := os.ReadFile(filepath.Join(dir, "schema.proto"))
+	// Verify that proto .g.cs files exist but no Grpc .g.cs files.
+	libDir := filepath.Join(outdir, library.Name)
+	entries, err := os.ReadDir(libDir)
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := `syntax = "proto3";
-package google.cloud.aiplatform.v1;
-
-message OpenApiSchema {
-  string name = 1;
-  OpenApiSchema nested = 2;
-}
-
-message PredictRequest {
-  OpenApiSchema schema = 1;
-}
-`
-	if diff := cmp.Diff(want, string(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
+	var hasProtoCS, hasGrpcCS bool
+	for _, e := range entries {
+		if strings.HasSuffix(e.Name(), ".g.cs") && !strings.Contains(e.Name(), "Grpc") {
+			hasProtoCS = true
+		}
+		if strings.Contains(e.Name(), "Grpc.g.cs") {
+			hasGrpcCS = true
+		}
+	}
+	if !hasProtoCS {
+		t.Error("expected proto .g.cs files, got none")
+	}
+	if hasGrpcCS {
+		t.Error("proto-only generation should not produce Grpc .g.cs files")
 	}
 }
 
-func TestApplyRemoveField(t *testing.T) {
-	dir := t.TempDir()
-	proto := `syntax = "proto3";
-package google.cloud.aiplatform.v1;
-
-message QueryDeployedModelsResponse {
-  string name = 1;
-  repeated DeployedModel deployed_models = 2;
-  string next_page_token = 3;
-}
-`
-	if err := os.WriteFile(filepath.Join(dir, "service.proto"), []byte(proto), 0644); err != nil {
-		t.Fatal(err)
+func TestGenerate_NoAPIs(t *testing.T) {
+	cfg := &config.Config{
+		Language: config.LanguageDotnet,
 	}
-
-	remove := &config.DotnetRemoveField{
-		Message: "QueryDeployedModelsResponse",
-		Field:   "deployed_models",
+	library := &config.Library{
+		Name:   "Google.Cloud.SecretManager.V1",
+		Output: t.TempDir(),
 	}
-	if err := applyRemoveField(dir, remove); err != nil {
-		t.Fatal(err)
-	}
-
-	got, err := os.ReadFile(filepath.Join(dir, "service.proto"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	want := `syntax = "proto3";
-package google.cloud.aiplatform.v1;
-
-message QueryDeployedModelsResponse {
-  string name = 1;
-  string next_page_token = 3;
-}
-`
-	if diff := cmp.Diff(want, string(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
+	err := generate(t.Context(), cfg, library, googleapisDir)
+	if err == nil {
+		t.Fatal("expected error, got nil")
 	}
 }
 
-func TestApplyRenameRPC(t *testing.T) {
-	dir := t.TempDir()
-	proto := `syntax = "proto3";
-package google.cloud.logging.v2;
-
-service ConfigServiceV2 {
-  rpc UpdateBucketAsync(UpdateBucketRequest) returns (Operation);
-  rpc GetBucket(GetBucketRequest) returns (LogBucket);
-}
-`
-	if err := os.WriteFile(filepath.Join(dir, "logging.proto"), []byte(proto), 0644); err != nil {
-		t.Fatal(err)
+func TestGenerateLibraries(t *testing.T) {
+	if testing.Short() {
+		t.Skip("slow test: .NET code generation")
 	}
+	testhelper.RequireCommand(t, "protoc")
+	testhelper.RequireCommand(t, "grpc_csharp_plugin")
+	testhelper.RequireCommand(t, "Google.Api.Generator")
 
-	rename := &config.DotnetRenameRPC{
-		From: "UpdateBucketAsync",
-		To:   "UpdateBucketLongRunning",
+	outdir := t.TempDir()
+	cfg := &config.Config{
+		Language: config.LanguageDotnet,
 	}
-	if err := applyRenameRPC(dir, rename); err != nil {
-		t.Fatal(err)
-	}
-
-	got, err := os.ReadFile(filepath.Join(dir, "logging.proto"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	want := `syntax = "proto3";
-package google.cloud.logging.v2;
-
-service ConfigServiceV2 {
-  rpc UpdateBucketLongRunning(UpdateBucketRequest) returns (Operation);
-  rpc GetBucket(GetBucketRequest) returns (LogBucket);
-}
-`
-	if diff := cmp.Diff(want, string(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
-	}
-}
-
-func TestApplyRPCWireNameFixes(t *testing.T) {
-	dir := t.TempDir()
-	libName := "Google.Cloud.Logging.V2"
-	libDir := filepath.Join(dir, libName)
-	if err := os.MkdirAll(libDir, 0755); err != nil {
-		t.Fatal(err)
-	}
-
-	csContent := `static readonly Method<UpdateBucketRequest, Operation> __Method_UpdateBucketLongRunning = new Method<UpdateBucketRequest, Operation>("UpdateBucketLongRunning");`
-	if err := os.WriteFile(filepath.Join(libDir, "ServiceGrpc.g.cs"), []byte(csContent), 0644); err != nil {
-		t.Fatal(err)
-	}
-
-	pregens := []*config.DotnetPregeneration{
+	libraries := []*config.Library{
 		{
-			RenameRPC: &config.DotnetRenameRPC{
-				From:     "UpdateBucketAsync",
-				To:       "UpdateBucketLongRunning",
-				WireName: "UpdateBucketAsync",
+			Name:   "Google.Cloud.SecretManager.V1",
+			Output: filepath.Join(outdir, "Google.Cloud.SecretManager.V1"),
+			APIs: []*config.API{
+				{Path: "google/cloud/secretmanager/v1"},
 			},
 		},
 	}
-	if err := applyRPCWireNameFixes(dir, libName, pregens); err != nil {
+	if err := GenerateLibraries(t.Context(), cfg, libraries, googleapisDir); err != nil {
 		t.Fatal(err)
 	}
-
-	got, err := os.ReadFile(filepath.Join(libDir, "ServiceGrpc.g.cs"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	want := `static readonly Method<UpdateBucketRequest, Operation> __Method_UpdateBucketLongRunning = new Method<UpdateBucketRequest, Operation>("UpdateBucketAsync");`
-	if diff := cmp.Diff(want, string(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
+	libDir := filepath.Join(outdir, "Google.Cloud.SecretManager.V1", "Google.Cloud.SecretManager.V1")
+	if _, err := os.Stat(libDir); err != nil {
+		t.Errorf("expected library output directory %s to exist: %v", libDir, err)
 	}
 }
 
-func TestApplyPregeneration(t *testing.T) {
-	dir := t.TempDir()
-	proto := `syntax = "proto3";
-package google.cloud.aiplatform.v1;
-
-message Schema {
-  string name = 1;
-  Schema nested = 2;
-  repeated DeployedModel deployed_models = 3;
-}
-
-service PredictionService {
-  rpc UpdateBucketAsync(UpdateBucketRequest) returns (Operation);
-}
-`
-	if err := os.WriteFile(filepath.Join(dir, "service.proto"), []byte(proto), 0644); err != nil {
-		t.Fatal(err)
+func TestGenerateLibraries_Error(t *testing.T) {
+	cfg := &config.Config{
+		Language: config.LanguageDotnet,
 	}
-
-	pregens := []*config.DotnetPregeneration{
+	libraries := []*config.Library{
 		{
-			RenameMessage: &config.DotnetRenameMessage{
-				From: "Schema",
-				To:   "OpenApiSchema",
-			},
-		},
-		{
-			RemoveField: &config.DotnetRemoveField{
-				Message: "OpenApiSchema",
-				Field:   "deployed_models",
-			},
-		},
-		{
-			RenameRPC: &config.DotnetRenameRPC{
-				From: "UpdateBucketAsync",
-				To:   "UpdateBucketLongRunning",
+			Name:   "Google.Cloud.SecretManager.V1",
+			Output: "/../bad-output",
+			APIs: []*config.API{
+				{Path: "google/cloud/secretmanager/v1"},
 			},
 		},
 	}
-	if err := applyPregeneration(dir, pregens); err != nil {
-		t.Fatal(err)
-	}
-
-	got, err := os.ReadFile(filepath.Join(dir, "service.proto"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	want := `syntax = "proto3";
-package google.cloud.aiplatform.v1;
-
-message OpenApiSchema {
-  string name = 1;
-  OpenApiSchema nested = 2;
-}
-
-service PredictionService {
-  rpc UpdateBucketLongRunning(UpdateBucketRequest) returns (Operation);
-}
-`
-	if diff := cmp.Diff(want, string(got)); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
+	err := GenerateLibraries(t.Context(), cfg, libraries, googleapisDir)
+	if err == nil {
+		t.Fatal("expected error, got nil")
 	}
 }
+
