@@ -52,10 +52,16 @@ func NewCommand(method *api.Method, overrides *Config, model *api.API, service *
 		}
 	}
 
-	// Infer default release track from proto package.
-	// TODO(https://github.com/googleapis/librarian/issues/3289): Allow gcloud config to overwrite the track for this command.
-	inferredTrack := inferTrackFromPackage(method.Service.Package)
-	cmd.ReleaseTracks = []string{strings.ToUpper(inferredTrack)}
+	// Use release tracks from gcloud config if provided, otherwise infer
+	// from the proto package name per AIP-185.
+	if len(overrides.APIs) > 0 && len(overrides.APIs[0].ReleaseTracks) > 0 {
+		for _, track := range overrides.APIs[0].ReleaseTracks {
+			cmd.ReleaseTracks = append(cmd.ReleaseTracks, string(track))
+		}
+	} else {
+		inferredTrack := inferTrackFromPackage(method.Service.Package)
+		cmd.ReleaseTracks = []string{strings.ToUpper(inferredTrack)}
+	}
 
 	// The core of the command generation happens here: we generate the arguments,
 	// request details, and async configuration.

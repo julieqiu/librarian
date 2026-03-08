@@ -1231,6 +1231,86 @@ func TestNewCommand(t *testing.T) {
 	}
 }
 
+func TestNewCommand_ReleaseTracks(t *testing.T) {
+	for _, test := range []struct {
+		name      string
+		pkg       string
+		overrides *Config
+		want      []string
+	}{
+		{
+			name:      "inferred GA from v1 package",
+			pkg:       "google.cloud.test.v1",
+			overrides: &Config{},
+			want:      []string{"GA"},
+		},
+		{
+			name:      "inferred BETA from v1beta package",
+			pkg:       "google.cloud.test.v1beta",
+			overrides: &Config{},
+			want:      []string{"BETA"},
+		},
+		{
+			name:      "inferred ALPHA from v1alpha package",
+			pkg:       "google.cloud.test.v1alpha",
+			overrides: &Config{},
+			want:      []string{"ALPHA"},
+		},
+		{
+			name: "config overrides inferred track",
+			pkg:  "google.cloud.test.v1beta",
+			overrides: &Config{
+				APIs: []API{{
+					ReleaseTracks: []ReleaseTrack{ReleaseTrackGA},
+				}},
+			},
+			want: []string{"GA"},
+		},
+		{
+			name: "config with multiple tracks",
+			pkg:  "google.cloud.test.v1",
+			overrides: &Config{
+				APIs: []API{{
+					ReleaseTracks: []ReleaseTrack{ReleaseTrackGA, ReleaseTrackBeta},
+				}},
+			},
+			want: []string{"GA", "BETA"},
+		},
+		{
+			name: "config with empty tracks falls back to inference",
+			pkg:  "google.cloud.test.v1beta",
+			overrides: &Config{
+				APIs: []API{{
+					ReleaseTracks: []ReleaseTrack{},
+				}},
+			},
+			want: []string{"BETA"},
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			service := api.NewTestService("TestService").WithPackage(test.pkg)
+			service.DefaultHost = "test.googleapis.com"
+			model := api.NewTestAPI([]*api.Message{}, nil, []*api.Service{service})
+			method := api.NewTestMethod("GetThing").
+				WithVerb("GET").
+				WithInput(api.NewTestMessage("GetThingRequest")).
+				WithPathTemplate(api.NewPathTemplate().
+					WithLiteral("v1").
+					WithVariable(api.NewPathVariable("name").WithLiteral("projects").WithMatch().WithLiteral("things").WithMatch()))
+			method.Service = service
+			method.Model = model
+
+			got, err := NewCommand(method, test.overrides, model, service)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if diff := cmp.Diff(test.want, got.ReleaseTracks); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
 func TestNewFormat(t *testing.T) {
 	tests := []struct {
 		name    string
