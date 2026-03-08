@@ -279,9 +279,7 @@ applied.
 Please don’t use alternate GitHub-supported aliases like Close or Resolves
 instead of Fixes.
 
-You can also use the Gemini CLI
-[/commit-message skill](#commit-message) to draft commit messages
-automatically. See [Gemini CLI skills](#gemini-cli-skills) for details.
+You can also use the Gemini CLI [/commit-message skill](#commit-message) to draft commit messages automatically. See [Gemini CLI skills](#gemini-cli-skills) for details.
 
 ## The review process
 
