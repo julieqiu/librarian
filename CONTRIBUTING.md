@@ -377,8 +377,7 @@ Drafts a commit message following the conventions in
 Gemini to draft a commit message. The skill reads the staged diff and prints a
 formatted commit message to the terminal without creating a commit.
 
-Defined in
-[`.gemini/skills/commit-message/SKILL.md`](.gemini/skills/commit-message/SKILL.md).
+Defined in [.gemini/skills/commit-message/SKILL.md](.gemini/skills/commit-message/SKILL.md).
 
 ## Expectations for the team
 
