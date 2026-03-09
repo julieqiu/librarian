@@ -215,7 +215,7 @@ func parseOwlBotAPIPaths(owlBot *owlBotYAML, googleapisDir, pkgName string) ([]*
 		return nil, fmt.Errorf("cannot parse API path from .OwlBot.yaml source: %q", source)
 	}
 	basePath := matches[1]
-	if basePath == "" && len(matches) > 2 {
+	if basePath == "" {
 		basePath = matches[2]
 	}
 
@@ -235,10 +235,13 @@ func parseOwlBotAPIPaths(owlBot *owlBotYAML, googleapisDir, pkgName string) ([]*
 		apiDir := filepath.Dir(path)
 		apiPath, err := filepath.Rel(googleapisDir, apiDir)
 		if err != nil {
-			return nil
+			return fmt.Errorf("getting relative path for %s: %w", apiDir, err)
 		}
 		info, err := parseBazelNodejsInfo(googleapisDir, apiPath)
-		if err != nil || info == nil {
+		if err != nil {
+			return fmt.Errorf("parsing bazel info for %s: %w", apiPath, err)
+		}
+		if info == nil {
 			return nil
 		}
 		// Match the npm package name.
