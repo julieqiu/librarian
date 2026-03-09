@@ -368,15 +368,6 @@ you will see a confirmation prompt with the skill name before it runs.
 
 To list all available skills, run `/skills list` inside Gemini CLI.
 
-### /commit-message
-
-Drafts a commit message following the conventions in
-[Commit messages](#commit-messages). Stage your changes with `git add`, then ask
-Gemini to draft a commit message. The skill reads the staged diff and prints a
-formatted commit message to the terminal without creating a commit.
-
-Defined in [.gemini/skills/commit-message/SKILL.md](.gemini/skills/commit-message/SKILL.md).
-
 ## Expectations for the team
 
 A lot of our communication will happen on GitHub issues. Team members are
