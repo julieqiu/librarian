@@ -124,8 +124,6 @@ func processRepo(ctx context.Context, repoName, repoDir, librarianBin string, ve
 		if err := run("tidy"); err != nil {
 			return err
 		}
-	}
-	if repoName != repoFake {
 		sources := sourcesToUpdate(cfg)
 		if len(sources) > 0 {
 			args := append([]string{"update"}, sources...)
