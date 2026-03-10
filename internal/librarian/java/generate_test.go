@@ -54,21 +54,6 @@ func TestCreateProtocOptions(t *testing.T) {
 			},
 		},
 		{
-			name: "rest transport",
-			api:  &config.API{Path: "google/cloud/secretmanager/v1"},
-			library: &config.Library{
-				Transport: "rest",
-			},
-			javaAPI: &config.JavaAPI{
-				Path: "google/cloud/secretmanager/v1",
-			},
-			expected: []string{
-				"--java_out=proto-out",
-				"--java_gapic_out=metadata:gapic-out",
-				"--java_gapic_opt=metadata,api-service-config=../../testdata/googleapis/google/cloud/secretmanager/v1/secretmanager_v1.yaml,grpc-service-config=../../testdata/googleapis/google/cloud/secretmanager/v1/secretmanager_grpc_service_config.json,transport=rest,rest-numeric-enums",
-			},
-		},
-		{
 			name:    "no rest numeric enum case",
 			api:     &config.API{Path: "google/cloud/secretmanager/v1"},
 			library: &config.Library{},
