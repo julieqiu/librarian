@@ -91,7 +91,7 @@ func generateAPI(ctx context.Context, api *config.API, library *config.Library, 
 			return fmt.Errorf("failed to create directory %s: %w", dir, err)
 		}
 	}
-	protocOptions, err := createProtocOptions(api, javaAPI, library, googleapisDir, p.protoDir, p.grpcDir, p.gapicDir)
+	protocOptions, err := createProtocOptions(api, javaAPI, googleapisDir, p.protoDir, p.grpcDir, p.gapicDir)
 	if err != nil {
 		return fmt.Errorf("failed to create protoc options: %w", err)
 	}
@@ -136,7 +136,7 @@ func constructProtocCommandArgs(api *config.API, javaAPI *config.JavaAPI, google
 	return args, apiProtos, nil
 }
 
-func createProtocOptions(api *config.API, javaAPI *config.JavaAPI, library *config.Library, googleapisDir, protoDir, grpcDir, gapicDir string) ([]string, error) {
+func createProtocOptions(api *config.API, javaAPI *config.JavaAPI, googleapisDir, protoDir, grpcDir, gapicDir string) ([]string, error) {
 	args := []string{
 		// --java_out generates standard Protocol Buffer Java classes.
 		fmt.Sprintf("--java_out=%s", protoDir),

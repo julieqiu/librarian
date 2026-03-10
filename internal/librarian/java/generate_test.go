@@ -35,14 +35,12 @@ func TestCreateProtocOptions(t *testing.T) {
 		name     string
 		api      *config.API
 		javaAPI  *config.JavaAPI
-		library  *config.Library
 		expected []string
 		wantErr  bool
 	}{
 		{
-			name:    "basic case",
-			api:     &config.API{Path: "google/cloud/secretmanager/v1"},
-			library: &config.Library{},
+			name: "basic case",
+			api:  &config.API{Path: "google/cloud/secretmanager/v1"},
 			javaAPI: &config.JavaAPI{
 				Path: "google/cloud/secretmanager/v1",
 			},
@@ -54,9 +52,8 @@ func TestCreateProtocOptions(t *testing.T) {
 			},
 		},
 		{
-			name:    "no rest numeric enum case",
-			api:     &config.API{Path: "google/cloud/secretmanager/v1"},
-			library: &config.Library{},
+			name: "no rest numeric enum case",
+			api:  &config.API{Path: "google/cloud/secretmanager/v1"},
 			javaAPI: &config.JavaAPI{
 				Path:               "google/cloud/secretmanager/v1",
 				NoRestNumericEnums: true,
@@ -71,7 +68,7 @@ func TestCreateProtocOptions(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			t.Parallel()
-			got, err := createProtocOptions(test.api, test.javaAPI, test.library, googleapisDir, "proto-out", "grpc-out", "gapic-out")
+			got, err := createProtocOptions(test.api, test.javaAPI, googleapisDir, "proto-out", "grpc-out", "gapic-out")
 			if (err != nil) != test.wantErr {
 				t.Fatalf("createProtocOptions() error = %v, wantErr %v", err, test.wantErr)
 			}
