@@ -170,7 +170,7 @@ func generateLibraries(ctx context.Context, cfg *config.Config, libraries []*con
 	case config.LanguageGo:
 		return golang.Generate(ctx, libraries, src.Googleapis)
 	case config.LanguageJava:
-		return java.Generate(ctx, libraries, src.Googleapis)
+		return java.Generate(ctx, cfg, libraries, src.Googleapis)
 	case config.LanguageNodejs:
 		return nodejs.Generate(ctx, libraries, src.Googleapis)
 	case config.LanguagePython:
