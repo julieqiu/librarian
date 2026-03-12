@@ -32,6 +32,19 @@ import (
 	"github.com/googleapis/librarian/internal/yaml"
 )
 
+var (
+	// nestedModules maps specific Go libraries to their nested module path.
+	// This is a hardcoded list to handle special cases during legacy migration
+	// where this information is not available in the source configuration.
+	nestedModules = map[string]string{
+		"bigquery": "v2",
+		"compute":  "metadata",
+		"iam":      "admin",
+		"logging":  "logadmin",
+		"pubsub":   "v2",
+	}
+)
+
 type goGAPICInfo struct {
 	ClientPackageName string
 	DisableGAPIC      bool
@@ -277,6 +290,13 @@ func buildGoLibraries(input *MigrationInput) ([]*config.Library, error) {
 			if !isEmptyGoModule(goModule) {
 				library.Go = goModule
 			}
+		}
+		mod, ok := nestedModules[id]
+		if ok {
+			if library.Go == nil {
+				library.Go = &config.GoModule{}
+			}
+			library.Go.NestedModule = mod
 		}
 		// Read Go GAPIC configurations from BUILD.bazel.
 		for _, api := range library.APIs {

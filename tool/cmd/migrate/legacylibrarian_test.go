@@ -429,6 +429,7 @@ func TestBuildGoLibraries(t *testing.T) {
 				{
 					Name: "bigquery",
 					APIs: []*config.API{{Path: "google/cloud/bigquery/biglake/v1"}},
+					Go:   &config.GoModule{NestedModule: "v2"},
 				},
 			},
 		},
@@ -466,6 +467,7 @@ func TestBuildGoLibraries(t *testing.T) {
 								Path:       "google/cloud/bigquery/analyticshub/v1",
 							},
 						},
+						NestedModule: "v2",
 					},
 				},
 			},
@@ -754,6 +756,30 @@ func TestBuildGoLibraries(t *testing.T) {
 								Path:      "google/cloud/compute/v1",
 							},
 						},
+						NestedModule: "metadata",
+					},
+				},
+			},
+		},
+		{
+			name: "add nested module to a library",
+			input: &MigrationInput{
+				librarianState: &legacyconfig.LibrarianState{
+					Libraries: []*legacyconfig.LibraryState{
+						{
+							ID: "pubsub",
+						},
+					},
+				},
+				librarianConfig: &legacyconfig.LibrarianConfig{},
+				repoPath:        "testdata/google-cloud-go",
+				googleapisDir:   "testdata/googleapis",
+			},
+			want: []*config.Library{
+				{
+					Name: "pubsub",
+					Go: &config.GoModule{
+						NestedModule: "v2",
 					},
 				},
 			},
