@@ -64,7 +64,8 @@ func generateLibrary(ctx context.Context, library *config.Library, googleapisDir
 }
 
 func generateAPI(ctx context.Context, api *config.API, library *config.Library, googleapisDir, repoRoot string) error {
-	stagingDir := filepath.Join(repoRoot, "owl-bot-staging", library.Name)
+	version := filepath.Base(api.Path)
+	stagingDir := filepath.Join(repoRoot, "owl-bot-staging", library.Name, version)
 	if err := os.MkdirAll(stagingDir, 0755); err != nil {
 		return err
 	}
