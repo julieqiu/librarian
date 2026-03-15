@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"strings"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/librarian/dart"
 	"github.com/googleapis/librarian/internal/librarian/golang"
@@ -178,29 +180,40 @@ func generateLibraries(ctx context.Context, cfg *config.Config, libraries []*con
 	}
 }
 
-// formatLibraries iterates over all the given libraries sequentially,
-// delegating to language-specific code to format each library.
+// formatLibraries delegates to language-specific code to format each library.
+// Languages that support parallel formatting are run concurrently.
 func formatLibraries(ctx context.Context, language string, libraries []*config.Library) error {
+	// Languages that can be parallelized.
+	g, ctx := errgroup.WithContext(ctx)
 	for _, library := range libraries {
 		switch language {
+		case config.LanguageGo:
+			g.Go(func() error {
+				return golang.Format(ctx, library)
+			})
+		case config.LanguageNodejs:
+			g.Go(func() error {
+				return nodejs.Format(ctx, library)
+			})
 		case config.LanguageDart:
-			if err := dart.Format(ctx, library); err != nil {
-				return err
-			}
+			g.Go(func() error {
+				return dart.Format(ctx, library)
+			})
+		}
+	}
+	if err := g.Wait(); err != nil {
+		return err
+	}
+
+	// Languages that should not be parallelized.
+	for _, library := range libraries {
+		switch language {
 		case config.LanguageFake:
 			if err := fakeFormat(library); err != nil {
 				return err
 			}
-		case config.LanguageGo:
-			if err := golang.Format(ctx, library); err != nil {
-				return err
-			}
 		case config.LanguageJava:
 			if err := java.Format(ctx, library); err != nil {
-				return err
-			}
-		case config.LanguageNodejs:
-			if err := nodejs.Format(ctx, library); err != nil {
 				return err
 			}
 		case config.LanguagePython:
@@ -208,6 +221,7 @@ func formatLibraries(ctx context.Context, language string, libraries []*config.L
 			// generation and formatting for Python.
 			return nil
 		case config.LanguageRust:
+			// Rust formatting shares the Cargo.toml workspace file across libraries.
 			if err := rust.Format(ctx, library); err != nil {
 				return err
 			}
