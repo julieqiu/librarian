@@ -17,6 +17,7 @@ package nodejs
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -57,7 +58,7 @@ func generateLibrary(ctx context.Context, library *config.Library, googleapisDir
 			return fmt.Errorf("failed to generate api %q: %w", api.Path, err)
 		}
 	}
-	if err := runPostProcessor(ctx, library, repoRoot, outdir); err != nil {
+	if err := runPostProcessor(ctx, library, googleapisDir, repoRoot, outdir); err != nil {
 		return fmt.Errorf("failed to run post processor: %w", err)
 	}
 	return nil
@@ -160,7 +161,7 @@ func buildGeneratorArgs(api *config.API, library *config.Library, googleapisDir,
 
 // runPostProcessor combines versioned API outputs from owl-bot-staging/ into
 // the output directory using gapic-node-processing, then compiles protos.
-func runPostProcessor(ctx context.Context, library *config.Library, repoRoot, outDir string) error {
+func runPostProcessor(ctx context.Context, library *config.Library, googleapisDir, repoRoot, outDir string) error {
 	owlbotPath := filepath.Join(outDir, "owlbot.py")
 	if _, err := os.Stat(owlbotPath); err == nil {
 		// Old way: use synthtool
@@ -216,6 +217,10 @@ func runPostProcessor(ctx context.Context, library *config.Library, repoRoot, ou
 		}
 	}
 
+	if err := copyMissingProtos(ctx, googleapisDir, outDir); err != nil {
+		return err
+	}
+
 	if err := command.RunInDir(ctx, outDir, "compileProtos", "src"); err != nil {
 		return fmt.Errorf("compileProtos: %w", err)
 	}
@@ -258,6 +263,78 @@ func runPostProcessor(ctx context.Context, library *config.Library, repoRoot, ou
 
 	if err := os.RemoveAll(filepath.Join(repoRoot, "owl-bot-staging")); err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("failed to remove owl-bot-staging: %w", err)
+	}
+	return nil
+}
+
+// copyMissingProtos ensures that all proto files referenced in the library's
+// source code are present in the output directory.
+//
+// The GAPIC generator only copies protos that belong to the API being
+// generated. However, generated Node.js code often includes transitive
+// dependencies on common protos (e.g., those from google/logging/type) that
+// must be available for subsequent proto compilation.
+//
+// This function scans *_proto_list.json files in the generated source code,
+// identifies referenced protos that were not copied by the generator, and
+// retrieves them from the googleapis directory.
+func copyMissingProtos(ctx context.Context, googleapisDir, outDir string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	googleapisDir, err := filepath.Abs(googleapisDir)
+	if err != nil {
+		return fmt.Errorf("failed to resolve googleapis directory: %w", err)
+	}
+
+	lists, err := filepath.Glob(filepath.Join(outDir, "src", "*", "*_proto_list.json"))
+	if err != nil {
+		return fmt.Errorf("failed to glob proto list files: %w", err)
+	}
+
+	for _, listPath := range lists {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		data, err := os.ReadFile(listPath)
+		if err != nil {
+			return fmt.Errorf("failed to read %s: %w", listPath, err)
+		}
+		var entries []string
+		if err := json.Unmarshal(data, &entries); err != nil {
+			return fmt.Errorf("failed to parse %s: %w", listPath, err)
+		}
+
+		listDir := filepath.Dir(listPath)
+		for _, entry := range entries {
+			absPath := filepath.Join(listDir, entry)
+			absPath = filepath.Clean(absPath)
+			if _, err := os.Stat(absPath); err == nil {
+				continue
+			} else if !os.IsNotExist(err) {
+				return fmt.Errorf("failed to stat destination path %s: %w", absPath, err)
+			}
+
+			// Extract the proto-relative path after "protos/".
+			const protosPrefix = "protos/"
+			idx := strings.Index(entry, protosPrefix)
+			if idx < 0 {
+				continue
+			}
+			relPath := entry[idx+len(protosPrefix):]
+
+			srcPath := filepath.Join(googleapisDir, relPath)
+			content, err := os.ReadFile(srcPath)
+			if err != nil {
+				return fmt.Errorf("failed to read source proto %s: %w", srcPath, err)
+			}
+			if err := os.MkdirAll(filepath.Dir(absPath), 0755); err != nil {
+				return fmt.Errorf("failed to create directory for %s: %w", absPath, err)
+			}
+			if err := os.WriteFile(absPath, content, 0644); err != nil {
+				return fmt.Errorf("failed to write proto %s: %w", absPath, err)
+			}
+		}
 	}
 	return nil
 }

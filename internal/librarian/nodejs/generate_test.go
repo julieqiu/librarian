@@ -332,7 +332,7 @@ func TestRunPostProcessor_Owlbot(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := runPostProcessor(t.Context(), library, repoRoot, outDir); err != nil {
+	if err := runPostProcessor(t.Context(), library, "", repoRoot, outDir); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(filepath.Join(outDir, "owlbot-ran.txt")); err != nil {
@@ -408,7 +408,7 @@ func TestRunPostProcessor(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := runPostProcessor(t.Context(), library, repoRoot, outDir); err != nil {
+	if err := runPostProcessor(t.Context(), library, "", repoRoot, outDir); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(filepath.Join(repoRoot, "owl-bot-staging")); !os.IsNotExist(err) {
@@ -466,7 +466,7 @@ func TestRunPostProcessor_CustomScripts(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := runPostProcessor(t.Context(), library, repoRoot, outDir); err != nil {
+	if err := runPostProcessor(t.Context(), library, "", repoRoot, outDir); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(filepath.Join(repoRoot, "owl-bot-staging")); !os.IsNotExist(err) {
@@ -546,7 +546,7 @@ func TestRunPostProcessor_PreservesFiles(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := runPostProcessor(t.Context(), library, repoRoot, outDir); err != nil {
+	if err := runPostProcessor(t.Context(), library, "", repoRoot, outDir); err != nil {
 		t.Fatal(err)
 	}
 
@@ -604,5 +604,39 @@ func TestGenerate(t *testing.T) {
 		if _, err := os.Stat(library.Output); err != nil {
 			t.Errorf("expected output directory for %q to exist: %v", library.Name, err)
 		}
+	}
+}
+
+func TestCopyMissingProtos(t *testing.T) {
+	repoRoot := t.TempDir()
+	outDir := filepath.Join(repoRoot, "packages", "test-lib")
+
+	srcDir := filepath.Join(outDir, "src", "v1")
+	if err := os.MkdirAll(srcDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	protoRelPath := "google/logging/type/log_severity.proto"
+	protoListEntry := "../../protos/" + protoRelPath
+	protoListPath := filepath.Join(srcDir, "common_proto_list.json")
+	if err := os.WriteFile(protoListPath, []byte(`["`+protoListEntry+`"]`), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := copyMissingProtos(t.Context(), googleapisDir, outDir); err != nil {
+		t.Fatal(err)
+	}
+
+	copiedProtoPath := filepath.Join(outDir, "protos", protoRelPath)
+	got, err := os.ReadFile(copiedProtoPath)
+	if err != nil {
+		t.Fatalf("expected copied proto at %s: %v", copiedProtoPath, err)
+	}
+
+	want, err := os.ReadFile(filepath.Join(googleapisDir, protoRelPath))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if diff := cmp.Diff(string(want), string(got)); diff != "" {
+		t.Errorf("copied proto content mismatch (-want +got):\n%s", diff)
 	}
 }
