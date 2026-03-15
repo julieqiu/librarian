@@ -18,6 +18,7 @@ package nodejs
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -335,9 +336,37 @@ func copyMissingProtos(googleapisDir, outDir string) error {
 	return nil
 }
 
-// Format runs gts (npm run fix) on the library directory.
+// Format runs eslint --fix on the library directory. It installs dependencies
+// first if needed (the .eslintrc.json extends ./node_modules/gts). It runs
+// eslint directly with --ignore-pattern to avoid gts's shell glob expanding
+// into node_modules.
 func Format(ctx context.Context, library *config.Library) error {
-	return command.RunInDir(ctx, library.Output, "npm", "run", "fix")
+	nodeModules := filepath.Join(library.Output, "node_modules")
+	installed := false
+	if _, err := os.Stat(nodeModules); os.IsNotExist(err) {
+		if err := command.RunInDir(ctx, library.Output, "npm", "install", "--ignore-scripts"); err != nil {
+			return fmt.Errorf("npm install: %w", err)
+		}
+		installed = true
+	}
+	// ESLint exit codes: 0 = no issues, 1 = lint issues found (warnings or
+	// unfixable errors), 2 = config/fatal error. Exit code 1 is expected for
+	// generated code which may have unfixable warnings like
+	// @typescript-eslint/no-explicit-any.
+	err := command.RunInDir(ctx, library.Output, "npx", "eslint",
+		"--fix",
+		"--ignore-pattern", "node_modules/",
+		"--no-error-on-unmatched-pattern",
+		"src/**/*.ts", "src/**/*.js")
+	// Clean up node_modules we installed to save disk space.
+	if installed {
+		os.RemoveAll(nodeModules)
+	}
+	var exitErr *exec.ExitError
+	if errors.As(err, &exitErr) && exitErr.ExitCode() == 1 {
+		return nil
+	}
+	return err
 }
 
 // DerivePackageName returns the npm package name for a library. It uses
