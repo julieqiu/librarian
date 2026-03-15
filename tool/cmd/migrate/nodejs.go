@@ -63,6 +63,72 @@ type nodejsGapicInfo struct {
 // or /some_path-nodejs.
 var owlBotSourceRegex = regexp.MustCompile(`^/(?:(.+?)/(?:\(|v\d|[^/]+-nodejs)|([^/]+)-nodejs)`)
 
+// apiVersionRegex matches valid API version directory names (e.g. v1,
+// v1beta1, v1alpha, v2p1beta1). Test-only directories like v1small are
+// excluded.
+var apiVersionRegex = regexp.MustCompile(`^v\d+(p\d+)?((alpha|beta)\d*)?$`)
+
+// nodejsSkipGenerate lists libraries that should have skip_generate set
+// because they have already been validated or use custom build processes.
+var nodejsSkipGenerate = map[string]bool{
+	"google-ads-admanager":                              true,
+	"google-ads-datamanager":                            true,
+	"google-ai-generativelanguage":                      true,
+	"google-analytics-admin":                            true,
+	"google-analytics-data":                             true,
+	"google-api-apikeys":                                true,
+	"google-api-cloudquotas":                            true,
+	"google-api-servicecontrol":                         true,
+	"google-api-servicemanagement":                      true,
+	"google-api-serviceusage":                           true,
+	"google-appengine":                                  true,
+	"google-apps-events-subscriptions":                  true,
+	"google-apps-meet":                                  true,
+	"google-area120-tables":                             true,
+	"google-chat":                                       true,
+	"google-cloud-accessapproval":                       true,
+	"google-cloud-advisorynotifications":                true,
+	"google-cloud-aiplatform":                           true,
+	"google-cloud-alloydb":                              true,
+	"google-cloud-apigateway":                           true,
+	"google-cloud-apigeeconnect":                        true,
+	"google-cloud-apigeeregistry":                       true,
+	"google-cloud-apihub":                               true,
+	"google-cloud-apiregistry":                          true,
+	"google-cloud-apphub":                               true,
+	"google-cloud-asset":                                true,
+	"google-cloud-assuredworkloads":                     true,
+	"google-cloud-automl":                               true,
+	"google-cloud-backupdr":                             true,
+	"google-cloud-baremetalsolution":                    true,
+	"google-cloud-batch":                                true,
+	"google-cloud-beyondcorp-appconnections":            true,
+	"google-cloud-beyondcorp-appconnectors":             true,
+	"google-cloud-beyondcorp-appgateways":               true,
+	"google-cloud-beyondcorp-clientconnectorservices":   true,
+	"google-cloud-beyondcorp-clientgateways":            true,
+	"google-cloud-bigquery-analyticshub":                true,
+	"google-cloud-bigquery-connection":                  true,
+	"google-cloud-bigquery-dataexchange":                true,
+	"google-cloud-bigquery-datapolicies":                true,
+	"google-cloud-bigquery-datatransfer":                true,
+	"google-cloud-bigquery-migration":                   true,
+	"google-cloud-bigquery-reservation":                 true,
+	"google-cloud-billing":                              true,
+	"google-cloud-billing-budgets":                      true,
+	"google-cloud-binaryauthorization":                  true,
+	"google-cloud-capacityplanner":                      true,
+	"google-cloud-certificatemanager":                   true,
+	"google-cloud-ces":                                  true,
+	"google-cloud-channel":                              true,
+	"google-cloud-chronicle":                            true,
+	"google-cloud-cloudcontrolspartner":                 true,
+	"google-cloud-clouddms":                             true,
+	"google-cloud-cloudsecuritycompliance":              true,
+	"google-cloud-commerce-consumer-procurement":        true,
+	"google-cloud-compute":                              true,
+}
+
 func runNodejsMigration(ctx context.Context, repoPath string) error {
 	src, err := fetchSource(ctx)
 	if err != nil {
@@ -137,6 +203,21 @@ func buildNodejsLibraries(repoPath, googleapisDir string) ([]*config.Library, er
 				return nil, fmt.Errorf("parsing API paths for %s: %w", libraryName, err)
 			}
 			library.APIs = apis
+		}
+
+		// Libraries with no API paths are handwritten packages that
+		// should not be generated. Some libraries with APIs also need
+		// to skip generation because they use custom build processes.
+		if len(library.APIs) == 0 || nodejsSkipGenerate[libraryName] {
+			library.SkipGenerate = true
+		}
+
+		// Libraries with a librarian.js post-processing script need
+		// manual review before generation can be enabled.
+		librarianJS := filepath.Join(pkgDir, "librarian.js")
+		if _, err := os.Stat(librarianJS); err == nil {
+			library.SkipGenerate = true
+			library.Keep = append(library.Keep, "librarian.js")
 		}
 
 		// Check if the npm package name needs to be set explicitly.
@@ -244,8 +325,10 @@ func parseOwlBotAPIPaths(owlBot *owlBotYAML, googleapisDir, pkgName string) ([]*
 		if info == nil {
 			return nil
 		}
-		// Match the npm package name.
-		if info.packageName == pkgName {
+		// Match the npm package name and skip test-only API paths
+		// with non-standard version names (e.g. v1small).
+		version := filepath.Base(apiPath)
+		if info.packageName == pkgName && apiVersionRegex.MatchString(version) {
 			apis = append(apis, &config.API{Path: apiPath})
 		}
 		return nil
