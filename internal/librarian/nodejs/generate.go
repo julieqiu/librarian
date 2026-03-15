@@ -22,22 +22,32 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/googleapis/librarian/internal/command"
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/serviceconfig"
 	"github.com/googleapis/librarian/internal/yaml"
+	"golang.org/x/sync/errgroup"
 )
 
-// Generate generates all given libraries in sequence.
+// maxParallel is the number of libraries to generate concurrently.
+// Each library spawns multiple subprocesses (protoc, Node.js generator,
+// compileProtos) sequentially, so we use NumCPU + 2 to keep cores busy
+// during I/O wait.
+var maxParallel = runtime.NumCPU() + 2
+
+// Generate generates all given libraries in parallel.
 func Generate(ctx context.Context, libraries []*config.Library, googleapisDir string) error {
+	g, ctx := errgroup.WithContext(ctx)
+	g.SetLimit(maxParallel)
 	for _, library := range libraries {
-		if err := generateLibrary(ctx, library, googleapisDir); err != nil {
-			return err
-		}
+		g.Go(func() error {
+			return generateLibrary(ctx, library, googleapisDir)
+		})
 	}
-	return nil
+	return g.Wait()
 }
 
 func generateLibrary(ctx context.Context, library *config.Library, googleapisDir string) error {
@@ -262,8 +272,8 @@ func runPostProcessor(ctx context.Context, library *config.Library, googleapisDi
 		}
 	}
 
-	if err := os.RemoveAll(filepath.Join(repoRoot, "owl-bot-staging")); err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("failed to remove owl-bot-staging: %w", err)
+	if err := os.RemoveAll(stagingDir); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to remove staging dir: %w", err)
 	}
 	return nil
 }
