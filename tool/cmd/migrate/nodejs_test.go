@@ -15,6 +15,8 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -29,8 +31,9 @@ func TestBuildNodejsLibraries(t *testing.T) {
 	}
 	want := []*config.Library{
 		{
-			Name:    "google-cloud-secretmanager",
-			Version: "6.1.0",
+			Name:          "google-cloud-secretmanager",
+			Version:       "6.1.0",
+			CopyrightYear: "2019",
 			APIs: []*config.API{
 				{Path: "google/cloud/secretmanager/v1"},
 			},
@@ -115,6 +118,48 @@ func TestDeriveNpmPackageName(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			got := deriveNpmPackageName(test.input)
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestExtractCopyrightYear(t *testing.T) {
+	for _, test := range []struct {
+		name    string
+		content string // content of src/index.ts; empty means no file created
+		noFile  bool   // if true, skip creating the file
+		want    string
+	}{
+		{
+			name:    "standard copyright header",
+			content: "// Copyright 2024 Google LLC\n\nexport {Client} from './v1';\n",
+			want:    "2024",
+		},
+		{
+			name:    "no copyright line",
+			content: "// This file has no copyright.\nexport {Client} from './v1';\n",
+			want:    "",
+		},
+		{
+			name:   "missing file",
+			noFile: true,
+			want:   "",
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			pkgDir := t.TempDir()
+			if !test.noFile {
+				srcDir := filepath.Join(pkgDir, "src")
+				if err := os.MkdirAll(srcDir, 0o755); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.WriteFile(filepath.Join(srcDir, "index.ts"), []byte(test.content), 0o644); err != nil {
+					t.Fatal(err)
+				}
+			}
+			got := extractCopyrightYear(pkgDir)
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("mismatch (-want +got):\n%s", diff)
 			}
