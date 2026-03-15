@@ -25,6 +25,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/googleapis/librarian/internal/command"
 	"github.com/googleapis/librarian/internal/config"
@@ -71,6 +72,11 @@ func generateLibrary(ctx context.Context, library *config.Library, googleapisDir
 	}
 	if err := runPostProcessor(ctx, library, googleapisDir, repoRoot, outdir); err != nil {
 		return fmt.Errorf("failed to run post processor: %w", err)
+	}
+	if library.CopyrightYear != "" {
+		if err := fixCopyrightYear(outdir, library.CopyrightYear); err != nil {
+			return fmt.Errorf("failed to fix copyright year: %w", err)
+		}
 	}
 	return nil
 }
@@ -367,6 +373,30 @@ func Format(ctx context.Context, library *config.Library) error {
 		return nil
 	}
 	return err
+}
+
+// fixCopyrightYear replaces the current year in "Copyright YYYY Google LLC"
+// headers with the library's copyright year in all generated .ts and .js
+// files under outDir/src/.
+func fixCopyrightYear(outDir, copyrightYear string) error {
+	currentYear := fmt.Sprintf("Copyright %d Google LLC", time.Now().Year())
+	replacement := fmt.Sprintf("Copyright %s Google LLC", copyrightYear)
+	return filepath.WalkDir(filepath.Join(outDir, "src"), func(path string, d os.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return err
+		}
+		if !strings.HasSuffix(path, ".ts") && !strings.HasSuffix(path, ".js") {
+			return nil
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		if !strings.Contains(string(data), currentYear) {
+			return nil
+		}
+		return os.WriteFile(path, []byte(strings.Replace(string(data), currentYear, replacement, 1)), 0644)
+	})
 }
 
 // DerivePackageName returns the npm package name for a library. It uses
