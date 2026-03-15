@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-24.04
     # TODO(https://github.com/googleapis/librarian/issues/4593): 
     # gapic-generator-typescript installation takes over 4 minutes.
-    # Improve this to <10 seconds and revert timeout to 5 minutes.
+    # Improve installation speed and revert timeout to 5 minutes.
     timeout-minutes: 6
     steps:
       - uses: actions/checkout@v5
