@@ -22,22 +22,32 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/googleapis/librarian/internal/command"
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/serviceconfig"
 	"github.com/googleapis/librarian/internal/yaml"
+	"golang.org/x/sync/errgroup"
 )
 
-// Generate generates all given libraries in sequence.
+// maxParallel is the number of libraries to generate concurrently.
+// Each library spawns multiple subprocesses (protoc, Node.js generator,
+// compileProtos) sequentially, so we use NumCPU + 2 to keep cores busy
+// during I/O wait.
+var maxParallel = runtime.NumCPU() + 2
+
+// Generate generates all given libraries in parallel.
 func Generate(ctx context.Context, libraries []*config.Library, googleapisDir string) error {
+	g, ctx := errgroup.WithContext(ctx)
+	g.SetLimit(maxParallel)
 	for _, library := range libraries {
-		if err := generateLibrary(ctx, library, googleapisDir); err != nil {
-			return err
-		}
+		g.Go(func() error {
+			return generateLibrary(ctx, library, googleapisDir)
+		})
 	}
-	return nil
+	return g.Wait()
 }
 
 func generateLibrary(ctx context.Context, library *config.Library, googleapisDir string) error {
@@ -65,7 +75,8 @@ func generateLibrary(ctx context.Context, library *config.Library, googleapisDir
 }
 
 func generateAPI(ctx context.Context, api *config.API, library *config.Library, googleapisDir, repoRoot string) error {
-	stagingDir := filepath.Join(repoRoot, "owl-bot-staging", library.Name)
+	version := filepath.Base(api.Path)
+	stagingDir := filepath.Join(repoRoot, "owl-bot-staging", library.Name, version)
 	if err := os.MkdirAll(stagingDir, 0755); err != nil {
 		return err
 	}
@@ -261,8 +272,65 @@ func runPostProcessor(ctx context.Context, library *config.Library, googleapisDi
 		}
 	}
 
-	if err := os.RemoveAll(filepath.Join(repoRoot, "owl-bot-staging")); err != nil && !os.IsNotExist(err) {
-		return fmt.Errorf("failed to remove owl-bot-staging: %w", err)
+	if err := os.RemoveAll(stagingDir); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to remove staging dir: %w", err)
+	}
+	return nil
+}
+
+// copyMissingProtos reads *_proto_list.json files under outDir/src/ and copies
+// any referenced protos that are missing from outDir/protos/ using the source
+// files in googleapisDir. The generator copies the API's own protos but not
+// transitive dependencies (e.g. google/logging/type/log_severity.proto).
+func copyMissingProtos(googleapisDir, outDir string) error {
+	googleapisDir, err := filepath.Abs(googleapisDir)
+	if err != nil {
+		return fmt.Errorf("failed to resolve googleapis directory: %w", err)
+	}
+
+	lists, err := filepath.Glob(filepath.Join(outDir, "src", "*", "*_proto_list.json"))
+	if err != nil {
+		return fmt.Errorf("failed to glob proto list files: %w", err)
+	}
+
+	for _, listPath := range lists {
+		data, err := os.ReadFile(listPath)
+		if err != nil {
+			return fmt.Errorf("failed to read %s: %w", listPath, err)
+		}
+		var entries []string
+		if err := json.Unmarshal(data, &entries); err != nil {
+			return fmt.Errorf("failed to parse %s: %w", listPath, err)
+		}
+
+		listDir := filepath.Dir(listPath)
+		for _, entry := range entries {
+			absPath := filepath.Join(listDir, entry)
+			absPath = filepath.Clean(absPath)
+			if _, err := os.Stat(absPath); err == nil {
+				continue
+			}
+
+			// Extract the proto-relative path after "protos/".
+			const protosPrefix = "protos/"
+			idx := strings.Index(entry, protosPrefix)
+			if idx < 0 {
+				continue
+			}
+			relPath := entry[idx+len(protosPrefix):]
+
+			srcPath := filepath.Join(googleapisDir, relPath)
+			content, err := os.ReadFile(srcPath)
+			if err != nil {
+				return fmt.Errorf("failed to read source proto %s: %w", srcPath, err)
+			}
+			if err := os.MkdirAll(filepath.Dir(absPath), 0755); err != nil {
+				return fmt.Errorf("failed to create directory for %s: %w", absPath, err)
+			}
+			if err := os.WriteFile(absPath, content, 0644); err != nil {
+				return fmt.Errorf("failed to write proto %s: %w", absPath, err)
+			}
+		}
 	}
 	return nil
 }
