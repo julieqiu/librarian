@@ -60,6 +60,16 @@ func generateLibrary(ctx context.Context, library *config.Library, googleapisDir
 	if err := runPostProcessor(ctx, library, repoRoot, outdir); err != nil {
 		return fmt.Errorf("failed to run post processor: %w", err)
 	}
+
+	return removeOwlBotYaml(outdir)
+}
+
+func removeOwlBotYaml(outDir string) error {
+	// Remove .OwlBot.yaml since librarian replaces the owl-bot workflow.
+	owlBotPath := filepath.Join(outDir, ".OwlBot.yaml")
+	if err := os.Remove(owlBotPath); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to remove .OwlBot.yaml: %w", err)
+	}
 	return nil
 }
 

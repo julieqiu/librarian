@@ -606,3 +606,23 @@ func TestGenerate(t *testing.T) {
 		}
 	}
 }
+func TestRemoveOwlBotYaml(t *testing.T) {
+	outDir := t.TempDir()
+	owlBotPath := filepath.Join(outDir, ".OwlBot.yaml")
+	if err := os.WriteFile(owlBotPath, []byte("test"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := removeOwlBotYaml(outDir); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := os.Stat(owlBotPath); !os.IsNotExist(err) {
+		t.Errorf("expected .OwlBot.yaml to be removed, but it still exists")
+	}
+
+	// Test that it doesn't fail if the file doesn't exist.
+	if err := removeOwlBotYaml(t.TempDir()); err != nil {
+		t.Errorf("expected removeOwlBotYaml to succeed even if file is missing, got: %v", err)
+	}
+}
