@@ -20,8 +20,6 @@ import (
 	"fmt"
 	"strings"
 
-	"golang.org/x/sync/errgroup"
-
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/librarian/dart"
 	"github.com/googleapis/librarian/internal/librarian/golang"
@@ -32,6 +30,7 @@ import (
 	sidekickconfig "github.com/googleapis/librarian/internal/sidekick/config"
 	"github.com/googleapis/librarian/internal/yaml"
 	"github.com/urfave/cli/v3"
+	"golang.org/x/sync/errgroup"
 )
 
 var (
