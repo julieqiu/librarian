@@ -220,6 +220,16 @@ func buildNodejsLibraries(repoPath, googleapisDir string) ([]*config.Library, er
 			library.Keep = append(library.Keep, "librarian.js")
 		}
 
+		// Preserve handwritten sample files if they exist.
+		for _, sample := range []string{
+			"samples/quickstart.js",
+			"samples/test/quickstart.js",
+		} {
+			if _, err := os.Stat(filepath.Join(pkgDir, sample)); err == nil {
+				library.Keep = append(library.Keep, sample)
+			}
+		}
+
 		// Extract copyright year from existing generated source files.
 		if year := extractCopyrightYear(pkgDir); year != "" {
 			library.CopyrightYear = year
