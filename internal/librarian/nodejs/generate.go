@@ -78,6 +78,11 @@ func generateLibrary(ctx context.Context, library *config.Library, googleapisDir
 			return fmt.Errorf("failed to fix copyright year: %w", err)
 		}
 	}
+	// Remove .OwlBot.yaml since librarian replaces the owl-bot workflow.
+	owlBotPath := filepath.Join(outdir, ".OwlBot.yaml")
+	if err := os.Remove(owlBotPath); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to remove .OwlBot.yaml: %w", err)
+	}
 	return nil
 }
 
@@ -244,10 +249,11 @@ func runPostProcessor(ctx context.Context, library *config.Library, googleapisDi
 	}
 
 	// librarian.js is a custom script some libraries use for post-processing.
-	// It has nothing to do with the Librarian CLI tool.
+	// It has nothing to do with the Librarian CLI tool. It runs from the repo
+	// root because scripts may use paths relative to the repo root.
 	librarianScript := filepath.Join(outDir, "librarian.js")
 	if _, err := os.Stat(librarianScript); err == nil {
-		if err := command.RunInDir(ctx, outDir, "node", "librarian.js"); err != nil {
+		if err := command.RunInDir(ctx, repoRoot, "node", librarianScript); err != nil {
 			return fmt.Errorf("librarian.js failed: %w", err)
 		}
 	}
