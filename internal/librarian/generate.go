@@ -224,7 +224,7 @@ func formatLibraries(ctx context.Context, language string, libraries []*config.L
 			return nil
 		case config.LanguageRust:
 			// Rust formatting cannot be parallelized because it shares the
-		// Cargo.toml workspace file across libraries.
+			// Cargo.toml workspace file across libraries.
 			if err := rust.Format(ctx, library); err != nil {
 				return err
 			}
