@@ -18,8 +18,9 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-24.04
-    # Presubmit jobs must complete within 5 minutes. See CONTRIBUTING.md.
-    timeout-minutes: 5
+    # TODO: gapic-generator-typescript installation takes over 4 minutes.
+    # Improve this to <10 seconds and revert timeout to 5 minutes.
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-go@v6
