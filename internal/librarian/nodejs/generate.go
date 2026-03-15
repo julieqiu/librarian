@@ -221,10 +221,11 @@ func runPostProcessor(ctx context.Context, library *config.Library, repoRoot, ou
 	}
 
 	// librarian.js is a custom script some libraries use for post-processing.
-	// It has nothing to do with the Librarian CLI tool.
+	// It has nothing to do with the Librarian CLI tool. It runs from the repo
+	// root because scripts may use paths relative to the repo root.
 	librarianScript := filepath.Join(outDir, "librarian.js")
 	if _, err := os.Stat(librarianScript); err == nil {
-		if err := command.RunInDir(ctx, outDir, "node", "librarian.js"); err != nil {
+		if err := command.RunInDir(ctx, repoRoot, "node", librarianScript); err != nil {
 			return fmt.Errorf("librarian.js failed: %w", err)
 		}
 	}

@@ -15,6 +15,7 @@
 package nodejs
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -22,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/googleapis/librarian/internal/command"
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/testhelper"
 )
@@ -604,5 +606,45 @@ func TestGenerate(t *testing.T) {
 		if _, err := os.Stat(library.Output); err != nil {
 			t.Errorf("expected output directory for %q to exist: %v", library.Name, err)
 		}
+	}
+}
+
+func TestLibrarianJSPath(t *testing.T) {
+	testhelper.RequireCommand(t, "node")
+
+	repoRoot, err := filepath.EvalSymlinks(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	outDir := filepath.Join(repoRoot, "packages", "test-lib")
+	if err := os.MkdirAll(outDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	// Create a librarian.js that writes its working directory to a file.
+	markerFile := "librarian-cwd.txt"
+	script := fmt.Sprintf("const fs = require('fs'); fs.writeFileSync('%s', process.cwd());", markerFile)
+	if err := os.WriteFile(filepath.Join(outDir, "librarian.js"), []byte(script), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Mimic the call in runPostProcessor.
+	librarianScript := filepath.Join(outDir, "librarian.js")
+	if err := command.RunInDir(t.Context(), repoRoot, "node", librarianScript); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := os.ReadFile(filepath.Join(repoRoot, markerFile))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	gotPath, err := filepath.EvalSymlinks(string(got))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if gotPath != repoRoot {
+		t.Errorf("librarian.js ran in %q, want %q", gotPath, repoRoot)
 	}
 }
