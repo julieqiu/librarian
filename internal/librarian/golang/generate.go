@@ -45,10 +45,6 @@ var (
 
 // Generate generates a Go client library.
 func Generate(ctx context.Context, library *config.Library, googleapisDir string) error {
-	if len(library.APIs) == 0 {
-		return nil
-	}
-
 	outdir, err := filepath.Abs(library.Output)
 	if err != nil {
 		return err

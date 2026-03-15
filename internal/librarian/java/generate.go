@@ -37,9 +37,6 @@ const (
 
 // Generate generates a Java client library.
 func Generate(ctx context.Context, cfg *config.Config, library *config.Library, googleapisDir string) error {
-	if len(library.APIs) == 0 {
-		return fmt.Errorf("failed to generate library: no apis configured for library %q", library.Name)
-	}
 	outdir, err := filepath.Abs(library.Output)
 	if err != nil {
 		return fmt.Errorf("failed to resolve output directory path: %w", err)

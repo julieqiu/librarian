@@ -37,11 +37,6 @@ const (
 
 // Generate generates a Python client library.
 func Generate(ctx context.Context, config *config.Config, library *config.Library, googleapisDir string) error {
-	// If the library has no APIs, there's nothing to do.
-	if len(library.APIs) == 0 {
-		return nil
-	}
-
 	// Convert library.Output to absolute path since protoc runs from a
 	// different directory.
 	outdir, err := filepath.Abs(library.Output)

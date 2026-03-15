@@ -31,10 +31,6 @@ import (
 
 // Generate generates a Node.js client library.
 func Generate(ctx context.Context, library *config.Library, googleapisDir string) error {
-	if len(library.APIs) == 0 {
-		return nil
-	}
-
 	outdir, err := filepath.Abs(library.Output)
 	if err != nil {
 		return fmt.Errorf("failed to resolve output directory path: %w", err)
