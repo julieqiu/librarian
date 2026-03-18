@@ -1160,7 +1160,7 @@ func TestToAPIs(t *testing.T) {
 	}
 }
 
-func TestBlockLegacyGenerationAndRelease(t *testing.T) {
+func TestBlockLegacyGeneration(t *testing.T) {
 	tempDir := t.TempDir()
 	if err := os.Mkdir(filepath.Join(tempDir, librarianDir), 0755); err != nil {
 		t.Fatal(err)
@@ -1196,7 +1196,7 @@ func TestBlockLegacyGenerationAndRelease(t *testing.T) {
 			{Name: "migrated"},
 		},
 	}
-	if err := blockLegacyGenerationAndRelease(tempDir, migratedConfig); err != nil {
+	if err := blockLegacyGeneration(tempDir, migratedConfig); err != nil {
 		t.Fatal(err)
 	}
 	wantConfig := &legacyconfig.LibrarianConfig{
@@ -1212,18 +1212,15 @@ func TestBlockLegacyGenerationAndRelease(t *testing.T) {
 			{
 				LibraryID:       "migrated-already-generate-blocked",
 				GenerateBlocked: true,
-				ReleaseBlocked:  true,
 			},
 			{
 				LibraryID:       "migrated",
 				NextVersion:     "1.2.3",
 				GenerateBlocked: true,
-				ReleaseBlocked:  true,
 			},
 			{
 				LibraryID:       "not-previously-in-config",
 				GenerateBlocked: true,
-				ReleaseBlocked:  true,
 			},
 		},
 	}
@@ -1236,13 +1233,13 @@ func TestBlockLegacyGenerationAndRelease(t *testing.T) {
 	}
 }
 
-func TestBlockLegacyGenerationAndRelease_Error(t *testing.T) {
+func TestBlockLegacyGeneration_Error(t *testing.T) {
 	tempDir := t.TempDir()
 	migratedConfig := &config.Config{}
-	gotErr := blockLegacyGenerationAndRelease(tempDir, migratedConfig)
+	gotErr := blockLegacyGeneration(tempDir, migratedConfig)
 	wantErr := os.ErrNotExist
 	if !errors.Is(gotErr, wantErr) {
-		t.Errorf("blockLegacyGenerationAndRelease error = %v, wantErr %v", gotErr, wantErr)
+		t.Errorf("blockLegacyGeneration error = %v, wantErr %v", gotErr, wantErr)
 	}
 }
 
