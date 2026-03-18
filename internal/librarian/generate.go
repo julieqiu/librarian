@@ -202,7 +202,7 @@ func generateLibraries(ctx context.Context, cfg *config.Config, libraries []*con
 		g, gctx := errgroup.WithContext(ctx)
 		for _, library := range libraries {
 			g.Go(func() error {
-				if err := nodejs.Generate(gctx, library, src.Googleapis); err != nil {
+				if err := nodejs.Generate(gctx, cfg, library, src.Googleapis); err != nil {
 					return err
 				}
 				return nodejs.Format(gctx, library)
