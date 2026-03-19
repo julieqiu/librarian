@@ -319,10 +319,14 @@ func copyMissingProtos(googleapisDir, outDir string) error {
 	return nil
 }
 
-// Format runs gts (npm run fix) on the library directory.
+// Format runs npm install then eslint on the library directory.
 func Format(ctx context.Context, library *config.Library) error {
 	if err := ctx.Err(); err != nil {
 		return err
+	}
+
+	if err := command.RunInDir(ctx, library.Output, "npm", "install"); err != nil {
+		return fmt.Errorf("npm install failed: %w", err)
 	}
 
 	// ESLint exit codes:
