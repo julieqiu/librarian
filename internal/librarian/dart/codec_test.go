@@ -497,7 +497,7 @@ func TestToModelConfig(t *testing.T) {
 						Googleapis: googleapisDir,
 						Showcase:   showcaseDir,
 					},
-					ActiveRoots: []string{"googleapis"},
+					ActiveRoots: []string{"googleapis", "showcase"},
 				},
 				Codec: map[string]string{},
 				Override: api.ModelOverride{
