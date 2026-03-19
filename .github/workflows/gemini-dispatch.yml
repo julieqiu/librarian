@@ -1,14 +1,11 @@
 name: '🔀 Gemini Dispatch'
-
 on:
   issue_comment:
     types:
       - 'created'
-
 defaults:
   run:
     shell: 'bash'
-
 jobs:
   dispatch:
     if: |-
@@ -41,7 +38,6 @@ jobs:
             } else {
               core.setOutput('command', 'fallthrough');
             }
-
       - name: 'Acknowledge request'
         env:
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN || github.token }}'
@@ -53,7 +49,6 @@ jobs:
           gh issue comment "${ISSUE_NUMBER}" \
             --body "${MESSAGE}" \
             --repo "${REPOSITORY}"
-
   invoke:
     needs: 'dispatch'
     if: |-
@@ -67,7 +62,6 @@ jobs:
     with:
       additional_context: '${{ needs.dispatch.outputs.additional_context }}'
     secrets: 'inherit'
-
   plan-execute:
     needs: 'dispatch'
     if: |-
@@ -81,7 +75,6 @@ jobs:
     with:
       additional_context: '${{ needs.dispatch.outputs.additional_context }}'
     secrets: 'inherit'
-
   fallthrough:
     needs:
       - 'dispatch'
