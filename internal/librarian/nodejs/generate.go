@@ -23,6 +23,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"bytes"
 	"regexp"
 	"strings"
 
@@ -45,16 +46,23 @@ func Generate(ctx context.Context, library *config.Library, googleapisDir string
 
 	var existingFiles []string
 	if library.CopyrightYear != "" {
-		_ = filepath.WalkDir(outdir, func(p string, d os.DirEntry, err error) error {
-			if err == nil && !d.IsDir() {
+		if err := filepath.WalkDir(outdir, func(p string, d os.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if !d.IsDir() {
 				if ext := filepath.Ext(p); ext == ".ts" || ext == ".js" {
-					if rel, err := filepath.Rel(outdir, p); err == nil {
-						existingFiles = append(existingFiles, rel)
+					rel, err := filepath.Rel(outdir, p)
+					if err != nil {
+						return err
 					}
+					existingFiles = append(existingFiles, rel)
 				}
 			}
 			return nil
-		})
+		}); err != nil {
+			return fmt.Errorf("failed to gather existing files: %w", err)
+		}
 	}
 
 	for _, api := range library.APIs {
@@ -91,7 +99,7 @@ func restoreCopyrightYear(outDir, year string, existingFiles []string) error {
 			return err
 		}
 		newContent := yearRegex.ReplaceAll(content, []byte(newCopyright))
-		if string(newContent) != string(content) {
+		if !bytes.Equal(newContent, content) {
 			// Get file info to preserve mode
 			info, statErr := os.Stat(fullPath)
 			if statErr != nil {
