@@ -79,7 +79,6 @@ func Generate(ctx context.Context, library *config.Library, googleapisDir string
 			return fmt.Errorf("restoreCopyrightYear failed: %w", err)
 		}
 	}
-
 	return nil
 }
 
