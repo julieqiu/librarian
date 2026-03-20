@@ -672,3 +672,136 @@ func TestGenerate(t *testing.T) {
 		}
 	}
 }
+
+func TestRestoreCopyrightYear(t *testing.T) {
+	tests := []struct {
+		name          string
+		files         map[string]struct {
+			content string
+			mode    os.FileMode
+		}
+		existingFiles []string
+		year          string
+		wantContents  map[string]string
+		wantModes     map[string]os.FileMode
+	}{
+		{
+			name: "successfully restore copyright year in existing files",
+			files: map[string]struct {
+				content string
+				mode    os.FileMode
+			}{
+				"foo.ts": {content: "Copyright 2026 Google\ncode", mode: 0644},
+				"bar.js": {content: "Copyright 2024 Google\ncode", mode: 0644},
+				"baz.ts": {content: "Copyright 2026 Google\ncode", mode: 0644},
+			},
+			existingFiles: []string{"foo.ts", "bar.js"},
+			year:          "2020",
+			wantContents: map[string]string{
+				"foo.ts": "Copyright 2020 Google\ncode",
+				"bar.js": "Copyright 2020 Google\ncode",
+				"baz.ts": "Copyright 2026 Google\ncode",
+			},
+			wantModes: map[string]os.FileMode{
+				"foo.ts": 0644,
+				"bar.js": 0644,
+				"baz.ts": 0644,
+			},
+		},
+		{
+			name: "preserves file modes",
+			files: map[string]struct {
+				content string
+				mode    os.FileMode
+			}{
+				"foo.ts": {content: "Copyright 2025 Google\ncode", mode: 0755},
+				"bar.js": {content: "Copyright 2025 Google\ncode", mode: 0600},
+			},
+			existingFiles: []string{"foo.ts", "bar.js"},
+			year:          "2019",
+			wantContents: map[string]string{
+				"foo.ts": "Copyright 2019 Google\ncode",
+				"bar.js": "Copyright 2019 Google\ncode",
+			},
+			wantModes: map[string]os.FileMode{
+				"foo.ts": 0755,
+				"bar.js": 0600,
+			},
+		},
+		{
+			name: "gracefully handles when file in list does not exist",
+			files: map[string]struct {
+				content string
+				mode    os.FileMode
+			}{
+				"foo.ts": {content: "Copyright 2025 Google\ncode", mode: 0644},
+			},
+			existingFiles: []string{"foo.ts", "missing.ts"},
+			year:          "2022",
+			wantContents: map[string]string{
+				"foo.ts": "Copyright 2022 Google\ncode",
+			},
+			wantModes: map[string]os.FileMode{
+				"foo.ts": 0644,
+			},
+		},
+		{
+			name: "does not modify files without a copyright header",
+			files: map[string]struct {
+				content string
+				mode    os.FileMode
+			}{
+				"foo.ts": {content: "No copyright info here\njust code", mode: 0644},
+			},
+			existingFiles: []string{"foo.ts"},
+			year:          "2021",
+			wantContents: map[string]string{
+				"foo.ts": "No copyright info here\njust code",
+			},
+			wantModes: map[string]os.FileMode{
+				"foo.ts": 0644,
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			for path, file := range tc.files {
+				fullPath := filepath.Join(dir, path)
+				if err := os.WriteFile(fullPath, []byte(file.content), file.mode); err != nil {
+					t.Fatalf("WriteFile path:%q error:%v", path, err)
+				}
+				if err := os.Chmod(fullPath, file.mode); err != nil {
+					t.Fatalf("Chmod path:%q error:%v", path, err)
+				}
+			}
+
+			if err := restoreCopyrightYear(dir, tc.year, tc.existingFiles); err != nil {
+				t.Fatalf("restoreCopyrightYear() error = %v, want no error", err)
+			}
+
+			for path, wantContent := range tc.wantContents {
+				fullPath := filepath.Join(dir, path)
+				gotContent, err := os.ReadFile(fullPath)
+				if err != nil {
+					t.Errorf("ReadFile(%q) failed: %v", path, err)
+					continue
+				}
+				if string(gotContent) != wantContent {
+					t.Errorf("ReadFile(%q) content = %q, want %q", path, string(gotContent), wantContent)
+				}
+
+				info, err := os.Stat(fullPath)
+				if err != nil {
+					t.Errorf("Stat(%q) failed: %v", path, err)
+					continue
+				}
+				wantMode, ok := tc.wantModes[path]
+				if ok && info.Mode() != wantMode {
+					t.Errorf("Stat(%q) mode = %v, want %v", path, info.Mode(), wantMode)
+				}
+			}
+		})
+	}
+}
