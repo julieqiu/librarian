@@ -23,6 +23,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/googleapis/librarian/internal/command"
@@ -41,6 +42,21 @@ func Generate(ctx context.Context, library *config.Library, googleapisDir string
 		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 	repoRoot := filepath.Dir(filepath.Dir(outdir))
+
+	var existingFiles []string
+	if library.CopyrightYear != "" {
+		_ = filepath.WalkDir(outdir, func(p string, d os.DirEntry, err error) error {
+			if err == nil && !d.IsDir() {
+				if ext := filepath.Ext(p); ext == ".ts" || ext == ".js" {
+					if rel, err := filepath.Rel(outdir, p); err == nil {
+						existingFiles = append(existingFiles, rel)
+					}
+				}
+			}
+			return nil
+		})
+	}
+
 	for _, api := range library.APIs {
 		if err := generateAPI(ctx, api, library, googleapisDir, repoRoot); err != nil {
 			return fmt.Errorf("failed to generate api %q: %w", api.Path, err)
@@ -48,6 +64,43 @@ func Generate(ctx context.Context, library *config.Library, googleapisDir string
 	}
 	if err := runPostProcessor(ctx, library, googleapisDir, repoRoot, outdir); err != nil {
 		return fmt.Errorf("failed to run post processor: %w", err)
+	}
+
+	if library.CopyrightYear != "" && len(existingFiles) > 0 {
+		if err := restoreCopyrightYear(outdir, library.CopyrightYear, existingFiles); err != nil {
+			return fmt.Errorf("restoreCopyrightYear failed: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// restoreCopyrightYear replaces the copyright year in pre-existing files with the 
+// original copyright year from librarian.yaml.
+func restoreCopyrightYear(outDir, year string, existingFiles []string) error {
+	yearRegex := regexp.MustCompile(`Copyright \d{4} Google`)
+	newCopyright := fmt.Sprintf("Copyright %s Google", year)
+
+	for _, relPath := range existingFiles {
+		fullPath := filepath.Join(outDir, relPath)
+		content, err := os.ReadFile(fullPath)
+		if err != nil {
+			if os.IsNotExist(err) {
+				continue
+			}
+			return err
+		}
+		newContent := yearRegex.ReplaceAll(content, []byte(newCopyright))
+		if string(newContent) != string(content) {
+			// Get file info to preserve mode
+			info, statErr := os.Stat(fullPath)
+			if statErr != nil {
+				return statErr
+			}
+			if err := os.WriteFile(fullPath, newContent, info.Mode()); err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
