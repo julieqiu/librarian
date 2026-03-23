@@ -16,6 +16,7 @@
 package nodejs
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -270,7 +271,7 @@ func restoreCopyrightYear(outDir, year string) error {
 	replacement := fmt.Sprintf("Copyright %s Google", year)
 	return filepath.WalkDir(srcDir, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
-			return nil
+			return err
 		}
 		if d.IsDir() {
 			return nil
@@ -284,7 +285,7 @@ func restoreCopyrightYear(outDir, year string) error {
 			return fmt.Errorf("reading %s: %w", path, err)
 		}
 		updated := re.ReplaceAll(content, []byte(replacement))
-		if string(updated) == string(content) {
+		if bytes.Equal(updated, content) {
 			return nil
 		}
 		return os.WriteFile(path, updated, 0644)
