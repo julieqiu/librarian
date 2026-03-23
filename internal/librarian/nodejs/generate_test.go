@@ -438,7 +438,7 @@ func TestRunPostProcessor_RemovesOwlBotYaml(t *testing.T) {
 	if err := runPostProcessor(t.Context(), library, "", repoRoot, outDir); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := os.Stat(filepath.Join(outDir, ".OwlBot.yaml")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(outDir, ".OwlBot.yaml")); !errors.Is(err, os.ErrNotExist) {
 		t.Error("expected .OwlBot.yaml to be removed after post-processing")
 	}
 }
