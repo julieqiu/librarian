@@ -402,9 +402,6 @@ func TestRunPostProcessor(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(repoRoot, "owl-bot-staging")); !os.IsNotExist(err) {
 		t.Error("expected owl-bot-staging to be removed after post-processing")
 	}
-	if _, err := os.Stat(filepath.Join(outDir, ".OwlBot.yaml")); !os.IsNotExist(err) {
-		t.Error("expected .OwlBot.yaml to be removed after post-processing")
-	}
 }
 
 func TestRunPostProcessor_RemovesOwlBotYaml(t *testing.T) {
