@@ -86,7 +86,7 @@ DESCRIPTION:
 
 OPTIONS:
 
-	--all                             update all libraries in the workspace
+	--all             update all libraries in the workspace
 	--version string  specific version to update to; not valid with --all
 	--help, -h        show help
 

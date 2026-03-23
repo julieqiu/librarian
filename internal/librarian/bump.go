@@ -450,4 +450,3 @@ func legacyRustBumpLibrary(ctx context.Context, cfg *config.Config, lib *config.
 		return fmt.Errorf("%q should not be using legacyRustBumpLibrary", cfg.Language)
 	}
 }
-
