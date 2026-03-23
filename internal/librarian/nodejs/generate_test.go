@@ -27,6 +27,8 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/librarian/internal/config"
+	"github.com/googleapis/librarian/internal/repometadata"
+	"github.com/googleapis/librarian/internal/sample"
 	"github.com/googleapis/librarian/internal/sources"
 	"github.com/googleapis/librarian/internal/testhelper"
 )
@@ -300,7 +302,11 @@ func TestRunPostProcessor_Owlbot(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := runPostProcessor(t.Context(), library, "", repoRoot, outDir); err != nil {
+	cfg := &config.Config{
+		Language: config.LanguageNodejs,
+		Repo:     "googleapis/google-cloud-node",
+	}
+	if err := runPostProcessor(t.Context(), cfg, library, "", repoRoot, outDir); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(filepath.Join(outDir, "owlbot-ran.txt")); err != nil {
@@ -397,7 +403,11 @@ func TestRunPostProcessor(t *testing.T) {
 
 	createStagingFixture(t, repoRoot, library.Name, []string{"v1", "v1beta1"})
 
-	if err := runPostProcessor(t.Context(), library, "", repoRoot, outDir); err != nil {
+	cfg := &config.Config{
+		Language: config.LanguageNodejs,
+		Repo:     "googleapis/google-cloud-node",
+	}
+	if err := runPostProcessor(t.Context(), cfg, library, "", repoRoot, outDir); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(filepath.Join(repoRoot, "owl-bot-staging")); !os.IsNotExist(err) {
@@ -436,7 +446,8 @@ func TestRunPostProcessor_RemovesOwlBotYaml(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := runPostProcessor(t.Context(), library, "", repoRoot, outDir); err != nil {
+	cfg := &config.Config{Language: config.LanguageNodejs}
+	if err := runPostProcessor(t.Context(), cfg, library, "", repoRoot, outDir); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(filepath.Join(outDir, ".OwlBot.yaml")); !errors.Is(err, os.ErrNotExist) {
@@ -493,7 +504,11 @@ func TestRunPostProcessor_CustomScripts(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := runPostProcessor(t.Context(), library, "", repoRoot, outDir); err != nil {
+	cfg := &config.Config{
+		Language: config.LanguageNodejs,
+		Repo:     "googleapis/google-cloud-node",
+	}
+	if err := runPostProcessor(t.Context(), cfg, library, "", repoRoot, outDir); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(filepath.Join(repoRoot, "owl-bot-staging")); !os.IsNotExist(err) {
@@ -578,7 +593,11 @@ func TestRunPostProcessor_PreservesFiles(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := runPostProcessor(t.Context(), library, "", repoRoot, outDir); err != nil {
+	cfg := &config.Config{
+		Language: config.LanguageNodejs,
+		Repo:     "googleapis/google-cloud-node",
+	}
+	if err := runPostProcessor(t.Context(), cfg, library, "", repoRoot, outDir); err != nil {
 		t.Fatal(err)
 	}
 
@@ -677,8 +696,12 @@ func TestGenerate(t *testing.T) {
 		library.Output = filepath.Join(repoRoot, "packages", library.Name)
 	}
 
+	cfg := &config.Config{
+		Language: config.LanguageNodejs,
+		Repo:     "googleapis/google-cloud-node",
+	}
 	for _, library := range libraries {
-		if err := Generate(t.Context(), library, &sources.Sources{Googleapis: absGoogleapisDir}); err != nil {
+		if err := Generate(t.Context(), cfg, library, &sources.Sources{Googleapis: absGoogleapisDir}); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -853,5 +876,44 @@ func createStagingFixture(t *testing.T, repoRoot, libName string, versions []str
 		if err := os.WriteFile(filepath.Join(protoDir, "service.proto"), []byte(protoContent), 0644); err != nil {
 			t.Fatal(err)
 		}
+	}
+}
+
+func TestWriteRepoMetadata(t *testing.T) {
+	absGoogleapisDir, err := filepath.Abs(googleapisDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outDir := t.TempDir()
+	cfg := &config.Config{
+		Language: config.LanguageNodejs,
+		Repo:     "googleapis/google-cloud-node",
+	}
+	library := &config.Library{
+		Name:         "google-cloud-secretmanager",
+		ReleaseLevel: "stable",
+		APIs:         []*config.API{{Path: "google/cloud/secretmanager/v1"}},
+	}
+	if err := writeRepoMetadata(cfg, library, absGoogleapisDir, outDir); err != nil {
+		t.Fatal(err)
+	}
+	got, err := repometadata.Read(outDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := sample.RepoMetadata()
+	want.DistributionName = "@google-cloud/secretmanager"
+	want.Language = cfg.Language
+	want.Repo = cfg.Repo
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("mismatch (-want +got):\n%s", diff)
+	}
+}
+
+func TestWriteRepoMetadata_NoAPIs(t *testing.T) {
+	cfg := &config.Config{Language: config.LanguageNodejs}
+	library := &config.Library{Name: "google-cloud-test"}
+	if err := writeRepoMetadata(cfg, library, "", t.TempDir()); err != nil {
+		t.Errorf("expected nil error for library with no APIs, got: %v", err)
 	}
 }
