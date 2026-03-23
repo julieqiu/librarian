@@ -246,7 +246,6 @@ func generateLibraries(ctx context.Context, cfg *config.Config, libraries []*con
 	return nil
 }
 
-
 func defaultOutput(language string, name, api, defaultOut string) string {
 	switch language {
 	case config.LanguageDart:
