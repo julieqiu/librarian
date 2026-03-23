@@ -210,6 +210,12 @@ func runPostProcessor(ctx context.Context, library *config.Library, googleapisDi
 		}
 	}
 
+	// Remove .OwlBot.yaml produced by the generator. Librarian replaces
+	// OwlBot so this file is no longer needed.
+	if err := os.Remove(filepath.Join(outDir, ".OwlBot.yaml")); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return fmt.Errorf("failed to remove .OwlBot.yaml: %w", err)
+	}
+
 	if err := restoreCopyrightYear(outDir, library.CopyrightYear); err != nil {
 		return fmt.Errorf("failed to restore copyright year: %w", err)
 	}
