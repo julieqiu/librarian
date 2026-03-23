@@ -35,7 +35,13 @@ func TestBuildNodejsLibraries(t *testing.T) {
 			APIs: []*config.API{
 				{Path: "google/cloud/secretmanager/v1"},
 			},
-			Keep: []string{".eslintrc.json", ".gitignore"},
+			Keep: []string{
+				".eslintrc.json",
+				".gitignore",
+				"samples/README.md",
+				"samples/quickstart.js",
+				"samples/test/quickstart.test.js",
+			},
 			Nodejs: &config.NodejsPackage{
 				ExtraProtocParameters: []string{"metadata"},
 				PackageName:           "@google-cloud/secret-manager",
