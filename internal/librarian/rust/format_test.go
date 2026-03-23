@@ -85,9 +85,9 @@ name = "` + libName + `"
 version = "0.1.0"
 edition.workspace = true
 `
-	if string(got) != want {
-		t.Errorf("Cargo.toml not formatted.\ngot:\n%s\nwant:\n%s", got, want)
-	}
+if diff := cmp.Diff(want, string(got)); diff != "" {
+	t.Errorf("mismatch (-want +got):\n%s", diff)
+}
 
 	// Verify Rust source was formatted by cargo fmt.
 	gotRs, err := os.ReadFile(filepath.Join(srcDir, "lib.rs"))
