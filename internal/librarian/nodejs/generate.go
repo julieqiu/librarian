@@ -173,20 +173,23 @@ func runPostProcessor(ctx context.Context, cfg *config.Config, library *config.L
 	// Librarian CLI tool).
 
 	// combine-library wipes the destination directory before writing generated
-	// files (src/, protos/). Save the non-generated files it would delete, then
-	// restore them afterward.
-	preserveFiles := []string{"librarian.js", ".readme-partials.yaml", "README.md"}
+	// files (src/, protos/). Save the keep files it would delete, then restore
+	// them afterward.
 	backupDir, err := os.MkdirTemp("", "librarian-backup-*")
 	if err != nil {
 		return fmt.Errorf("failed to create backup dir: %w", err)
 	}
 	defer os.RemoveAll(backupDir)
-	for _, name := range preserveFiles {
+	for _, name := range library.Keep {
 		src := filepath.Join(outDir, name)
 		if _, err := os.Stat(src); err != nil {
 			continue // file doesn't exist, nothing to save
 		}
-		if err := os.Rename(src, filepath.Join(backupDir, name)); err != nil {
+		dst := filepath.Join(backupDir, name)
+		if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+			return fmt.Errorf("failed to create backup subdir for %s: %w", name, err)
+		}
+		if err := os.Rename(src, dst); err != nil {
 			return fmt.Errorf("failed to save %s: %w", name, err)
 		}
 	}
@@ -200,13 +203,17 @@ func runPostProcessor(ctx context.Context, cfg *config.Config, library *config.L
 		return fmt.Errorf("combine-library: %w", err)
 	}
 
-	// Restore non-generated files.
-	for _, name := range preserveFiles {
+	// Restore keep files.
+	for _, name := range library.Keep {
 		src := filepath.Join(backupDir, name)
 		if _, err := os.Stat(src); err != nil {
 			continue
 		}
-		if err := os.Rename(src, filepath.Join(outDir, name)); err != nil {
+		dst := filepath.Join(outDir, name)
+		if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+			return fmt.Errorf("failed to create output subdir for %s: %w", name, err)
+		}
+		if err := os.Rename(src, dst); err != nil {
 			return fmt.Errorf("failed to restore %s: %w", name, err)
 		}
 	}

@@ -462,7 +462,10 @@ func TestRunPostProcessor_CustomScripts(t *testing.T) {
 	testhelper.RequireCommand(t, "npx")
 
 	repoRoot := t.TempDir()
-	library := &config.Library{Name: "google-cloud-secretmanager"}
+	library := &config.Library{
+		Name: "google-cloud-secretmanager",
+		Keep: []string{"librarian.js", ".readme-partials.yaml", "README.md"},
+	}
 	outDir := filepath.Join(repoRoot, "packages", library.Name)
 	if err := os.MkdirAll(outDir, 0755); err != nil {
 		t.Fatal(err)
@@ -576,7 +579,10 @@ func TestRunPostProcessor_PreservesFiles(t *testing.T) {
 	testhelper.RequireCommand(t, "compileProtos")
 
 	repoRoot := t.TempDir()
-	library := &config.Library{Name: "google-cloud-test"}
+	library := &config.Library{
+		Name: "google-cloud-test",
+		Keep: []string{"README.md", ".readme-partials.yaml", "system-test/.eslintrc.yml"},
+	}
 	outDir := filepath.Join(repoRoot, "packages", library.Name)
 	if err := os.MkdirAll(outDir, 0755); err != nil {
 		t.Fatal(err)
@@ -590,6 +596,14 @@ func TestRunPostProcessor_PreservesFiles(t *testing.T) {
 	}
 	partialsContent := "introduction: ''\nbody: ''"
 	if err := os.WriteFile(filepath.Join(outDir, ".readme-partials.yaml"), []byte(partialsContent), 0644); err != nil {
+		t.Fatal(err)
+	}
+	eslintContent := "extends: eslint:recommended"
+	eslintDir := filepath.Join(outDir, "system-test")
+	if err := os.MkdirAll(eslintDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(eslintDir, ".eslintrc.yml"), []byte(eslintContent), 0644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -610,6 +624,13 @@ func TestRunPostProcessor_PreservesFiles(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(outDir, ".readme-partials.yaml")); err != nil {
 		t.Errorf("expected .readme-partials.yaml to be preserved: %v", err)
+	}
+	gotEslint, err := os.ReadFile(filepath.Join(outDir, "system-test", ".eslintrc.yml"))
+	if err != nil {
+		t.Fatalf("expected system-test/.eslintrc.yml to be preserved: %v", err)
+	}
+	if string(gotEslint) != eslintContent {
+		t.Errorf("system-test/.eslintrc.yml content = %q, want %q", string(gotEslint), eslintContent)
 	}
 }
 
