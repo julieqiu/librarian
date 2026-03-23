@@ -98,7 +98,7 @@ if diff := cmp.Diff(want, string(got)); diff != "" {
     println!("hello");
 }
 `
-	if string(gotRs) != wantRs {
-		t.Errorf("lib.rs not formatted.\ngot:\n%s\nwant:\n%s", gotRs, wantRs)
-	}
+if diff := cmp.Diff(wantRs, string(gotRs)); diff != "" {
+	t.Errorf("mismatch (-want +got):\n%s", diff)
+}
 }
