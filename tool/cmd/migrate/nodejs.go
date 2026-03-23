@@ -351,7 +351,10 @@ func extractCopyrightYear(pkgDir string) string {
 func nodejsSamplesKeep(pkgDir string) ([]string, error) {
 	samplesDir := filepath.Join(pkgDir, "samples")
 	if _, err := os.Stat(samplesDir); err != nil {
-		return nil, nil
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, err
 	}
 	var paths []string
 	err := filepath.WalkDir(samplesDir, func(path string, d os.DirEntry, err error) error {
