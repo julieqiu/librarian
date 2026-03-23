@@ -296,8 +296,11 @@ func restoreCopyrightYear(outDir, year string) error {
 	replacement := []byte(fmt.Sprintf("Copyright %s Google", year))
 	for _, dir := range []string{"src", "test"} {
 		d := filepath.Join(outDir, dir)
-		if _, err := os.Stat(d); os.IsNotExist(err) {
-			continue
+		if _, err := os.Stat(d); err != nil {
+			if os.IsNotExist(err) {
+				continue
+			}
+			return err
 		}
 		if err := filepath.WalkDir(d, func(path string, d os.DirEntry, err error) error {
 			if err != nil {
