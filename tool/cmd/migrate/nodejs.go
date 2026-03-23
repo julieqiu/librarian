@@ -207,6 +207,11 @@ func buildNodejsLibraries(repoPath, googleapisDir string) ([]*config.Library, er
 				library.Keep = append(library.Keep, name)
 			}
 		}
+		samplesKeep, err := nodejsSamplesKeep(pkgDir)
+		if err != nil {
+			return nil, fmt.Errorf("collecting samples for %s: %w", libraryName, err)
+		}
+		library.Keep = append(library.Keep, samplesKeep...)
 
 		libraries = append(libraries, library)
 	}
@@ -338,6 +343,42 @@ func extractCopyrightYear(pkgDir string) string {
 		return string(m[1])
 	}
 	return ""
+}
+
+// nodejsSamplesKeep walks the samples/ directory under pkgDir and returns
+// all file paths relative to pkgDir, excluding anything under
+// samples/generated/. Returns nil if the samples/ directory does not exist.
+func nodejsSamplesKeep(pkgDir string) ([]string, error) {
+	samplesDir := filepath.Join(pkgDir, "samples")
+	if _, err := os.Stat(samplesDir); err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+	var paths []string
+	err := filepath.WalkDir(samplesDir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			if filepath.Base(path) == "generated" && filepath.Dir(path) == samplesDir {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		rel, err := filepath.Rel(pkgDir, path)
+		if err != nil {
+			return fmt.Errorf("getting relative path for %s: %w", path, err)
+		}
+		paths = append(paths, rel)
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	sort.Strings(paths)
+	return paths, nil
 }
 
 // deriveNpmPackageName derives the expected npm package name from a library
