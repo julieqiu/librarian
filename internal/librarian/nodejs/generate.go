@@ -207,11 +207,11 @@ func runPostProcessor(ctx context.Context, library *config.Library, googleapisDi
 	}
 
 	if err := copyMissingProtos(googleapisDir, outDir); err != nil {
-		return fmt.Errorf("copyMissingProtos: %w", err)
+		return fmt.Errorf("failed to copy missing protos: %w", err)
 	}
 
 	if err := command.RunInDir(ctx, outDir, "compileProtos", "src"); err != nil {
-		return fmt.Errorf("compileProtos: %w", err)
+		return fmt.Errorf("failed to compile protos: %w", err)
 	}
 
 	// librarian.js is a custom script some libraries use for post-processing.
