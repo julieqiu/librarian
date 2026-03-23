@@ -579,7 +579,7 @@ func TestFindModuleByOutput(t *testing.T) {
 							Output:   "target-output",
 						},
 						{
-							Language: config.LanguageRustStorage,
+							Template: "storage",
 							Output:   "other-output",
 						},
 					},
