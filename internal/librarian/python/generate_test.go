@@ -950,7 +950,10 @@ func TestGenerate(t *testing.T) {
 					DefaultVersion: "v1",
 				},
 			}
-			if err := Generate(t.Context(), cfg, library, googleapisDir); err != nil {
+			srcs := &sources.Sources{
+				Googleapis: googleapisDir,
+			}
+			if err := Generate(t.Context(), cfg, library, srcs); err != nil {
 				t.Fatal(err)
 			}
 			gotMetadata, err := repometadata.Read(outdir)
