@@ -19,6 +19,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/testhelper"
 )
@@ -85,9 +86,9 @@ name = "` + libName + `"
 version = "0.1.0"
 edition.workspace = true
 `
-if diff := cmp.Diff(want, string(got)); diff != "" {
-	t.Errorf("mismatch (-want +got):\n%s", diff)
-}
+	if diff := cmp.Diff(want, string(got)); diff != "" {
+		t.Errorf("mismatch (-want +got):\n%s", diff)
+	}
 
 	// Verify Rust source was formatted by cargo fmt.
 	gotRs, err := os.ReadFile(filepath.Join(srcDir, "lib.rs"))
@@ -98,7 +99,7 @@ if diff := cmp.Diff(want, string(got)); diff != "" {
     println!("hello");
 }
 `
-if diff := cmp.Diff(wantRs, string(gotRs)); diff != "" {
-	t.Errorf("mismatch (-want +got):\n%s", diff)
-}
+	if diff := cmp.Diff(wantRs, string(gotRs)); diff != "" {
+		t.Errorf("mismatch (-want +got):\n%s", diff)
+	}
 }
