@@ -105,7 +105,6 @@ func runNodejsMigration(ctx context.Context, repoPath string) error {
 		},
 		Default: &config.Default{
 			Output:       "packages",
-			Keep:         []string{},
 			ReleaseLevel: "stable",
 		},
 		Libraries: libraries,
