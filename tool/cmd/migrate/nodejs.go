@@ -41,6 +41,11 @@ var nodejsConfigFiles = []string{
 	".mocharc.js",
 	".prettierignore",
 	".prettierrc.js",
+	".repo-metadata.json",
+	"CHANGELOG.md",
+	"README.md",
+	"package.json",
+	"tsconfig.json",
 }
 
 // nodejsPackageJSON represents the fields we need from a Node.js package.json.
@@ -100,7 +105,6 @@ func runNodejsMigration(ctx context.Context, repoPath string) error {
 		},
 		Default: &config.Default{
 			Output:       "packages",
-			Keep:         []string{"CHANGELOG.md"},
 			ReleaseLevel: "stable",
 		},
 		Libraries: libraries,
