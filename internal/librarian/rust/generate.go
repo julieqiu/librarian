@@ -89,7 +89,7 @@ func Generate(ctx context.Context, cfg *config.Config, library *config.Library, 
 }
 
 func createRepoMetadata(cfg *config.Config, library *config.Library, sources *sources.Sources) (*repometadata.RepoMetadata, error) {
-	metadata, err := repometadata.FromLibrary(cfg, library, sources)
+	metadata, err := repometadata.FromLibrary(cfg, library, sources.Googleapis)
 	if err != nil {
 		return nil, err
 	}
