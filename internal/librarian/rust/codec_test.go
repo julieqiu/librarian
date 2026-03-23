@@ -713,13 +713,13 @@ func TestModuleToModelConfig(t *testing.T) {
 				Rust: &config.RustCrate{
 					Modules: []*config.RustModule{
 						{
-							Language: "custom",
+							Language: config.LanguageRustStorage,
 						},
 					},
 				},
 			},
 			want: &parser.ModelConfig{
-				Language:            "custom",
+				Language:            config.LanguageRustStorage,
 				SpecificationFormat: config.SpecProtobuf,
 				Source: &sources.SourceConfig{
 					ActiveRoots: []string{"googleapis"},

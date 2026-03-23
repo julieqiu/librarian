@@ -128,9 +128,6 @@ func generateVeneer(ctx context.Context, library *config.Library, sources *sourc
 		return nil
 	}
 	for _, module := range library.Rust.Modules {
-		if module.Template == "storage" {
-			return generateRustStorage(ctx, library, module.Output, sources)
-		}
 		modelConfig, err := moduleToModelConfig(library, module, sources)
 		if err != nil {
 			return fmt.Errorf("moduleToModelConfig %q: %w", module.Output, err)
@@ -139,10 +136,17 @@ func generateVeneer(ctx context.Context, library *config.Library, sources *sourc
 		if err != nil {
 			return fmt.Errorf("CreateModel %q: %w", module.Output, err)
 		}
-		if module.Template == "prost" {
-			err = rust_prost.Generate(ctx, model, module.Output, modelConfig)
-		} else {
-			err = sidekickrust.Generate(ctx, model, module.Output, modelConfig)
+		switch modelConfig.Language {
+		case config.LanguageRust:
+			if module.Template == "prost" {
+				err = rust_prost.Generate(ctx, model, module.Output, modelConfig)
+			} else {
+				err = sidekickrust.Generate(ctx, model, module.Output, modelConfig)
+			}
+		case config.LanguageRustStorage:
+			return generateRustStorage(ctx, library, module.Output, sources)
+		default:
+			err = fmt.Errorf("language %q not supported", modelConfig.Language)
 		}
 		if err != nil {
 			return fmt.Errorf("module %q: %w", module.Output, err)
