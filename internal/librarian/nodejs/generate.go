@@ -292,30 +292,38 @@ func restoreCopyrightYear(outDir, year string) error {
 	if year == "" {
 		return nil
 	}
-	srcDir := filepath.Join(outDir, "src")
 	re := regexp.MustCompile(`Copyright \d{4} Google`)
-	replacement := fmt.Sprintf("Copyright %s Google", year)
-	return filepath.WalkDir(srcDir, func(path string, d os.DirEntry, err error) error {
-		if err != nil {
+	replacement := []byte(fmt.Sprintf("Copyright %s Google", year))
+	for _, dir := range []string{"src", "test"} {
+		d := filepath.Join(outDir, dir)
+		if _, err := os.Stat(d); os.IsNotExist(err) {
+			continue
+		}
+		if err := filepath.WalkDir(d, func(path string, d os.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if d.IsDir() {
+				return nil
+			}
+			ext := filepath.Ext(path)
+			if ext != ".ts" && ext != ".js" {
+				return nil
+			}
+			content, err := os.ReadFile(path)
+			if err != nil {
+				return fmt.Errorf("reading %s: %w", path, err)
+			}
+			updated := re.ReplaceAll(content, replacement)
+			if bytes.Equal(updated, content) {
+				return nil
+			}
+			return os.WriteFile(path, updated, 0644)
+		}); err != nil {
 			return err
 		}
-		if d.IsDir() {
-			return nil
-		}
-		ext := filepath.Ext(path)
-		if ext != ".ts" && ext != ".js" {
-			return nil
-		}
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return fmt.Errorf("reading %s: %w", path, err)
-		}
-		updated := re.ReplaceAll(content, []byte(replacement))
-		if bytes.Equal(updated, content) {
-			return nil
-		}
-		return os.WriteFile(path, updated, 0644)
-	})
+	}
+	return nil
 }
 
 // writeRepoMetadata generates .repo-metadata.json for the library.
