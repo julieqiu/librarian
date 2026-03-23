@@ -45,6 +45,8 @@ const (
 	LanguageRuby = "ruby"
 	// LanguageRust is the language identifier for Rust.
 	LanguageRust = "rust"
+	// LanguageRustStorage is a variation of the Rust generator for storage.
+	LanguageRustStorage = "rust_storage"
 )
 
 // GoModule represents the Go-specific configuration for a library.
@@ -149,6 +151,7 @@ type RustModule struct {
 	InternalBuilders bool `yaml:"internal_builders,omitempty"`
 
 	// Language can be used to select a variation of the Rust generator.
+	// For example, `rust_storage` enables special handling for the storage client.
 	Language string `yaml:"language,omitempty"`
 
 	// ModulePath is the Rust module path for converters
@@ -191,7 +194,7 @@ type RustModule struct {
 	APIPath string `yaml:"api_path"`
 
 	// Template specifies which generator template to use.
-	// Valid values: "grpc-client", "http-client", "prost", "convert-prost", "mod", "storage".
+	// Valid values: "grpc-client", "http-client", "prost", "convert-prost", "mod".
 	Template string `yaml:"template"`
 }
 
