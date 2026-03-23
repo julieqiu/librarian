@@ -102,10 +102,7 @@ func runGenerate(ctx context.Context, cfg *config.Config, all bool, libraryName 
 	if err := cleanLibraries(cfg.Language, libraries); err != nil {
 		return err
 	}
-	if err := generateLibraries(ctx, cfg, libraries, sources); err != nil {
-		return err
-	}
-	return postGenerate(ctx, cfg.Language, cfg)
+	return generateLibraries(ctx, cfg, libraries, sources)
 }
 
 // cleanLibraries iterates over all the given libraries sequentially,
@@ -170,6 +167,7 @@ func generateLibraries(ctx context.Context, cfg *config.Config, libraries []*con
 				return fmt.Errorf("format library %q (%s): %w", library.Name, cfg.Language, err)
 			}
 		}
+		return fakePostGenerate()
 	case config.LanguageGo:
 		for _, library := range libraries {
 			// Generation cannot be parallelized because protoc writes to a
@@ -198,6 +196,7 @@ func generateLibraries(ctx context.Context, cfg *config.Config, libraries []*con
 				return fmt.Errorf("format library %q (%s): %w", library.Name, cfg.Language, err)
 			}
 		}
+		return java.PostGenerate(ctx, ".", cfg)
 	case config.LanguageNodejs:
 		g, gctx := errgroup.WithContext(ctx)
 		for _, library := range libraries {
@@ -240,26 +239,13 @@ func generateLibraries(ctx context.Context, cfg *config.Config, libraries []*con
 				return fmt.Errorf("format library %q (%s): %w", library.Name, cfg.Language, err)
 			}
 		}
+		return rust.UpdateWorkspace(ctx)
 	default:
 		return fmt.Errorf("language %q does not support generation", cfg.Language)
 	}
 	return nil
 }
 
-// postGenerate performs repository-level actions after all individual
-// libraries have been generated.
-func postGenerate(ctx context.Context, language string, cfg *config.Config) error {
-	switch language {
-	case config.LanguageFake:
-		return fakePostGenerate()
-	case config.LanguageJava:
-		return java.PostGenerate(ctx, ".", cfg)
-	case config.LanguageRust:
-		return rust.UpdateWorkspace(ctx)
-	default:
-		return nil
-	}
-}
 
 func defaultOutput(language string, name, api, defaultOut string) string {
 	switch language {
