@@ -30,11 +30,13 @@ import (
 	"github.com/googleapis/librarian/internal/command"
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/serviceconfig"
+	"github.com/googleapis/librarian/internal/sources"
 	"github.com/googleapis/librarian/internal/yaml"
 )
 
 // Generate generates a Node.js client library.
-func Generate(ctx context.Context, library *config.Library, googleapisDir string) error {
+func Generate(ctx context.Context, library *config.Library, srcs *sources.Sources) error {
+	googleapisDir := srcs.Googleapis
 	outdir, err := filepath.Abs(library.Output)
 	if err != nil {
 		return fmt.Errorf("failed to resolve output directory path: %w", err)

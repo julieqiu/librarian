@@ -27,6 +27,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/librarian/internal/config"
+	"github.com/googleapis/librarian/internal/sources"
 	"github.com/googleapis/librarian/internal/testhelper"
 )
 
@@ -638,7 +639,7 @@ func TestGenerate(t *testing.T) {
 	}
 
 	for _, library := range libraries {
-		if err := Generate(t.Context(), library, absGoogleapisDir); err != nil {
+		if err := Generate(t.Context(), library, &sources.Sources{Googleapis: absGoogleapisDir}); err != nil {
 			t.Fatal(err)
 		}
 	}
