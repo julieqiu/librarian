@@ -292,10 +292,27 @@ func restoreCopyrightYear(outDir, year string) error {
 	if year == "" {
 		return nil
 	}
-	srcDir := filepath.Join(outDir, "src")
 	re := regexp.MustCompile(`Copyright \d{4} Google`)
-	replacement := fmt.Sprintf("Copyright %s Google", year)
-	return filepath.WalkDir(srcDir, func(path string, d os.DirEntry, err error) error {
+	replacement := []byte(fmt.Sprintf("Copyright %s Google", year))
+	for _, dir := range []string{"src", "test"} {
+		d := filepath.Join(outDir, dir)
+		if _, err := os.Stat(d); err != nil {
+			if os.IsNotExist(err) {
+				continue
+			}
+			return err
+		}
+		if err := replaceCopyrightInDir(d, re, replacement); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// replaceCopyrightInDir walks dir and replaces copyright years in .ts and .js
+// files using the provided regex and replacement.
+func replaceCopyrightInDir(dir string, re *regexp.Regexp, replacement []byte) error {
+	return filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -310,7 +327,7 @@ func restoreCopyrightYear(outDir, year string) error {
 		if err != nil {
 			return fmt.Errorf("reading %s: %w", path, err)
 		}
-		updated := re.ReplaceAll(content, []byte(replacement))
+		updated := re.ReplaceAll(content, replacement)
 		if bytes.Equal(updated, content) {
 			return nil
 		}

@@ -637,24 +637,35 @@ func TestRunPostProcessor_PreservesFiles(t *testing.T) {
 func TestRestoreCopyrightYear(t *testing.T) {
 	for _, test := range []struct {
 		name  string
+		dir   string
 		year  string
 		input string
 		want  string
 	}{
 		{
-			name:  "replaces year",
+			name:  "replaces year in src",
+			dir:   "src",
 			year:  "2020",
 			input: "// Copyright 2026 Google LLC\n",
 			want:  "// Copyright 2020 Google LLC\n",
 		},
 		{
+			name:  "replaces year in test",
+			dir:   "test",
+			year:  "2019",
+			input: "// Copyright 2026 Google LLC\n",
+			want:  "// Copyright 2019 Google LLC\n",
+		},
+		{
 			name:  "empty year is no-op",
+			dir:   "src",
 			year:  "",
 			input: "// Copyright 2026 Google LLC\n",
 			want:  "// Copyright 2026 Google LLC\n",
 		},
 		{
 			name:  "no match is no-op",
+			dir:   "src",
 			year:  "2020",
 			input: "// No copyright here\n",
 			want:  "// No copyright here\n",
@@ -662,18 +673,18 @@ func TestRestoreCopyrightYear(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			outDir := t.TempDir()
-			srcDir := filepath.Join(outDir, "src")
-			if err := os.MkdirAll(srcDir, 0755); err != nil {
+			dir := filepath.Join(outDir, test.dir)
+			if err := os.MkdirAll(dir, 0755); err != nil {
 				t.Fatal(err)
 			}
-			testFile := filepath.Join(srcDir, "index.ts")
-			if err := os.WriteFile(testFile, []byte(test.input), 0644); err != nil {
+			file := filepath.Join(dir, "index.ts")
+			if err := os.WriteFile(file, []byte(test.input), 0644); err != nil {
 				t.Fatal(err)
 			}
 			if err := restoreCopyrightYear(outDir, test.year); err != nil {
 				t.Fatal(err)
 			}
-			got, err := os.ReadFile(testFile)
+			got, err := os.ReadFile(file)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -681,6 +692,13 @@ func TestRestoreCopyrightYear(t *testing.T) {
 				t.Errorf("mismatch (-want +got):\n%s", diff)
 			}
 		})
+	}
+}
+
+func TestRestoreCopyrightYear_SkipsMissingDirs(t *testing.T) {
+	outDir := t.TempDir()
+	if err := restoreCopyrightYear(outDir, "2020"); err != nil {
+		t.Fatal(err)
 	}
 }
 
