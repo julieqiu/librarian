@@ -43,7 +43,8 @@ func Generate(ctx context.Context, cfg *config.Config, library *config.Library, 
 		return fmt.Errorf("failed to resolve output directory path: %w", err)
 	}
 	// Ensure googleapisDir is absolute to avoid issues with relative paths in protoc.
-	googleapisDir, err := filepath.Abs(srcs.Googleapis)
+	var googleapisDir string
+	googleapisDir, err = filepath.Abs(srcs.Googleapis)
 	if err != nil {
 		return fmt.Errorf("failed to resolve googleapis directory path: %w", err)
 	}
