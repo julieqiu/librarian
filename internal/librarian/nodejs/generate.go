@@ -302,31 +302,37 @@ func restoreCopyrightYear(outDir, year string) error {
 			}
 			return err
 		}
-		if err := filepath.WalkDir(d, func(path string, d os.DirEntry, err error) error {
-			if err != nil {
-				return err
-			}
-			if d.IsDir() {
-				return nil
-			}
-			ext := filepath.Ext(path)
-			if ext != ".ts" && ext != ".js" {
-				return nil
-			}
-			content, err := os.ReadFile(path)
-			if err != nil {
-				return fmt.Errorf("reading %s: %w", path, err)
-			}
-			updated := re.ReplaceAll(content, replacement)
-			if bytes.Equal(updated, content) {
-				return nil
-			}
-			return os.WriteFile(path, updated, 0644)
-		}); err != nil {
+		if err := replaceCopyrightInDir(d, re, replacement); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+// replaceCopyrightInDir walks dir and replaces copyright years in .ts and .js
+// files using the provided regex and replacement.
+func replaceCopyrightInDir(dir string, re *regexp.Regexp, replacement []byte) error {
+	return filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		ext := filepath.Ext(path)
+		if ext != ".ts" && ext != ".js" {
+			return nil
+		}
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return fmt.Errorf("reading %s: %w", path, err)
+		}
+		updated := re.ReplaceAll(content, replacement)
+		if bytes.Equal(updated, content) {
+			return nil
+		}
+		return os.WriteFile(path, updated, 0644)
+	})
 }
 
 // writeRepoMetadata generates .repo-metadata.json for the library.
