@@ -574,6 +574,44 @@ func TestFormat(t *testing.T) {
 	}
 }
 
+func TestRunPostProcessor_PreservesRepoMetadata(t *testing.T) {
+	testhelper.RequireCommand(t, "gapic-node-processing")
+	testhelper.RequireCommand(t, "compileProtos")
+
+	repoRoot := t.TempDir()
+	library := &config.Library{
+		Name: "google-cloud-test",
+		Keep: []string{".repo-metadata.json"},
+	}
+	outDir := filepath.Join(repoRoot, "packages", library.Name)
+	if err := os.MkdirAll(outDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	createStagingFixture(t, repoRoot, library.Name, []string{"v1"})
+
+	originalContent := `{"name": "original", "language": "nodejs"}`
+	if err := os.WriteFile(filepath.Join(outDir, ".repo-metadata.json"), []byte(originalContent), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg := &config.Config{
+		Language: config.LanguageNodejs,
+		Repo:     "googleapis/google-cloud-node",
+	}
+	if err := runPostProcessor(t.Context(), cfg, library, "", repoRoot, outDir); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := os.ReadFile(filepath.Join(outDir, ".repo-metadata.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != originalContent {
+		t.Errorf(".repo-metadata.json content = %q, want %q", string(got), originalContent)
+	}
+}
+
 func TestRunPostProcessor_PreservesFiles(t *testing.T) {
 	testhelper.RequireCommand(t, "gapic-node-processing")
 	testhelper.RequireCommand(t, "compileProtos")

@@ -25,6 +25,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/googleapis/librarian/internal/command"
@@ -234,8 +235,10 @@ func runPostProcessor(ctx context.Context, cfg *config.Config, library *config.L
 	if err := restoreCopyrightYear(outDir, library.CopyrightYear); err != nil {
 		return fmt.Errorf("failed to restore copyright year: %w", err)
 	}
-	if err := writeRepoMetadata(cfg, library, googleapisDir, outDir); err != nil {
-		return fmt.Errorf("failed to write repo metadata: %w", err)
+	if !slices.Contains(library.Keep, ".repo-metadata.json") {
+		if err := writeRepoMetadata(cfg, library, googleapisDir, outDir); err != nil {
+			return fmt.Errorf("failed to write repo metadata: %w", err)
+		}
 	}
 	if err := copyMissingProtos(googleapisDir, outDir); err != nil {
 		return fmt.Errorf("failed to copy missing protos: %w", err)
