@@ -465,10 +465,17 @@ func copySamplesFromStaging(stagingDir, outDir string) error {
 	return nil
 }
 
-// Format runs gts (npm run fix) on the library directory.
+// Format runs npm install to restore dependencies, then runs eslint --fix on
+// the library directory.
 func Format(ctx context.Context, library *config.Library) error {
 	if err := ctx.Err(); err != nil {
 		return err
+	}
+
+	// Run npm install to restore node_modules, which may have been removed
+	// by combine-library.
+	if err := command.RunInDir(ctx, library.Output, "npm", "install"); err != nil {
+		return fmt.Errorf("npm install failed: %w", err)
 	}
 
 	// ESLint exit codes:

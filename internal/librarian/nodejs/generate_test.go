@@ -537,9 +537,13 @@ func TestRunPostProcessor_CustomScripts(t *testing.T) {
 
 func TestFormat(t *testing.T) {
 	testhelper.RequireCommand(t, "eslint")
+	testhelper.RequireCommand(t, "npm")
 	outDir := t.TempDir()
 	srcDir := filepath.Join(outDir, "src")
 	if err := os.MkdirAll(srcDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(outDir, "package.json"), []byte("{}"), 0644); err != nil {
 		t.Fatal(err)
 	}
 	eslintConfig := `{
@@ -911,10 +915,14 @@ func TestFormat_CanceledContext(t *testing.T) {
 
 func TestFormat_ExitCode1(t *testing.T) {
 	testhelper.RequireCommand(t, "eslint")
+	testhelper.RequireCommand(t, "npm")
 
 	outDir := t.TempDir()
 	srcDir := filepath.Join(outDir, "src")
 	if err := os.MkdirAll(srcDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(outDir, "package.json"), []byte("{}"), 0644); err != nil {
 		t.Fatal(err)
 	}
 
