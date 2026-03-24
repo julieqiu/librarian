@@ -68,6 +68,63 @@ members = []
 	}
 }
 
+func TestCreateMissingCargo(t *testing.T) {
+	t.Setenv("PATH", t.TempDir())
+	err := create(t.Context(), "testlib")
+	if err == nil {
+		t.Fatal("expected an error, got nil")
+	}
+	if !strings.Contains(err.Error(), "cargo --version") {
+		t.Errorf("expected error to mention 'cargo --version', got: %v", err)
+	}
+}
+
+func TestCreateMissingTaplo(t *testing.T) {
+	// Create a temporary bin directory with a fake cargo that succeeds
+	// but no taplo, so the taplo --version check fails.
+	fakeBin := t.TempDir()
+	fakeCargo := filepath.Join(fakeBin, "cargo")
+	if err := os.WriteFile(fakeCargo, []byte("#!/bin/sh\nexit 0\n"), 0755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", fakeBin)
+	err := create(t.Context(), "testlib")
+	if err == nil {
+		t.Fatal("expected an error, got nil")
+	}
+	if !strings.Contains(err.Error(), "taplo --version") {
+		t.Errorf("expected error to mention 'taplo --version', got: %v", err)
+	}
+}
+
+func TestCreateCargoNewError(t *testing.T) {
+	testhelper.RequireCommand(t, "cargo")
+	testhelper.RequireCommand(t, "taplo")
+	testhelper.RequireCommand(t, "git")
+
+	t.Chdir(t.TempDir())
+	if err := cmdtest.Run(t.Context(), "git", "init"); err != nil {
+		t.Fatal(err)
+	}
+	workspaceCargo := `
+[workspace]
+members = []
+`
+	if err := os.WriteFile("Cargo.toml", []byte(workspaceCargo), 0644); err != nil {
+		t.Fatal(err)
+	}
+	// Pre-create the output directory with a Cargo.toml so `cargo new` fails.
+	if err := os.MkdirAll("testlib", 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join("testlib", "Cargo.toml"), []byte(""), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := create(t.Context(), "testlib"); err == nil {
+		t.Fatal("expected an error, got nil")
+	}
+}
+
 func TestValidate(t *testing.T) {
 	testhelper.RequireCommand(t, "cargo")
 	testhelper.RequireCommand(t, "rustfmt")
