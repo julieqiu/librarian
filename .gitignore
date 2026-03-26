@@ -9,6 +9,8 @@
 *.dylib
 
 # Binaries
+/librarian
+/migrate
 cmd/legacyautomation/legacyautomation
 cmd/legacylibrarian/legacylibrarian
 cmd/librarian/librarian
