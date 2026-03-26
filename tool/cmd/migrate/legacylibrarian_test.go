@@ -938,6 +938,7 @@ func TestBuildGoLibraries(t *testing.T) {
 						{Path: "google/bigtable/v2"},
 						{Path: "google/bigtable/admin/v2"},
 					},
+					Keep: []string{"README.md"},
 					Go: &config.GoModule{
 						GoAPIs: []*config.GoAPI{
 							{Path: "google/bigtable/admin/v2", NoMetadata: true, ProtoOnly: true},
@@ -1008,6 +1009,48 @@ func TestBuildGoLibraries(t *testing.T) {
 							{Path: "google/storage/v2", ImportPath: "storage/internal/apiv2"},
 						},
 					},
+				},
+			},
+		},
+		{
+			name: "firestore keep",
+			input: &MigrationInput{
+				librarianState: &legacyconfig.LibrarianState{
+					Libraries: []*legacyconfig.LibraryState{
+						{
+							ID: "firestore",
+						},
+					},
+				},
+				librarianConfig: &legacyconfig.LibrarianConfig{},
+				repoPath:        "testdata/google-cloud-go",
+				googleapisDir:   "testdata/googleapis",
+			},
+			want: []*config.Library{
+				{
+					Name: "firestore",
+					Keep: []string{"README.md"},
+				},
+			},
+		},
+		{
+			name: "pubsub/v2 keep",
+			input: &MigrationInput{
+				librarianState: &legacyconfig.LibrarianState{
+					Libraries: []*legacyconfig.LibraryState{
+						{
+							ID: "pubsub/v2",
+						},
+					},
+				},
+				librarianConfig: &legacyconfig.LibrarianConfig{},
+				repoPath:        "testdata/google-cloud-go",
+				googleapisDir:   "testdata/googleapis",
+			},
+			want: []*config.Library{
+				{
+					Name: "pubsub/v2",
+					Keep: []string{"README.md"},
 				},
 			},
 		},
