@@ -123,6 +123,7 @@ type LibraryConfig struct {
 // GenerationConfig represents the root of generation_config.yaml.
 type GenerationConfig struct {
 	GoogleapisCommitish string          `yaml:"googleapis_commitish"`
+	LibrariesBomVersion string          `yaml:"libraries_bom_version"`
 	Libraries           []LibraryConfig `yaml:"libraries"`
 }
 
@@ -260,6 +261,11 @@ func buildConfig(gen *GenerationConfig, repoPath string, src *config.Source, ver
 	}
 	return &config.Config{
 		Language: "java",
+		Default: &config.Default{
+			Java: &config.JavaModule{
+				LibrariesBomVersion: gen.LibrariesBomVersion,
+			},
+		},
 		Sources: &config.Sources{
 			Googleapis: src,
 		},
