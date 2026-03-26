@@ -1,0 +1,65 @@
+dart:
+  protoc:
+    version: "29.3"
+    checksum: "f149c4a69910c8d241d27869d2cdf6791187a7a9434ad0f392b4a61e1697c3844e60bce634bd7147cb4cb7f2ad2530fc933be4976f67ac75d9ad78bb8b412f24"
+go:
+  protoc:
+    version: "25.7"
+    checksum: "ac571249613458e4b9598a8f2a9b3ab9e56ed04d35f610f4181c65da4ee9bfd6fe44b5b0fd0a6d5b53ca4657d443c3bd457c3ef6164df8b8b4bc537012205aec"
+java:
+  protoc:
+    version: "33.2"
+  tools:
+    - name: gapic-generator-java
+      version: "2.66.1"
+    - name: google-java-format
+      version: "1.25.2"
+    - name: protoc-gen-grpc-java
+      version: "1.76.2"
+nodejs:
+  protoc:
+    version: "29.3"
+    checksum: "f149c4a69910c8d241d27869d2cdf6791187a7a9434ad0f392b4a61e1697c3844e60bce634bd7147cb4cb7f2ad2530fc933be4976f67ac75d9ad78bb8b412f24"
+  tools:
+    - name: gapic-generator-typescript
+      version: "76ba85a7f55c6e82943008b4eceb07a0f58b39e1"
+      checksum: "9561a116203761bad63bf1a0abc7a4a0db67608683c3d67b45abfc394df612ac"
+    - name: gapic-node-processing
+      version: "0.1.7"
+    - name: gapic-tools
+      version: "1.0.5"
+    - name: synthtool
+      version: "5aa438a342707842d11fbbb302c6277fbf9e4655"
+python:
+  protoc:
+    version: "25.3"
+    checksum: "5ec3474ca09df0511bb2ca66b5ca091fa8943c30aa26285f225d0b1ba60b5665b3419be4cd2322decbb55464039ca0a0405a47e86bcc11491589405d615d280e"
+  tools:
+    - name: black
+      version: "23.7.0"
+    - name: gapic-generator
+      version: "1.30.11"
+    - name: isort
+      version: "5.11.0"
+    - name: nox
+      version: "2025.11.12"
+    - name: pandoc
+      version: "3.8.2"
+      checksum: "f5e90628b44a801ecdf812236291871607db8fb2fba0e99911a6c497b406c64a8940fd2a776d482ece7a9dac10d0228378d78da61091262b69e7276456495f5c"
+    - name: ruff
+      version: "0.14.14"
+    - name: synthtool
+      version: "afd7725f32d522a95e964884e0fba6d0d6b4cb6a"
+rust:
+  protoc:
+    version: "29.3"
+    checksum: "f149c4a69910c8d241d27869d2cdf6791187a7a9434ad0f392b4a61e1697c3844e60bce634bd7147cb4cb7f2ad2530fc933be4976f67ac75d9ad78bb8b412f24"
+  tools:
+    - name: cargo-hack
+    - name: cargo-minimal-versions
+    - name: cargo-semver-checks
+      version: "0.46.0"
+    - name: cargo-workspaces
+      version: "0.4.0"
+    - name: taplo-cli
+      version: "0.10.0"

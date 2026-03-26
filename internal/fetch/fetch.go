@@ -17,6 +17,7 @@ package fetch
 
 import (
 	"archive/tar"
+	"archive/zip"
 	"compress/gzip"
 	"context"
 	"crypto/sha256"
@@ -39,11 +40,48 @@ const (
 
 var (
 	errChecksumMismatch = errors.New("checksum mismatch")
-	errMissingSHA256    = errors.New("must provide expected SHA256")
 	defaultBackoff      = 10 * time.Second
 )
 
 const maxDownloadRetries = 3
+
+// Download downloads a file from the given url to the target path. If
+// expectedSha256 is non-empty, it verifies the SHA256 checksum. It retries up
+// to maxDownloadRetries times with exponential backoff on failure.
+func Download(ctx context.Context, target, url, expectedSha256 string) error {
+	if fileExists(target) {
+		return nil
+	}
+	if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil {
+		return err
+	}
+	tempFile, err := os.CreateTemp(filepath.Dir(target), "temp-")
+	if err != nil {
+		return err
+	}
+	tempPath := tempFile.Name()
+	_ = tempFile.Close()
+	defer func() {
+		cerr := os.Remove(tempPath)
+		if err == nil && cerr != nil && !os.IsNotExist(cerr) {
+			err = cerr
+		}
+	}()
+
+	if err := downloadFile(ctx, tempPath, url); err != nil {
+		return err
+	}
+	if expectedSha256 != "" {
+		sha, err := computeSHA256(tempPath)
+		if err != nil {
+			return err
+		}
+		if sha != expectedSha256 {
+			return fmt.Errorf("%w: expected=%s, got=%s", errChecksumMismatch, expectedSha256, sha)
+		}
+	}
+	return os.Rename(tempPath, target)
+}
 
 // Endpoints defines the endpoints used to access GitHub.
 type Endpoints struct {
@@ -66,12 +104,12 @@ type Repo struct {
 	Repo string
 }
 
-// RepoFromTarballLink extracts the gitHub account and repository (such as
+// repoFromTarballLink extracts the gitHub account and repository (such as
 // `googleapis/googleapis`, or `googleapis/google-cloud-rust`) from the tarball
 // link.
 // Note: This does **not** set [Repo.Branch] as it is not derivable from a
 // commit-based archive URL.
-func RepoFromTarballLink(githubDownload, tarballLink string) (*Repo, error) {
+func repoFromTarballLink(githubDownload, tarballLink string) (*Repo, error) {
 	urlPath := strings.TrimPrefix(tarballLink, githubDownload)
 	urlPath = strings.TrimPrefix(urlPath, "/")
 	components := strings.Split(urlPath, "/")
@@ -138,7 +176,7 @@ func LatestCommitAndChecksum(endpoints *Endpoints, repo *Repo) (commit, sha256 s
 		return "", "", err
 	}
 
-	tarballURL := TarballLink(endpoints.Download, repo, commit)
+	tarballURL := tarballLink(endpoints.Download, repo, commit)
 	sha256, err = urlSha256(tarballURL)
 	if err != nil {
 		return "", "", err
@@ -146,56 +184,17 @@ func LatestCommitAndChecksum(endpoints *Endpoints, repo *Repo) (commit, sha256 s
 	return commit, sha256, nil
 }
 
-// TarballLink constructs a GitHub tarball download URL for the given
+// tarballLink constructs a GitHub tarball download URL for the given
 // repository and commit SHA.
 // Note: This does **not** incorporate the [Repo.Branch] as this produces a
 // commit-based archive URL.
-func TarballLink(githubDownload string, repo *Repo, sha string) string {
+func tarballLink(githubDownload string, repo *Repo, sha string) string {
 	return fmt.Sprintf("%s/%s/%s/archive/%s.tar.gz", githubDownload, repo.Org, repo.Repo, sha)
 }
 
-// DownloadTarball downloads a tarball from the given url to the target
-// path, verifying its SHA256 checksum matches expectedSha256. It retries up to
-// maxDownloadRetries times with exponential backoff on failure.
-func DownloadTarball(ctx context.Context, target, url, expectedSha256 string) error {
-	if fileExists(target) {
-		return nil
-	}
-	if expectedSha256 == "" {
-		return errMissingSHA256
-	}
-	if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil {
-		return err
-	}
-	tempFile, err := os.CreateTemp(filepath.Dir(target), "temp-")
-	if err != nil {
-		return err
-	}
-	tempPath := tempFile.Name()
-	_ = tempFile.Close()
-	defer func() {
-		cerr := os.Remove(tempPath)
-		if err == nil && cerr != nil && !os.IsNotExist(cerr) {
-			err = cerr
-		}
-	}()
-
-	if err := downloadTarball(ctx, tempPath, url); err != nil {
-		return err
-	}
-	sha, err := computeSHA256(tempPath)
-	if err != nil {
-		return err
-	}
-	if sha != expectedSha256 {
-		return fmt.Errorf("%w: expected=%s, got=%s", errChecksumMismatch, expectedSha256, sha)
-	}
-	return os.Rename(tempPath, target)
-}
-
-// downloadTarball downloads a tarball from the given source URL to the target
-// path. It retries up to maxDownloadRetries times with exponential backoff on failure.
-func downloadTarball(ctx context.Context, target, source string) error {
+// downloadFile downloads a file from the given source URL to the target path.
+// It retries up to maxDownloadRetries times with exponential backoff on failure.
+func downloadFile(ctx context.Context, target, source string) error {
 	var err error
 	for i := range maxDownloadRetries {
 		if i > 0 {
@@ -319,4 +318,55 @@ func ExtractTarball(tarballPath, destDir string) error {
 			out.Close()
 		}
 	}
+}
+
+// ExtractZip extracts a zip archive to the specified directory.
+func ExtractZip(zipPath, destDir string) error {
+	r, err := zip.OpenReader(zipPath)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	for _, f := range r.File {
+		target := filepath.Join(destDir, f.Name)
+		if !strings.HasPrefix(filepath.Clean(target), filepath.Clean(destDir)+string(os.PathSeparator)) {
+			return fmt.Errorf("invalid zip entry: %s", f.Name)
+		}
+		if f.FileInfo().IsDir() {
+			if err := os.MkdirAll(target, 0755); err != nil {
+				return err
+			}
+			continue
+		}
+		if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil {
+			return err
+		}
+		if err := extractZipEntry(f, target); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func extractZipEntry(f *zip.File, target string) (err error) {
+	rc, err := f.Open()
+	if err != nil {
+		return err
+	}
+	defer rc.Close()
+
+	out, err := os.OpenFile(target, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+	if err != nil {
+		return err
+	}
+	defer func() {
+		cerr := out.Close()
+		if err == nil {
+			err = cerr
+		}
+	}()
+
+	_, err = io.Copy(out, rc)
+	return err
 }

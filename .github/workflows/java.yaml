@@ -33,9 +33,9 @@ jobs:
           distribution: "temurin"
       - name: Display Java version
         run: java -version
-      - name: Install Java tools
+      - name: Run librarian setup
         run: |
-          ./.github/workflows/scripts/install_java_tools.sh "$HOME/java_tools"
+          go run ./cmd/librarian setup java
           echo "$HOME/java_tools/bin" >> $GITHUB_PATH
       - name: Verify tools
         run: |

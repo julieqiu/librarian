@@ -26,9 +26,8 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version-file: "go.mod"
-      - uses: ./.github/actions/install-protoc
-      - name: Install Go tools
-        run: go install tool
+      - name: Run librarian setup
+        run: go run ./cmd/librarian setup go
       - name: Check go generate
         run: |
           go generate ./...

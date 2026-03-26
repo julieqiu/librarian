@@ -26,7 +26,6 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version-file: "go.mod"
-      - uses: ./.github/actions/install-protoc
       - name: Display Go version
         run: go version
       - name: Install Rust toolchain
@@ -35,7 +34,8 @@ jobs:
         run: cargo version
       - name: Display rustc version
         run: rustup show active-toolchain -v
-      - uses: ./.github/actions/install-taplo
+      - name: Run librarian setup
+        run: go run ./cmd/librarian setup rust
       - name: Verify git and tar are available
         run: |
           git --version
@@ -56,12 +56,20 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version-file: "go.mod"
-      - uses: ./.github/actions/install-protoc
-      - name: Install librarian
-        run: go install ./cmd/librarian
+      - name: Display Go version
+        run: go version
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-      - uses: ./.github/actions/install-taplo
+      - name: Display Cargo version
+        run: cargo version
+      - name: Display rustc version
+        run: rustup show active-toolchain -v
+      - name: Run librarian setup
+        run: go run ./cmd/librarian setup rust
+      - name: Verify git and tar are available
+        run: |
+          git --version
+          tar --version
       - name: Checkout google-cloud-rust
         uses: actions/checkout@v6
         with:

@@ -22,15 +22,13 @@ import (
 	"fmt"
 
 	"github.com/googleapis/librarian/internal/command"
+	"github.com/googleapis/librarian/internal/setup"
 	"github.com/urfave/cli/v3"
 )
 
 // ErrLibraryNotFound is returned when the specified library is not found in config.
 var ErrLibraryNotFound = errors.New("library not found")
 
-const (
-	librarianConfigPath = "librarian.yaml"
-)
 
 // Run executes the librarian command with the given arguments.
 func Run(ctx context.Context, args ...string) error {
@@ -58,9 +56,25 @@ func Run(ctx context.Context, args ...string) error {
 			versionCommand(),
 			publishCommand(),
 			tagCommand(),
+			setupCommand(),
 		},
 	}
 	return cmd.Run(ctx, args)
+}
+
+func setupCommand() *cli.Command {
+	return &cli.Command{
+		Name:      "setup",
+		Usage:     "install dependencies for a language",
+		UsageText: "librarian setup <language>",
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			language := cmd.Args().First()
+			if language == "" {
+				return fmt.Errorf("language is required, e.g. librarian setup rust")
+			}
+			return setup.Run(ctx, language)
+		},
+	}
 }
 
 // versionCommand prints the version information.

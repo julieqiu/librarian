@@ -25,7 +25,6 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version-file: "go.mod"
-      - uses: ./.github/actions/install-protoc
       - name: Display Go version
         run: go version
       - name: Install Dart SDK
@@ -34,6 +33,8 @@ jobs:
           sdk: 3.6.0
       - name: Display Dart version
         run: dart --version
+      - name: Run librarian setup
+        run: go run ./cmd/librarian setup dart
       - name: Verify git is available
         run: git --version
       - name: Run internal/sidekick/dart tests

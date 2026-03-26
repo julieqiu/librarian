@@ -39,19 +39,8 @@ jobs:
           python-version: "3.14"
       - name: Display Python version
         run: python3 --version
-      - uses: ./.github/actions/install-protoc
-      - name: Install gapic-generator-typescript
-        run: |
-          git clone --depth 1 https://github.com/googleapis/google-cloud-node-core.git /tmp/google-cloud-node-core
-          cd /tmp/google-cloud-node-core/generator/gapic-generator-typescript
-          npm install
-          npm run compile
-          npm link
-      - name: Install gapic-node-processing and gapic-tools
-        run: npm install -g gapic-node-processing@0.1.7 gapic-tools@1.0.5
-      - name: Install synthtool
-        run: |
-          pip install gcp-synthtool@git+https://github.com/googleapis/synthtool@5aa438a342707842d11fbbb302c6277fbf9e4655
+      - name: Run librarian setup
+        run: go run ./cmd/librarian setup nodejs
       - name: Run internal/librarian/nodejs tests
         run: go test -race -coverprofile=coverage.out -covermode=atomic ./internal/librarian/nodejs
       - name: Upload coverage report
