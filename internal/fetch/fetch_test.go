@@ -40,7 +40,7 @@ const (
 )
 
 func TestRepoFromTarballLink(t *testing.T) {
-	got, err := RepoFromTarballLink(testGitHubDn, testGitHubDn+"/org-name/repo-name"+tarballPathTrailer)
+	got, err := repoFromTarballLink(testGitHubDn, testGitHubDn+"/org-name/repo-name"+tarballPathTrailer)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,7 +68,7 @@ func TestRepoFromTarballLinkErrors(t *testing.T) {
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			if got, err := RepoFromTarballLink(testGitHubDn, test.tarballLink); err == nil {
+			if got, err := repoFromTarballLink(testGitHubDn, test.tarballLink); err == nil {
 				t.Errorf("expected an error, got=%v", got)
 			}
 		})
@@ -207,26 +207,26 @@ func TestTarballLink(t *testing.T) {
 			want:           "https://test.example.com/my-org/my-repo/archive/def456.tar.gz",
 		},
 	} {
-		got := TarballLink(test.githubDownload, test.repo, test.sha)
+		got := tarballLink(test.githubDownload, test.repo, test.sha)
 		if got != test.want {
-			t.Errorf("TarballLink() = %q, want %q", got, test.want)
+			t.Errorf("tarballLink() = %q, want %q", got, test.want)
 		}
 	}
 }
 
-func TestDownloadTarballTgzExists(t *testing.T) {
+func TestDownloadTgzExists(t *testing.T) {
 	testDir := t.TempDir()
 	tarball := makeTestContents(t)
 	target := path.Join(testDir, "existing-file")
 	if err := os.WriteFile(target, tarball.Contents, 0644); err != nil {
 		t.Fatal(err)
 	}
-	if err := DownloadTarball(t.Context(), target, "https://unused/placeholder.tar.gz", tarball.Sha256); err != nil {
+	if err := Download(t.Context(), target, "https://unused/placeholder.tar.gz", tarball.Sha256); err != nil {
 		t.Fatal(err)
 	}
 }
 
-func TestDownloadTarballNeedsDownload(t *testing.T) {
+func TestDownloadNeedsDownload(t *testing.T) {
 	testDir := t.TempDir()
 	tarball := makeTestContents(t)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -239,7 +239,7 @@ func TestDownloadTarballNeedsDownload(t *testing.T) {
 	defer server.Close()
 
 	expected := path.Join(testDir, "new-file")
-	if err := DownloadTarball(t.Context(), expected, server.URL+"/placeholder.tar.gz", tarball.Sha256); err != nil {
+	if err := Download(t.Context(), expected, server.URL+"/placeholder.tar.gz", tarball.Sha256); err != nil {
 		t.Fatal(err)
 	}
 	got, err := os.ReadFile(expected)
@@ -251,7 +251,7 @@ func TestDownloadTarballNeedsDownload(t *testing.T) {
 	}
 }
 
-func TestDownloadTarballChecksumMismatch(t *testing.T) {
+func TestDownloadChecksumMismatch(t *testing.T) {
 	testDir := t.TempDir()
 	tarball := makeTestContents(t)
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -263,7 +263,7 @@ func TestDownloadTarballChecksumMismatch(t *testing.T) {
 	target := path.Join(testDir, "target-file")
 	wrongSha := "0000000000000000000000000000000000000000000000000000000000000000"
 
-	err := DownloadTarball(t.Context(), target, server.URL+"/test.tar.gz", wrongSha)
+	err := Download(t.Context(), target, server.URL+"/test.tar.gz", wrongSha)
 	if !errors.Is(err, errChecksumMismatch) {
 		t.Fatalf("expected errChecksumMismatch, got: %v", err)
 	}
@@ -272,7 +272,7 @@ func TestDownloadTarballChecksumMismatch(t *testing.T) {
 	}
 }
 
-func TestDownloadTarball_ContextCanceled(t *testing.T) {
+func TestDownload_ContextCanceled(t *testing.T) {
 	testDir := t.TempDir()
 	// Set up a mock web server that sleeps to simulate a long download.
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -285,13 +285,13 @@ func TestDownloadTarball_ContextCanceled(t *testing.T) {
 	// Create a context that will be canceled explicitly after a short delay.
 	ctx, cancel := context.WithCancel(t.Context())
 	// Start a goroutine to cancel the context after a brief period,
-	// so that `DownloadTarball` is still in progress when the cancellation occurs.
+	// so that `Download` is still in progress when the cancellation occurs.
 	go func() {
 		time.Sleep(50 * time.Millisecond)
 		cancel()
 	}()
 
-	err := DownloadTarball(ctx, target, server.URL+"/test.tar.gz", "any-sha")
+	err := Download(ctx, target, server.URL+"/test.tar.gz", "any-sha")
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("expected context.Canceled, got: %v", err)
 	}
@@ -475,7 +475,7 @@ func TestExtractTarballErrors(t *testing.T) {
 	}
 }
 
-func TestDownloadTarballErrors(t *testing.T) {
+func TestDownloadErrors(t *testing.T) {
 	for _, test := range []struct {
 		name    string
 		target  func(t *testing.T) string
@@ -523,19 +523,11 @@ func TestDownloadTarballErrors(t *testing.T) {
 			t.Cleanup(func() {
 				defaultBackoff = 10 * time.Second
 			})
-			err := DownloadTarball(context.Background(), test.target(t), test.url(t), test.sha)
+			err := Download(context.Background(), test.target(t), test.url(t), test.sha)
 			if (err != nil) != test.wantErr {
-				t.Errorf("DownloadTarball() error = %v, wantErr %v", err, test.wantErr)
+				t.Errorf("Download() error = %v, wantErr %v", err, test.wantErr)
 			}
 		})
-	}
-}
-
-func TestDownloadTarballEmptySha(t *testing.T) {
-	target := path.Join(t.TempDir(), "target")
-	err := DownloadTarball(t.Context(), target, "https://any-url", "")
-	if !errors.Is(err, errMissingSHA256) {
-		t.Errorf("expected errMissingSHA256, got: %v", err)
 	}
 }
 
@@ -632,7 +624,7 @@ func TestLatestCommitAndChecksum(t *testing.T) {
 	}
 }
 
-func TestDownloadTarballRetryErrorIncludesLastFailure(t *testing.T) {
+func TestDownloadRetryErrorIncludesLastFailure(t *testing.T) {
 	defaultBackoff = time.Millisecond
 	t.Cleanup(func() {
 		defaultBackoff = 10 * time.Second
@@ -643,7 +635,7 @@ func TestDownloadTarballRetryErrorIncludesLastFailure(t *testing.T) {
 	defer server.Close()
 
 	target := path.Join(t.TempDir(), "target-file")
-	err := DownloadTarball(t.Context(), target, server.URL+"/test.tar.gz", "any-sha")
+	err := Download(t.Context(), target, server.URL+"/test.tar.gz", "any-sha")
 	if err == nil {
 		t.Fatal("expected an error")
 	}
@@ -655,7 +647,7 @@ func TestDownloadTarballRetryErrorIncludesLastFailure(t *testing.T) {
 	}
 }
 
-func TestDownloadTarballRetrySucceeds(t *testing.T) {
+func TestDownloadRetrySucceeds(t *testing.T) {
 	defaultBackoff = time.Millisecond
 	t.Cleanup(func() {
 		defaultBackoff = 10 * time.Second
@@ -674,7 +666,7 @@ func TestDownloadTarballRetrySucceeds(t *testing.T) {
 	defer server.Close()
 
 	target := path.Join(t.TempDir(), "target-file")
-	if err := DownloadTarball(t.Context(), target, server.URL+"/test.tar.gz", tarball.Sha256); err != nil {
+	if err := Download(t.Context(), target, server.URL+"/test.tar.gz", tarball.Sha256); err != nil {
 		t.Fatal(err)
 	}
 

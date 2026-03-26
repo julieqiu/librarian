@@ -103,7 +103,7 @@ func RepoDir(ctx context.Context, repo, commit, expectedSHA256 string) (string, 
 	if err := os.MkdirAll(outDir, 0755); err != nil {
 		return "", fmt.Errorf("failed creating %q: %w", outDir, err)
 	}
-	if err := DownloadTarball(ctx, tgz, sourceURL, expectedSHA256); err != nil {
+	if err := Download(ctx, tgz, sourceURL, expectedSHA256); err != nil {
 		return "", err
 	}
 	if err := ExtractTarball(tgz, outDir); err != nil {
