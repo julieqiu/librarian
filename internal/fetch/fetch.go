@@ -66,17 +66,17 @@ type Repo struct {
 	Repo string
 }
 
-// RepoFromTarballLink extracts the gitHub account and repository (such as
-// `googleapis/googleapis`, or `googleapis/google-cloud-rust`) from the tarball
+// repoFromArchiveLink extracts the GitHub account and repository (such as
+// `googleapis/googleapis`, or `googleapis/google-cloud-rust`) from an archive
 // link.
 // Note: This does **not** set [Repo.Branch] as it is not derivable from a
 // commit-based archive URL.
-func RepoFromTarballLink(githubDownload, tarballLink string) (*Repo, error) {
-	urlPath := strings.TrimPrefix(tarballLink, githubDownload)
+func repoFromArchiveLink(githubDownload, archiveLink string) (*Repo, error) {
+	urlPath := strings.TrimPrefix(archiveLink, githubDownload)
 	urlPath = strings.TrimPrefix(urlPath, "/")
 	components := strings.Split(urlPath, "/")
 	if len(components) < 2 {
-		return nil, fmt.Errorf("invalid tarball URL %q", tarballLink)
+		return nil, fmt.Errorf("invalid archive URL %q", archiveLink)
 	}
 	repo := &Repo{
 		Org:  components[0],
@@ -138,7 +138,7 @@ func LatestCommitAndChecksum(endpoints *Endpoints, repo *Repo) (commit, sha256 s
 		return "", "", err
 	}
 
-	tarballURL := TarballLink(endpoints.Download, repo, commit)
+	tarballURL := tarballLink(endpoints.Download, repo, commit)
 	sha256, err = urlSha256(tarballURL)
 	if err != nil {
 		return "", "", err
@@ -146,18 +146,18 @@ func LatestCommitAndChecksum(endpoints *Endpoints, repo *Repo) (commit, sha256 s
 	return commit, sha256, nil
 }
 
-// TarballLink constructs a GitHub tarball download URL for the given
+// tarballLink constructs a GitHub tarball download URL for the given
 // repository and commit SHA.
 // Note: This does **not** incorporate the [Repo.Branch] as this produces a
 // commit-based archive URL.
-func TarballLink(githubDownload string, repo *Repo, sha string) string {
+func tarballLink(githubDownload string, repo *Repo, sha string) string {
 	return fmt.Sprintf("%s/%s/%s/archive/%s.tar.gz", githubDownload, repo.Org, repo.Repo, sha)
 }
 
-// DownloadTarball downloads a tarball from the given url to the target
-// path, verifying its SHA256 checksum matches expectedSha256. It retries up to
+// download downloads a file from the given url to the target path, verifying
+// its SHA256 checksum matches expectedSha256. It retries up to
 // maxDownloadRetries times with exponential backoff on failure.
-func DownloadTarball(ctx context.Context, target, url, expectedSha256 string) error {
+func download(ctx context.Context, target, url, expectedSha256 string) error {
 	if fileExists(target) {
 		return nil
 	}
@@ -180,7 +180,7 @@ func DownloadTarball(ctx context.Context, target, url, expectedSha256 string) er
 		}
 	}()
 
-	if err := downloadTarball(ctx, tempPath, url); err != nil {
+	if err := downloadFile(ctx, tempPath, url); err != nil {
 		return err
 	}
 	sha, err := computeSHA256(tempPath)
@@ -193,9 +193,9 @@ func DownloadTarball(ctx context.Context, target, url, expectedSha256 string) er
 	return os.Rename(tempPath, target)
 }
 
-// downloadTarball downloads a tarball from the given source URL to the target
-// path. It retries up to maxDownloadRetries times with exponential backoff on failure.
-func downloadTarball(ctx context.Context, target, source string) error {
+// downloadFile downloads a file from the given source URL to the target path.
+// It retries up to maxDownloadRetries times with exponential backoff on failure.
+func downloadFile(ctx context.Context, target, source string) error {
 	var err error
 	for i := range maxDownloadRetries {
 		if i > 0 {
@@ -260,9 +260,9 @@ func fileExists(name string) bool {
 	return stat.Mode().IsRegular()
 }
 
-// ExtractTarball extracts a gzipped tarball to the specified directory,
+// extractTarball extracts a gzipped tarball to the specified directory,
 // stripping the top-level directory prefix that GitHub adds to tarballs.
-func ExtractTarball(tarballPath, destDir string) error {
+func extractTarball(tarballPath, destDir string) error {
 	f, err := os.Open(tarballPath)
 	if err != nil {
 		return err
