@@ -475,7 +475,7 @@ func TestExtractTarball_Errors(t *testing.T) {
 	}
 }
 
-func TestDownload_Errors(t *testing.T) {
+func TestDownload_Error(t *testing.T) {
 	for _, test := range []struct {
 		name    string
 		target  func(t *testing.T) string
