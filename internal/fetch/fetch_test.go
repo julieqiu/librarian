@@ -53,7 +53,7 @@ func TestRepoFromArchiveLink(t *testing.T) {
 	}
 }
 
-func TestRepoFromArchiveLink_Errors(t *testing.T) {
+func TestRepoFromArchiveLink_Error(t *testing.T) {
 	for _, test := range []struct {
 		name        string
 		archiveLink string
