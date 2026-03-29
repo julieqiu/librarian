@@ -45,6 +45,7 @@ var nodejsConfigFiles = []string{
 	".prettierignore",
 	".prettierrc.cjs",
 	".prettierrc.js",
+	".readme-partials.yaml",
 	".readme-partials.yml",
 	".repo-metadata.json",
 	"CHANGELOG.md",
