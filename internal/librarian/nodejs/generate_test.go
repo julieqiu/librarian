@@ -34,103 +34,250 @@ import (
 
 const googleapisDir = "../../testdata/googleapis"
 
-func TestDerivePackageName(t *testing.T) {
-	for _, test := range []struct {
-		name string
-		lib  *config.Library
-		want string
-	}{
+
+func TestGenerate(t *testing.T) {
+	if testing.Short() {
+		t.Skip("slow test: Node.js code generation")
+	}
+
+	testhelper.RequireCommand(t, "gapic-generator-typescript")
+	testhelper.RequireCommand(t, "gapic-node-processing")
+	testhelper.RequireCommand(t, "compileProtos")
+
+	absGoogleapisDir, err := filepath.Abs(googleapisDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	repoRoot := t.TempDir()
+	libraries := []*config.Library{
 		{
-			name: "explicit package name",
-			lib: &config.Library{
-				Name: "google-cloud-accessapproval",
-				Nodejs: &config.NodejsPackage{
-					PackageName: "@google-cloud/access-approval",
-				},
+			Name: "google-cloud-secretmanager",
+			APIs: []*config.API{
+				{Path: "google/cloud/secretmanager/v1"},
 			},
-			want: "@google-cloud/access-approval",
 		},
 		{
-			name: "derived from library name",
-			lib: &config.Library{
-				Name: "google-cloud-batch",
+			Name: "google-cloud-configdelivery",
+			APIs: []*config.API{
+				{Path: "google/cloud/configdelivery/v1"},
 			},
-			want: "@google-cloud/batch",
 		},
-		{
-			name: "derived with multi-segment suffix",
-			lib: &config.Library{
-				Name: "google-cloud-video-transcoder",
-			},
-			want: "@google-cloud/video-transcoder",
-		},
-		{
-			name: "nil nodejs config",
-			lib: &config.Library{
-				Name: "google-cloud-speech",
-			},
-			want: "@google-cloud/speech",
-		},
-		{
-			name: "empty package name in config",
-			lib: &config.Library{
-				Name:   "google-cloud-monitoring",
-				Nodejs: &config.NodejsPackage{},
-			},
-			want: "@google-cloud/monitoring",
-		},
-		{
-			name: "no second dash",
-			lib: &config.Library{
-				Name: "google",
-			},
-			want: "google",
-		},
-		{
-			name: "only one dash",
-			lib: &config.Library{
-				Name: "google-cloud",
-			},
-			want: "google-cloud",
-		},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			got := DerivePackageName(test.lib)
-			if diff := cmp.Diff(test.want, got); diff != "" {
-				t.Errorf("mismatch (-want +got):\n%s", diff)
-			}
-		})
+	}
+	for _, library := range libraries {
+		library.Output = filepath.Join(repoRoot, "packages", library.Name)
+	}
+
+	cfg := &config.Config{
+		Language: config.LanguageNodejs,
+		Repo:     "googleapis/google-cloud-node",
+	}
+	for _, library := range libraries {
+		if err := Generate(t.Context(), cfg, library, &sources.Sources{Googleapis: absGoogleapisDir}); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	for _, library := range libraries {
+		if _, err := os.Stat(library.Output); err != nil {
+			t.Errorf("expected output directory for %q to exist: %v", library.Name, err)
+		}
 	}
 }
 
-func TestDefaultOutput(t *testing.T) {
-	for _, test := range []struct {
-		name          string
-		libName       string
-		defaultOutput string
-		want          string
-	}{
-		{
-			name:          "standard",
-			libName:       "google-cloud-batch",
-			defaultOutput: "packages",
-			want:          "packages/google-cloud-batch",
+func TestGenerate_Owlbot(t *testing.T) {
+	testhelper.RequireCommand(t, "python3")
+
+	repoRoot := t.TempDir()
+	outDir := filepath.Join(repoRoot, "packages", "google-cloud-test")
+	if err := os.MkdirAll(outDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(
+		filepath.Join(outDir, "owlbot.py"),
+		[]byte("import pathlib\npathlib.Path('owlbot-ran.txt').write_text('yes')\n"),
+		0644,
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	library := &config.Library{
+		Name:   "google-cloud-test",
+		Output: outDir,
+	}
+	cfg := &config.Config{Language: config.LanguageNodejs}
+	srcs := &sources.Sources{Googleapis: googleapisDir}
+	if err := Generate(t.Context(), cfg, library, srcs); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(outDir, "owlbot-ran.txt")); err != nil {
+		t.Errorf("expected owlbot.py to run: %v", err)
+	}
+}
+
+func TestGenerate_NoProtos(t *testing.T) {
+	repoRoot := t.TempDir()
+	outDir := filepath.Join(repoRoot, "packages", "google-cloud-apigeeconnect")
+
+	library := &config.Library{
+		Name:   "google-cloud-apigeeconnect",
+		Output: outDir,
+		APIs:   []*config.API{{Path: "google/cloud/apigeeconnect/v1"}},
+	}
+	cfg := &config.Config{Language: config.LanguageNodejs}
+	srcs := &sources.Sources{Googleapis: googleapisDir}
+	if err := Generate(t.Context(), cfg, library, srcs); err == nil {
+		t.Fatal("expected error for API directory with no proto files")
+	}
+}
+
+func TestGenerate_MkdirAllError(t *testing.T) {
+	repoRoot := t.TempDir()
+	// Create a file where a directory is expected, so MkdirAll fails.
+	blocker := filepath.Join(repoRoot, "packages")
+	if err := os.WriteFile(blocker, []byte("not a dir"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	library := &config.Library{
+		Name:   "google-cloud-test",
+		Output: filepath.Join(repoRoot, "packages", "google-cloud-test"),
+	}
+	cfg := &config.Config{Language: config.LanguageNodejs}
+	srcs := &sources.Sources{Googleapis: t.TempDir()}
+	if err := Generate(t.Context(), cfg, library, srcs); err == nil {
+		t.Fatal("expected error when output directory cannot be created")
+	}
+}
+
+func TestGenerate_PostProcessorError(t *testing.T) {
+	testhelper.RequireCommand(t, "python3")
+
+	repoRoot := t.TempDir()
+	outDir := filepath.Join(repoRoot, "packages", "google-cloud-test")
+	if err := os.MkdirAll(outDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(
+		filepath.Join(outDir, "owlbot.py"),
+		[]byte("import sys; sys.exit(1)\n"),
+		0644,
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	library := &config.Library{
+		Name:   "google-cloud-test",
+		Output: outDir,
+	}
+	cfg := &config.Config{Language: config.LanguageNodejs}
+	srcs := &sources.Sources{Googleapis: googleapisDir}
+	if err := Generate(t.Context(), cfg, library, srcs); err == nil {
+		t.Fatal("expected error from failing owlbot.py")
+	}
+}
+
+
+func TestGenerateAPI(t *testing.T) {
+	if testing.Short() {
+		t.Skip("slow test: Node.js GAPIC code generation")
+	}
+
+	testhelper.RequireCommand(t, "gapic-generator-typescript")
+
+	absGoogleapisDir, err := filepath.Abs(googleapisDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	repoRoot := t.TempDir()
+	outDir := filepath.Join(repoRoot, "packages", "google-cloud-secretmanager")
+	if err := os.MkdirAll(outDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	err = generateAPI(
+		t.Context(),
+		&config.API{Path: "google/cloud/secretmanager/v1"},
+		&config.Library{Name: "google-cloud-secretmanager", Output: outDir},
+		absGoogleapisDir,
+		repoRoot,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	stagingDir := filepath.Join(repoRoot, "owl-bot-staging", "google-cloud-secretmanager", "v1")
+	if _, err := os.Stat(stagingDir); err != nil {
+		t.Errorf("expected staging directory to exist: %v", err)
+	}
+}
+
+func TestGenerateAPI_MultipleVersions(t *testing.T) {
+	if testing.Short() {
+		t.Skip("slow test: Node.js GAPIC code generation")
+	}
+
+	testhelper.RequireCommand(t, "gapic-generator-typescript")
+	absGoogleapisDir, err := filepath.Abs(googleapisDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	repoRoot := t.TempDir()
+	library := &config.Library{
+		Name: "google-cloud-secretmanager",
+		APIs: []*config.API{
+			{Path: "google/cloud/secretmanager/v1"},
+			{Path: "google/cloud/secretmanager/v1beta2"},
 		},
-		{
-			name:          "empty default",
-			libName:       "google-cloud-batch",
-			defaultOutput: "",
-			want:          "google-cloud-batch",
-		},
-	} {
-		t.Run(test.name, func(t *testing.T) {
-			got := DefaultOutput(test.libName, test.defaultOutput)
-			if diff := cmp.Diff(test.want, got); diff != "" {
-				t.Errorf("mismatch (-want +got):\n%s", diff)
+	}
+	outDir := filepath.Join(repoRoot, "packages", library.Name)
+	if err := os.MkdirAll(outDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	library.Output = outDir
+
+	for _, api := range library.APIs {
+		t.Run(api.Path, func(t *testing.T) {
+			if err := generateAPI(t.Context(), api, library, absGoogleapisDir, repoRoot); err != nil {
+				t.Fatal(err)
 			}
 		})
 	}
+	for _, api := range library.APIs {
+		version := filepath.Base(api.Path)
+		stagingDir := filepath.Join(repoRoot, "owl-bot-staging", library.Name, version)
+		if _, err := os.Stat(stagingDir); err != nil {
+			t.Errorf("expected staging directory for %s to exist: %v", version, err)
+		}
+	}
 }
+
+func TestGenerateAPI_NoProtos(t *testing.T) {
+	googleapisDir := t.TempDir()
+	repoRoot := t.TempDir()
+
+	// Create an API directory with no .proto files.
+	apiPath := "google/cloud/emptyapi/v1"
+	apiDir := filepath.Join(googleapisDir, apiPath)
+	if err := os.MkdirAll(apiDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	// Write a non-proto file so the directory is not empty.
+	if err := os.WriteFile(filepath.Join(apiDir, "BUILD.bazel"), []byte("# empty"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	library := &config.Library{
+		Name:   "google-cloud-emptyapi",
+		Output: filepath.Join(repoRoot, "packages", "google-cloud-emptyapi"),
+	}
+	if err := generateAPI(t.Context(), &config.API{Path: apiPath}, library, googleapisDir, repoRoot); err == nil {
+		t.Fatal("expected error for API directory with no proto files")
+	}
+}
+
 
 func TestBuildGeneratorArgs(t *testing.T) {
 	absGoogleapisDir, err := filepath.Abs(googleapisDir)
@@ -257,6 +404,24 @@ func TestBuildGeneratorArgs(t *testing.T) {
 			},
 		},
 		{
+			name: "rest transport",
+			api:  &config.API{Path: "google/ads/admanager/v1"},
+			library: &config.Library{
+				Name: "google-cloud-admanager",
+			},
+			want: []string{
+				"gapic-generator-typescript",
+				"--protoc=" + protocPath,
+				"--common-proto-path=" + absGoogleapisDir,
+				"-I", absGoogleapisDir,
+				"--output-dir", "staging",
+				"--package-name", "@google-cloud/admanager",
+				"--metadata",
+				"--transport", "rest",
+				"--rest-numeric-enums",
+			},
+		},
+		{
 			name: "metadata in extra params is skipped",
 			api:  &config.API{Path: "google/cloud/secretmanager/v1"},
 			library: &config.Library{
@@ -292,6 +457,32 @@ func TestBuildGeneratorArgs(t *testing.T) {
 	}
 }
 
+
+func TestRunPostProcessor(t *testing.T) {
+	testhelper.RequireCommand(t, "gapic-node-processing")
+	testhelper.RequireCommand(t, "compileProtos")
+
+	repoRoot := t.TempDir()
+	library := &config.Library{Name: "google-cloud-secretmanager"}
+	outDir := filepath.Join(repoRoot, "packages", library.Name)
+	if err := os.MkdirAll(outDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	createStagingFixture(t, repoRoot, library.Name, []string{"v1", "v1beta1"})
+
+	cfg := &config.Config{
+		Language: config.LanguageNodejs,
+		Repo:     "googleapis/google-cloud-node",
+	}
+	if err := runPostProcessor(t.Context(), cfg, library, "", repoRoot, outDir); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(repoRoot, "owl-bot-staging")); !os.IsNotExist(err) {
+		t.Error("expected owl-bot-staging to be removed after post-processing")
+	}
+}
+
 func TestRunPostProcessor_Owlbot(t *testing.T) {
 	testhelper.RequireCommand(t, "python3")
 
@@ -316,107 +507,6 @@ func TestRunPostProcessor_Owlbot(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(outDir, "owlbot-ran.txt")); err != nil {
 		t.Errorf("expected owlbot.py to run and create owlbot-ran.txt: %v", err)
-	}
-}
-
-func TestGenerateAPI(t *testing.T) {
-	if testing.Short() {
-		t.Skip("slow test: Node.js GAPIC code generation")
-	}
-
-	testhelper.RequireCommand(t, "gapic-generator-typescript")
-
-	absGoogleapisDir, err := filepath.Abs(googleapisDir)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	repoRoot := t.TempDir()
-	outDir := filepath.Join(repoRoot, "packages", "google-cloud-secretmanager")
-	if err := os.MkdirAll(outDir, 0755); err != nil {
-		t.Fatal(err)
-	}
-
-	err = generateAPI(
-		t.Context(),
-		&config.API{Path: "google/cloud/secretmanager/v1"},
-		&config.Library{Name: "google-cloud-secretmanager", Output: outDir},
-		absGoogleapisDir,
-		repoRoot,
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	stagingDir := filepath.Join(repoRoot, "owl-bot-staging", "google-cloud-secretmanager", "v1")
-	if _, err := os.Stat(stagingDir); err != nil {
-		t.Errorf("expected staging directory to exist: %v", err)
-	}
-}
-
-func TestGenerateAPI_MultipleVersions(t *testing.T) {
-	if testing.Short() {
-		t.Skip("slow test: Node.js GAPIC code generation")
-	}
-
-	testhelper.RequireCommand(t, "gapic-generator-typescript")
-	absGoogleapisDir, err := filepath.Abs(googleapisDir)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	repoRoot := t.TempDir()
-	library := &config.Library{
-		Name: "google-cloud-secretmanager",
-		APIs: []*config.API{
-			{Path: "google/cloud/secretmanager/v1"},
-			{Path: "google/cloud/secretmanager/v1beta2"},
-		},
-	}
-	outDir := filepath.Join(repoRoot, "packages", library.Name)
-	if err := os.MkdirAll(outDir, 0755); err != nil {
-		t.Fatal(err)
-	}
-	library.Output = outDir
-
-	for _, api := range library.APIs {
-		t.Run(api.Path, func(t *testing.T) {
-			if err := generateAPI(t.Context(), api, library, absGoogleapisDir, repoRoot); err != nil {
-				t.Fatal(err)
-			}
-		})
-	}
-	for _, api := range library.APIs {
-		version := filepath.Base(api.Path)
-		stagingDir := filepath.Join(repoRoot, "owl-bot-staging", library.Name, version)
-		if _, err := os.Stat(stagingDir); err != nil {
-			t.Errorf("expected staging directory for %s to exist: %v", version, err)
-		}
-	}
-}
-
-func TestRunPostProcessor(t *testing.T) {
-	testhelper.RequireCommand(t, "gapic-node-processing")
-	testhelper.RequireCommand(t, "compileProtos")
-
-	repoRoot := t.TempDir()
-	library := &config.Library{Name: "google-cloud-secretmanager"}
-	outDir := filepath.Join(repoRoot, "packages", library.Name)
-	if err := os.MkdirAll(outDir, 0755); err != nil {
-		t.Fatal(err)
-	}
-
-	createStagingFixture(t, repoRoot, library.Name, []string{"v1", "v1beta1"})
-
-	cfg := &config.Config{
-		Language: config.LanguageNodejs,
-		Repo:     "googleapis/google-cloud-node",
-	}
-	if err := runPostProcessor(t.Context(), cfg, library, "", repoRoot, outDir); err != nil {
-		t.Fatal(err)
-	}
-	if _, err := os.Stat(filepath.Join(repoRoot, "owl-bot-staging")); !os.IsNotExist(err) {
-		t.Error("expected owl-bot-staging to be removed after post-processing")
 	}
 }
 
@@ -600,31 +690,153 @@ func TestRunPostProcessor_PreservesFiles(t *testing.T) {
 	}
 }
 
+func TestRunPostProcessor_RestoreKeepMissing(t *testing.T) {
+	testhelper.RequireCommand(t, "gapic-node-processing")
+	testhelper.RequireCommand(t, "compileProtos")
+
+	repoRoot := t.TempDir()
+	library := &config.Library{
+		Name: "google-cloud-test",
+		Keep: []string{"does-not-exist.txt"},
+	}
+	outDir := filepath.Join(repoRoot, "packages", library.Name)
+	if err := os.MkdirAll(outDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	createStagingFixture(t, repoRoot, library.Name, []string{"v1"})
+
+	cfg := &config.Config{
+		Language: config.LanguageNodejs,
+		Repo:     "googleapis/google-cloud-node",
+	}
+	if err := runPostProcessor(t.Context(), cfg, library, "", repoRoot, outDir); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestRunPostProcessor_SnippetMetadataError(t *testing.T) {
+	testhelper.RequireCommand(t, "gapic-node-processing")
+	testhelper.RequireCommand(t, "compileProtos")
+
+	repoRoot := t.TempDir()
+	library := &config.Library{
+		Name:    "google-cloud-test",
+		Version: "1.0.0",
+	}
+	outDir := filepath.Join(repoRoot, "packages", library.Name)
+	if err := os.MkdirAll(outDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	createStagingFixture(t, repoRoot, library.Name, []string{"v1"})
+
+	// Add an invalid snippet metadata file in the staging samples directory.
+	samplesDir := filepath.Join(repoRoot, "owl-bot-staging", library.Name, "v1", "samples", "generated", "v1")
+	if err := os.MkdirAll(samplesDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(
+		filepath.Join(samplesDir, "snippet_metadata_google.cloud.test.v1.json"),
+		[]byte("not valid json"),
+		0644,
+	); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg := &config.Config{
+		Language: config.LanguageNodejs,
+		Repo:     "googleapis/google-cloud-node",
+	}
+	if err := runPostProcessor(t.Context(), cfg, library, "", repoRoot, outDir); err == nil {
+		t.Fatal("expected error from invalid snippet metadata")
+	}
+}
+
+func TestRunPostProcessor_CopyMissingProtosError(t *testing.T) {
+	testhelper.RequireCommand(t, "gapic-node-processing")
+	testhelper.RequireCommand(t, "compileProtos")
+
+	repoRoot := t.TempDir()
+	library := &config.Library{
+		Name: "google-cloud-test",
+	}
+	outDir := filepath.Join(repoRoot, "packages", library.Name)
+	if err := os.MkdirAll(outDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	createStagingFixture(t, repoRoot, library.Name, []string{"v1"})
+
+	// Add a proto_list.json that references a proto NOT in the googleapis dir.
+	// combine-library will copy it to outDir/src/v1/.
+	srcDir := filepath.Join(repoRoot, "owl-bot-staging", library.Name, "v1", "src", "v1")
+	entries := []string{"../../protos/google/missing/v1/missing.proto"}
+	data, err := json.Marshal(entries)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(srcDir, "test_proto_list.json"), data, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Use a temporary empty dir as googleapisDir so the referenced proto is missing.
+	emptyGoogleapisDir := t.TempDir()
+	cfg := &config.Config{
+		Language: config.LanguageNodejs,
+		Repo:     "googleapis/google-cloud-node",
+	}
+	if err := runPostProcessor(t.Context(), cfg, library, emptyGoogleapisDir, repoRoot, outDir); err == nil {
+		t.Fatal("expected error from missing source proto")
+	}
+}
+
+
 func TestRestoreCopyrightYear(t *testing.T) {
 	for _, test := range []struct {
 		name  string
 		dir   string
+		file  string
 		year  string
 		input string
 		want  string
 	}{
 		{
-			name:  "replaces year in src",
+			name:  "replaces year in ts file",
 			dir:   "src",
+			file:  "index.ts",
 			year:  "2020",
 			input: "// Copyright 2026 Google LLC\n",
 			want:  "// Copyright 2020 Google LLC\n",
 		},
 		{
-			name:  "replaces year in test",
+			name:  "replaces year in js file",
+			dir:   "src",
+			file:  "index.js",
+			year:  "2020",
+			input: "// Copyright 2026 Google LLC\n",
+			want:  "// Copyright 2020 Google LLC\n",
+		},
+		{
+			name:  "replaces year in test directory",
 			dir:   "test",
+			file:  "index.ts",
 			year:  "2019",
 			input: "// Copyright 2026 Google LLC\n",
 			want:  "// Copyright 2019 Google LLC\n",
 		},
 		{
+			name:  "skips non-js files",
+			dir:   "src",
+			file:  "helper.py",
+			year:  "2020",
+			input: "// Copyright 2026 Google LLC\n",
+			want:  "// Copyright 2026 Google LLC\n",
+		},
+		{
 			name:  "empty year is no-op",
 			dir:   "src",
+			file:  "index.ts",
 			year:  "",
 			input: "// Copyright 2026 Google LLC\n",
 			want:  "// Copyright 2026 Google LLC\n",
@@ -632,6 +844,7 @@ func TestRestoreCopyrightYear(t *testing.T) {
 		{
 			name:  "no match is no-op",
 			dir:   "src",
+			file:  "index.ts",
 			year:  "2020",
 			input: "// No copyright here\n",
 			want:  "// No copyright here\n",
@@ -643,7 +856,7 @@ func TestRestoreCopyrightYear(t *testing.T) {
 			if err := os.MkdirAll(dir, 0755); err != nil {
 				t.Fatal(err)
 			}
-			file := filepath.Join(dir, "index.ts")
+			file := filepath.Join(dir, test.file)
 			if err := os.WriteFile(file, []byte(test.input), 0644); err != nil {
 				t.Fatal(err)
 			}
@@ -668,55 +881,45 @@ func TestRestoreCopyrightYear_SkipsMissingDirs(t *testing.T) {
 	}
 }
 
-func TestGenerate(t *testing.T) {
-	if testing.Short() {
-		t.Skip("slow test: Node.js code generation")
-	}
 
-	testhelper.RequireCommand(t, "gapic-generator-typescript")
-	testhelper.RequireCommand(t, "gapic-node-processing")
-	testhelper.RequireCommand(t, "compileProtos")
-
+func TestWriteRepoMetadata(t *testing.T) {
 	absGoogleapisDir, err := filepath.Abs(googleapisDir)
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	repoRoot := t.TempDir()
-	libraries := []*config.Library{
-		{
-			Name: "google-cloud-secretmanager",
-			APIs: []*config.API{
-				{Path: "google/cloud/secretmanager/v1"},
-			},
-		},
-		{
-			Name: "google-cloud-configdelivery",
-			APIs: []*config.API{
-				{Path: "google/cloud/configdelivery/v1"},
-			},
-		},
-	}
-	for _, library := range libraries {
-		library.Output = filepath.Join(repoRoot, "packages", library.Name)
-	}
-
+	outDir := t.TempDir()
 	cfg := &config.Config{
 		Language: config.LanguageNodejs,
 		Repo:     "googleapis/google-cloud-node",
 	}
-	for _, library := range libraries {
-		if err := Generate(t.Context(), cfg, library, &sources.Sources{Googleapis: absGoogleapisDir}); err != nil {
-			t.Fatal(err)
-		}
+	library := &config.Library{
+		Name: "google-cloud-secretmanager",
+		APIs: []*config.API{{Path: "google/cloud/secretmanager/v1"}},
 	}
-
-	for _, library := range libraries {
-		if _, err := os.Stat(library.Output); err != nil {
-			t.Errorf("expected output directory for %q to exist: %v", library.Name, err)
-		}
+	if err := writeRepoMetadata(cfg, library, absGoogleapisDir, outDir); err != nil {
+		t.Fatal(err)
+	}
+	got, err := repometadata.Read(outDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := sample.RepoMetadata()
+	want.DistributionName = "@google-cloud/secretmanager"
+	want.Language = cfg.Language
+	want.Repo = cfg.Repo
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("mismatch (-want +got):\n%s", diff)
 	}
 }
+
+func TestWriteRepoMetadata_NoAPIs(t *testing.T) {
+	cfg := &config.Config{Language: config.LanguageNodejs}
+	library := &config.Library{Name: "google-cloud-test"}
+	if err := writeRepoMetadata(cfg, library, "", t.TempDir()); err != nil {
+		t.Errorf("expected nil error for library with no APIs, got: %v", err)
+	}
+}
+
 
 func TestCopyMissingProtos(t *testing.T) {
 	googleapisDir := t.TempDir()
@@ -782,6 +985,30 @@ func TestCopyMissingProtos(t *testing.T) {
 		t.Errorf("existing proto should not be overwritten (-want +got):\n%s", diff)
 	}
 }
+
+func TestCopyMissingProtos_ReadError(t *testing.T) {
+	googleapisDir := t.TempDir()
+	outDir := t.TempDir()
+
+	listDir := filepath.Join(outDir, "src", "v1")
+	if err := os.MkdirAll(listDir, 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	entries := []string{"../../protos/google/missing/v1/missing.proto"}
+	data, err := json.Marshal(entries)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(listDir, "test_proto_list.json"), data, 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := copyMissingProtos(googleapisDir, outDir); err == nil {
+		t.Fatal("expected error for missing source proto")
+	}
+}
+
 
 func TestCopySamplesFromStaging(t *testing.T) {
 	stagingDir := t.TempDir()
@@ -852,51 +1079,28 @@ func TestCopySamplesFromStaging_NonExistentDir(t *testing.T) {
 	}
 }
 
-func TestGenerateAPI_NoProtos(t *testing.T) {
-	googleapisDir := t.TempDir()
-	repoRoot := t.TempDir()
+func TestCopySamplesFromStaging_ReadError(t *testing.T) {
+	stagingDir := t.TempDir()
+	outDir := t.TempDir()
 
-	// Create an API directory with no .proto files.
-	apiPath := "google/cloud/emptyapi/v1"
-	apiDir := filepath.Join(googleapisDir, apiPath)
-	if err := os.MkdirAll(apiDir, 0755); err != nil {
+	samplesDir := filepath.Join(stagingDir, "v1", "samples")
+	if err := os.MkdirAll(samplesDir, 0755); err != nil {
 		t.Fatal(err)
 	}
-	// Write a non-proto file so the directory is not empty.
-	if err := os.WriteFile(filepath.Join(apiDir, "BUILD.bazel"), []byte("# empty"), 0644); err != nil {
+	unreadable := filepath.Join(samplesDir, "sample.js")
+	if err := os.WriteFile(unreadable, []byte("content"), 0644); err != nil {
 		t.Fatal(err)
 	}
-
-	library := &config.Library{
-		Name:   "google-cloud-emptyapi",
-		Output: filepath.Join(repoRoot, "packages", "google-cloud-emptyapi"),
+	if err := os.Chmod(unreadable, 0000); err != nil {
+		t.Fatal(err)
 	}
-	if err := generateAPI(t.Context(), &config.API{Path: apiPath}, library, googleapisDir, repoRoot); err == nil {
-		t.Fatal("expected error for API directory with no proto files")
+	t.Cleanup(func() { os.Chmod(unreadable, 0644) })
+
+	if err := copySamplesFromStaging(stagingDir, outDir); err == nil {
+		t.Fatal("expected error for unreadable sample file")
 	}
 }
 
-func createStagingFixture(t *testing.T, repoRoot, libName string, versions []string) {
-	t.Helper()
-	for _, v := range versions {
-		stagingBase := filepath.Join(repoRoot, "owl-bot-staging", libName, v)
-		srcDir := filepath.Join(stagingBase, "src", v)
-		if err := os.MkdirAll(srcDir, 0755); err != nil {
-			t.Fatal(err)
-		}
-		if err := os.WriteFile(filepath.Join(srcDir, "index.ts"), []byte("export {};\n"), 0644); err != nil {
-			t.Fatal(err)
-		}
-		protoDir := filepath.Join(stagingBase, "protos", "google", "cloud", "test", v)
-		if err := os.MkdirAll(protoDir, 0755); err != nil {
-			t.Fatal(err)
-		}
-		protoContent := fmt.Sprintf("syntax = \"proto3\";\npackage google.cloud.test.%s;\n", v)
-		if err := os.WriteFile(filepath.Join(protoDir, "service.proto"), []byte(protoContent), 0644); err != nil {
-			t.Fatal(err)
-		}
-	}
-}
 
 func TestUpdateSnippetMetadataVersion(t *testing.T) {
 	for _, test := range []struct {
@@ -993,40 +1197,136 @@ func TestUpdateSnippetMetadataVersion_NoFiles(t *testing.T) {
 	}
 }
 
-func TestWriteRepoMetadata(t *testing.T) {
-	absGoogleapisDir, err := filepath.Abs(googleapisDir)
-	if err != nil {
+func TestUpdateVersionInFile_InvalidJSON(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "snippet_metadata.json")
+	if err := os.WriteFile(path, []byte("not json"), 0644); err != nil {
 		t.Fatal(err)
 	}
-	outDir := t.TempDir()
-	cfg := &config.Config{
-		Language: config.LanguageNodejs,
-		Repo:     "googleapis/google-cloud-node",
-	}
-	library := &config.Library{
-		Name: "google-cloud-secretmanager",
-		APIs: []*config.API{{Path: "google/cloud/secretmanager/v1"}},
-	}
-	if err := writeRepoMetadata(cfg, library, absGoogleapisDir, outDir); err != nil {
-		t.Fatal(err)
-	}
-	got, err := repometadata.Read(outDir)
-	if err != nil {
-		t.Fatal(err)
-	}
-	want := sample.RepoMetadata()
-	want.DistributionName = "@google-cloud/secretmanager"
-	want.Language = cfg.Language
-	want.Repo = cfg.Repo
-	if diff := cmp.Diff(want, got); diff != "" {
-		t.Errorf("mismatch (-want +got):\n%s", diff)
+	if err := updateVersionInFile(path, "1.0.0"); err == nil {
+		t.Fatal("expected error for invalid JSON")
 	}
 }
 
-func TestWriteRepoMetadata_NoAPIs(t *testing.T) {
-	cfg := &config.Config{Language: config.LanguageNodejs}
-	library := &config.Library{Name: "google-cloud-test"}
-	if err := writeRepoMetadata(cfg, library, "", t.TempDir()); err != nil {
-		t.Errorf("expected nil error for library with no APIs, got: %v", err)
+
+func TestDerivePackageName(t *testing.T) {
+	for _, test := range []struct {
+		name string
+		lib  *config.Library
+		want string
+	}{
+		{
+			name: "explicit package name",
+			lib: &config.Library{
+				Name: "google-cloud-accessapproval",
+				Nodejs: &config.NodejsPackage{
+					PackageName: "@google-cloud/access-approval",
+				},
+			},
+			want: "@google-cloud/access-approval",
+		},
+		{
+			name: "derived from library name",
+			lib: &config.Library{
+				Name: "google-cloud-batch",
+			},
+			want: "@google-cloud/batch",
+		},
+		{
+			name: "derived with multi-segment suffix",
+			lib: &config.Library{
+				Name: "google-cloud-video-transcoder",
+			},
+			want: "@google-cloud/video-transcoder",
+		},
+		{
+			name: "nil nodejs config",
+			lib: &config.Library{
+				Name: "google-cloud-speech",
+			},
+			want: "@google-cloud/speech",
+		},
+		{
+			name: "empty package name in config",
+			lib: &config.Library{
+				Name:   "google-cloud-monitoring",
+				Nodejs: &config.NodejsPackage{},
+			},
+			want: "@google-cloud/monitoring",
+		},
+		{
+			name: "no second dash",
+			lib: &config.Library{
+				Name: "google",
+			},
+			want: "google",
+		},
+		{
+			name: "only one dash",
+			lib: &config.Library{
+				Name: "google-cloud",
+			},
+			want: "google-cloud",
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got := DerivePackageName(test.lib)
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+
+func TestDefaultOutput(t *testing.T) {
+	for _, test := range []struct {
+		name          string
+		libName       string
+		defaultOutput string
+		want          string
+	}{
+		{
+			name:          "standard",
+			libName:       "google-cloud-batch",
+			defaultOutput: "packages",
+			want:          "packages/google-cloud-batch",
+		},
+		{
+			name:          "empty default",
+			libName:       "google-cloud-batch",
+			defaultOutput: "",
+			want:          "google-cloud-batch",
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got := DefaultOutput(test.libName, test.defaultOutput)
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+
+func createStagingFixture(t *testing.T, repoRoot, libName string, versions []string) {
+	t.Helper()
+	for _, v := range versions {
+		stagingBase := filepath.Join(repoRoot, "owl-bot-staging", libName, v)
+		srcDir := filepath.Join(stagingBase, "src", v)
+		if err := os.MkdirAll(srcDir, 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(srcDir, "index.ts"), []byte("export {};\n"), 0644); err != nil {
+			t.Fatal(err)
+		}
+		protoDir := filepath.Join(stagingBase, "protos", "google", "cloud", "test", v)
+		if err := os.MkdirAll(protoDir, 0755); err != nil {
+			t.Fatal(err)
+		}
+		protoContent := fmt.Sprintf("syntax = \"proto3\";\npackage google.cloud.test.%s;\n", v)
+		if err := os.WriteFile(filepath.Join(protoDir, "service.proto"), []byte(protoContent), 0644); err != nil {
+			t.Fatal(err)
+		}
 	}
 }
