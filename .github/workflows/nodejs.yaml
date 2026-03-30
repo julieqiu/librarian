@@ -43,7 +43,7 @@ jobs:
       - name: Download gapic-generator-typescript
         run: |
           mkdir -p /tmp/gapic-generator-typescript
-          curl -sL https://github.com/googleapis/google-cloud-node/archive/refs/heads/main.tar.gz | tar xz --strip-components=3 -C /tmp/gapic-generator-typescript google-cloud-node-main/generator/gapic-generator-typescript
+          curl -sL https://github.com/googleapis/google-cloud-node/archive/refs/heads/main.tar.gz | tar xz --strip-components=4 -C /tmp/gapic-generator-typescript google-cloud-node-main/core/generator/gapic-generator-typescript
       - name: Install gapic-generator-typescript
         run: |
           cd /tmp/gapic-generator-typescript
