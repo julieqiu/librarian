@@ -126,4 +126,3 @@ func runCmd(ctx context.Context, dir string, env map[string]string, command stri
 	}
 	return string(output), nil
 }
-
