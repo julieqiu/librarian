@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"log/slog"
 	"maps"
+	"os/exec"
+	"path/filepath"
 	"runtime"
 	"slices"
 	"strings"
@@ -65,10 +67,9 @@ var errSemverCheck = errors.New("semver check failed")
 // Publish finds all the crates that should be published. It can optionally
 // run in dry-run mode, dry-run mode with continue on errors, and/or skip semver checks.
 func Publish(ctx context.Context, cfg *config.Release, dryRun, dryRunKeepGoing, skipSemverChecks bool) error {
-	if err := preFlight(ctx, cfg.Preinstalled, cfg.Remote, cfg.Tools["cargo"]); err != nil {
+	if err := preFlight(ctx, cfg.Remote, cfg.Tools["cargo"]); err != nil {
 		return err
 	}
-	gitExe := command.GetExecutablePath(cfg.Preinstalled, "git")
 	lastTag, err := git.GetLastTag(ctx, gitExe, cfg.Remote, config.BranchMain)
 	if err != nil {
 		return err
@@ -96,14 +97,13 @@ func publishCrates(ctx context.Context, cfg *config.Release, dryRun, dryRunKeepG
 		}
 	}
 	slog.Info("computing publication plan with: cargo workspaces plan")
-	cargoPath := command.GetExecutablePath(cfg.Preinstalled, "cargo")
-	output, err := command.Output(ctx, cargoPath, "workspaces", "plan", "--skip-published")
+	output, err := command.Output(ctx, cargoExe, "workspaces", "plan", "--skip-published")
 	if err != nil {
 		return err
 	}
 	plannedCrates := strings.Split(string(output), "\n")
 	plannedCrates = slices.DeleteFunc(plannedCrates, func(a string) bool { return a == "" })
-	if !isMockCargo(cargoPath) {
+	if !isMockCargo() {
 		for _, crate := range plannedCrates {
 			if _, ok := manifests[crate]; !ok {
 				return fmt.Errorf("unplanned crate %q found in workspace plan", crate)
@@ -117,13 +117,12 @@ func publishCrates(ctx context.Context, cfg *config.Release, dryRun, dryRunKeepG
 	slog.Info(fmt.Sprintf("there are %d crates in need of publishing, summary=%v", totalCrates, crateSummary))
 
 	if !skipSemverChecks {
-		gitPath := command.GetExecutablePath(cfg.Preinstalled, "git")
 		if err := runSemverChecks(ctx, semverData{
 			dryRunKeepGoing: dryRunKeepGoing,
 			manifests:       manifests,
 			lastTag:         lastTag,
-			cargoPath:       cargoPath,
-			gitPath:         gitPath,
+			cargoPath:       cargoExe,
+			gitPath:         gitExe,
 		}); err != nil {
 			return err
 		}
@@ -135,7 +134,16 @@ func publishCrates(ctx context.Context, cfg *config.Release, dryRun, dryRunKeepG
 	} else if dryRun {
 		args = append(args, "--dry-run")
 	}
-	return command.Run(ctx, cargoPath, args...)
+	return command.Run(ctx, cargoExe, args...)
+}
+
+func isMockCargo() bool {
+	p, err := exec.LookPath(cargoExe)
+	if err != nil {
+		return false
+	}
+	resolved, err := filepath.EvalSymlinks(p)
+	return err == nil && filepath.Base(resolved) == "echo"
 }
 
 // runSemverChecks iterates through manifests and runs semver checks for each.
@@ -165,8 +173,4 @@ func semverCheck(ctx context.Context, semverData semverData, name string, manife
 		return nil
 	}
 	return err
-}
-
-func isMockCargo(path string) bool {
-	return path == "/bin/echo"
 }

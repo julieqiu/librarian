@@ -21,7 +21,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/googleapis/librarian/internal/command"
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/git"
 	"github.com/googleapis/librarian/internal/yaml"
@@ -61,20 +60,15 @@ func tagCommand() *cli.Command {
 	}
 }
 
-// tag implements the tag command. It is provided with the configuration
-// at HEAD, just to find the git executable to use, after which it finds the
-// release commit to publish (unless already specified). The configuration at
-// the release commit is used for all further operations.
-func tag(ctx context.Context, cfg *config.Config, releaseCommit string, createReleaseTag bool) error {
-	gitExe := "git"
-	if cfg.Release != nil {
-		gitExe = command.GetExecutablePath(cfg.Release.Preinstalled, "git")
-	}
+// tag implements the tag command. It finds the release commit to tag (unless
+// already specified). The configuration at the release commit is used for all
+// further operations.
+func tag(ctx context.Context, _ *config.Config, releaseCommit string, createReleaseTag bool) error {
 	if err := git.AssertGitStatusClean(ctx, gitExe); err != nil {
 		return err
 	}
 	if releaseCommit == "" {
-		latestReleaseCommit, err := findLatestReleaseCommitHash(ctx, gitExe)
+		latestReleaseCommit, err := findLatestReleaseCommitHash(ctx)
 		if err != nil {
 			return err
 		}

@@ -33,6 +33,8 @@ import (
 )
 
 const (
+	gitExe = "git"
+
 	defaultVersion = "0.1.0"
 )
 
@@ -105,7 +107,6 @@ func runBump(ctx context.Context, cfg *config.Config, all bool, libraryName, ver
 	if cfg.Release == nil {
 		return errReleaseConfigEmpty
 	}
-	gitExe := command.GetExecutablePath(cfg.Release.Preinstalled, "git")
 	if err := git.AssertGitStatusClean(ctx, gitExe); err != nil {
 		return err
 	}
@@ -229,11 +230,7 @@ func bumpLibrary(cfg *config.Config, lib *config.Library, versionOverride string
 func postBump(ctx context.Context, cfg *config.Config) error {
 	switch cfg.Language {
 	case config.LanguageRust:
-		cargoExe := "cargo"
-		if cfg.Release != nil {
-			cargoExe = command.GetExecutablePath(cfg.Release.Preinstalled, "cargo")
-		}
-		if err := command.Run(ctx, cargoExe, "update", "--workspace"); err != nil {
+		if err := command.Run(ctx, "cargo", "update", "--workspace"); err != nil {
 			return err
 		}
 	}
@@ -324,7 +321,7 @@ func findReleasedLibraries(cfgBefore, cfgAfter *config.Config) ([]string, error)
 // this *without* using tags, as it's used in circumstances where the full
 // release process has not yet been completed (e.g. to find which commit
 // *should* be tagged).
-func findLatestReleaseCommitHash(ctx context.Context, gitExe string) (string, error) {
+func findLatestReleaseCommitHash(ctx context.Context) (string, error) {
 	commits, err := git.FindCommitsForPath(ctx, gitExe, config.LibrarianYAML)
 	if err != nil {
 		return "", err

@@ -23,7 +23,6 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/googleapis/librarian/internal/command"
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/testhelper"
 )
@@ -39,7 +38,7 @@ func TestGetLastTag(t *testing.T) {
 	cfg := &config.Release{
 		Remote: "origin",
 	}
-	got, err := GetLastTag(t.Context(), command.GetExecutablePath(cfg.Preinstalled, "git"), cfg.Remote, config.BranchMain)
+	got, err := GetLastTag(t.Context(), "git", cfg.Remote, config.BranchMain)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +52,7 @@ func TestLastTagGitError(t *testing.T) {
 	cfg := &config.Release{
 		Remote: "origin",
 	}
-	_, err := GetLastTag(t.Context(), command.GetExecutablePath(cfg.Preinstalled, "git"), cfg.Remote, config.BranchMain)
+	_, err := GetLastTag(t.Context(), "git", cfg.Remote, config.BranchMain)
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
@@ -75,9 +74,6 @@ func TestIsNewFileSuccess(t *testing.T) {
 	if err := os.WriteFile(existingName, []byte(newLibRsContents), 0644); err != nil {
 		t.Fatal(err)
 	}
-	cfg := &config.Release{}
-	gitExe := command.GetExecutablePath(cfg.Preinstalled, "git")
-
 	newName := path.Join("src", "storage", "src", "new.rs")
 	if err := os.MkdirAll(path.Dir(newName), 0755); err != nil {
 		t.Fatal(err)
@@ -87,10 +83,10 @@ func TestIsNewFileSuccess(t *testing.T) {
 	}
 	testhelper.RunGit(t, "add", ".")
 	testhelper.RunGit(t, "commit", "-m", "feat: changed storage", ".")
-	if IsNewFile(t.Context(), gitExe, headCommit, existingName) {
+	if IsNewFile(t.Context(), "git", headCommit, existingName) {
 		t.Errorf("file is not new but reported as such: %s", existingName)
 	}
-	if !IsNewFile(t.Context(), gitExe, headCommit, newName) {
+	if !IsNewFile(t.Context(), "git", headCommit, newName) {
 		t.Errorf("file is new but not reported as such: %s", newName)
 	}
 }
@@ -99,10 +95,8 @@ func TestIsNewFileDiffError(t *testing.T) {
 	const wantTag = "new-file-success"
 	t.Chdir(t.TempDir())
 	testhelper.SetupForVersionBump(t, wantTag)
-	cfg := &config.Release{}
-	gitExe := command.GetExecutablePath(cfg.Preinstalled, "git")
 	existingName := path.Join("src", "storage", "src", "lib.rs")
-	if IsNewFile(t.Context(), gitExe, "invalid-tag", existingName) {
+	if IsNewFile(t.Context(), "git", "invalid-tag", existingName) {
 		t.Errorf("diff errors should return false for isNewFile(): %s", existingName)
 	}
 }
@@ -112,7 +106,7 @@ func TestFilesChangedSuccess(t *testing.T) {
 	remoteDir := testhelper.SetupRepoWithChange(t, wantTag)
 	testhelper.CloneRepository(t, remoteDir)
 
-	got, err := FilesChangedSince(t.Context(), command.GetExecutablePath(nil, "git"), wantTag, nil)
+	got, err := FilesChangedSince(t.Context(), "git", wantTag, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -126,7 +120,7 @@ func TestFilesBadRef(t *testing.T) {
 	const wantTag = "release-2002-03-04"
 	remoteDir := testhelper.SetupRepoWithChange(t, wantTag)
 	testhelper.CloneRepository(t, remoteDir)
-	if got, err := FilesChangedSince(t.Context(), command.GetExecutablePath(nil, "git"), "--invalid--", nil); err == nil {
+	if got, err := FilesChangedSince(t.Context(), "git", "--invalid--", nil); err == nil {
 		t.Errorf("expected an error with invalid tag, got=%v", got)
 	}
 }
@@ -201,11 +195,6 @@ func TestFilterSomeGlobs(t *testing.T) {
 }
 
 func TestAssertGitStatusClean(t *testing.T) {
-	cfg := &config.Release{
-		Preinstalled: map[string]string{
-			"git": "git",
-		},
-	}
 	for _, test := range []struct {
 		name    string
 		setup   func(t *testing.T)
@@ -235,7 +224,7 @@ func TestAssertGitStatusClean(t *testing.T) {
 			tmpDir := t.TempDir()
 			t.Chdir(tmpDir)
 			test.setup(t)
-			err := AssertGitStatusClean(t.Context(), command.GetExecutablePath(cfg.Preinstalled, "git"))
+			err := AssertGitStatusClean(t.Context(), "git")
 			if !errors.Is(err, test.wantErr) {
 				t.Errorf("AssertGitStatusClean() error = %v, wantErr %v", err, test.wantErr)
 			}

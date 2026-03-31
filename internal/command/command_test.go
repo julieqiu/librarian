@@ -25,7 +25,6 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/googleapis/librarian/internal/config"
 )
 
 const (
@@ -111,51 +110,6 @@ func TestOutput_Error(t *testing.T) {
 	}
 	if !strings.Contains(string(exitErr.Stderr), invalidSubcommand) {
 		t.Errorf("stderr should mention the invalid subcommand; got %q", string(exitErr.Stderr))
-	}
-}
-
-func TestGetExecutablePath(t *testing.T) {
-	tests := []struct {
-		name           string
-		releaseConfig  *config.Release
-		executableName string
-		want           string
-	}{
-		{
-			name: "Preinstalled tool found",
-			releaseConfig: &config.Release{
-				Preinstalled: map[string]string{
-					"cargo": "/usr/bin/cargo",
-					"git":   "/usr/bin/git",
-				},
-			},
-			executableName: "cargo",
-			want:           "/usr/bin/cargo",
-		},
-		{
-			name: "Preinstalled tool not found",
-			releaseConfig: &config.Release{
-				Preinstalled: map[string]string{
-					"git": "/usr/bin/git",
-				},
-			},
-			executableName: "cargo",
-			want:           "cargo",
-		},
-		{
-			name:           "No preinstalled section",
-			releaseConfig:  &config.Release{},
-			executableName: "cargo",
-			want:           "cargo",
-		},
-	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			got := GetExecutablePath(test.releaseConfig.Preinstalled, test.executableName)
-			if diff := cmp.Diff(test.want, got); diff != "" {
-				t.Errorf("mismatch (-want +got):\n%s", diff)
-			}
-		})
 	}
 }
 

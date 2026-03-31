@@ -24,16 +24,20 @@ import (
 	"github.com/googleapis/librarian/internal/git"
 )
 
+const (
+	cargoExe = "cargo"
+	gitExe   = "git"
+)
+
 // preFlight performs all the necessary checks before a release.
-func preFlight(ctx context.Context, preinstalled map[string]string, remote string, cargoTools []config.Tool) error {
-	gitExe := command.GetExecutablePath(preinstalled, "git")
+func preFlight(ctx context.Context, remote string, cargoTools []config.Tool) error {
 	if err := git.CheckVersion(ctx, gitExe); err != nil {
 		return err
 	}
 	if err := git.CheckRemoteURL(ctx, gitExe, remote); err != nil {
 		return err
 	}
-	return cargoPreFlight(ctx, command.GetExecutablePath(preinstalled, "cargo"), cargoTools)
+	return cargoPreFlight(ctx, cargoExe, cargoTools)
 }
 
 // cargoPreFlight verifies all the necessary cargo tools are installed.

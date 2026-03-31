@@ -35,10 +35,6 @@ func TestPublishCratesSuccess(t *testing.T) {
 	cfg := &config.Release{
 		Remote: "origin",
 
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": "/bin/echo",
-		},
 		Tools: map[string][]config.Tool{
 			"cargo": {
 				{Name: "cargo-semver-checks", Version: "1.2.3"},
@@ -65,10 +61,6 @@ func TestPublishCratesWithNewCrate(t *testing.T) {
 	cfg := &config.Release{
 		Remote: "origin",
 
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": "/bin/echo",
-		},
 		Tools: map[string][]config.Tool{
 			"cargo": {
 				{Name: "cargo-semver-checks", Version: "1.2.3"},
@@ -96,10 +88,6 @@ func TestPublishCratesWithBadManifest(t *testing.T) {
 	cfg := &config.Release{
 		Remote: "origin",
 
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": "/bin/echo",
-		},
 		Tools: map[string][]config.Tool{
 			"cargo": {
 				{Name: "cargo-semver-checks", Version: "1.2.3"},
@@ -132,10 +120,6 @@ func TestPublishCratesGetPlanError(t *testing.T) {
 	cfg := &config.Release{
 		Remote: "origin",
 
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": "git",
-		},
 	}
 	remoteDir := testhelper.SetupRepoWithChange(t, "release-2001-02-03")
 	testhelper.CloneRepository(t, remoteDir)
@@ -155,10 +139,6 @@ func TestPublishCratesPlanMismatchError(t *testing.T) {
 	cfg := &config.Release{
 		Remote: "origin",
 
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": "echo",
-		},
 		Tools: map[string][]config.Tool{
 			"cargo": {
 				{Name: "cargo-semver-checks", Version: "1.2.3"},
@@ -204,10 +184,6 @@ fi
 	cfg := &config.Release{
 		Remote: "origin",
 
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": cargoScript,
-		},
 	}
 	remoteDir := testhelper.SetupRepoWithChange(t, "release-2001-02-03")
 	testhelper.CloneRepository(t, remoteDir)
@@ -233,10 +209,6 @@ func TestPublishSuccess(t *testing.T) {
 	cfg := &config.Release{
 		Remote: "origin",
 
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": "/bin/echo",
-		},
 		Tools: map[string][]config.Tool{
 			"cargo": {
 				{Name: "cargo-semver-checks", Version: "1.2.3"},
@@ -258,10 +230,6 @@ func TestPublishWithLocalChangesError(t *testing.T) {
 	config := &config.Release{
 		Remote: "origin",
 
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": "/bin/echo",
-		},
 		Tools: map[string][]config.Tool{
 			"cargo": {
 				{Name: "cargo-semver-checks", Version: "1.2.3"},
@@ -280,25 +248,19 @@ func TestPublishWithLocalChangesError(t *testing.T) {
 }
 
 func TestPublishPreflightError(t *testing.T) {
-	config := &config.Release{
-		Preinstalled: map[string]string{
-			"git": "git-not-found",
-		},
-	}
+	// Set PATH to an empty directory so git cannot be found.
+	t.Setenv("PATH", t.TempDir())
+	config := &config.Release{}
 	if err := Publish(t.Context(), config, true, false, false); err == nil {
 		t.Errorf("expected a preflight error with a bad git command")
 	}
 }
 
 func TestPublishLastTagError(t *testing.T) {
-	const echo = "/bin/echo"
 	testhelper.RequireCommand(t, "git")
-	testhelper.RequireCommand(t, echo)
+	symlinkCargo(t)
 	config := config.Release{
 		Remote: "invalid-remote",
-		Preinstalled: map[string]string{
-			"cargo": echo,
-		},
 	}
 	remoteDir := testhelper.SetupRepoWithChange(t, "release-2001-02-03")
 	testhelper.CloneRepository(t, remoteDir)
@@ -332,10 +294,6 @@ fi
 	cfg := &config.Release{
 		Remote: "origin",
 
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": cargoScript,
-		},
 	}
 	remoteDir := testhelper.SetupRepoWithChange(t, "release-2001-02-03")
 	testhelper.CloneRepository(t, remoteDir)
@@ -388,10 +346,6 @@ fi
 	cfg := &config.Release{
 		Remote: "origin",
 
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": cargoScript,
-		},
 	}
 	remoteDir := testhelper.SetupRepoWithChange(t, "release-2001-02-03")
 	testhelper.CloneRepository(t, remoteDir)
@@ -436,10 +390,6 @@ fi
 	cfg := &config.Release{
 		Remote: "origin",
 
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": cargoScript,
-		},
 	}
 	// Setup a dummy repo
 	remoteDir := testhelper.SetupRepoWithChange(t, "test-validation")

@@ -15,6 +15,9 @@
 package rust
 
 import (
+	"os"
+	"os/exec"
+	"path/filepath"
 	"testing"
 
 	"github.com/googleapis/librarian/internal/config"
@@ -51,36 +54,43 @@ func TestCargoPreFlightBadTool(t *testing.T) {
 }
 
 func TestPreFlightMissingGit(t *testing.T) {
-	if err := preFlight(t.Context(), map[string]string{"git": "git-is-not-installed"}, "", nil); err == nil {
+	// Set PATH to an empty directory so git cannot be found.
+	t.Setenv("PATH", t.TempDir())
+	if err := preFlight(t.Context(), "", nil); err == nil {
 		t.Fatal("expected an error, got nil")
 	}
 }
 
 func TestPreFlightMissingCargo(t *testing.T) {
 	testhelper.RequireCommand(t, "git")
-	if err := preFlight(t.Context(), map[string]string{"cargo": "cargo-is-not-installed"}, "", nil); err == nil {
+	testhelper.ContinueInNewGitRepository(t, t.TempDir())
+	// Set PATH so cargo is not found. Prepend an empty dir but keep git accessible.
+	binDir := t.TempDir()
+	gitPath, err := exec.LookPath("git")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(gitPath, filepath.Join(binDir, "git")); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", binDir)
+	if err := preFlight(t.Context(), "origin", nil); err == nil {
 		t.Fatal("expected an error, got nil")
 	}
 }
 
 func TestPreFlightMissingUpstream(t *testing.T) {
 	testhelper.RequireCommand(t, "git")
-	testhelper.RequireCommand(t, "/bin/echo")
-	preinstalled := map[string]string{
-		"cargo": "/bin/echo",
-	}
+	symlinkCargo(t)
 	testhelper.ContinueInNewGitRepository(t, t.TempDir())
-	if err := preFlight(t.Context(), preinstalled, "origin", nil); err == nil {
+	if err := preFlight(t.Context(), "origin", nil); err == nil {
 		t.Fatal("expected an error, got nil")
 	}
 }
 
 func TestPreFlightWithTools(t *testing.T) {
 	testhelper.RequireCommand(t, "git")
-	testhelper.RequireCommand(t, "/bin/echo")
-	preinstalled := map[string]string{
-		"cargo": "/bin/echo",
-	}
+	symlinkCargo(t)
 	tools := []config.Tool{
 		{
 			Name:    "cargo-semver-checks",
@@ -88,17 +98,20 @@ func TestPreFlightWithTools(t *testing.T) {
 		},
 	}
 	testhelper.SetupForVersionBump(t, "test-preflight-with-tools")
-	if err := preFlight(t.Context(), preinstalled, "origin", tools); err != nil {
+	if err := preFlight(t.Context(), "origin", tools); err != nil {
 		t.Errorf("expected a successful run, got=%v", err)
 	}
 }
 
 func TestPreFlightToolFailure(t *testing.T) {
 	testhelper.RequireCommand(t, "git")
-	preinstalled := map[string]string{
-		// Using `git install blah blah` will fail.
-		"cargo": "git",
+	// Create a fake cargo that fails on `install`.
+	binDir := t.TempDir()
+	script := "#!/bin/sh\nif [ \"$1\" = \"install\" ]; then exit 1; fi\n"
+	if err := os.WriteFile(filepath.Join(binDir, "cargo"), []byte(script), 0755); err != nil {
+		t.Fatal(err)
 	}
+	t.Setenv("PATH", binDir+":"+os.Getenv("PATH"))
 	tools := []config.Tool{
 		{
 			Name:    "invalid-tool-name---",
@@ -106,7 +119,7 @@ func TestPreFlightToolFailure(t *testing.T) {
 		},
 	}
 	testhelper.SetupForVersionBump(t, "test-preflight-with-tools")
-	if err := preFlight(t.Context(), preinstalled, "origin", tools); err == nil {
+	if err := preFlight(t.Context(), "origin", tools); err == nil {
 		t.Errorf("expected an error installing cargo-semver-checks")
 	}
 }

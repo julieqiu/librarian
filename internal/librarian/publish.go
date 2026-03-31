@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/googleapis/librarian/internal/command"
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/git"
 	"github.com/googleapis/librarian/internal/librarian/rust"
@@ -77,24 +76,19 @@ func legacyRustPublish(ctx context.Context, cfg *config.Config, cmd *cli.Command
 	return rust.Publish(ctx, cfg.Release, dryRun, dryRunKeepGoing, skipSemverChecks)
 }
 
-// publish implements the publish command. It is provided with the configuration
-// at HEAD, just to find the git executable to use, after which it finds the
-// release commit to publish. The configuration at the release commit is used
-// for all further operations (and the repo will be checked out at that commit).
-// The releaseCommit flag allows a user to identify a specific release commit to
-// publish, in case of overlapping releases being performed. The execute flag
-// says whether to actually publish (true) or just perform a dry run (false).
-func publish(ctx context.Context, cfg *config.Config, releaseCommit string, execute bool) error {
-	gitExe := "git"
-	if cfg.Release != nil {
-		gitExe = command.GetExecutablePath(cfg.Release.Preinstalled, "git")
-	}
+// publish implements the publish command. It finds the release commit to
+// publish and checks out that commit. The configuration at the release commit
+// is used for all further operations. The releaseCommit flag allows a user to
+// identify a specific release commit to publish, in case of overlapping
+// releases being performed. The execute flag says whether to actually publish
+// (true) or just perform a dry run (false).
+func publish(ctx context.Context, _ *config.Config, releaseCommit string, execute bool) error {
 	if err := git.AssertGitStatusClean(ctx, gitExe); err != nil {
 		return err
 	}
 	var err error
 	if releaseCommit == "" {
-		releaseCommit, err = findLatestReleaseCommitHash(ctx, gitExe)
+		releaseCommit, err = findLatestReleaseCommitHash(ctx)
 		if err != nil {
 			return err
 		}
@@ -103,7 +97,7 @@ func publish(ctx context.Context, cfg *config.Config, releaseCommit string, exec
 		return err
 	}
 	// Reload the config after checking out the release commit.
-	cfg, err = yaml.Read[config.Config](config.LibrarianYAML)
+	cfg, err := yaml.Read[config.Config](config.LibrarianYAML)
 	if err != nil {
 		return err
 	}

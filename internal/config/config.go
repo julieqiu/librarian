@@ -59,13 +59,6 @@ type Release struct {
 	// IgnoredChanges defines globs that are ignored in change analysis.
 	IgnoredChanges []string `yaml:"ignored_changes,omitempty"`
 
-	// Preinstalled tools defines the list of tools that must be preinstalled.
-	//
-	// This is indexed by the well-known name of the tool vs. its path, e.g.
-	// [preinstalled]
-	// cargo = /usr/bin/cargo
-	Preinstalled map[string]string `yaml:"preinstalled,omitempty"`
-
 	// Remote sets the name of the source-of-truth remote for releases, typically `upstream`.
 	Remote string `yaml:"remote,omitempty"`
 
