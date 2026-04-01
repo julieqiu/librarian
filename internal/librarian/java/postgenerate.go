@@ -157,7 +157,7 @@ func searchForBOMArtifacts(repoPath string) ([]*bomConfig, error) {
 		configs = append(configs, moduleConfigs...)
 	}
 
-	legacies, err := collectLegacyBOMs(repoPath, dnsBom, notificationBom)
+	legacies, err := collectLegacyBOMs(repoPath, dnsBom, notificationBom, grafeasBom)
 	if err != nil {
 		return nil, err
 	}
@@ -165,13 +165,7 @@ func searchForBOMArtifacts(repoPath string) ([]*bomConfig, error) {
 	sort.Slice(configs, func(i, j int) bool {
 		return configs[i].ArtifactID < configs[j].ArtifactID
 	})
-	// Add Grafeas last. This is done after sorting to match the current order in google-cloud-java.
-	// TODO(https://github.com/googleapis/librarian/issues/4706): Move this prior to sort.
-	grafeas, err := collectLegacyBOMs(repoPath, grafeasBom)
-	if err != nil {
-		return nil, err
-	}
-	return append(configs, grafeas...), nil
+	return configs, nil
 }
 
 // searchModuleForBOM scans a specific module's directory for submodules that end in "-bom"
