@@ -19,7 +19,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"maps"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -109,10 +108,6 @@ func publishCrates(ctx context.Context, cfg *config.Release, dryRun, dryRunKeepG
 			}
 		}
 	}
-
-	crateSummary := slices.Collect(maps.Keys(manifests))
-	totalCrates := len(crateSummary)
-	crateSummary = crateSummary[0:min(20, totalCrates)]
 
 	if !skipSemverChecks {
 		if err := runSemverChecks(ctx, semverData{
