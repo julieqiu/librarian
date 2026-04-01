@@ -36,27 +36,25 @@ type postProcessParams struct {
 	library             *config.Library
 	metadata            *repoMetadata
 	outDir              string
-	libraryName         string
-	libraryVersion      string
 	librariesBomVersion string
 	version             string
 	googleapisDir       string
 	apiProtos           []string
 	includeSamples      bool
-	gapicDir            string
-	grpcDir             string
-	protoDir            string
 }
 
 func postProcessAPI(ctx context.Context, p postProcessParams) error {
+	gapicDir := filepath.Join(p.outDir, p.version, "gapic")
+	grpcDir := filepath.Join(p.outDir, p.version, "grpc")
+	protoDir := filepath.Join(p.outDir, p.version, "proto")
 	// Unzip the temp-codegen.srcjar into temporary version/ directory.
-	srcjarPath := filepath.Join(p.gapicDir, "temp-codegen.srcjar")
+	srcjarPath := filepath.Join(gapicDir, "temp-codegen.srcjar")
 	if _, err := os.Stat(srcjarPath); err == nil {
-		if err := filesystem.Unzip(ctx, srcjarPath, p.gapicDir); err != nil {
+		if err := filesystem.Unzip(ctx, srcjarPath, gapicDir); err != nil {
 			return fmt.Errorf("failed to unzip %s: %w", srcjarPath, err)
 		}
 	}
-	for _, dir := range []string{p.grpcDir, p.protoDir} {
+	for _, dir := range []string{grpcDir, protoDir} {
 		if err := addMissingHeaders(dir); err != nil {
 			return fmt.Errorf("failed to fix headers in %s: %w", dir, err)
 		}
@@ -80,7 +78,7 @@ func postProcessAPI(ctx context.Context, p postProcessParams) error {
 	}
 
 	// Generate clirr-ignored-differences.xml for the proto module.
-	modules := deriveModuleNames(p.libraryName, p.version)
+	modules := p.modules()
 	protoModuleRoot := filepath.Join(p.outDir, modules.proto)
 	if err := generateClirr(protoModuleRoot); err != nil {
 		return fmt.Errorf("failed to generate clirr ignore file: %w", err)
@@ -193,7 +191,7 @@ func restructure(actions []moveAction) error {
 // tree into the destination root directory for GAPIC, Proto, gRPC, and samples.
 // It also copies the relevant proto files into the proto module.
 func restructureModules(p postProcessParams, destRoot string) error {
-	modules := deriveModuleNames(p.libraryName, p.version)
+	modules := p.modules()
 	tempProtoSrcDir := filepath.Join(p.outDir, p.version, "proto")
 	if err := removeConflictingFiles(tempProtoSrcDir); err != nil {
 		return err
@@ -246,7 +244,7 @@ func restructureModules(p postProcessParams, destRoot string) error {
 func runOwlBot(ctx context.Context, p postProcessParams) error {
 	// Versions used to populate README.md file.
 	env := map[string]string{
-		"SYNTHTOOL_LIBRARY_VERSION":       p.libraryVersion,
+		"SYNTHTOOL_LIBRARY_VERSION":       p.library.Version,
 		"SYNTHTOOL_LIBRARIES_BOM_VERSION": p.librariesBomVersion,
 	}
 	// Path to templates used for README.md file.
