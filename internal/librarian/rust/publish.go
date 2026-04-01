@@ -96,7 +96,6 @@ func publishCrates(ctx context.Context, cfg *config.Release, dryRun, dryRunKeepG
 			manifests[name] = manifest
 		}
 	}
-	slog.Info("computing publication plan with: cargo workspaces plan")
 	output, err := command.Output(ctx, cargoExe, "workspaces", "plan", "--skip-published")
 	if err != nil {
 		return err
@@ -114,7 +113,6 @@ func publishCrates(ctx context.Context, cfg *config.Release, dryRun, dryRunKeepG
 	crateSummary := slices.Collect(maps.Keys(manifests))
 	totalCrates := len(crateSummary)
 	crateSummary = crateSummary[0:min(20, totalCrates)]
-	slog.Info(fmt.Sprintf("there are %d crates in need of publishing, summary=%v", totalCrates, crateSummary))
 
 	if !skipSemverChecks {
 		if err := runSemverChecks(ctx, semverData{
@@ -127,7 +125,6 @@ func publishCrates(ctx context.Context, cfg *config.Release, dryRun, dryRunKeepG
 			return err
 		}
 	}
-	slog.Info("publishing crates with: cargo workspaces publish --skip-published ...")
 	args := []string{"workspaces", "publish", "--skip-published", "--publish-interval=60", "--no-git-commit", "--from-git", "skip"}
 	if dryRunKeepGoing {
 		args = append(args, "--dry-run", "--keep-going")
