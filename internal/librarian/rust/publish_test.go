@@ -69,7 +69,7 @@ func TestPublishCratesWithNewCrate(t *testing.T) {
 		path.Join("src", "pubsub", "src", "lib.rs"),
 	}
 	lastTag := "release-with-new-crate"
-	if err := publishCrates(t.Context(),true, false, false, lastTag, files); err != nil {
+	if err := publishCrates(t.Context(), true, false, false, lastTag, files); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -91,7 +91,7 @@ func TestPublishCratesWithBadManifest(t *testing.T) {
 		path.Join("src", "storage", "src", "lib.rs"),
 	}
 	lastTag := "release-2001-02-03"
-	if err := publishCrates(t.Context(),true, false, false, lastTag, files); err == nil {
+	if err := publishCrates(t.Context(), true, false, false, lastTag, files); err == nil {
 		t.Errorf("expected an error with a bad manifest file")
 	}
 }
@@ -390,7 +390,7 @@ fi
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			err := publishCrates(t.Context(),true, false, true, lastTag, test.files)
+			err := publishCrates(t.Context(), true, false, true, lastTag, test.files)
 			var got string
 			if err != nil {
 				got = err.Error()
