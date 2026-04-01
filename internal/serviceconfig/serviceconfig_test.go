@@ -106,13 +106,11 @@ func TestFind(t *testing.T) {
 			},
 		},
 		{
-			name: "not service config has title override",
+			name: "no service config",
 			api:  "google/cloud/orgpolicy/v1",
 			want: &API{
-				Path:             "google/cloud/orgpolicy/v1",
-				Title:            "Organization Policy Types",
-				Languages:        []string{config.LanguageGo, config.LanguageJava, config.LanguagePython, config.LanguageRust},
-				DocumentationURI: "https://cloud.google.com/resource-manager/docs/organization-policy/overview",
+				Path:      "google/cloud/orgpolicy/v1",
+				Languages: []string{config.LanguageGo, config.LanguageJava, config.LanguagePython, config.LanguageRust},
 			},
 		},
 		{
@@ -158,8 +156,6 @@ func TestFind(t *testing.T) {
 			api:  "discoveries/compute.v1.json",
 			want: &API{
 				Discovery:          "discoveries/compute.v1.json",
-				DocumentationURI:   "https://cloud.google.com/compute/",
-				NewIssueURI:        "https://issuetracker.google.com/issues/new?component=187134&template=0",
 				Path:               "google/cloud/compute/v1",
 				ServiceConfig:      "google/cloud/compute/v1/compute_v1.yaml",
 				ServiceName:        "compute.googleapis.com",
@@ -319,25 +315,17 @@ func TestPopulateFromServiceConfig(t *testing.T) {
 		},
 		{
 			name: "no publishing",
-			api: &API{
-				DocumentationURI: "override doc uri",
-			},
+			api:  &API{},
 			cfg: &Service{
 				Title: "service config title",
 			},
 			want: &API{
-				Title:            "service config title",
-				DocumentationURI: "override doc uri",
+				Title: "service config title",
 			},
 		},
 		{
-			name: "everything overridden",
-			api: &API{
-				Title:            "override title",
-				DocumentationURI: "override doc uri",
-				NewIssueURI:      "override new issue uri",
-				ShortName:        "override short name",
-			},
+			name: "service config always wins",
+			api:  &API{},
 			cfg: &Service{
 				Title: "service config title",
 				Publishing: &annotations.Publishing{
@@ -347,10 +335,10 @@ func TestPopulateFromServiceConfig(t *testing.T) {
 				},
 			},
 			want: &API{
-				Title:            "override title",
-				DocumentationURI: "override doc uri",
-				NewIssueURI:      "override new issue uri",
-				ShortName:        "override short name",
+				Title:            "service config title",
+				DocumentationURI: "service config doc uri",
+				NewIssueURI:      "service config new issue uri",
+				ShortName:        "service config short name",
 			},
 		},
 		{

@@ -51,17 +51,18 @@ type API struct {
 	// path.
 	Path string `yaml:"path,omitempty"`
 
-	// Description provides the information for describing an API.
-	Description string `yaml:"description,omitempty"`
+	// Description is the API description. Populated from the service config's
+	// documentation summary.
+	Description string `yaml:"-"`
 
 	// Discovery is the file path to a discovery document in
 	// github.com/googleapis/discovery-artifact-manager.
 	// Used by sidekick languages (Rust, Dart) as an alternative to proto files.
 	Discovery string `yaml:"discovery,omitempty"`
 
-	// DocumentationURI overrides the product documentation URI from the service
-	// config's publishing section.
-	DocumentationURI string `yaml:"documentation_uri,omitempty"`
+	// DocumentationURI is the product documentation URI. Populated from the
+	// service config's publishing section.
+	DocumentationURI string `yaml:"-"`
 
 	// Languages restricts which languages can generate client libraries for this API.
 	// Empty means all languages can use this API.
@@ -73,9 +74,9 @@ type API struct {
 	//   - Some APIs (like DIREGAPIC protos) are only used by specific languages
 	Languages []string `yaml:"languages,omitempty"`
 
-	// NewIssueURI overrides the new issue URI from the service config's
-	// publishing section.
-	NewIssueURI string `yaml:"new_issue_uri,omitempty"`
+	// NewIssueURI is the URI for filing new issues. Populated from the service
+	// config's publishing section.
+	NewIssueURI string `yaml:"-"`
 
 	// NoRESTNumericEnums determines whether to use numeric enums in REST requests.
 	// The "No" prefix is used because the default behavior (when this field is `false` or omitted) is
@@ -97,19 +98,20 @@ type API struct {
 	// standardize release level vocabulary across lanaguages.
 	ReleaseLevels map[string]string `yaml:"release_level,omitempty"`
 
-	// ShortName overrides the API short name from the service config's
+	// ShortName is the API short name. Populated from the service config's
 	// publishing section.
-	ShortName string `yaml:"short_name,omitempty"`
+	ShortName string `yaml:"-"`
 
 	// ServiceConfig is the service config file path override.
 	// If empty, the service config is discovered in the directory specified by Path.
 	ServiceConfig string `yaml:"service_config,omitempty"`
 
-	// ServiceName is a DNS-like logical identifier for the service, such as `calendar.googleapis.com`.
-	ServiceName string `yaml:"service_name,omitempty"`
+	// ServiceName is a DNS-like logical identifier for the service, such as
+	// `calendar.googleapis.com`. Populated from the service config.
+	ServiceName string `yaml:"-"`
 
-	// Title overrides the API title from the service config.
-	Title string `yaml:"title,omitempty"`
+	// Title is the API title. Populated from the service config.
+	Title string `yaml:"-"`
 
 	// Transports defines the supported transports per language.
 	// Map key is the language name (e.g., "python", "rust").

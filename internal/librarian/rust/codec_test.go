@@ -389,7 +389,7 @@ func TestLibraryToModelConfig(t *testing.T) {
 			},
 		},
 		{
-			name: "with title override",
+			name: "with title from service config",
 			library: &config.Library{
 				Name: "google-cloud-apps-script-type-gmail",
 			},
@@ -402,9 +402,6 @@ func TestLibraryToModelConfig(t *testing.T) {
 				SpecificationSource: "google/apps/script/type/gmail",
 				Source: &sources.SourceConfig{
 					ActiveRoots: []string{"googleapis"},
-				},
-				Override: api.ModelOverride{
-					Title: "Google Apps Script Types",
 				},
 			},
 		},
