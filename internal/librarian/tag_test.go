@@ -134,20 +134,6 @@ func TestTag_Error(t *testing.T) {
 		wantErr          error
 	}{
 		{
-			name: "custom tool specified for git and doesn't exist",
-			setup: func(t *testing.T, cfg *config.Config) {
-				// Add a release commit to distinguish this case from "no releases"
-				cfg.Libraries[0].Version = "1.1.0"
-				cfg.Release = &config.Release{
-					Preinstalled: map[string]string{
-						"git": "/usr/bin/does-not-exist",
-					},
-				}
-				writeConfigAndCommit(t, cfg)
-			},
-			// Can't easily check this error
-		},
-		{
 			name: "repo is dirty",
 			setup: func(t *testing.T, cfg *config.Config) {
 				// Add a release commit to distinguish this case from "no releases"

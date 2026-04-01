@@ -32,11 +32,12 @@ import (
 func TestPublishCratesSuccess(t *testing.T) {
 	testhelper.RequireCommand(t, "git")
 	testhelper.RequireCommand(t, "/bin/echo")
+	symlinkDir := t.TempDir()
+	if err := os.Symlink("/bin/echo", filepath.Join(symlinkDir, "cargo")); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", symlinkDir+string(os.PathListSeparator)+os.Getenv("PATH"))
 	cfg := &config.Release{
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": "/bin/echo",
-		},
 		Tools: map[string][]config.Tool{
 			"cargo": {
 				{Name: "cargo-semver-checks", Version: "1.2.3"},
@@ -60,11 +61,12 @@ func TestPublishCratesSuccess(t *testing.T) {
 func TestPublishCratesWithNewCrate(t *testing.T) {
 	testhelper.RequireCommand(t, "git")
 	testhelper.RequireCommand(t, "/bin/echo")
+	symlinkDir := t.TempDir()
+	if err := os.Symlink("/bin/echo", filepath.Join(symlinkDir, "cargo")); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", symlinkDir+string(os.PathListSeparator)+os.Getenv("PATH"))
 	cfg := &config.Release{
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": "/bin/echo",
-		},
 		Tools: map[string][]config.Tool{
 			"cargo": {
 				{Name: "cargo-semver-checks", Version: "1.2.3"},
@@ -89,11 +91,12 @@ func TestPublishCratesWithNewCrate(t *testing.T) {
 func TestPublishCratesWithBadManifest(t *testing.T) {
 	testhelper.RequireCommand(t, "git")
 	testhelper.RequireCommand(t, "/bin/echo")
+	symlinkDir := t.TempDir()
+	if err := os.Symlink("/bin/echo", filepath.Join(symlinkDir, "cargo")); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", symlinkDir+string(os.PathListSeparator)+os.Getenv("PATH"))
 	cfg := &config.Release{
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": "/bin/echo",
-		},
 		Tools: map[string][]config.Tool{
 			"cargo": {
 				{Name: "cargo-semver-checks", Version: "1.2.3"},
@@ -123,12 +126,13 @@ func TestPublishCratesWithBadManifest(t *testing.T) {
 
 func TestPublishCratesGetPlanError(t *testing.T) {
 	testhelper.RequireCommand(t, "git")
-	cfg := &config.Release{
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": "git",
-		},
+	scriptDir := t.TempDir()
+	script := "#!/bin/sh\nexit 1"
+	if err := os.WriteFile(filepath.Join(scriptDir, "cargo"), []byte(script), 0755); err != nil {
+		t.Fatal(err)
 	}
+	t.Setenv("PATH", scriptDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	cfg := &config.Release{}
 	remoteDir := testhelper.SetupRepoWithChange(t, "release-2001-02-03")
 	testhelper.CloneRepository(t, remoteDir)
 	files := []string{
@@ -143,12 +147,14 @@ func TestPublishCratesGetPlanError(t *testing.T) {
 
 func TestPublishCratesPlanMismatchError(t *testing.T) {
 	testhelper.RequireCommand(t, "git")
-	testhelper.RequireCommand(t, "echo")
+	scriptDir := t.TempDir()
+	// Create a cargo script that echoes its args, causing a plan mismatch.
+	script := "#!/bin/sh\necho \"$@\""
+	if err := os.WriteFile(filepath.Join(scriptDir, "cargo"), []byte(script), 0755); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", scriptDir+string(os.PathListSeparator)+os.Getenv("PATH"))
 	cfg := &config.Release{
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": "echo",
-		},
 		Tools: map[string][]config.Tool{
 			"cargo": {
 				{Name: "cargo-semver-checks", Version: "1.2.3"},
@@ -190,13 +196,9 @@ fi
 	if err := os.WriteFile(cargoScript, []byte(script), 0755); err != nil {
 		t.Fatal(err)
 	}
+	t.Setenv("PATH", tmpDir+string(os.PathListSeparator)+os.Getenv("PATH"))
 
-	cfg := &config.Release{
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": cargoScript,
-		},
-	}
+	cfg := &config.Release{}
 	remoteDir := testhelper.SetupRepoWithChange(t, "release-2001-02-03")
 	testhelper.CloneRepository(t, remoteDir)
 	files := []string{
@@ -218,11 +220,12 @@ fi
 func TestPublishSuccess(t *testing.T) {
 	testhelper.RequireCommand(t, "git")
 	testhelper.RequireCommand(t, "/bin/echo")
+	symlinkDir := t.TempDir()
+	if err := os.Symlink("/bin/echo", filepath.Join(symlinkDir, "cargo")); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", symlinkDir+string(os.PathListSeparator)+os.Getenv("PATH"))
 	cfg := &config.Release{
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": "/bin/echo",
-		},
 		Tools: map[string][]config.Tool{
 			"cargo": {
 				{Name: "cargo-semver-checks", Version: "1.2.3"},
@@ -241,11 +244,12 @@ func TestPublishSuccess(t *testing.T) {
 func TestPublishWithLocalChangesError(t *testing.T) {
 	testhelper.RequireCommand(t, "git")
 	testhelper.RequireCommand(t, "/bin/echo")
+	symlinkDir := t.TempDir()
+	if err := os.Symlink("/bin/echo", filepath.Join(symlinkDir, "cargo")); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", symlinkDir+string(os.PathListSeparator)+os.Getenv("PATH"))
 	config := &config.Release{
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": "/bin/echo",
-		},
 		Tools: map[string][]config.Tool{
 			"cargo": {
 				{Name: "cargo-semver-checks", Version: "1.2.3"},
@@ -264,11 +268,13 @@ func TestPublishWithLocalChangesError(t *testing.T) {
 }
 
 func TestPublishPreflightError(t *testing.T) {
-	config := &config.Release{
-		Preinstalled: map[string]string{
-			"git": "git-not-found",
-		},
+	scriptDir := t.TempDir()
+	script := "#!/bin/sh\nexit 1"
+	if err := os.WriteFile(filepath.Join(scriptDir, "git"), []byte(script), 0755); err != nil {
+		t.Fatal(err)
 	}
+	t.Setenv("PATH", scriptDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	config := &config.Release{}
 	if err := Publish(t.Context(), config, true, false, false); err == nil {
 		t.Errorf("expected a preflight error with a bad git command")
 	}
@@ -296,12 +302,8 @@ fi
 		t.Fatal(err)
 	}
 
-	cfg := &config.Release{
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": cargoScript,
-		},
-	}
+	t.Setenv("PATH", tmpDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	cfg := &config.Release{}
 	remoteDir := testhelper.SetupRepoWithChange(t, "release-2001-02-03")
 	testhelper.CloneRepository(t, remoteDir)
 	files := []string{
@@ -350,12 +352,8 @@ fi
 		t.Fatal(err)
 	}
 
-	cfg := &config.Release{
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": cargoScript,
-		},
-	}
+	t.Setenv("PATH", tmpDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	cfg := &config.Release{}
 	remoteDir := testhelper.SetupRepoWithChange(t, "release-2001-02-03")
 	testhelper.CloneRepository(t, remoteDir)
 	files := []string{
@@ -396,12 +394,8 @@ fi
 		t.Fatal(err)
 	}
 
-	cfg := &config.Release{
-		Preinstalled: map[string]string{
-			"git":   "git",
-			"cargo": cargoScript,
-		},
-	}
+	t.Setenv("PATH", tmpDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+	cfg := &config.Release{}
 	// Setup a dummy repo
 	remoteDir := testhelper.SetupRepoWithChange(t, "test-validation")
 	testhelper.CloneRepository(t, remoteDir)

@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/googleapis/librarian/internal/command"
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/git"
 	"github.com/googleapis/librarian/internal/librarian/rust"
@@ -86,9 +85,6 @@ func legacyRustPublish(ctx context.Context, cfg *config.Config, cmd *cli.Command
 // says whether to actually publish (true) or just perform a dry run (false).
 func publish(ctx context.Context, cfg *config.Config, releaseCommit string, execute bool) error {
 	gitExe := "git"
-	if cfg.Release != nil {
-		gitExe = command.GetExecutablePath(cfg.Release.Preinstalled, "git")
-	}
 	if err := git.AssertGitStatusClean(ctx, gitExe); err != nil {
 		return err
 	}

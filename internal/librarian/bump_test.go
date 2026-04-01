@@ -577,7 +577,9 @@ func TestFindLibrariesToBump_Error(t *testing.T) {
 }
 
 func TestPostBump(t *testing.T) {
-	fakeCargo := filepath.Join(t.TempDir(), "fake-cargo")
+	tmpDir := t.TempDir()
+	fakeCargo := filepath.Join(tmpDir, "cargo")
+	t.Setenv("PATH", tmpDir+string(os.PathListSeparator)+os.Getenv("PATH"))
 	for _, test := range []struct {
 		name    string
 		setup   func()
@@ -594,11 +596,6 @@ func TestPostBump(t *testing.T) {
 			},
 			cfg: &config.Config{
 				Language: config.LanguageRust,
-				Release: &config.Release{
-					Preinstalled: map[string]string{
-						"cargo": fakeCargo,
-					},
-				},
 			},
 		},
 		{
@@ -611,11 +608,6 @@ func TestPostBump(t *testing.T) {
 			},
 			cfg: &config.Config{
 				Language: config.LanguageRust,
-				Release: &config.Release{
-					Preinstalled: map[string]string{
-						"cargo": fakeCargo,
-					},
-				},
 			},
 			wantErr: true,
 		},

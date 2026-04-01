@@ -25,15 +25,15 @@ import (
 )
 
 // preFlight performs all the necessary checks before a release.
-func preFlight(ctx context.Context, preinstalled map[string]string, cargoTools []config.Tool) error {
-	gitExe := command.GetExecutablePath(preinstalled, "git")
+func preFlight(ctx context.Context, cargoTools []config.Tool) error {
+	gitExe := "git"
 	if err := git.CheckVersion(ctx, gitExe); err != nil {
 		return err
 	}
 	if err := git.CheckRemoteURL(ctx, gitExe, config.RemoteUpstream); err != nil {
 		return err
 	}
-	return cargoPreFlight(ctx, command.GetExecutablePath(preinstalled, "cargo"), cargoTools)
+	return cargoPreFlight(ctx, "cargo", cargoTools)
 }
 
 // cargoPreFlight verifies all the necessary cargo tools are installed.

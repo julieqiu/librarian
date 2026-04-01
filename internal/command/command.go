@@ -126,12 +126,3 @@ func runCmd(ctx context.Context, dir string, env map[string]string, command stri
 	}
 	return string(output), nil
 }
-
-// GetExecutablePath finds the path for a given command, checking for an
-// override in the provided commandOverrides map first.
-func GetExecutablePath(commandOverrides map[string]string, commandName string) string {
-	if exe, ok := commandOverrides[commandName]; ok {
-		return exe
-	}
-	return commandName
-}

@@ -100,11 +100,7 @@ Examples:
 // runBump performs the actual work of the bump command, after all the command
 // lines arguments have been validated and the configuration loaded.
 func runBump(ctx context.Context, cfg *config.Config, all bool, libraryName, versionOverride string) error {
-	var preinstalled map[string]string
-	if cfg.Release != nil {
-		preinstalled = cfg.Release.Preinstalled
-	}
-	gitExe := command.GetExecutablePath(preinstalled, "git")
+	gitExe := "git"
 	if err := git.AssertGitStatusClean(ctx, gitExe); err != nil {
 		return err
 	}
@@ -233,9 +229,6 @@ func postBump(ctx context.Context, cfg *config.Config) error {
 	switch cfg.Language {
 	case config.LanguageRust:
 		cargoExe := "cargo"
-		if cfg.Release != nil {
-			cargoExe = command.GetExecutablePath(cfg.Release.Preinstalled, "cargo")
-		}
 		if err := command.Run(ctx, cargoExe, "update", "--workspace"); err != nil {
 			return err
 		}

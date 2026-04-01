@@ -21,7 +21,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/googleapis/librarian/internal/command"
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/git"
 	"github.com/googleapis/librarian/internal/yaml"
@@ -67,9 +66,6 @@ func tagCommand() *cli.Command {
 // the release commit is used for all further operations.
 func tag(ctx context.Context, cfg *config.Config, releaseCommit string, createReleaseTag bool) error {
 	gitExe := "git"
-	if cfg.Release != nil {
-		gitExe = command.GetExecutablePath(cfg.Release.Preinstalled, "git")
-	}
 	if err := git.AssertGitStatusClean(ctx, gitExe); err != nil {
 		return err
 	}
