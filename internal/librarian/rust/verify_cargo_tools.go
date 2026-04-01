@@ -17,7 +17,6 @@ package rust
 import (
 	"context"
 	"fmt"
-	"log/slog"
 
 	"github.com/googleapis/librarian/internal/command"
 	"github.com/googleapis/librarian/internal/config"
@@ -45,7 +44,6 @@ func cargoPreFlight(ctx context.Context, cargoExe string, tools []config.Tool) e
 		if tool.Version == "" {
 			continue
 		}
-		slog.Info("installing cargo tool", "name", tool.Name, "version", tool.Version)
 		spec := fmt.Sprintf("%s@%s", tool.Name, tool.Version)
 		if err := command.Run(ctx, cargoExe, "install", "--locked", spec); err != nil {
 			return err
