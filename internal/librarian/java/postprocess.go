@@ -197,7 +197,7 @@ func restructure(actions []moveAction) error {
 // It also copies the relevant proto files into the proto module.
 func restructureModules(p postProcessParams, destRoot string) error {
 	modules := p.modules()
-	tempProtoSrcDir := filepath.Join(p.outDir, p.version, "proto")
+	tempProtoSrcDir := p.protoDir()
 	if err := removeConflictingFiles(tempProtoSrcDir); err != nil {
 		return err
 	}
@@ -208,29 +208,29 @@ func restructureModules(p postProcessParams, destRoot string) error {
 			description: "proto source",
 		},
 		{
-			src:         filepath.Join(p.outDir, p.version, "grpc"),
+			src:         p.grpcDir(),
 			dest:        filepath.Join(destRoot, modules.grpc, "src", "main", "java"),
 			description: "grpc source",
 		},
 		{
-			src:         filepath.Join(p.outDir, p.version, "gapic", "src", "main"),
+			src:         filepath.Join(p.gapicDir(), "src", "main"),
 			dest:        filepath.Join(destRoot, modules.gapic, "src", "main"),
 			description: "gapic source",
 		},
 		{
-			src:         filepath.Join(p.outDir, p.version, "gapic", "src", "test"),
+			src:         filepath.Join(p.gapicDir(), "src", "test"),
 			dest:        filepath.Join(destRoot, modules.gapic, "src", "test"),
 			description: "gapic test",
 		},
 		{
-			src:         filepath.Join(p.outDir, p.version, "gapic", "proto", "src", "main", "java"),
+			src:         filepath.Join(p.gapicDir(), "proto", "src", "main", "java"),
 			dest:        filepath.Join(destRoot, modules.proto, "src", "main", "java"),
 			description: "resource name source",
 		},
 	}
 	if p.includeSamples {
 		actions = append(actions, moveAction{
-			src:         filepath.Join(p.outDir, p.version, "gapic", "samples", "snippets", "generated", "src", "main", "java"),
+			src:         filepath.Join(p.gapicDir(), "samples", "snippets", "generated", "src", "main", "java"),
 			dest:        filepath.Join(destRoot, "samples", "snippets", "generated"),
 			description: "samples",
 		})
