@@ -48,14 +48,14 @@ const (
 // The generated file contains a set of whitelist rules that tell the Clirr tool
 // to ignore specific changes (like method additions to interfaces) to
 // prevent false-positive binary compatibility failures in the build.
-func generateClirr(protoModulePath string) error {
+func generateClirr(protoModulePath string) (err error) {
 	outputPath := filepath.Join(protoModulePath, clirrIgnoreFile)
-	_, err := os.Stat(outputPath)
+	_, statErr := os.Stat(outputPath)
 	switch {
-	case err == nil:
+	case statErr == nil:
 		return nil
-	case !os.IsNotExist(err):
-		return fmt.Errorf("failed to check for %s: %w", outputPath, err)
+	case !os.IsNotExist(statErr):
+		return fmt.Errorf("failed to check for %s: %w", outputPath, statErr)
 	}
 	protoPaths, err := findProtoPackages(protoModulePath)
 	if err != nil {
@@ -68,18 +68,16 @@ func generateClirr(protoModulePath string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create %s: %w", outputPath, err)
 	}
-	var returnErr error
 	defer func() {
-		if cerr := f.Close(); cerr != nil {
-			if returnErr == nil {
-				returnErr = cerr
-			} else {
-				returnErr = fmt.Errorf("%w; close error: %w", returnErr, cerr)
-			}
+		cerr := f.Close()
+		if err == nil {
+			err = cerr
 		}
 	}()
-	returnErr = templates.ExecuteTemplate(f, templateName, protoPaths)
-	return returnErr
+	if terr := templates.ExecuteTemplate(f, templateName, protoPaths); terr != nil {
+		return fmt.Errorf("failed to execute template %s: %w", templateName, terr)
+	}
+	return nil
 }
 
 func findProtoPackages(protoModulePath string) ([]string, error) {
