@@ -60,6 +60,7 @@ func TestPublishCratesSuccess(t *testing.T) {
 
 func TestPublishCratesWithNewCrate(t *testing.T) {
 	testhelper.RequireCommand(t, "git")
+	symlinkCargo(t)
 	_ = testhelper.SetupRepoWithChange(t, "release-with-new-crate")
 	testhelper.AddCrate(t, path.Join("src", "pubsub"), "google-cloud-pubsub")
 	testhelper.RunGit(t, "add", path.Join("src", "pubsub"))
