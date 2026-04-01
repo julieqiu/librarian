@@ -48,14 +48,14 @@ const (
 // The generated file contains a set of whitelist rules that tell the Clirr tool
 // to ignore specific changes (like method additions to interfaces) to
 // prevent false-positive binary compatibility failures in the build.
-func generateClirr(protoModulePath string) (err error) {
+func generateClirr(protoModulePath string) error {
 	outputPath := filepath.Join(protoModulePath, clirrIgnoreFile)
-	_, statErr := os.Stat(outputPath)
+	_, err := os.Stat(outputPath)
 	switch {
-	case statErr == nil:
+	case err == nil:
 		return nil
-	case !os.IsNotExist(statErr):
-		return fmt.Errorf("failed to check for %s: %w", outputPath, statErr)
+	case !os.IsNotExist(err):
+		return fmt.Errorf("failed to check for %s: %w", outputPath, err)
 	}
 	protoPaths, err := findProtoPackages(protoModulePath)
 	if err != nil {
@@ -74,10 +74,7 @@ func generateClirr(protoModulePath string) (err error) {
 			err = cerr
 		}
 	}()
-	if terr := templates.ExecuteTemplate(f, templateName, protoPaths); terr != nil {
-		return fmt.Errorf("failed to execute template %s: %w", templateName, terr)
-	}
-	return nil
+	return templates.ExecuteTemplate(f, templateName, protoPaths)
 }
 
 func findProtoPackages(protoModulePath string) ([]string, error) {
