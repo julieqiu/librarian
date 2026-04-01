@@ -43,10 +43,15 @@ type postProcessParams struct {
 	includeSamples      bool
 }
 
+func (p postProcessParams) gapicDir() string { return filepath.Join(p.outDir, p.version, "gapic") }
+func (p postProcessParams) grpcDir() string  { return filepath.Join(p.outDir, p.version, "grpc") }
+func (p postProcessParams) protoDir() string { return filepath.Join(p.outDir, p.version, "proto") }
+func (p postProcessParams) modules() javaModules { return deriveModuleNames(p.library.Name, p.version) }
+
 func postProcessAPI(ctx context.Context, p postProcessParams) error {
-	gapicDir := filepath.Join(p.outDir, p.version, "gapic")
-	grpcDir := filepath.Join(p.outDir, p.version, "grpc")
-	protoDir := filepath.Join(p.outDir, p.version, "proto")
+	gapicDir := p.gapicDir()
+	grpcDir := p.grpcDir()
+	protoDir := p.protoDir()
 	// Unzip the temp-codegen.srcjar into temporary version/ directory.
 	srcjarPath := filepath.Join(gapicDir, "temp-codegen.srcjar")
 	if _, err := os.Stat(srcjarPath); err == nil {
