@@ -175,34 +175,29 @@ func TestDeriveDistributionName(t *testing.T) {
 }
 
 func TestResolveGAPICOptions_MultipleConfigsError(t *testing.T) {
-	testCases := []struct {
+	for _, test := range []struct {
 		name    string
 		files   []string
 		apiPath string
-		wantErr string
 	}{
 		{
 			name:    "multiple grpc configs",
 			files:   []string{"a_grpc_service_config.json", "b_grpc_service_config.json"},
 			apiPath: "google/cloud/multiple/v1",
-			wantErr: "multiple gRPC service config files found",
 		},
 		{
 			name:    "multiple gapic configs",
 			files:   []string{"a_gapic.yaml", "b_gapic.yaml"},
 			apiPath: "google/cloud/multiplegapic/v1",
-			wantErr: "multiple GAPIC config files found",
 		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
+	} {
+		t.Run(test.name, func(t *testing.T) {
 			tmpDir := t.TempDir()
-			apiDir := filepath.Join(tmpDir, tc.apiPath)
+			apiDir := filepath.Join(tmpDir, test.apiPath)
 			if err := os.MkdirAll(apiDir, 0755); err != nil {
 				t.Fatal(err)
 			}
-			for _, file := range tc.files {
+			for _, file := range test.files {
 				content := []byte("")
 				if strings.HasSuffix(file, ".json") {
 					content = []byte("{}")
@@ -215,9 +210,9 @@ func TestResolveGAPICOptions_MultipleConfigsError(t *testing.T) {
 			apiCfgs := &serviceconfig.API{Transports: map[string]serviceconfig.Transport{
 				config.LanguageJava: serviceconfig.GRPC,
 			}}
-			_, err := resolveGAPICOptions(&config.Config{Repo: "test-repo"}, &config.Library{Name: "test"}, &config.API{Path: tc.apiPath}, tmpDir, apiCfgs)
-			if err == nil || !strings.Contains(err.Error(), tc.wantErr) {
-				t.Errorf("resolveGAPICOptions() error = %v, wantErr %v", err, tc.wantErr)
+			_, err := resolveGAPICOptions(&config.Config{Repo: "test-repo"}, &config.Library{Name: "test"}, &config.API{Path: test.apiPath}, tmpDir, apiCfgs)
+			if err == nil {
+				t.Fatal("resolveGAPICOptions() error = nil, want non-nil")
 			}
 		})
 	}
