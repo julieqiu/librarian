@@ -80,11 +80,11 @@ func Publish(ctx context.Context, cfg *config.Release, dryRun, dryRunKeepGoing, 
 	if err != nil {
 		return err
 	}
-	return publishCrates(ctx, cfg, dryRun, dryRunKeepGoing, skipSemverChecks, lastTag, files)
+	return publishCrates(ctx, dryRun, dryRunKeepGoing, skipSemverChecks, lastTag, files)
 }
 
 // publishCrates publishes the crates that have changed.
-func publishCrates(ctx context.Context, cfg *config.Release, dryRun, dryRunKeepGoing, skipSemverChecks bool, lastTag string, files []string) error {
+func publishCrates(ctx context.Context, dryRun, dryRunKeepGoing, skipSemverChecks bool, lastTag string, files []string) error {
 	manifests := map[string]string{}
 	for _, manifest := range findCargoManifests(files) {
 		names, err := publishedCrate(manifest)

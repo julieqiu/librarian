@@ -29,19 +29,22 @@ import (
 	"github.com/googleapis/librarian/internal/testhelper"
 )
 
+// symlinkCargo makes /bin/echo available as "cargo" on PATH so that tests
+// can run without a real cargo installation. The publishCrates function
+// detects this via isMockCargo and skips the plan-vs-changed validation,
+// since /bin/echo does not produce real crate names.
+func symlinkCargo(t *testing.T) {
+	t.Helper()
+	binDir := t.TempDir()
+	if err := os.Symlink("/bin/echo", filepath.Join(binDir, "cargo")); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("PATH", binDir+":"+os.Getenv("PATH"))
+}
+
 func TestPublishCratesSuccess(t *testing.T) {
 	testhelper.RequireCommand(t, "git")
-	testhelper.RequireCommand(t, "/bin/echo")
-	cfg := &config.Release{
-		Remote: "origin",
-
-		Tools: map[string][]config.Tool{
-			"cargo": {
-				{Name: "cargo-semver-checks", Version: "1.2.3"},
-				{Name: "cargo-workspaces", Version: "3.4.5"},
-			},
-		},
-	}
+	symlinkCargo(t)
 	remoteDir := testhelper.SetupRepoWithChange(t, "release-2001-02-03")
 	testhelper.CloneRepository(t, remoteDir)
 	files := []string{
@@ -50,24 +53,13 @@ func TestPublishCratesSuccess(t *testing.T) {
 	}
 	lastTag := "release-2001-02-03"
 
-	if err := publishCrates(t.Context(), cfg, true, false, false, lastTag, files); err != nil {
+	if err := publishCrates(t.Context(), true, false, false, lastTag, files); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestPublishCratesWithNewCrate(t *testing.T) {
 	testhelper.RequireCommand(t, "git")
-	testhelper.RequireCommand(t, "/bin/echo")
-	cfg := &config.Release{
-		Remote: "origin",
-
-		Tools: map[string][]config.Tool{
-			"cargo": {
-				{Name: "cargo-semver-checks", Version: "1.2.3"},
-				{Name: "cargo-workspaces", Version: "3.4.5"},
-			},
-		},
-	}
 	_ = testhelper.SetupRepoWithChange(t, "release-with-new-crate")
 	testhelper.AddCrate(t, path.Join("src", "pubsub"), "google-cloud-pubsub")
 	testhelper.RunGit(t, "add", path.Join("src", "pubsub"))
@@ -77,24 +69,13 @@ func TestPublishCratesWithNewCrate(t *testing.T) {
 		path.Join("src", "pubsub", "src", "lib.rs"),
 	}
 	lastTag := "release-with-new-crate"
-	if err := publishCrates(t.Context(), cfg, true, false, false, lastTag, files); err != nil {
+	if err := publishCrates(t.Context(),true, false, false, lastTag, files); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestPublishCratesWithBadManifest(t *testing.T) {
 	testhelper.RequireCommand(t, "git")
-	testhelper.RequireCommand(t, "/bin/echo")
-	cfg := &config.Release{
-		Remote: "origin",
-
-		Tools: map[string][]config.Tool{
-			"cargo": {
-				{Name: "cargo-semver-checks", Version: "1.2.3"},
-				{Name: "cargo-workspaces", Version: "3.4.5"},
-			},
-		},
-	}
 	_ = testhelper.SetupRepoWithChange(t, "release-2001-02-03")
 	name := path.Join("src", "storage", "src", "lib.rs")
 	if err := os.WriteFile(name, []byte(testhelper.NewLibRsContents), 0644); err != nil {
@@ -110,17 +91,18 @@ func TestPublishCratesWithBadManifest(t *testing.T) {
 		path.Join("src", "storage", "src", "lib.rs"),
 	}
 	lastTag := "release-2001-02-03"
-	if err := publishCrates(t.Context(), cfg, true, false, false, lastTag, files); err == nil {
+	if err := publishCrates(t.Context(),true, false, false, lastTag, files); err == nil {
 		t.Errorf("expected an error with a bad manifest file")
 	}
 }
 
 func TestPublishCratesGetPlanError(t *testing.T) {
 	testhelper.RequireCommand(t, "git")
-	cfg := &config.Release{
-		Remote: "origin",
-
+	binDir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(binDir, "cargo"), []byte("#!/bin/sh\nexit 1\n"), 0755); err != nil {
+		t.Fatal(err)
 	}
+	t.Setenv("PATH", binDir+":"+os.Getenv("PATH"))
 	remoteDir := testhelper.SetupRepoWithChange(t, "release-2001-02-03")
 	testhelper.CloneRepository(t, remoteDir)
 	files := []string{
@@ -128,24 +110,20 @@ func TestPublishCratesGetPlanError(t *testing.T) {
 		path.Join("src", "storage", "src", "lib.rs"),
 	}
 	lastTag := "release-2001-02-03"
-	if err := publishCrates(t.Context(), cfg, true, false, false, lastTag, files); err == nil {
+	if err := publishCrates(t.Context(), true, false, false, lastTag, files); err == nil {
 		t.Fatalf("expected an error during plan generation")
 	}
 }
 
 func TestPublishCratesPlanMismatchError(t *testing.T) {
 	testhelper.RequireCommand(t, "git")
-	testhelper.RequireCommand(t, "echo")
-	cfg := &config.Release{
-		Remote: "origin",
-
-		Tools: map[string][]config.Tool{
-			"cargo": {
-				{Name: "cargo-semver-checks", Version: "1.2.3"},
-				{Name: "cargo-workspaces", Version: "3.4.5"},
-			},
-		},
+	// Create a cargo that outputs a crate name not in the changed files.
+	binDir := t.TempDir()
+	script := "#!/bin/sh\necho nonexistent-crate\n"
+	if err := os.WriteFile(filepath.Join(binDir, "cargo"), []byte(script), 0755); err != nil {
+		t.Fatal(err)
 	}
+	t.Setenv("PATH", binDir+":"+os.Getenv("PATH"))
 	remoteDir := testhelper.SetupRepoWithChange(t, "release-2001-02-03")
 	testhelper.CloneRepository(t, remoteDir)
 	files := []string{
@@ -153,7 +131,7 @@ func TestPublishCratesPlanMismatchError(t *testing.T) {
 		path.Join("src", "storage", "src", "lib.rs"),
 	}
 	lastTag := "release-2001-02-03"
-	if err := publishCrates(t.Context(), cfg, true, false, false, lastTag, files); err == nil {
+	if err := publishCrates(t.Context(), true, false, false, lastTag, files); err == nil {
 		t.Fatalf("expected an error during plan comparison")
 	}
 }
@@ -181,10 +159,7 @@ fi
 		t.Fatal(err)
 	}
 
-	cfg := &config.Release{
-		Remote: "origin",
-
-	}
+	t.Setenv("PATH", tmpDir+":"+os.Getenv("PATH"))
 	remoteDir := testhelper.SetupRepoWithChange(t, "release-2001-02-03")
 	testhelper.CloneRepository(t, remoteDir)
 	files := []string{
@@ -194,11 +169,11 @@ fi
 	lastTag := "release-2001-02-03"
 
 	// This should fail because semver-checks fails.
-	if err := publishCrates(t.Context(), cfg, true, false, false, lastTag, files); err == nil {
+	if err := publishCrates(t.Context(), true, false, false, lastTag, files); err == nil {
 		t.Fatal("expected an error from semver-checks")
 	}
 	// Skipping the checks should succeed.
-	if err := publishCrates(t.Context(), cfg, true, false, true, lastTag, files); err != nil {
+	if err := publishCrates(t.Context(), true, false, true, lastTag, files); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -291,10 +266,7 @@ fi
 		t.Fatal(err)
 	}
 
-	cfg := &config.Release{
-		Remote: "origin",
-
-	}
+	t.Setenv("PATH", tmpDir+":"+os.Getenv("PATH"))
 	remoteDir := testhelper.SetupRepoWithChange(t, "release-2001-02-03")
 	testhelper.CloneRepository(t, remoteDir)
 	files := []string{
@@ -303,7 +275,7 @@ fi
 	}
 	lastTag := "release-2001-02-03"
 
-	if err := publishCrates(t.Context(), cfg, true, true, false, lastTag, files); err != nil {
+	if err := publishCrates(t.Context(), true, true, false, lastTag, files); err != nil {
 		t.Fatal(err)
 	}
 
@@ -343,10 +315,7 @@ fi
 		t.Fatal(err)
 	}
 
-	cfg := &config.Release{
-		Remote: "origin",
-
-	}
+	t.Setenv("PATH", tmpDir+":"+os.Getenv("PATH"))
 	remoteDir := testhelper.SetupRepoWithChange(t, "release-2001-02-03")
 	testhelper.CloneRepository(t, remoteDir)
 	files := []string{
@@ -356,11 +325,11 @@ fi
 	lastTag := "release-2001-02-03"
 
 	// This should fail because semver-checks fails.
-	if err := publishCrates(t.Context(), cfg, true, false, false, lastTag, files); err == nil {
+	if err := publishCrates(t.Context(), true, false, false, lastTag, files); err == nil {
 		t.Fatal("expected an error from semver-checks")
 	}
 	// With --keep-going, this should succeed.
-	if err := publishCrates(t.Context(), cfg, true, true, false, lastTag, files); err != nil {
+	if err := publishCrates(t.Context(), true, true, false, lastTag, files); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -387,10 +356,7 @@ fi
 		t.Fatal(err)
 	}
 
-	cfg := &config.Release{
-		Remote: "origin",
-
-	}
+	t.Setenv("PATH", tmpDir+":"+os.Getenv("PATH"))
 	// Setup a dummy repo
 	remoteDir := testhelper.SetupRepoWithChange(t, "test-validation")
 	testhelper.CloneRepository(t, remoteDir)
@@ -424,7 +390,7 @@ fi
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			err := publishCrates(t.Context(), cfg, true, false, true, lastTag, test.files)
+			err := publishCrates(t.Context(),true, false, true, lastTag, test.files)
 			var got string
 			if err != nil {
 				got = err.Error()
