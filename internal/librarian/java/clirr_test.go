@@ -17,8 +17,9 @@ package java
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestGenerateClirr(t *testing.T) {
@@ -38,16 +39,25 @@ func TestGenerateClirr(t *testing.T) {
 	}
 
 	outputPath := filepath.Join(protoModulePath, "clirr-ignored-differences.xml")
-	if _, err := os.Stat(outputPath); err != nil {
-		t.Errorf("expected %s to exist: %v", outputPath, err)
-	}
-	content, err := os.ReadFile(outputPath)
+	got, err := os.ReadFile(outputPath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	expected := "com/google/cloud/test/v1"
-	if !strings.Contains(string(content), expected) {
-		t.Errorf("expected generated file to contain %s, but got:\n%s", expected, string(content))
+	goldenPath := filepath.Join("testdata", "clirr", "clirr-ignored-differences.xml")
+	if *update {
+		if err := os.MkdirAll(filepath.Dir(goldenPath), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(goldenPath, got, 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	want, err := os.ReadFile(goldenPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if diff := cmp.Diff(string(want), string(got)); diff != "" {
+		t.Errorf("mismatch (-want +got):\n%s\n\nHint: run 'go test ./internal/librarian/java -v -update' to update golden files.", diff)
 	}
 }
 
@@ -65,7 +75,7 @@ func TestGenerateClirr_SkipExisting(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if string(newContent) != initialContent {
-		t.Errorf("expected generateClirr to skip existing file, but content changed from %q to %q", initialContent, string(newContent))
+	if diff := cmp.Diff(initialContent, string(newContent)); diff != "" {
+		t.Errorf("generateClirr modified existing file (-want +got):\n%s", diff)
 	}
 }
