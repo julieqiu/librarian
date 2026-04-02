@@ -15,6 +15,7 @@
 package serviceconfig
 
 import (
+	"slices"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -32,11 +33,27 @@ func TestAPIsNoDuplicates(t *testing.T) {
 }
 
 func TestAPIsAlphabeticalOrder(t *testing.T) {
-	for i := 1; i < len(APIs); i++ {
-		prev := APIs[i-1].Path
-		curr := APIs[i].Path
-		if prev > curr {
-			t.Errorf("APIs not in alphabetical order: %q comes after %q", prev, curr)
+	var rust, nonRust []string
+	seenNonRust := false
+	for _, api := range APIs {
+		if slices.Contains(api.Languages, config.LanguageRust) {
+			if seenNonRust {
+				t.Errorf("rust entry %q appears after non-rust entries", api.Path)
+			}
+			rust = append(rust, api.Path)
+		} else {
+			seenNonRust = true
+			nonRust = append(nonRust, api.Path)
+		}
+	}
+	for i := 1; i < len(rust); i++ {
+		if rust[i-1] > rust[i] {
+			t.Errorf("rust APIs not in alphabetical order: %q comes after %q", rust[i-1], rust[i])
+		}
+	}
+	for i := 1; i < len(nonRust); i++ {
+		if nonRust[i-1] > nonRust[i] {
+			t.Errorf("non-rust APIs not in alphabetical order: %q comes after %q", nonRust[i-1], nonRust[i])
 		}
 	}
 }
