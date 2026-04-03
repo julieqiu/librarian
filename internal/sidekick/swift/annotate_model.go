@@ -23,7 +23,7 @@ func (codec *codec) annotateModel(model *api.API) error {
 	annotations := &modelAnnotations{
 		CopyrightYear: codec.GenerationYear,
 		BoilerPlate:   license.HeaderBulk(),
-		PackageName:   PackageName(model, codec.PackageName),
+		PackageName:   codec.PackageName,
 	}
 	model.Codec = annotations
 	for _, message := range model.Messages {
