@@ -15,7 +15,9 @@
 package parser
 
 import (
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -2132,6 +2134,7 @@ func TestProtobuf_ParseBadFiles(t *testing.T) {
 		{SpecificationSource: "-invalid-file-name-", ServiceConfig: secretManagerYamlFullPath},
 		{SpecificationSource: protobufFile, ServiceConfig: "-invalid-file-name-"},
 		{SpecificationSource: secretManagerYamlFullPath, ServiceConfig: secretManagerYamlFullPath},
+		{DescriptorFiles: "dummy.desc", DescriptorFilesToGenerate: ""},
 	} {
 		if got, err := ParseProtobuf(cfg); err == nil {
 			t.Fatalf("expected error with missing source file, got=%v", got)
@@ -2149,7 +2152,7 @@ func newTestCodeGeneratorRequest(t *testing.T, filename string) *pluginpb.CodeGe
 		ActiveRoots: []string{"googleapis", "protobuf-src"},
 		IncludeList: []string{filename},
 	}
-	request, err := newCodeGeneratorRequest("testdata", src)
+	request, err := codeGeneratorRequestFromSource("testdata", src)
 	if err != nil {
 		t.Fatalf("Failed to make API for Protobuf %v", err)
 	}
@@ -2194,6 +2197,43 @@ func TestParseResourcePatterns(t *testing.T) {
 			t.Errorf("parseResourcePatterns() returned error %q, want %q", err.Error(), want)
 		}
 	})
+}
+
+func TestParseProtobuf_Descriptors(t *testing.T) {
+	requireProtoc(t)
+	descFile := newTestDescriptorFile(t, "scalar.proto")
+	defer os.Remove(descFile)
+
+	cfg := &ModelConfig{
+		DescriptorFiles:           descFile,
+		DescriptorFilesToGenerate: "scalar.proto",
+		ServiceConfig:             secretManagerYamlFullPath,
+	}
+	got, err := ParseProtobuf(cfg)
+	if err != nil {
+		t.Fatalf("ParseProtobuf failed: %v", err)
+	}
+	if got == nil {
+		t.Fatalf("ParseProtobuf returned nil model")
+	}
+}
+
+func newTestDescriptorFile(t *testing.T, filename string) string {
+	t.Helper()
+
+	tmpDir := t.TempDir()
+	descFile := filepath.Join(tmpDir, "test.desc")
+
+	cmd := exec.CommandContext(t.Context(), "protoc", "-o", descFile, "--include_imports",
+		"-I", "testdata",
+		"-I", "../../testdata/googleapis",
+		filepath.Join("testdata", filename))
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("Failed to generate .desc file: %v", err)
+	}
+
+	return descFile
 }
 
 func requireProtoc(t *testing.T) {
