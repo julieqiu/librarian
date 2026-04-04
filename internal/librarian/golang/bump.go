@@ -15,7 +15,6 @@
 package golang
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -39,20 +38,13 @@ func Bump(library *config.Library, output, version string) error {
 	if err := bumpInternalVersion(output, version); err != nil {
 		return err
 	}
-	for _, api := range library.APIs {
-		goAPI := findGoAPI(library, api.Path)
-		if goAPI == nil {
-			return fmt.Errorf("error finding goAPI associated with API %s: %w", api.Path, errGoAPINotFound)
-		}
+	return forEachGoAPI(library, func(_ *config.API, goAPI *config.GoAPI) error {
 		snippetDir := findSnippetDirectory(library, goAPI, output)
 		if snippetDir == "" {
-			continue
+			return nil
 		}
-		if err := snippetmetadata.UpdateAllLibraryVersions(snippetDir, version); err != nil {
-			return err
-		}
-	}
-	return nil
+		return snippetmetadata.UpdateAllLibraryVersions(snippetDir, version)
+	})
 }
 
 func bumpInternalVersion(output, version string) error {

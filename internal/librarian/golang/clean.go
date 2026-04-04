@@ -123,11 +123,7 @@ func cleanRootFiles(libraryDir string, keepSet map[string]bool) error {
 // cleanClientDirectory walks through each API directory in the library and
 // removes generated Go client files and snippets.
 func cleanClientDirectory(library *config.Library, libraryDir string, keepSet map[string]bool) error {
-	for _, api := range library.APIs {
-		goAPI := findGoAPI(library, api.Path)
-		if goAPI == nil {
-			return fmt.Errorf("error finding goAPI associated with API %s: %w", api.Path, errGoAPINotFound)
-		}
+	return forEachGoAPI(library, func(_ *config.API, goAPI *config.GoAPI) error {
 		repoRoot := repoRootPath(libraryDir, library.Name)
 		relClientPath := clientPathFromRepoRoot(library, goAPI)
 		clientPath := filepath.Join(repoRoot, relClientPath)
@@ -135,11 +131,8 @@ func cleanClientDirectory(library *config.Library, libraryDir string, keepSet ma
 			return err
 		}
 		snippetDir := snippetDirectory(repoRoot, relClientPath)
-		if err := os.RemoveAll(snippetDir); err != nil {
-			return err
-		}
-	}
-	return nil
+		return os.RemoveAll(snippetDir)
+	})
 }
 
 func cleanGeneratedClientFiles(clientPath, libraryDir string, keepSet map[string]bool) error {

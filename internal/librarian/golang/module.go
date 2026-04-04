@@ -95,6 +95,21 @@ func DefaultOutput(name, defaultOutput string) string {
 	return filepath.Join(defaultOutput, name)
 }
 
+// forEachGoAPI calls fn for each API in library.APIs with its associated GoAPI.
+// It returns an error if any GoAPI is not found.
+func forEachGoAPI(library *config.Library, fn func(api *config.API, goAPI *config.GoAPI) error) error {
+	for _, api := range library.APIs {
+		goAPI := findGoAPI(library, api.Path)
+		if goAPI == nil {
+			return fmt.Errorf("goAPI not found for API %s: %w", api.Path, errGoAPINotFound)
+		}
+		if err := fn(api, goAPI); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func findGoAPI(library *config.Library, apiPath string) *config.GoAPI {
 	if library.Go == nil {
 		return nil
