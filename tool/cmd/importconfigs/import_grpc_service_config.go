@@ -32,18 +32,14 @@ var errMultipleGRPCServiceConfigs = errors.New("found multiple gRPC service conf
 
 func importGRPCServiceConfigCommand() *cli.Command {
 	return &cli.Command{
-		Name:  "import-grpc-service-config",
-		Usage: "import gRPC service config JSON data into sdk.yaml",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:     "googleapis",
-				Usage:    "path to googleapis dir",
-				Required: true,
-			},
-		},
+		Name:      "import-grpc-service-config",
+		Usage:     "import gRPC service config JSON data into sdk.yaml",
+		UsageText: "import-grpc-service-config <googleapis-dir>",
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			googleapisDir := cmd.String("googleapis")
-			return runImportGRPCServiceConfig("internal/serviceconfig/sdk.yaml", googleapisDir)
+			if cmd.NArg() != 1 {
+				return fmt.Errorf("expected 1 argument, got %d", cmd.NArg())
+			}
+			return runImportGRPCServiceConfig("internal/serviceconfig/sdk.yaml", cmd.Args().First())
 		},
 	}
 }

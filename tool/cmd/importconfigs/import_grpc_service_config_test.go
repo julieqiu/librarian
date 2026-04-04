@@ -275,10 +275,9 @@ func TestRunImportGRPCServiceConfig_Error(t *testing.T) {
 	}
 }
 
-func TestImportGRPCServiceConfigCommand(t *testing.T) {
+func TestImportGRPCServiceConfig_CommandError(t *testing.T) {
 	cmd := importGRPCServiceConfigCommand()
-	ctx := t.Context()
-	if err := cmd.Run(ctx, []string{"import-grpc-service-config", "--help"}); err != nil {
+	if err := cmd.Run(t.Context(), []string{"import-grpc-service-config", "--help"}); err != nil {
 		t.Fatalf("cmd.Run() error = %v", err)
 	}
 }
