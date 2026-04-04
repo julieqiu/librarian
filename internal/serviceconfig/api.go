@@ -64,8 +64,7 @@ type API struct {
 	DocumentationURI string `yaml:"documentation_uri,omitempty"`
 
 	// Languages restricts which languages can generate client libraries for this API.
-	// Empty means all languages can use this API.
-	// We should be explicit about supported languages when adding entries.
+	// Use "all" to indicate all languages can use this API.
 	//
 	// Restrictions exist for several reasons:
 	//   - Newer languages (Rust, Dart) skip older beta versions when stable versions exist
@@ -249,7 +248,7 @@ func HasAPIPath(path, language string) bool {
 	if !ok {
 		return false
 	}
-	return len(api.Languages) == 0 || slices.Contains(api.Languages, language)
+	return slices.Contains(api.Languages, config.LanguageAll) || slices.Contains(api.Languages, language)
 }
 
 func unmarshalAPIsOrPanic() []API {
