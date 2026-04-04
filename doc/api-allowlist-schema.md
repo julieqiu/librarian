@@ -20,3 +20,35 @@ This document describes the schema for the API Allowlist.
 | `service_name` | string | Is a DNS-like logical identifier for the service, such as `calendar.googleapis.com`. |
 | `title` | string | Overrides the API title from the service config. |
 | `transports` | map[string]Transport | Defines the supported transports per language. Map key is the language name (e.g., "python", "rust"). Optional. If omitted, all languages use GRPCRest by default. |
+| `grpc_service_config` | [GRPCServiceConfig](#grpcserviceconfig-configuration) (optional) | Contains inline gRPC service config data (retry/timeout settings). |
+
+## GRPCServiceConfig Configuration
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `method_config` | list of [MethodConfig](#methodconfig-configuration) |  |
+
+## MethodConfig Configuration
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `name` | list of [MethodName](#methodname-configuration) | Identifies which service methods this config applies to. An empty Method field means all methods on the named service. |
+| `timeout` | string | Is the maximum duration for an RPC, including all retry attempts. Uses proto3 Duration string format (e.g., "60s"). |
+| `retry_policy` | [RetryPolicy](#retrypolicy-configuration) (optional) | Defines the retry behavior for matching methods. |
+
+## MethodName Configuration
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `service` | string | Is the fully qualified gRPC service name (e.g., "google.cloud.secretmanager.v1.SecretManagerService"). |
+| `method` | string | Is the method name (e.g., "GetSecret"). If empty, the config applies to all methods on the service. |
+
+## RetryPolicy Configuration
+
+| Field | Type | Description |
+| :--- | :--- | :--- |
+| `max_attempts` | int | Is the maximum number of RPC attempts including the original request. Values above 5 are treated as 5. |
+| `initial_backoff` | string | Is the delay before the first retry, in proto3 Duration format (e.g., "1s"). |
+| `max_backoff` | string | Caps the retry delay, in proto3 Duration format (e.g., "10s"). |
+| `backoff_multiplier` | float64 | Controls exponential growth of the delay between successive retry attempts. |
+| `retryable_status_codes` | list of string | Lists the gRPC status codes that trigger a retry (e.g., "UNAVAILABLE"). |

@@ -114,6 +114,10 @@ type API struct {
 	// Map key is the language name (e.g., "python", "rust").
 	// Optional. If omitted, all languages use GRPCRest by default.
 	Transports map[string]Transport `yaml:"transports,omitempty"`
+
+	// GRPCServiceConfig contains inline gRPC service config data (retry/timeout
+	// settings).
+	GRPCServiceConfig *GRPCServiceConfig `yaml:"grpc_service_config,omitempty"`
 }
 
 // Transport gets transport for a given language.
