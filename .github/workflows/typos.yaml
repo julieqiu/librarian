@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 # We use misspell via golangci-lint, but typos is a better spellchecker, so we
 # run this in CI as well. Since typos-cli is a Rust tool, it is harder to set
 # up with go test ./..., so it is only run as a GitHub Action.
