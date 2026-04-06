@@ -276,7 +276,7 @@ func TestNodejsRead(t *testing.T) {
 				{
 					Name:     "gapic-generator-typescript",
 					Version:  "76ba85a7f55c6e82943008b4eceb07a0f58b39e1",
-					Package:  "https://github.com/googleapis/google-cloud-node-core/archive/76ba85a7f55c6e82943008b4eceb07a0f58b39e1.tar.gz",
+					Package:  "https://github.com/googleapis/google-cloud-node/archive/76ba85a7f55c6e82943008b4eceb07a0f58b39e1.tar.gz",
 					Checksum: "9561a116203761bad63bf1a0abc7a4a0db67608683c3d67b45abfc394df612ac",
 					Build:    []string{"npm install", "npm run compile", "npm link"},
 				},
