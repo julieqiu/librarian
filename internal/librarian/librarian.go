@@ -74,14 +74,12 @@ func installCommand() *cli.Command {
 If no language is provided, the language is determined
 from librarian.yaml in the current directory.`,
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			var cfg *config.Config
 			lang := cmd.Args().First()
+			cfg, err := yaml.Read[config.Config](config.LibrarianYAML)
+			if err != nil && lang == "" {
+				return err
+			}
 			if lang == "" {
-				var err error
-				cfg, err = yaml.Read[config.Config](config.LibrarianYAML)
-				if err != nil {
-					return err
-				}
 				lang = cfg.Language
 			}
 			switch lang {
