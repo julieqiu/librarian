@@ -68,8 +68,8 @@ func Run(ctx context.Context, args ...string) error {
 func installCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "install",
-		Usage:       "install tool dependencies for a language",
-		UsageText:   "librarian install [language]",
+		Usage:     "install tool dependencies for a language",
+		UsageText: "librarian install [language]",
 		Description: `Install tool dependencies for the given language.
 If no language is provided, the language is determined
 from librarian.yaml in the current directory.`,
