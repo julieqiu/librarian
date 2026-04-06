@@ -26,12 +26,15 @@ func TestInstall(t *testing.T) {
 	// installGapicGeneratorTypescript expects after cloning.
 	gitStub := `#!/bin/sh
 for last; do true; done
-mkdir -p "$last/generator/gapic-generator-typescript"
+mkdir -p "$last/core/generator/gapic-generator-typescript"
 `
 	if err := os.WriteFile(filepath.Join(bin, "git"), []byte(gitStub), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(bin, "npm"), []byte("#!/bin/sh\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(bin, "npx"), []byte("#!/bin/sh\n"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(bin, "pip"), []byte("#!/bin/sh\n"), 0o755); err != nil {
