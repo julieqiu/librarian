@@ -68,14 +68,25 @@ func Run(ctx context.Context, args ...string) error {
 func installCommand() *cli.Command {
 	return &cli.Command{
 		Name:      "install",
-		Usage:     "install dependencies for the current language",
-		UsageText: "librarian install",
+		Usage:       "install tool dependencies for a language",
+		UsageText:   "librarian install [language]",
+		Description: `Install tool dependencies for the given language.
+If no language is provided, the language is determined
+from librarian.yaml in the current directory.`,
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			cfg, err := yaml.Read[config.Config](config.LibrarianYAML)
-			if err != nil {
-				return err
+			var cfg *config.Config
+			lang := cmd.Args().First()
+			if lang == "" {
+				var err error
+				cfg, err = yaml.Read[config.Config](config.LibrarianYAML)
+				if err != nil {
+					return err
+				}
+				lang = cfg.Language
 			}
-			switch cfg.Language {
+			switch lang {
+			case config.LanguageFake:
+				return nil
 			case config.LanguageGo:
 				return golang.Install(ctx)
 			case config.LanguageNodejs:
@@ -83,7 +94,7 @@ func installCommand() *cli.Command {
 			case config.LanguageRust:
 				return rust.Install(ctx, cfg.Tools)
 			default:
-				return fmt.Errorf("language %q does not support install", cfg.Language)
+				return fmt.Errorf("language %q does not support install", lang)
 			}
 		},
 	}
