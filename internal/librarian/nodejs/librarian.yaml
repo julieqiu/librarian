@@ -25,6 +25,9 @@ tools:
       build:
         - "npm install"
         - "npx tsc"
+        # tsc only compiles TypeScript; the generator also needs templates/
+        # and protos/ in build/ (resolved via __dirname at runtime).
+        - "cp -r templates protos build/"
         - "npm link"
     - name: gapic-node-processing
       version: "0.1.7"

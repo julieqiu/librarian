@@ -12,6 +12,7 @@ tools:
       build:
         - "npm install"
         - "npx tsc"
+        - "cp -r templates protos build/"
         - "npm link"
     - name: gapic-node-processing
       version: "0.1.7"
