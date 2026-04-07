@@ -31,21 +31,7 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: "3.14"
-      - name: "Install Node.js dependencies (resolve cache paths)"
-        id: tool-paths
-        run: |
-          echo "npm=$(npm config get prefix)" >> "$GITHUB_OUTPUT"
-          echo "pip=$(python3 -c 'import site; print(site.getsitepackages()[0])')" >> "$GITHUB_OUTPUT"
-      - name: "Install Node.js dependencies (restore cache)"
-        uses: actions/cache@v5
-        id: tools-cache
-        with:
-          path: |
-            ${{ steps.tool-paths.outputs.npm }}
-            ${{ steps.tool-paths.outputs.pip }}
-          key: nodejs-tools-${{ hashFiles('internal/librarian/nodejs/librarian.yaml') }}
-      - name: "Install Node.js dependencies (run librarian install)"
-        if: steps.tools-cache.outputs.cache-hit != 'true'
+      - name: Install Node.js dependencies
         run: librarian -v install nodejs
       - name: Run tests
         run: go run ./tool/cmd/coverage ./internal/librarian/nodejs
