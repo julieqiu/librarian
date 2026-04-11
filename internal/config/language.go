@@ -663,6 +663,10 @@ type DotnetCsprojSnippets struct {
 
 // NodejsPackage contains Node.js-specific library configuration.
 type NodejsPackage struct {
+	// AdditionalProtos is a list of additional proto files to include in generation.
+	// This can be overridden at the API level.
+	AdditionalProtos []string `yaml:"additional_protos,omitempty"`
+
 	// BundleConfig is the path to a GAPIC bundle config file.
 	BundleConfig string `yaml:"bundle_config,omitempty"`
 
@@ -683,6 +687,18 @@ type NodejsPackage struct {
 	// Mixins controls mixin behavior (e.g., "none" to disable).
 	Mixins string `yaml:"mixins,omitempty"`
 
+	// NodejsAPIs is a list of Node.js-specific API configurations.
+	NodejsAPIs []*NodejsAPI `yaml:"nodejs_apis,omitempty"`
+
 	// PackageName is the npm package name (e.g., "@google-cloud/access-approval").
 	PackageName string `yaml:"package_name,omitempty"`
+}
+
+// NodejsAPI represents configuration for a single API within a Node.js package.
+type NodejsAPI struct {
+	// AdditionalProtos is a list of additional proto files to include in generation.
+	AdditionalProtos []string `yaml:"additional_protos,omitempty"`
+
+	// Path is the source path.
+	Path string `yaml:"path,omitempty"`
 }
