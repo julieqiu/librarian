@@ -242,7 +242,7 @@ This document describes the schema for the librarian.yaml.
 | Field | Type | Description |
 | :--- | :--- | :--- |
 | `additional_protos` | list of string | Is a list of additional proto files to include in generation. |
-| `samples` | bool (optional) | Determines whether to generate samples for the API. |
+| `samples` | bool (optional) | Determines whether to generate samples for the API, default is true when omitted. |
 | `path` | string | Is the source path. |
 | `proto_artifact_id_override` | string | Overrides the artifact ID for the proto module. The artifact ID is also used as the name for the module's directory. |
 | `proto_only` | bool | Determines whether to generate a Proto-only client. A proto-only client does not define a service in the proto files. |
