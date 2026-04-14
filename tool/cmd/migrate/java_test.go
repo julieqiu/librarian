@@ -617,6 +617,18 @@ func TestParseJavaBazel(t *testing.T) {
 				ProtoOnly: true,
 			},
 		},
+		{
+			name:          "complex-deps",
+			googleapisDir: "testdata/parse-bazel/complex-deps",
+			buildPath:     "google/cloud/aiplatform/v1",
+			want: &javaGAPICInfo{
+				AdditionalProtos: []string{
+					"google/cloud/common_resources.proto",
+					"google/cloud/location/locations.proto",
+					"google/iam/v1/iam_policy.proto",
+				},
+			},
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			got, err := parseJavaBazel(test.googleapisDir, test.buildPath)
