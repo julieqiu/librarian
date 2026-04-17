@@ -158,7 +158,7 @@ before starting.
 
 Before sending a pull request, make sure it includes tests if there are logic
 changes, copyright headers in every file, and a commit message following the
-conventions in "Commit messages" section below.
+conventions in the [Commit messages](#commit-messages) section below.
 
 To keep the main repository clean, please open pull requests from a personal
 fork. When opening your PR, enable "Allow edits from maintainers" to allow
