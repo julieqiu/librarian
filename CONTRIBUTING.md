@@ -165,7 +165,7 @@ fork. When opening your pull request, enable "Allow edits from maintainers"
 to allow others to help you with minor tweaks or merge conflicts directly.
 
 For a step-by-step guide, see the official documentation on
-[creating a pull request from a fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork)
+[creating a pull request from a fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork).
 
 ### Keeping pull requests up to date with base branch
 
