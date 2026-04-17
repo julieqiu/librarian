@@ -161,8 +161,8 @@ changes, copyright headers in every file, and a commit message following the
 conventions in the [Commit messages](#commit-messages) section below.
 
 To keep the main repository clean, please open pull requests from a personal
-fork. When opening your PR, enable "Allow edits from maintainers" to allow
-others to help you with minor tweaks or merge conflicts directly.
+fork. When opening your pull request, enable "Allow edits from maintainers"
+to allow others to help you with minor tweaks or merge conflicts directly.
 
 For a step-by-step guide, see the official documentation on
 [creating a pull request from a fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork)
