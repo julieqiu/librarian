@@ -315,3 +315,36 @@ func TestFieldTypeName_Repeated(t *testing.T) {
 		})
 	}
 }
+
+func TestFieldTypeName_Map(t *testing.T) {
+	mapEntry := &api.Message{
+		Name:    "SingularMapEntry",
+		Package: "google.cloud.test.v1",
+		ID:      ".google.cloud.test.v1.WithMap.SingularMapEntry",
+		IsMap:   true,
+		Fields: []*api.Field{
+			{Name: "key", Typez: api.STRING_TYPE, ID: ".google.cloud.test.v1.WithMap.SingularMapEntry.key"},
+			{Name: "value", Typez: api.INT32_TYPE, ID: ".google.cloud.test.v1.WithMap.SingularMapEntry.value"},
+		},
+	}
+
+	model := api.NewTestAPI(nil, nil, nil)
+	model.PackageName = mapEntry.Package
+	model.State.MessageByID[mapEntry.ID] = mapEntry
+	c := newTestCodec(t, model, map[string]string{})
+
+	field := &api.Field{
+		Typez:   api.MESSAGE_TYPE,
+		TypezID: ".google.cloud.test.v1.WithMap.SingularMapEntry",
+		ID:      ".test.field1",
+	}
+
+	got, err := c.baseFieldTypeName(field)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "[String: Int32]"
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("mismatch (-want +got):\n%s", diff)
+	}
+}
