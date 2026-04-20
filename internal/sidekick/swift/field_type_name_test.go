@@ -78,24 +78,16 @@ func TestFieldTypeName_BaseMessage(t *testing.T) {
 		ID:      ".google.cloud.test.v1.OuterMessage.NestedMessage",
 		Parent:  outer,
 	}
+	outer.Messages = append(outer.Messages, nested)
 	simple := &api.Message{
 		Name:    "SimpleMessage",
 		Package: "google.cloud.test.v1",
 		ID:      ".google.cloud.test.v1.SimpleMessage",
 	}
 
-	c := &codec{
-		Model: &api.API{
-			PackageName: "google.cloud.test.v1",
-			State: &api.APIState{
-				MessageByID: map[string]*api.Message{
-					".google.cloud.test.v1.SimpleMessage":              simple,
-					".google.cloud.test.v1.OuterMessage":               outer,
-					".google.cloud.test.v1.OuterMessage.NestedMessage": nested,
-				},
-			},
-		},
-	}
+	model := api.NewTestAPI([]*api.Message{outer, simple}, nil, nil)
+	model.State.MessageByID[nested.ID] = nested
+	c := newTestCodec(t, model, map[string]string{})
 
 	for _, test := range []struct {
 		name  string
@@ -145,26 +137,16 @@ func TestFieldTypeName_BaseEnum(t *testing.T) {
 		ID:      ".google.cloud.test.v1.OuterMessage.NestedEnum",
 		Parent:  outer,
 	}
+	outer.Enums = append(outer.Enums, nested)
 	simple := &api.Enum{
 		Name:    "SimpleEnum",
 		Package: "google.cloud.test.v1",
 		ID:      ".google.cloud.test.v1.SimpleEnum",
 	}
 
-	c := &codec{
-		Model: &api.API{
-			PackageName: "google.cloud.test.v1",
-			State: &api.APIState{
-				EnumByID: map[string]*api.Enum{
-					".google.cloud.test.v1.SimpleEnum":              simple,
-					".google.cloud.test.v1.OuterMessage.NestedEnum": nested,
-				},
-				MessageByID: map[string]*api.Message{
-					".google.cloud.test.v1.OuterMessage": outer,
-				},
-			},
-		},
-	}
+	model := api.NewTestAPI([]*api.Message{outer}, []*api.Enum{simple}, nil)
+	model.State.EnumByID[nested.ID] = nested
+	c := newTestCodec(t, model, map[string]string{})
 
 	for _, test := range []struct {
 		name  string
