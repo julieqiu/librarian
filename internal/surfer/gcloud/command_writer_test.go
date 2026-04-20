@@ -144,7 +144,6 @@ func TestWriteCommandFiles_Error(t *testing.T) {
 }
 
 func TestMapCommandToYAML(t *testing.T) {
-	var nilVal any = nil
 	cmd := &Command{
 		Hidden: true,
 		HelpText: HelpText{
@@ -216,14 +215,14 @@ func TestMapCommandToYAML(t *testing.T) {
 			Collection:            []string{"ac"},
 			ExtractResourceResult: true,
 		},
-		Update: &declarative.UpdateConfig{
+		Update: &declarative.Update{
 			ReadModifyUpdate:     true,
 			DisableAutoFieldMask: true,
 		},
 		Response: &declarative.Response{
 			IDField: "id",
 		},
-		Output: &declarative.OutputConfig{
+		Output: &declarative.Output{
 			Format: "table",
 		},
 		Arguments: declarative.Arguments{
@@ -250,7 +249,7 @@ func TestMapCommandToYAML(t *testing.T) {
 					ArgName: "bool-arg",
 					Type:    "bool",
 					Action:  "store_true",
-					Default: declarative.Default{Value: &nilVal},
+					Default: declarative.Default{Set: true},
 				},
 			},
 		},
