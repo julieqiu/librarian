@@ -19,7 +19,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/googleapis/librarian/internal/surfer/gcloud"
+	"github.com/googleapis/librarian/internal/librarian/gcloud"
 	"github.com/urfave/cli/v3"
 )
 

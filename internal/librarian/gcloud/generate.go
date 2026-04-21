@@ -18,7 +18,7 @@ package gcloud
 import (
 	"context"
 
-	"github.com/googleapis/librarian/internal/surfer/gcloud/provider"
+	"github.com/googleapis/librarian/internal/librarian/gcloud/provider"
 )
 
 // GenerateConfig contains parameters for generating gcloud commands.

@@ -21,7 +21,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/googleapis/librarian/internal/sidekick/api"
-	"github.com/googleapis/librarian/internal/surfer/gcloud/provider"
+	"github.com/googleapis/librarian/internal/librarian/gcloud/provider"
 )
 
 func TestOutputFormat(t *testing.T) {
