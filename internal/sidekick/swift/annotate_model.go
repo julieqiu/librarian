@@ -66,7 +66,9 @@ func (codec *codec) annotateModel() error {
 		}
 	}
 	for _, service := range codec.Model.Services {
-		codec.annotateService(service, annotations)
+		if err := codec.annotateService(service, annotations); err != nil {
+			return err
+		}
 	}
 	var imports []string
 	for _, p := range codec.Dependencies {
