@@ -33,6 +33,9 @@ func (codec *codec) annotateMessage(message *api.Message, model *modelAnnotation
 	}
 
 	message.Codec = annotations
+	for _, oneof := range message.OneOfs {
+		codec.annotateOneOf(oneof)
+	}
 	for _, field := range message.Fields {
 		if err := codec.annotateField(field); err != nil {
 			return err
