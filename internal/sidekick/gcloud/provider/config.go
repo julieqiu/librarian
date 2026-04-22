@@ -263,10 +263,10 @@ func FindFieldHelpTextRule(c *Config, fieldID string) *HelpTextRule {
 
 // APIVersion extracts the API version from the configuration.
 func APIVersion(c *Config) string {
-	if len(c.APIs) > 0 {
-		return c.APIs[0].APIVersion
+	if c == nil || len(c.APIs) == 0 {
+		return ""
 	}
-	return ""
+	return c.APIs[0].APIVersion
 }
 
 // ShouldGenerateOperations returns true if operations commands should be generated.

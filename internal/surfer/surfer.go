@@ -19,7 +19,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/googleapis/librarian/internal/librarian/gcloud"
+	sidekickgcloud "github.com/googleapis/librarian/internal/sidekick/gcloud"
+	"github.com/googleapis/librarian/internal/sidekick/gcloud/provider"
 	"github.com/urfave/cli/v3"
 )
 
@@ -78,28 +79,25 @@ service config yaml, and gcloud.yaml.`,
 				Usage: "base python module path for surface command groups",
 			},
 		},
-		Action: func(ctx context.Context, cmd *cli.Command) error {
+		Action: func(_ context.Context, cmd *cli.Command) error {
 			if cmd.Args().Len() == 0 {
 				return fmt.Errorf("path to gcloud.yaml is required")
 			}
-			config := cmd.Args().First()
-			googleapis := cmd.String("googleapis")
-			out := cmd.String("out")
-			includeList := cmd.String("proto-files-include-list")
-			serviceConfig := cmd.String("service-config")
-			descriptorFiles := cmd.String("descriptor-files")
-			descriptorFilesToGenerate := cmd.String("descriptor-files-to-generate")
-			baseModule := cmd.String("base-module")
-			return gcloud.Generate(gcloud.GenerateConfig{
-				GcloudConfig:              config,
-				ServiceConfig:             serviceConfig,
-				IncludeList:               includeList,
-				Googleapis:                googleapis,
-				DescriptorFilesToGenerate: descriptorFilesToGenerate,
-				DescriptorFiles:           descriptorFiles,
-				Output:                    out,
-				BaseModule:                baseModule,
-			})
+			overrides, err := provider.ReadGcloudConfig(cmd.Args().First())
+			if err != nil {
+				return err
+			}
+			model, err := provider.CreateAPIModel(
+				cmd.String("googleapis"),
+				cmd.String("proto-files-include-list"),
+				cmd.String("service-config"),
+				cmd.String("descriptor-files"),
+				cmd.String("descriptor-files-to-generate"),
+			)
+			if err != nil {
+				return err
+			}
+			return sidekickgcloud.Generate(model, overrides, cmd.String("out"), cmd.String("base-module"))
 		},
 	}
 }

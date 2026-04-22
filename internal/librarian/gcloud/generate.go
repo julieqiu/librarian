@@ -16,31 +16,29 @@
 package gcloud
 
 import (
+	"context"
+	"fmt"
+
+	"github.com/googleapis/librarian/internal/config"
+	"github.com/googleapis/librarian/internal/serviceconfig"
 	sidekickgcloud "github.com/googleapis/librarian/internal/sidekick/gcloud"
 	"github.com/googleapis/librarian/internal/sidekick/gcloud/provider"
+	"github.com/googleapis/librarian/internal/sources"
 )
 
-// GenerateConfig contains parameters for generating gcloud commands.
-type GenerateConfig struct {
-	GcloudConfig              string
-	ServiceConfig             string
-	IncludeList               string
-	Googleapis                string
-	DescriptorFilesToGenerate string
-	DescriptorFiles           string
-	Output                    string
-	BaseModule                string
-}
-
-// Generate generates gcloud commands for a service.
-func Generate(cfg GenerateConfig) error {
-	overrides, err := provider.ReadGcloudConfig(cfg.GcloudConfig)
+// Generate generates gcloud commands for the given library.
+func Generate(_ context.Context, library *config.Library, src *sources.Sources) error {
+	if len(library.APIs) != 1 {
+		return fmt.Errorf("the gcloud generator only supports a single api per library")
+	}
+	g := library.Gcloud
+	svcConfig, err := serviceconfig.Find(src.Googleapis, library.APIs[0].Path, config.LanguageGcloud)
 	if err != nil {
 		return err
 	}
-	model, err := provider.CreateAPIModel(cfg.Googleapis, cfg.IncludeList, cfg.ServiceConfig, cfg.DescriptorFiles, cfg.DescriptorFilesToGenerate)
+	model, err := provider.CreateAPIModel(src.Googleapis, g.IncludeList, svcConfig.ServiceConfig, g.DescriptorFiles, g.DescriptorFilesToGenerate)
 	if err != nil {
 		return err
 	}
-	return sidekickgcloud.Generate(model, overrides, cfg.Output, cfg.BaseModule)
+	return sidekickgcloud.Generate(model, nil, library.Output, g.BaseModule)
 }

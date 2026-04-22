@@ -16,24 +16,27 @@ package gcloud
 
 import (
 	"testing"
+
+	"github.com/googleapis/librarian/internal/config"
+	"github.com/googleapis/librarian/internal/sources"
 )
 
-func TestGenerate_InvalidConfig(t *testing.T) {
-	err := Generate(GenerateConfig{
-		GcloudConfig: "nonexistent_config.yaml",
-	})
-	if err == nil {
-		t.Error("Generate() error = nil, want error for nonexistent config")
+func TestGenerate_RequiresSingleAPI(t *testing.T) {
+	library := &config.Library{
+		Gcloud: &config.GcloudCommand{},
+	}
+	if err := Generate(t.Context(), library, &sources.Sources{}); err == nil {
+		t.Error("Generate() error = nil, want error for zero APIs")
 	}
 }
 
 func TestGenerate_InvalidModel(t *testing.T) {
-	// GcloudConfig is empty, so it might pass (or not, depending on implementation),
-	// but Googleapis being nonexistent should definitely fail during model creation.
-	err := Generate(GenerateConfig{
-		Googleapis: "nonexistent_googleapis_dir",
-	})
-	if err == nil {
+	library := &config.Library{
+		APIs:   []*config.API{{Path: "google/cloud/parallelstore/v1"}},
+		Gcloud: &config.GcloudCommand{},
+	}
+	src := &sources.Sources{Googleapis: "nonexistent_googleapis_dir"}
+	if err := Generate(t.Context(), library, src); err == nil {
 		t.Error("Generate() error = nil, want error for nonexistent googleapis dir")
 	}
 }
