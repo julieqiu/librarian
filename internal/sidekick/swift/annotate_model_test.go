@@ -82,7 +82,6 @@ func TestModelAnnotations_WithExternalDependencies(t *testing.T) {
 			Name:               "GoogleCloudGax",
 			RequiredByServices: true,
 		},
-		Required: true,
 	}
 	codec.ApiPackages = map[string]*Dependency{
 		dep1.ApiPackage: dep1,
@@ -101,7 +100,6 @@ func TestModelAnnotations_WithExternalDependencies(t *testing.T) {
 
 	wantDependsOn := map[string]*Dependency{
 		dep1.Name: dep1,
-		dep3.Name: dep3,
 	}
 
 	if diff := cmp.Diff(wantDependsOn, ann.DependsOn); diff != "" {
