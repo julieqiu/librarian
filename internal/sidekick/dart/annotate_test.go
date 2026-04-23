@@ -265,6 +265,43 @@ func TestAnnotateModel_Options_MissingRequired(t *testing.T) {
 	}
 }
 
+func TestAnnotateModel_HasMethods(t *testing.T) {
+	method := sample.MethodListSecretVersions()
+	serviceWithMethods := &api.Service{
+		Name:    "ServiceWithMethods",
+		Methods: []*api.Method{method},
+		Package: sample.Package,
+	}
+	serviceWithoutMethods := &api.Service{
+		Name:    "ServiceWithoutMethods",
+		Methods: []*api.Method{},
+		Package: sample.Package,
+	}
+	model := api.NewTestAPI(
+		[]*api.Message{sample.ListSecretVersionsRequest(), sample.ListSecretVersionsResponse(),
+			sample.Secret(), sample.SecretVersion(), sample.Replication(), sample.Automatic(),
+			sample.CustomerManagedEncryption()},
+		[]*api.Enum{sample.EnumState()},
+		[]*api.Service{serviceWithMethods, serviceWithoutMethods},
+	)
+	api.Validate(model)
+	annotate := newAnnotateModel(model)
+	err := annotate.annotateModel(requiredConfig)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	codec1 := serviceWithMethods.Codec.(*serviceAnnotations)
+	if !codec1.HasMethods {
+		t.Errorf("Expected HasMethods to be true for ServiceWithMethods")
+	}
+
+	codec2 := serviceWithoutMethods.Codec.(*serviceAnnotations)
+	if codec2.HasMethods {
+		t.Errorf("Expected HasMethods to be false for ServiceWithoutMethods")
+	}
+}
+
 func TestAnnotateMethod(t *testing.T) {
 	method := sample.MethodListSecretVersions()
 	service := &api.Service{
@@ -307,6 +344,44 @@ func TestAnnotateMethod(t *testing.T) {
 	want = "ListSecretVersionsResponse"
 	if got != want {
 		t.Errorf("mismatched type, got=%q, want=%q", got, want)
+	}
+}
+
+func TestAnnotateMethod_IsLast(t *testing.T) {
+	notLastMethod := sample.MethodListSecretVersions()
+	lastMethod := sample.MethodListSecretVersions()
+	lastMethod.Name = "ListSecretVersions2"
+	lastMethod.ID = notLastMethod.ID + "2"
+
+	service := &api.Service{
+		Name:          sample.ServiceName,
+		Documentation: sample.APIDescription,
+		DefaultHost:   sample.DefaultHost,
+		Methods:       []*api.Method{notLastMethod, lastMethod},
+		Package:       sample.Package,
+	}
+	model := api.NewTestAPI(
+		[]*api.Message{sample.ListSecretVersionsRequest(), sample.ListSecretVersionsResponse(),
+			sample.Secret(), sample.SecretVersion(), sample.Replication(), sample.Automatic(),
+			sample.CustomerManagedEncryption()},
+		[]*api.Enum{sample.EnumState()},
+		[]*api.Service{service},
+	)
+	api.Validate(model)
+	annotate := newAnnotateModel(model)
+	err := annotate.annotateModel(requiredConfig)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	codec1 := notLastMethod.Codec.(*methodAnnotation)
+	if codec1.IsLast {
+		t.Errorf("Expected IsLast to be false for method1")
+	}
+
+	codec2 := lastMethod.Codec.(*methodAnnotation)
+	if !codec2.IsLast {
+		t.Errorf("Expected IsLast to be true for method2")
 	}
 }
 
