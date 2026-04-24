@@ -29,21 +29,21 @@ func TestFormatPath(t *testing.T) {
 	}{
 		{
 			name: "literals only",
-			template: api.NewPathTemplate().
+			template: (&api.PathTemplate{}).
 				WithLiteral("v1").
 				WithLiteral("operations"),
 			want: "/v1/operations",
 		},
 		{
 			name: "with variable",
-			template: api.NewPathTemplate().
+			template: (&api.PathTemplate{}).
 				WithLiteral("v1").
 				WithVariableNamed("name"),
 			want: "/v1/\\(request.name)",
 		},
 		{
 			name: "nested variable",
-			template: api.NewPathTemplate().
+			template: (&api.PathTemplate{}).
 				WithLiteral("v1").
 				WithVariableNamed("project", "name"),
 			want: "/v1/\\(request.project.name)",
