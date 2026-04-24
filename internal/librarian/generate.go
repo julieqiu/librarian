@@ -22,6 +22,7 @@ import (
 
 	"github.com/googleapis/librarian/internal/config"
 	"github.com/googleapis/librarian/internal/librarian/dart"
+	"github.com/googleapis/librarian/internal/librarian/gcloud"
 	"github.com/googleapis/librarian/internal/librarian/golang"
 	"github.com/googleapis/librarian/internal/librarian/java"
 	"github.com/googleapis/librarian/internal/librarian/nodejs"
@@ -130,6 +131,8 @@ func cleanLibraries(language string, libraries []*config.Library) error {
 			err = checkAndClean(library.Output, library.Keep)
 		case config.LanguageFake:
 			err = fakeClean(library)
+		case config.LanguageGcloud:
+			err = checkAndClean(library.Output, library.Keep)
 		case config.LanguageGo:
 			err = golang.Clean(library)
 		case config.LanguageJava:
@@ -185,6 +188,12 @@ func generateLibraries(ctx context.Context, cfg *config.Config, libraries []*con
 			}
 		}
 		return fakePostGenerate()
+	case config.LanguageGcloud:
+		for _, library := range libraries {
+			if err := gcloud.Generate(ctx, library, src); err != nil {
+				return fmt.Errorf("generate library %q (%s): %w", library.Name, cfg.Language, err)
+			}
+		}
 	case config.LanguageGo:
 		g, gctx := errgroup.WithContext(ctx)
 		for _, library := range libraries {
