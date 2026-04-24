@@ -12,28 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package gcloud
+package surfer
 
 import (
 	"testing"
 )
 
 func TestGenerate_InvalidConfig(t *testing.T) {
-	err := Generate(GenerateConfig{
+	err := generate(generateConfig{
 		GcloudConfig: "nonexistent_config.yaml",
 	})
 	if err == nil {
-		t.Error("Generate() error = nil, want error for nonexistent config")
+		t.Error("generate() error = nil, want error for nonexistent config")
 	}
 }
 
 func TestGenerate_InvalidModel(t *testing.T) {
 	// GcloudConfig is empty, so it might pass (or not, depending on implementation),
 	// but Googleapis being nonexistent should definitely fail during model creation.
-	err := Generate(GenerateConfig{
+	err := generate(generateConfig{
 		Googleapis: "nonexistent_googleapis_dir",
 	})
 	if err == nil {
-		t.Error("Generate() error = nil, want error for nonexistent googleapis dir")
+		t.Error("generate() error = nil, want error for nonexistent googleapis dir")
 	}
 }
