@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package gcloud provides a simple API for generating gcloud commands.
+// Package gcloud generates gcloud command surfaces from API protos.
 package gcloud
 
 import (
@@ -29,14 +29,12 @@ import (
 	"github.com/googleapis/librarian/internal/sources"
 )
 
-// gcloudBaseModule is the Python module path for the generated surfaces. It is
-// hardcoded because gcloud.yaml (which could otherwise carry this value) is
-// intentionally omitted from the librarian path.
+// gcloudBaseModule is the Python package the generated surfaces live under
+// in the gcloud source tree.
 const gcloudBaseModule = "googlecloudsdk"
 
-// Generate generates gcloud commands for every API in library. It is the
-// librarian dispatch entry point and infers overrides from the parsed API
-// model rather than reading a gcloud.yaml file.
+// Generate writes gcloud command surfaces for each API in library into
+// library.Output.
 func Generate(ctx context.Context, library *config.Library, src *sources.Sources) error {
 	for _, a := range library.APIs {
 		if err := generateAPI(a, library, src); err != nil {
@@ -48,7 +46,6 @@ func Generate(ctx context.Context, library *config.Library, src *sources.Sources
 
 func generateAPI(a *config.API, library *config.Library, src *sources.Sources) error {
 	apiDir := filepath.Join(src.Googleapis, a.Path)
-
 	includeList, err := collectProtoIncludeList(src.Googleapis, apiDir)
 	if err != nil {
 		return err
@@ -68,9 +65,8 @@ func generateAPI(a *config.API, library *config.Library, src *sources.Sources) e
 	return sidekickgcloud.Generate(model, overrides, library.Output, gcloudBaseModule)
 }
 
-// collectProtoIncludeList returns a comma-separated list of .proto files
-// under apiDir, each expressed as a path relative to googleapisDir (the
-// format CreateAPIModel expects).
+// collectProtoIncludeList returns the .proto files in apiDir as
+// googleapis-relative paths joined by commas.
 func collectProtoIncludeList(googleapisDir, apiDir string) (string, error) {
 	entries, err := os.ReadDir(apiDir)
 	if err != nil {
@@ -98,9 +94,8 @@ func collectProtoIncludeList(googleapisDir, apiDir string) (string, error) {
 	return strings.Join(files, ","), nil
 }
 
-// findServiceConfig returns the absolute path of the single *.yaml service
-// config that lives next to the protos. It returns an error when none or
-// more than one yaml file is present.
+// findServiceConfig returns the single service config yaml in apiDir. It
+// is an error for apiDir to contain zero or more than one yaml file.
 func findServiceConfig(apiDir string) (string, error) {
 	entries, err := os.ReadDir(apiDir)
 	if err != nil {
@@ -127,9 +122,8 @@ func findServiceConfig(apiDir string) (string, error) {
 	}
 }
 
-// buildOverrides constructs an in-memory provider.Config inferred from the
-// parsed API model. ReleaseTrackGA is hardcoded because gcloud.yaml is
-// intentionally omitted from this path.
+// buildOverrides returns the generator overrides inferred from model. The
+// release track is always GA; the librarian path does not read gcloud.yaml.
 func buildOverrides(model *api.API) *provider.Config {
 	return &provider.Config{
 		ServiceName: serviceName(model),
@@ -143,8 +137,8 @@ func buildOverrides(model *api.API) *provider.Config {
 	}
 }
 
-// serviceName returns the DefaultHost of the first service in the model
-// (e.g. "parallelstore.googleapis.com"). Returns "" if no services exist.
+// serviceName returns the default host of the first service in model, or
+// "" if model has no services.
 func serviceName(model *api.API) string {
 	if len(model.Services) == 0 {
 		return ""
@@ -152,8 +146,7 @@ func serviceName(model *api.API) string {
 	return model.Services[0].DefaultHost
 }
 
-// apiVersion returns the trailing version component of the protobuf package
-// name (e.g. "google.cloud.parallelstore.v1" -> "v1").
+// apiVersion returns the last dot-separated component of the proto package name.
 func apiVersion(model *api.API) string {
 	parts := strings.Split(model.PackageName, ".")
 	if len(parts) == 0 {

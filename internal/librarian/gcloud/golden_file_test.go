@@ -15,7 +15,6 @@
 package gcloud
 
 import (
-	"context"
 	"errors"
 	"flag"
 	"io/fs"
@@ -23,7 +22,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"testing"
-	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/googleapis/librarian/internal/config"
@@ -36,7 +34,6 @@ var updateGolden = flag.Bool("update", false, "update gcloud golden files")
 
 func TestGenerate_Golden(t *testing.T) {
 	testhelper.RequireCommand(t, "protoc")
-
 	googleapisPath, err := filepath.Abs("../../testdata/googleapis")
 	if err != nil {
 		t.Fatal(err)
@@ -58,7 +55,6 @@ func TestGenerate_Golden(t *testing.T) {
 		t.Run(test, func(t *testing.T) {
 			caseDir := filepath.Join("testdata", test)
 			cfgPath := filepath.Join(caseDir, "librarian.yaml")
-
 			cfg, err := yaml.Read[config.Config](cfgPath)
 			if err != nil {
 				t.Fatal(err)
@@ -66,19 +62,14 @@ func TestGenerate_Golden(t *testing.T) {
 			if len(cfg.Libraries) != 1 {
 				t.Fatalf("expected exactly one library in %s, got %d", cfgPath, len(cfg.Libraries))
 			}
-			library := cfg.Libraries[0]
 
+			library := cfg.Libraries[0]
 			outDir := filepath.Join(t.TempDir(), "out")
 			library.Output = outDir
-
 			src := &sources.Sources{
 				Googleapis: googleapisPath,
 			}
-
-			ctx, cancel := context.WithTimeout(t.Context(), 60*time.Second)
-			defer cancel()
-
-			if err := Generate(ctx, library, src); err != nil {
+			if err := Generate(t.Context(), library, src); err != nil {
 				t.Fatal(err)
 			}
 
@@ -132,7 +123,6 @@ func compareDirectories(t *testing.T, expectedDir, gotDir string) bool {
 		}
 
 		relPath, _ := filepath.Rel(expectedDir, path)
-
 		gotPath := filepath.Join(gotDir, relPath)
 		if _, err := os.Stat(gotPath); errors.Is(err, fs.ErrNotExist) {
 			t.Errorf("%s: missing in output", relPath)
@@ -151,7 +141,10 @@ func compareDirectories(t *testing.T, expectedDir, gotDir string) bool {
 			return nil
 		}
 
-		relPath, _ := filepath.Rel(gotDir, path)
+		relPath, err := filepath.Rel(gotDir, path)
+		if err != nil {
+			return err
+		}
 
 		expectedPath := filepath.Join(expectedDir, relPath)
 		if _, err := os.Stat(expectedPath); errors.Is(err, fs.ErrNotExist) {
