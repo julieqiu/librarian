@@ -94,7 +94,7 @@ func FindDependencies(model *API, ids []string) (map[string]bool, error) {
 
 		if message := model.Message(id); message != nil {
 			for _, field := range message.Fields {
-				if field.Typez == ENUM_TYPE || field.Typez == MESSAGE_TYPE {
+				if field.Typez == TypezEnum || field.Typez == TypezMessage {
 					add(field.TypezID)
 				}
 			}
@@ -130,7 +130,7 @@ func FindDependencies(model *API, ids []string) (map[string]bool, error) {
 			// In the current definition of APIState, a message must
 			// includes all of its fields.
 			for _, field := range message.Fields {
-				if field.Typez == ENUM_TYPE || field.Typez == MESSAGE_TYPE {
+				if field.Typez == TypezEnum || field.Typez == TypezMessage {
 					add(field.TypezID)
 				}
 			}

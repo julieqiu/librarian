@@ -165,18 +165,18 @@ func TestFieldIsMap(t *testing.T) {
 		Optional: false,
 		Name:     "children",
 		ID:       ".test.ParentMessage.children",
-		Typez:    api.MESSAGE_TYPE,
+		Typez:    api.TypezMessage,
 		TypezID:  ".test.ParentMessage.SingularMapEntry",
 	}
 	field1 := &api.Field{
 		Name:  "singular",
 		ID:    ".test.ParentMessage.singular",
-		Typez: api.INT32_TYPE,
+		Typez: api.TypezInt32,
 	}
 	field2 := &api.Field{
 		Name:    "singular",
 		ID:      ".test.ParentMessage.singular",
-		Typez:   api.MESSAGE_TYPE,
+		Typez:   api.TypezMessage,
 		TypezID: "invalid",
 	}
 	parent := &api.Message{
@@ -189,13 +189,13 @@ func TestFieldIsMap(t *testing.T) {
 		Name:     "key",
 		JSONName: "key",
 		ID:       ".test.ParentMessage.SingularMapEntry.key",
-		Typez:    api.STRING_TYPE,
+		Typez:    api.TypezString,
 	}
 	value := &api.Field{
 		Name:     "value",
 		JSONName: "value",
 		ID:       ".test.ParentMessage.SingularMapEntry.value",
-		Typez:    api.MESSAGE_TYPE,
+		Typez:    api.TypezMessage,
 		TypezID:  ".test.ParentMessage",
 	}
 	map_message := &api.Message{

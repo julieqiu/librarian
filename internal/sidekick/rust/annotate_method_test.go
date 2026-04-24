@@ -194,12 +194,12 @@ func annotateMethodModel(t *testing.T) *api.API {
 		Package: "test.v1",
 		ID:      ".test.v1.Request",
 		Fields: []*api.Field{
-			{Name: "project", ID: ".test.v1.Request.project", Typez: api.STRING_TYPE},
-			{Name: "zone", ID: ".test.v1.Request.zone", Typez: api.STRING_TYPE},
-			{Name: "type", ID: ".test.v1.Request.type", Typez: api.STRING_TYPE},
-			{Name: "name", ID: ".test.v1.Request.name", Typez: api.STRING_TYPE},
-			{Name: "location", ID: ".test.v1.Request.location", Typez: api.STRING_TYPE},
-			{Name: "cluster", ID: ".test.v1.Request.cluster", Typez: api.STRING_TYPE},
+			{Name: "project", ID: ".test.v1.Request.project", Typez: api.TypezString},
+			{Name: "zone", ID: ".test.v1.Request.zone", Typez: api.TypezString},
+			{Name: "type", ID: ".test.v1.Request.type", Typez: api.TypezString},
+			{Name: "name", ID: ".test.v1.Request.name", Typez: api.TypezString},
+			{Name: "location", ID: ".test.v1.Request.location", Typez: api.TypezString},
+			{Name: "cluster", ID: ".test.v1.Request.cluster", Typez: api.TypezString},
 		},
 	}
 	response := &api.Message{

@@ -313,7 +313,7 @@ func makeRequestMessage(a *api.API, parent *api.Message, operation *v3.Operation
 			Name:          name,
 			JSONName:      name,
 			Documentation: "The request body.",
-			Typez:         api.MESSAGE_TYPE,
+			Typez:         api.TypezMessage,
 			TypezID:       bid,
 			Optional:      true,
 		}
@@ -338,7 +338,7 @@ func openapiFieldIsOptional(p *v3.Parameter) bool {
 }
 
 func openapiIsAutoPopulated(typez api.Typez, schema *base.Schema, p *v3.Parameter) bool {
-	return typez == api.STRING_TYPE && schema.Format == "uuid" && openapiFieldIsOptional(p)
+	return typez == api.TypezString && schema.Format == "uuid" && openapiFieldIsOptional(p)
 }
 
 func makeResponseMessage(api *api.API, operation *v3.Operation, packageName string) (*api.Message, error) {
@@ -438,7 +438,7 @@ func makeScalarField(messageName, name string, schema *base.Schema, optional boo
 		Typez:         typez,
 		TypezID:       typezID,
 		Deprecated:    field.Deprecated != nil && *field.Deprecated,
-		Optional:      optional || (typez == api.MESSAGE_TYPE),
+		Optional:      optional || (typez == api.TypezMessage),
 	}, nil
 }
 
@@ -461,7 +461,7 @@ func makeObjectField(model *api.API, packageName, messageName, name string, fiel
 				JSONName:      name, // OpenAPI field names are always camelCase
 				Documentation: field.Description,
 				Deprecated:    field.Deprecated != nil && *field.Deprecated,
-				Typez:         api.MESSAGE_TYPE,
+				Typez:         api.TypezMessage,
 				TypezID:       ".google.protobuf.Any",
 				Optional:      true,
 			}, nil
@@ -475,7 +475,7 @@ func makeObjectField(model *api.API, packageName, messageName, name string, fiel
 			JSONName:      name, // OpenAPI field names are always camelCase
 			Documentation: field.Description,
 			Deprecated:    field.Deprecated != nil && *field.Deprecated,
-			Typez:         api.MESSAGE_TYPE,
+			Typez:         api.TypezMessage,
 			TypezID:       message.ID,
 			Optional:      false,
 			Repeated:      false,
@@ -490,7 +490,7 @@ func makeObjectField(model *api.API, packageName, messageName, name string, fiel
 			JSONName:      name, // OpenAPI field names are always camelCase
 			Documentation: field.Description,
 			Deprecated:    field.Deprecated != nil && *field.Deprecated,
-			Typez:         api.MESSAGE_TYPE,
+			Typez:         api.TypezMessage,
 			TypezID:       typezID,
 			Optional:      true,
 		}, nil
@@ -522,7 +522,7 @@ func makeArrayField(model *api.API, packageName, messageName, name string, field
 				JSONName:      name, // OpenAPI field names are always camelCase
 				Documentation: field.Description,
 				Deprecated:    field.Deprecated != nil && *field.Deprecated,
-				Typez:         api.MESSAGE_TYPE,
+				Typez:         api.TypezMessage,
 				TypezID:       typezID,
 			}
 			result = new
@@ -549,7 +549,7 @@ func makeObjectFieldAllOf(packageName, messageName, name string, field *base.Sch
 			JSONName:      name, // OpenAPI field names are always camelCase
 			Documentation: field.Description,
 			Deprecated:    field.Deprecated != nil && *field.Deprecated,
-			Typez:         api.MESSAGE_TYPE,
+			Typez:         api.TypezMessage,
 			TypezID:       typezID,
 			Optional:      true,
 		}, nil
@@ -576,7 +576,7 @@ func makeMapMessage(model *api.API, messageName, name string, schema *base.Schem
 		key := &api.Field{
 			Name:    "key",
 			ID:      id + ".key",
-			Typez:   api.STRING_TYPE,
+			Typez:   api.TypezString,
 			TypezID: "string",
 		}
 		placeholder := &api.Message{
@@ -598,7 +598,7 @@ func scalarType(messageName, name string, schema *base.Schema) (api.Typez, strin
 	for _, type_name := range schema.Type {
 		switch type_name {
 		case "boolean":
-			return api.BOOL_TYPE, "bool", nil
+			return api.TypezBool, "bool", nil
 		case "integer":
 			return scalarTypeForIntegerFormats(messageName, name, schema)
 		case "number":
@@ -614,14 +614,14 @@ func scalarTypeForIntegerFormats(messageName, name string, schema *base.Schema) 
 	switch schema.Format {
 	case "int32":
 		if schema.Minimum != nil && *schema.Minimum == 0 {
-			return api.UINT32_TYPE, "uint32", nil
+			return api.TypezUint32, "uint32", nil
 		}
-		return api.INT32_TYPE, "int32", nil
+		return api.TypezInt32, "int32", nil
 	case "int64":
 		if schema.Minimum != nil && *schema.Minimum == 0 {
-			return api.UINT64_TYPE, "uint64", nil
+			return api.TypezUint64, "uint64", nil
 		}
-		return api.INT64_TYPE, "int64", nil
+		return api.TypezInt64, "int64", nil
 	}
 	return 0, "", fmt.Errorf("unknown integer format (%s) for field %s.%s", schema.Format, messageName, name)
 }
@@ -629,9 +629,9 @@ func scalarTypeForIntegerFormats(messageName, name string, schema *base.Schema) 
 func scalarTypeForNumberFormats(messageName, name string, schema *base.Schema) (api.Typez, string, error) {
 	switch schema.Format {
 	case "float":
-		return api.FLOAT_TYPE, "float", nil
+		return api.TypezFloat, "float", nil
 	case "double":
-		return api.DOUBLE_TYPE, "double", nil
+		return api.TypezDouble, "double", nil
 	}
 	return 0, "", fmt.Errorf("unknown number format (%s) for field %s.%s", schema.Format, messageName, name)
 }
@@ -639,27 +639,27 @@ func scalarTypeForNumberFormats(messageName, name string, schema *base.Schema) (
 func scalarTypeForStringFormats(messageName, name string, schema *base.Schema) (api.Typez, string, error) {
 	switch schema.Format {
 	case "":
-		return api.STRING_TYPE, "string", nil
+		return api.TypezString, "string", nil
 	case "uuid":
-		return api.STRING_TYPE, "string", nil
+		return api.TypezString, "string", nil
 	case "byte":
-		return api.BYTES_TYPE, "bytes", nil
+		return api.TypezBytes, "bytes", nil
 	case "int32":
 		if schema.Minimum != nil && *schema.Minimum == 0 {
-			return api.UINT32_TYPE, "uint32", nil
+			return api.TypezUint32, "uint32", nil
 		}
-		return api.INT32_TYPE, "int32", nil
+		return api.TypezInt32, "int32", nil
 	case "int64":
 		if schema.Minimum != nil && *schema.Minimum == 0 {
-			return api.UINT64_TYPE, "uint64", nil
+			return api.TypezUint64, "uint64", nil
 		}
-		return api.INT64_TYPE, "int64", nil
+		return api.TypezInt64, "int64", nil
 	case "google-duration":
-		return api.MESSAGE_TYPE, ".google.protobuf.Duration", nil
+		return api.TypezMessage, ".google.protobuf.Duration", nil
 	case "date-time":
-		return api.MESSAGE_TYPE, ".google.protobuf.Timestamp", nil
+		return api.TypezMessage, ".google.protobuf.Timestamp", nil
 	case "google-fieldmask":
-		return api.MESSAGE_TYPE, ".google.protobuf.FieldMask", nil
+		return api.TypezMessage, ".google.protobuf.FieldMask", nil
 	}
 	return 0, "", fmt.Errorf("unknown string format (%s) for field %s.%s", schema.Format, messageName, name)
 }

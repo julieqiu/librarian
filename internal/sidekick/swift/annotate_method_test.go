@@ -22,7 +22,7 @@ import (
 )
 
 func TestAnnotateMethod(t *testing.T) {
-	keyField := &api.Field{Name: "key", ID: ".test.Request.key", Typez: api.STRING_TYPE}
+	keyField := &api.Field{Name: "key", ID: ".test.Request.key", Typez: api.TypezString}
 	inputType := &api.Message{
 		Name:   "Request",
 		ID:     ".test.Request",
@@ -32,7 +32,7 @@ func TestAnnotateMethod(t *testing.T) {
 		Name: "Response",
 		ID:   ".test.Response",
 		Fields: []*api.Field{
-			{Name: "value", ID: ".test.Request.value", Typez: api.STRING_TYPE},
+			{Name: "value", ID: ".test.Request.value", Typez: api.TypezString},
 		},
 	}
 	for _, test := range []struct {
@@ -171,14 +171,14 @@ func TestAnnotateMethod_EscapedName(t *testing.T) {
 				Name: "Request",
 				ID:   ".test.Request",
 				Fields: []*api.Field{
-					{Name: "key", ID: ".test.Request.key", Typez: api.STRING_TYPE},
+					{Name: "key", ID: ".test.Request.key", Typez: api.TypezString},
 				},
 			}
 			outputType := &api.Message{
 				Name: "Response",
 				ID:   ".test.Response",
 				Fields: []*api.Field{
-					{Name: "value", ID: ".test.Request.value", Typez: api.STRING_TYPE},
+					{Name: "value", ID: ".test.Request.value", Typez: api.TypezString},
 				},
 			}
 			method := &api.Method{

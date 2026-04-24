@@ -120,7 +120,7 @@ func TestDisco_ParsePagination(t *testing.T) {
 		Name:     "pageToken",
 		JSONName: "pageToken",
 		ID:       "..zones.listRequest.pageToken",
-		Typez:    api.STRING_TYPE,
+		Typez:    api.TypezString,
 		TypezID:  "string",
 		Optional: true,
 	}
@@ -147,7 +147,7 @@ func TestDisco_ParsePaginationAggregate(t *testing.T) {
 		Name:     "pageToken",
 		JSONName: "pageToken",
 		ID:       "..machineTypes.aggregatedListRequest.pageToken",
-		Typez:    api.STRING_TYPE,
+		Typez:    api.TypezString,
 		TypezID:  "string",
 		Optional: true,
 	}

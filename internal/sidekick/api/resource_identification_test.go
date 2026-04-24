@@ -62,7 +62,7 @@ func TestIdentifyTargetResources(t *testing.T) {
 			fields: []*Field{
 				{
 					Name:              "project",
-					Typez:             STRING_TYPE,
+					Typez:             TypezString,
 					ResourceReference: &ResourceReference{Type: "cloudresourcemanager.googleapis.com/Project"},
 				},
 			},
@@ -80,12 +80,12 @@ func TestIdentifyTargetResources(t *testing.T) {
 			fields: []*Field{
 				{
 					Name:              "project",
-					Typez:             STRING_TYPE,
+					Typez:             TypezString,
 					ResourceReference: &ResourceReference{Type: "cloudresourcemanager.googleapis.com/Project"},
 				},
 				{
 					Name:              "location",
-					Typez:             STRING_TYPE, // Often locations are string IDs
+					Typez:             TypezString, // Often locations are string IDs
 					ResourceReference: &ResourceReference{Type: "locations.googleapis.com/Location"},
 				},
 			},
@@ -102,12 +102,12 @@ func TestIdentifyTargetResources(t *testing.T) {
 			fields: []*Field{
 				{
 					Name:  "parent",
-					Typez: MESSAGE_TYPE,
+					Typez: TypezMessage,
 					MessageType: &Message{
 						Fields: []*Field{
 							{
 								Name:              "project",
-								Typez:             STRING_TYPE,
+								Typez:             TypezString,
 								ResourceReference: &ResourceReference{Type: "cloudresourcemanager.googleapis.com/Project"},
 							},
 						},
@@ -128,7 +128,7 @@ func TestIdentifyTargetResources(t *testing.T) {
 			fields: []*Field{
 				{
 					Name:              "name",
-					Typez:             STRING_TYPE,
+					Typez:             TypezString,
 					ResourceReference: &ResourceReference{Type: "example.googleapis.com/Resource"},
 				},
 			},
@@ -147,7 +147,7 @@ func TestIdentifyTargetResources(t *testing.T) {
 			fields: []*Field{
 				{
 					Name:              "name",
-					Typez:             STRING_TYPE,
+					Typez:             TypezString,
 					ResourceReference: &ResourceReference{Type: "apikeys.googleapis.com/Key"},
 				},
 			},
@@ -182,7 +182,7 @@ func TestIdentifyTargetResources_NoMatch(t *testing.T) {
 			path: NewPathTemplate().
 				WithLiteral("projects").WithVariableNamed("project"),
 			fields: []*Field{
-				{Name: "project", Typez: STRING_TYPE}, // No ResourceReference
+				{Name: "project", Typez: TypezString}, // No ResourceReference
 			},
 		},
 		{
@@ -194,12 +194,12 @@ func TestIdentifyTargetResources_NoMatch(t *testing.T) {
 			fields: []*Field{
 				{
 					Name:              "project",
-					Typez:             STRING_TYPE,
+					Typez:             TypezString,
 					ResourceReference: &ResourceReference{Type: "cloudresourcemanager.googleapis.com/Project"},
 				},
 				{
 					Name:  "glossary",
-					Typez: STRING_TYPE,
+					Typez: TypezString,
 					// No ResourceReference on the second variable
 				},
 			},
@@ -235,8 +235,8 @@ func TestIdentifyTargetResources_Heuristic(t *testing.T) {
 				WithLiteral("projects").WithVariableNamed("project").
 				WithLiteral("locations").WithVariableNamed("location"),
 			fields: []*Field{
-				{Name: "project", Typez: STRING_TYPE},
-				{Name: "location", Typez: STRING_TYPE},
+				{Name: "project", Typez: TypezString},
+				{Name: "location", Typez: TypezString},
 			},
 			want: &TargetResource{
 				FieldPaths: [][]string{{"project"}, {"location"}},
@@ -251,9 +251,9 @@ func TestIdentifyTargetResources_Heuristic(t *testing.T) {
 				WithLiteral("zones").WithVariableNamed("zone").
 				WithLiteral("instances").WithVariableNamed("instance"),
 			fields: []*Field{
-				{Name: "project", Typez: STRING_TYPE},
-				{Name: "zone", Typez: STRING_TYPE},
-				{Name: "instance", Typez: STRING_TYPE},
+				{Name: "project", Typez: TypezString},
+				{Name: "zone", Typez: TypezString},
+				{Name: "instance", Typez: TypezString},
 			},
 			getPaths: []*PathTemplate{
 				NewPathTemplate().
@@ -274,8 +274,8 @@ func TestIdentifyTargetResources_Heuristic(t *testing.T) {
 				WithLiteral("global").
 				WithLiteral("backendServices").WithVariableNamed("backend_service"),
 			fields: []*Field{
-				{Name: "project", Typez: STRING_TYPE},
-				{Name: "backend_service", Typez: STRING_TYPE},
+				{Name: "project", Typez: TypezString},
+				{Name: "backend_service", Typez: TypezString},
 			},
 			getPaths: []*PathTemplate{
 				NewPathTemplate().
@@ -298,7 +298,7 @@ func TestIdentifyTargetResources_Heuristic(t *testing.T) {
 				WithLiteral("global").
 				WithLiteral("foos").WithVariableNamed("foo"),
 			fields: []*Field{
-				{Name: "foo", Typez: STRING_TYPE},
+				{Name: "foo", Typez: TypezString},
 			},
 			getPaths: []*PathTemplate{
 				NewPathTemplate().
@@ -320,8 +320,8 @@ func TestIdentifyTargetResources_Heuristic(t *testing.T) {
 				WithLiteral("v1").WithVariableNamed("resource").
 				WithLiteral("children").WithVariableNamed("child"),
 			fields: []*Field{
-				{Name: "resource", Typez: STRING_TYPE},
-				{Name: "child", Typez: STRING_TYPE},
+				{Name: "resource", Typez: TypezString},
+				{Name: "child", Typez: TypezString},
 			},
 			getPaths: []*PathTemplate{
 				NewPathTemplate().
@@ -341,8 +341,8 @@ func TestIdentifyTargetResources_Heuristic(t *testing.T) {
 				WithLiteral("projects").WithVariableNamed("project").
 				WithLiteral("locations").WithVariableNamed("location"),
 			fields: []*Field{
-				{Name: "project", Typez: STRING_TYPE},
-				{Name: "location", Typez: STRING_TYPE},
+				{Name: "project", Typez: TypezString},
+				{Name: "location", Typez: TypezString},
 			},
 			want: &TargetResource{
 				FieldPaths: [][]string{{"project"}, {"location"}},
@@ -358,10 +358,10 @@ func TestIdentifyTargetResources_Heuristic(t *testing.T) {
 				WithLiteral("instances").WithVariableNamed("instance").
 				WithLiteral("start").WithVariableNamed("action_id"), // "start" is not a collection
 			fields: []*Field{
-				{Name: "project", Typez: STRING_TYPE},
-				{Name: "zone", Typez: STRING_TYPE},
-				{Name: "instance", Typez: STRING_TYPE},
-				{Name: "action_id", Typez: STRING_TYPE},
+				{Name: "project", Typez: TypezString},
+				{Name: "zone", Typez: TypezString},
+				{Name: "instance", Typez: TypezString},
+				{Name: "action_id", Typez: TypezString},
 			},
 			getPaths: []*PathTemplate{
 				NewPathTemplate().
@@ -382,9 +382,9 @@ func TestIdentifyTargetResources_Heuristic(t *testing.T) {
 				WithLiteral("unknown").WithVariableNamed("other").
 				WithLiteral("instances").WithVariableNamed("instance"),
 			fields: []*Field{
-				{Name: "project", Typez: STRING_TYPE},
-				{Name: "other", Typez: STRING_TYPE},
-				{Name: "instance", Typez: STRING_TYPE},
+				{Name: "project", Typez: TypezString},
+				{Name: "other", Typez: TypezString},
+				{Name: "instance", Typez: TypezString},
 			},
 			getPaths: []*PathTemplate{
 				NewPathTemplate().
@@ -411,7 +411,7 @@ func TestIdentifyTargetResources_Heuristic(t *testing.T) {
 			path: NewPathTemplate().
 				WithLiteral("metadata").WithVariableNamed("data"), // does not match fallback
 			fields: []*Field{
-				{Name: "data", Typez: STRING_TYPE},
+				{Name: "data", Typez: TypezString},
 			},
 			want: nil,
 		},
@@ -423,8 +423,8 @@ func TestIdentifyTargetResources_Heuristic(t *testing.T) {
 				WithLiteral("global").
 				WithLiteral("crossSiteNetworks").WithVariableNamed("cross_site_network"),
 			fields: []*Field{
-				{Name: "project", Typez: STRING_TYPE},
-				{Name: "cross_site_network", Typez: STRING_TYPE},
+				{Name: "project", Typez: TypezString},
+				{Name: "cross_site_network", Typez: TypezString},
 			},
 			getPaths: []*PathTemplate{
 				NewPathTemplate().
@@ -445,8 +445,8 @@ func TestIdentifyTargetResources_Heuristic(t *testing.T) {
 				WithLiteral("global").
 				WithLiteral("crossSiteNetworks").WithVariableNamed("cross_site_network"),
 			fields: []*Field{
-				{Name: "project", Typez: STRING_TYPE},
-				{Name: "cross_site_network", Typez: STRING_TYPE},
+				{Name: "project", Typez: TypezString},
+				{Name: "cross_site_network", Typez: TypezString},
 			},
 			getPaths: []*PathTemplate{
 				NewPathTemplate().
@@ -465,7 +465,7 @@ func TestIdentifyTargetResources_Heuristic(t *testing.T) {
 				WithLiteral("global").
 				WithLiteral("firewallPolicies").WithVariableNamed("resource"),
 			fields: []*Field{
-				{Name: "resource", Typez: STRING_TYPE},
+				{Name: "resource", Typez: TypezString},
 			},
 			getPaths: []*PathTemplate{
 				NewPathTemplate().
@@ -514,8 +514,8 @@ func TestIdentifyTargetResources_HeuristicsDisabled(t *testing.T) {
 		WithLiteral("projects").WithVariableNamed("project").
 		WithLiteral("locations").WithVariableNamed("location")
 	fields := []*Field{
-		{Name: "project", Typez: STRING_TYPE},
-		{Name: "location", Typez: STRING_TYPE},
+		{Name: "project", Typez: TypezString},
+		{Name: "location", Typez: TypezString},
 	}
 
 	model, binding := setupTestModel(serviceID, path, fields)

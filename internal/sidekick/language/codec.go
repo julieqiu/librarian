@@ -112,7 +112,7 @@ func HasNestedTypes(m *api.Message) bool {
 
 // FieldIsMap returns true if the field is a map.
 func FieldIsMap(f *api.Field, model *api.API) bool {
-	if f.Typez != api.MESSAGE_TYPE {
+	if f.Typez != api.TypezMessage {
 		return false
 	}
 	if m := model.Message(f.TypezID); m != nil {

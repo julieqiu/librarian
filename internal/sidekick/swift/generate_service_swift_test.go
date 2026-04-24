@@ -134,7 +134,7 @@ func TestGenerateService_WithImports(t *testing.T) {
 		Fields: []*api.Field{
 			{
 				Name:    "ext_field",
-				Typez:   api.MESSAGE_TYPE,
+				Typez:   api.TypezMessage,
 				TypezID: ".google.cloud.external.v1.ExternalMessage",
 			},
 		},

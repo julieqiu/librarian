@@ -433,7 +433,7 @@ func (b *pathBindingAnnotation) HasResourceNameArgs() bool {
 // returns a `Result<>`.
 func (b *pathBindingAnnotation) QueryParamsCanFail() bool {
 	for _, f := range b.QueryParams {
-		if f.Typez == api.MESSAGE_TYPE {
+		if f.Typez == api.TypezMessage {
 			return true
 		}
 	}
@@ -1069,10 +1069,10 @@ func makeAccessors(fields []string, m *api.Method) ([]string, error) {
 		} else {
 			accessors = append(accessors, fmt.Sprintf(".map(|m| &m.%s)", rustFieldName))
 		}
-		if field.Typez == api.STRING_TYPE {
+		if field.Typez == api.TypezString {
 			accessors = append(accessors, ".map(|s| s.as_str())")
 		}
-		if field.Typez == api.MESSAGE_TYPE {
+		if field.Typez == api.TypezMessage {
 			if fieldMessage := m.Model.Message(field.TypezID); fieldMessage != nil {
 				message = fieldMessage
 			}
@@ -1243,19 +1243,19 @@ func (c *codec) annotateOneOf(oneof *api.OneOf, message *api.Message, model *api
 
 func (c *codec) primitiveSerdeAs(field *api.Field) string {
 	switch field.Typez {
-	case api.INT32_TYPE, api.SFIXED32_TYPE, api.SINT32_TYPE:
+	case api.TypezInt32, api.TypezSfixed32, api.TypezSint32:
 		return "wkt::internal::I32"
-	case api.INT64_TYPE, api.SFIXED64_TYPE, api.SINT64_TYPE:
+	case api.TypezInt64, api.TypezSfixed64, api.TypezSint64:
 		return "wkt::internal::I64"
-	case api.UINT32_TYPE, api.FIXED32_TYPE:
+	case api.TypezUint32, api.TypezFixed32:
 		return "wkt::internal::U32"
-	case api.UINT64_TYPE, api.FIXED64_TYPE:
+	case api.TypezUint64, api.TypezFixed64:
 		return "wkt::internal::U64"
-	case api.FLOAT_TYPE:
+	case api.TypezFloat:
 		return "wkt::internal::F32"
-	case api.DOUBLE_TYPE:
+	case api.TypezDouble:
 		return "wkt::internal::F64"
-	case api.BYTES_TYPE:
+	case api.TypezBytes:
 		if c.bytesUseUrlSafeAlphabet {
 			return "serde_with::base64::Base64<serde_with::base64::UrlSafe>"
 		}
@@ -1266,14 +1266,14 @@ func (c *codec) primitiveSerdeAs(field *api.Field) string {
 }
 
 func (c *codec) mapKeySerdeAs(field *api.Field) string {
-	if field.Typez == api.BOOL_TYPE {
+	if field.Typez == api.TypezBool {
 		return "serde_with::DisplayFromStr"
 	}
 	return c.primitiveSerdeAs(field)
 }
 
 func (c *codec) mapValueSerdeAs(field *api.Field) string {
-	if field.Typez == api.MESSAGE_TYPE {
+	if field.Typez == api.TypezMessage {
 		return c.messageFieldSerdeAs(field)
 	}
 	return c.primitiveSerdeAs(field)
@@ -1332,16 +1332,16 @@ func (c *codec) annotateField(field *api.Field, message *api.Message, model *api
 		PrimitiveFieldType: primitiveFieldType,
 		AddQueryParameter:  addQueryParameter(field),
 		SerdeAs:            c.primitiveSerdeAs(field),
-		SkipIfIsDefault:    field.Typez != api.STRING_TYPE && field.Typez != api.BYTES_TYPE,
-		IsWktValue:         field.Typez == api.MESSAGE_TYPE && field.TypezID == ".google.protobuf.Value",
-		IsWktNullValue:     field.Typez == api.ENUM_TYPE && field.TypezID == ".google.protobuf.NullValue",
+		SkipIfIsDefault:    field.Typez != api.TypezString && field.Typez != api.TypezBytes,
+		IsWktValue:         field.Typez == api.TypezMessage && field.TypezID == ".google.protobuf.Value",
+		IsWktNullValue:     field.Typez == api.TypezEnum && field.TypezID == ".google.protobuf.NullValue",
 	}
-	if field.Recursive || (field.Typez == api.MESSAGE_TYPE && field.IsOneOf) {
+	if field.Recursive || (field.Typez == api.TypezMessage && field.IsOneOf) {
 		ann.IsBoxed = true
 	}
 	ann.MapToBoxed = mapToBoxed(field, message, model)
 	field.Codec = ann
-	if field.Typez == api.MESSAGE_TYPE {
+	if field.Typez == api.TypezMessage {
 		if msg := model.Message(field.TypezID); msg != nil && msg.IsMap {
 			if len(msg.Fields) != 2 {
 				return nil, fmt.Errorf("expected exactly two fields for field's map message (%q), fieldId=%s", field.TypezID, field.ID)
@@ -1592,7 +1592,7 @@ func isIdempotent(p *api.PathInfo) string {
 // Prost boxes fields that would cause an infinitely sized struct, which happens
 // on recursive cycles that are not broken by a repeated or map field.
 func mapToBoxed(field *api.Field, message *api.Message, model *api.API) bool {
-	if field.Typez != api.MESSAGE_TYPE || field.Repeated || field.Map {
+	if field.Typez != api.TypezMessage || field.Repeated || field.Map {
 		return false
 	}
 
@@ -1610,7 +1610,7 @@ func mapToBoxed(field *api.Field, message *api.Message, model *api.API) bool {
 			return false
 		}
 		for _, f := range msg.Fields {
-			if f.Typez != api.MESSAGE_TYPE || f.Repeated || f.Map {
+			if f.Typez != api.TypezMessage || f.Repeated || f.Map {
 				continue
 			}
 			if check(f.TypezID, targetID, visited) {
