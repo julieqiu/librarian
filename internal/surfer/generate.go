@@ -12,16 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package gcloud provides a simple API for generating gcloud commands.
-package gcloud
+package surfer
 
 import (
-	sidekickgcloud "github.com/googleapis/librarian/internal/sidekick/gcloud"
+	"github.com/googleapis/librarian/internal/sidekick/gcloud"
 	"github.com/googleapis/librarian/internal/sidekick/gcloud/provider"
 )
 
-// GenerateConfig contains parameters for generating gcloud commands.
-type GenerateConfig struct {
+// generateConfig contains parameters for generating gcloud commands.
+type generateConfig struct {
 	GcloudConfig              string
 	ServiceConfig             string
 	IncludeList               string
@@ -32,8 +31,8 @@ type GenerateConfig struct {
 	BaseModule                string
 }
 
-// Generate generates gcloud commands for a service.
-func Generate(cfg GenerateConfig) error {
+// generate generates gcloud commands for a service.
+func generate(cfg generateConfig) error {
 	overrides, err := provider.ReadGcloudConfig(cfg.GcloudConfig)
 	if err != nil {
 		return err
@@ -42,5 +41,5 @@ func Generate(cfg GenerateConfig) error {
 	if err != nil {
 		return err
 	}
-	return sidekickgcloud.Generate(model, overrides, cfg.Output, cfg.BaseModule)
+	return gcloud.Generate(model, overrides, cfg.Output, cfg.BaseModule)
 }
