@@ -72,7 +72,7 @@
 // Attributes—project, location, resource ID, and so on—that form the
 // resource path. gcloud expands these into flags.
 //
-// Default distinguishes “no default” from a default value of nil, false,
+// Default distinguishes "no default" from a default value of nil, false,
 // or 0 when marshaling and unmarshaling.
 package declarative
 
