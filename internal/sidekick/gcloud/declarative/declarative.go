@@ -15,9 +15,9 @@
 // Package declarative defines Go types that map directly to the schema of a
 // gcloud declarative YAML command.
 //
-// A declarative YAML file describes a single CLI command—its help text,
-// arguments, API request, long-running operation handling, and output—without
-// any hand-written Python.
+// A declarative YAML file describes a single CLI command, including its
+// help text, arguments, API request, long-running operation handling, and
+// output, without any hand-written Python.
 //
 // At startup, gcloud’s calliope framework reads these YAML files from each
 // surface in the source tree and turns them into runnable command classes.
