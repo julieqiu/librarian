@@ -50,7 +50,7 @@ const (
 	SINT64_TYPE    Typez = 18
 )
 
-var _typez_name = [...]string{
+var typezName = [...]string{
 	"UNDEFINED",
 	"DOUBLE",
 	"FLOAT",
@@ -74,10 +74,10 @@ var _typez_name = [...]string{
 
 // String returns the symbolic name for the Typez.
 func (t Typez) String() string {
-	if t < 0 || int(t) >= len(_typez_name) {
+	if t < 0 || int(t) >= len(typezName) {
 		return fmt.Sprintf("Typez(%d)", t)
 	}
-	return _typez_name[t]
+	return typezName[t]
 }
 
 // FieldBehavior represents annotations for how the code generator handles a
