@@ -1031,24 +1031,6 @@ type Field struct {
 	Codec any
 }
 
-// FieldParent returns the Parent field with an alternative name.
-//
-// In some mustache templates we want to access the parent for the
-// enclosing field. In mustache you can get a field from an enclosing context
-// *if* the name is unique.
-func (f *Field) FieldParent() *Message {
-	return f.Parent
-}
-
-// FieldCodec returns the Codec field with an alternative name.
-//
-// In some mustache templates we want to access the codec for the
-// enclosing field. In mustache you can get a field from an enclosing context
-// *if* the name is unique.
-func (f *Field) FieldCodec() any {
-	return f.Codec
-}
-
 // DocumentAsRequired returns true if the field should be documented as required.
 func (field *Field) DocumentAsRequired() bool {
 	return slices.Contains(field.Behavior, FIELD_BEHAVIOR_REQUIRED)
@@ -1144,14 +1126,6 @@ func (f *Field) IsEnum() bool {
 // also objects.
 func (f *Field) IsObject() bool {
 	return f.Typez == MESSAGE_TYPE
-}
-
-// Pair is a key-value pair.
-type Pair struct {
-	// Key of the pair.
-	Key string
-	// Value of the pair.
-	Value string
 }
 
 // OneOf is a group of fields that are mutually exclusive. Notably, proto3 optional
