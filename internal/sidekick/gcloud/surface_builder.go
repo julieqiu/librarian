@@ -22,32 +22,32 @@ import (
 	"github.com/googleapis/librarian/internal/sidekick/gcloud/provider"
 )
 
-type commandTreeBuilder struct {
+type surfaceBuilder struct {
 	model  *api.API
 	config *provider.Config
 }
 
-func newCommandTreeBuilder(model *api.API, config *provider.Config) *commandTreeBuilder {
-	return &commandTreeBuilder{
+func newSurfaceBuilder(model *api.API, config *provider.Config) *surfaceBuilder {
+	return &surfaceBuilder{
 		model:  model,
 		config: config,
 	}
 }
 
-func (b *commandTreeBuilder) build() (*CommandGroupsByTrack, error) {
+func (b *surfaceBuilder) build() (*CommandGroupsByTrack, error) {
 	tree := &CommandGroupsByTrack{}
 
 	for _, service := range b.model.Services {
-		groupBuilder := newCommandGroupBuilder(b.model, service, b.config)
+		gb := newGroupBuilder(b.model, service, b.config)
 
 		track := strings.ToUpper(provider.InferTrackFromPackage(service.Package))
-		root, err := b.root(tree, track, groupBuilder)
+		root, err := b.root(tree, track, gb)
 		if err != nil {
 			return nil, err
 		}
 
 		for _, method := range service.Methods {
-			if err := b.insert(root, groupBuilder, method); err != nil {
+			if err := b.insert(root, gb, method); err != nil {
 				return nil, err
 			}
 		}
@@ -59,7 +59,7 @@ func (b *commandTreeBuilder) build() (*CommandGroupsByTrack, error) {
 // insert traverses the tree and attaches a command leaf node. It resolves the
 // literal path segments of the method and walks the tree, creating missing
 // groups if they do not yet exist.
-func (b *commandTreeBuilder) insert(root *CommandGroup, groupBuilder *commandGroupBuilder, method *api.Method) error {
+func (b *surfaceBuilder) insert(root *CommandGroup, gb *groupBuilder, method *api.Method) error {
 	if provider.IsSingletonResourceMethod(method, b.model) {
 		return nil
 	}
@@ -85,12 +85,12 @@ func (b *commandTreeBuilder) insert(root *CommandGroup, groupBuilder *commandGro
 		}
 
 		if curr.Groups[seg] == nil {
-			curr.Groups[seg] = groupBuilder.build(segments, i, curr.Path)
+			curr.Groups[seg] = gb.build(segments, i, curr.Path)
 		}
 		curr = curr.Groups[seg]
 	}
 
-	cmd, err := newCommandBuilder(method, b.config, b.model, groupBuilder.service).build()
+	cmd, err := newCommandBuilder(method, b.config, b.model, gb.service).build()
 	if err != nil {
 		return err
 	}
@@ -99,21 +99,21 @@ func (b *commandTreeBuilder) insert(root *CommandGroup, groupBuilder *commandGro
 	return nil
 }
 
-func (b *commandTreeBuilder) root(tree *CommandGroupsByTrack, track string, groupBuilder *commandGroupBuilder) (*CommandGroup, error) {
+func (b *surfaceBuilder) root(tree *CommandGroupsByTrack, track string, gb *groupBuilder) (*CommandGroup, error) {
 	switch track {
 	case "GA":
 		if tree.GA == nil {
-			tree.GA = groupBuilder.buildRoot()
+			tree.GA = gb.buildRoot()
 		}
 		return tree.GA, nil
 	case "BETA":
 		if tree.BETA == nil {
-			tree.BETA = groupBuilder.buildRoot()
+			tree.BETA = gb.buildRoot()
 		}
 		return tree.BETA, nil
 	case "ALPHA":
 		if tree.ALPHA == nil {
-			tree.ALPHA = groupBuilder.buildRoot()
+			tree.ALPHA = gb.buildRoot()
 		}
 		return tree.ALPHA, nil
 	default:
@@ -130,10 +130,10 @@ var flattenedSegments = map[string]bool{
 	"organizations": true,
 }
 
-func (b *commandTreeBuilder) isFlattenedSegment(lit string) bool {
+func (b *surfaceBuilder) isFlattenedSegment(lit string) bool {
 	return flattenedSegments[lit]
 }
 
-func (b *commandTreeBuilder) isTerminatedSegment(lit string) bool {
+func (b *surfaceBuilder) isTerminatedSegment(lit string) bool {
 	return lit == "operations" && !provider.ShouldGenerateOperations(b.config)
 }
