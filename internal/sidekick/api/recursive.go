@@ -25,7 +25,7 @@ func LabelRecursiveFields(model *API) {
 }
 
 func (field *Field) recursivelyReferences(messageID string, model *API, visited map[string]bool) bool {
-	if field.Typez != MESSAGE_TYPE {
+	if field.Typez != TypezMessage {
 		return false
 	}
 	if field.TypezID == messageID {

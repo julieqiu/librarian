@@ -63,7 +63,7 @@ func TestEnumNames(t *testing.T) {
 		Fields: []*api.Field{
 			{
 				Name:     "automatic",
-				Typez:    api.MESSAGE_TYPE,
+				Typez:    api.TypezMessage,
 				TypezID:  sample.Automatic().ID,
 				Optional: true,
 				Repeated: false,
@@ -203,7 +203,7 @@ func TestFieldType_EnumImports(t *testing.T) {
 
 	field := &api.Field{
 		Name:    "testField",
-		Typez:   api.ENUM_TYPE,
+		Typez:   api.TypezEnum,
 		TypezID: ".google.type.DayOfWeek",
 	}
 	annotate.imports = map[string]bool{}
@@ -266,19 +266,19 @@ func TestFieldType(t *testing.T) {
 		typez api.Typez
 		want  string
 	}{
-		{api.BOOL_TYPE, "bool"},
-		{api.INT32_TYPE, "int"},
-		{api.UINT32_TYPE, "int"},
-		{api.FIXED32_TYPE, "int"},
-		{api.SFIXED32_TYPE, "int"},
-		{api.INT64_TYPE, "int"},
-		{api.UINT64_TYPE, "BigInt"},
-		{api.FIXED64_TYPE, "BigInt"},
-		{api.SFIXED64_TYPE, "int"},
-		{api.FLOAT_TYPE, "double"},
-		{api.DOUBLE_TYPE, "double"},
-		{api.STRING_TYPE, "String"},
-		{api.BYTES_TYPE, "Uint8List"},
+		{api.TypezBool, "bool"},
+		{api.TypezInt32, "int"},
+		{api.TypezUint32, "int"},
+		{api.TypezFixed32, "int"},
+		{api.TypezSfixed32, "int"},
+		{api.TypezInt64, "int"},
+		{api.TypezUint64, "BigInt"},
+		{api.TypezFixed64, "BigInt"},
+		{api.TypezSfixed64, "int"},
+		{api.TypezFloat, "double"},
+		{api.TypezDouble, "double"},
+		{api.TypezString, "String"},
+		{api.TypezBytes, "Uint8List"},
 	} {
 		field := &api.Field{
 			Name:     "parent",
@@ -309,13 +309,13 @@ func TestFieldType(t *testing.T) {
 	field1 := &api.Field{
 		Name:     "parent",
 		JSONName: "parent",
-		Typez:    api.MESSAGE_TYPE,
+		Typez:    api.TypezMessage,
 		TypezID:  sampleMessage.ID,
 	}
 	field2 := &api.Field{
 		Name:     "parent",
 		JSONName: "parent",
-		Typez:    api.ENUM_TYPE,
+		Typez:    api.TypezEnum,
 		TypezID:  sampleEnum.ID,
 	}
 	message := &api.Message{
@@ -354,18 +354,18 @@ func TestFieldType_Maps(t *testing.T) {
 		Fields: []*api.Field{
 			{
 				Name:  "key",
-				Typez: api.STRING_TYPE,
+				Typez: api.TypezString,
 			},
 			{
 				Name:  "value",
-				Typez: api.INT32_TYPE,
+				Typez: api.TypezInt32,
 			},
 		},
 	}
 	field := &api.Field{
 		Name:     "map",
 		JSONName: "map",
-		Typez:    api.MESSAGE_TYPE,
+		Typez:    api.TypezMessage,
 		TypezID:  map1.ID,
 	}
 	model := api.NewTestAPI([]*api.Message{}, []*api.Enum{}, []*api.Service{})
@@ -384,7 +384,7 @@ func TestFieldType_Bytes(t *testing.T) {
 	field := &api.Field{
 		Name:     "test",
 		JSONName: "test",
-		Typez:    api.BYTES_TYPE,
+		Typez:    api.TypezBytes,
 	}
 	message := &api.Message{
 		Name:   "$test",
@@ -412,18 +412,18 @@ func TestFieldType_Repeated(t *testing.T) {
 		typez api.Typez
 		want  string
 	}{
-		{api.BOOL_TYPE, "List<bool>"},
-		{api.INT32_TYPE, "List<int>"},
-		{api.UINT32_TYPE, "List<int>"},
-		{api.FIXED32_TYPE, "List<int>"},
-		{api.SFIXED32_TYPE, "List<int>"},
-		{api.INT64_TYPE, "List<int>"},
-		{api.UINT64_TYPE, "List<BigInt>"},
-		{api.FIXED64_TYPE, "List<BigInt>"},
-		{api.SFIXED64_TYPE, "List<int>"},
-		{api.FLOAT_TYPE, "List<double>"},
-		{api.DOUBLE_TYPE, "List<double>"},
-		{api.STRING_TYPE, "List<String>"},
+		{api.TypezBool, "List<bool>"},
+		{api.TypezInt32, "List<int>"},
+		{api.TypezUint32, "List<int>"},
+		{api.TypezFixed32, "List<int>"},
+		{api.TypezSfixed32, "List<int>"},
+		{api.TypezInt64, "List<int>"},
+		{api.TypezUint64, "List<BigInt>"},
+		{api.TypezFixed64, "List<BigInt>"},
+		{api.TypezSfixed64, "List<int>"},
+		{api.TypezFloat, "List<double>"},
+		{api.TypezDouble, "List<double>"},
+		{api.TypezString, "List<String>"},
 	} {
 		field := &api.Field{
 			Name:     "parent",
@@ -455,14 +455,14 @@ func TestFieldType_Repeated(t *testing.T) {
 	field1 := &api.Field{
 		Name:     "parent",
 		JSONName: "parent",
-		Typez:    api.MESSAGE_TYPE,
+		Typez:    api.TypezMessage,
 		TypezID:  sampleMessage.ID,
 		Repeated: true,
 	}
 	field2 := &api.Field{
 		Name:     "parent",
 		JSONName: "parent",
-		Typez:    api.ENUM_TYPE,
+		Typez:    api.TypezEnum,
 		TypezID:  sampleEnum.ID,
 		Repeated: true,
 	}

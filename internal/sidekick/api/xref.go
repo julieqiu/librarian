@@ -38,13 +38,13 @@ func CrossReference(model *API) error {
 		for _, f := range m.Fields {
 			f.Parent = m
 			switch f.Typez {
-			case MESSAGE_TYPE:
+			case TypezMessage:
 				t := model.Message(f.TypezID)
 				if t == nil {
 					return fmt.Errorf("cannot find message type %s for field %s", f.TypezID, f.ID)
 				}
 				f.MessageType = t
-			case ENUM_TYPE:
+			case TypezEnum:
 				t := model.Enum(f.TypezID)
 				if t == nil {
 					return fmt.Errorf("cannot find enum type %s for field %s", f.TypezID, f.ID)
@@ -688,7 +688,7 @@ func findBodyField(message *Message, pathInfo *PathInfo, targetTypeID string, si
 func findResourceIDField(message *Message, singular string) *Field {
 	expectedIDName := fmt.Sprintf("%s_id", singular)
 	for _, f := range message.Fields {
-		if f.Name == expectedIDName && f.Typez == STRING_TYPE {
+		if f.Name == expectedIDName && f.Typez == TypezString {
 			return f
 		}
 	}

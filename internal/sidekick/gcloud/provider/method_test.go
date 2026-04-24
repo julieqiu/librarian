@@ -167,7 +167,7 @@ func TestFindResourceMessage(t *testing.T) {
 			name: "Standard List Response",
 			outputType: &api.Message{
 				Fields: []*api.Field{
-					{Name: "next_page_token", Typez: api.STRING_TYPE},
+					{Name: "next_page_token", Typez: api.TypezString},
 					{Name: "instances", Repeated: true, MessageType: instanceMsg},
 				},
 			},
@@ -177,7 +177,7 @@ func TestFindResourceMessage(t *testing.T) {
 			name: "No Repeated Message",
 			outputType: &api.Message{
 				Fields: []*api.Field{
-					{Name: "status", Typez: api.STRING_TYPE},
+					{Name: "status", Typez: api.TypezString},
 				},
 			},
 			want: nil,

@@ -617,8 +617,8 @@ func rustFieldTypesCases() *api.API {
 		ID:    "..$MapMessage",
 		IsMap: true,
 		Fields: []*api.Field{
-			{Name: "key", ID: "..$Message.key", Typez: api.INT32_TYPE},
-			{Name: "value", ID: "..$Message.value", Typez: api.INT32_TYPE},
+			{Name: "key", ID: "..$Message.key", Typez: api.TypezInt32},
+			{Name: "value", ID: "..$Message.value", Typez: api.TypezInt32},
 		},
 	}
 	message := &api.Message{
@@ -627,57 +627,57 @@ func rustFieldTypesCases() *api.API {
 		Fields: []*api.Field{
 			{
 				Name:     "f_int32",
-				Typez:    api.INT32_TYPE,
+				Typez:    api.TypezInt32,
 				Optional: false,
 				Repeated: false,
 			},
 			{
 				Name:     "f_int32_optional",
-				Typez:    api.INT32_TYPE,
+				Typez:    api.TypezInt32,
 				Optional: true,
 				Repeated: false,
 			},
 			{
 				Name:     "f_int32_repeated",
-				Typez:    api.INT32_TYPE,
+				Typez:    api.TypezInt32,
 				Optional: false,
 				Repeated: true,
 			},
 			{
 				Name:     "f_string",
-				Typez:    api.STRING_TYPE,
+				Typez:    api.TypezString,
 				Optional: false,
 				Repeated: false,
 			},
 			{
 				Name:     "f_string_optional",
-				Typez:    api.STRING_TYPE,
+				Typez:    api.TypezString,
 				Optional: true,
 				Repeated: false,
 			},
 			{
 				Name:     "f_string_repeated",
-				Typez:    api.STRING_TYPE,
+				Typez:    api.TypezString,
 				Optional: false,
 				Repeated: true,
 			},
 			{
 				Name:     "f_msg",
-				Typez:    api.MESSAGE_TYPE,
+				Typez:    api.TypezMessage,
 				TypezID:  "..Target",
 				Optional: true,
 				Repeated: false,
 			},
 			{
 				Name:     "f_msg_repeated",
-				Typez:    api.MESSAGE_TYPE,
+				Typez:    api.TypezMessage,
 				TypezID:  "..Target",
 				Optional: false,
 				Repeated: true,
 			},
 			{
 				Name:      "f_msg_recursive",
-				Typez:     api.MESSAGE_TYPE,
+				Typez:     api.TypezMessage,
 				TypezID:   "..Message",
 				Optional:  true,
 				Repeated:  false,
@@ -685,7 +685,7 @@ func rustFieldTypesCases() *api.API {
 			},
 			{
 				Name:      "f_msg_recursive_repeated",
-				Typez:     api.MESSAGE_TYPE,
+				Typez:     api.TypezMessage,
 				TypezID:   "..Message",
 				Optional:  false,
 				Repeated:  true,
@@ -693,21 +693,21 @@ func rustFieldTypesCases() *api.API {
 			},
 			{
 				Name:     "f_timestamp",
-				Typez:    api.MESSAGE_TYPE,
+				Typez:    api.TypezMessage,
 				TypezID:  ".google.protobuf.Timestamp",
 				Optional: true,
 				Repeated: false,
 			},
 			{
 				Name:     "f_timestamp_repeated",
-				Typez:    api.MESSAGE_TYPE,
+				Typez:    api.TypezMessage,
 				TypezID:  ".google.protobuf.Timestamp",
 				Optional: false,
 				Repeated: true,
 			},
 			{
 				Name:     "f_map",
-				Typez:    api.MESSAGE_TYPE,
+				Typez:    api.TypezMessage,
 				TypezID:  "..$MapMessage",
 				Optional: false,
 				Repeated: false,
@@ -830,29 +830,29 @@ func TestFieldMapTypeValues(t *testing.T) {
 	}{
 		{
 			"std::collections::HashMap<i32,std::string::String>",
-			&api.Field{Typez: api.STRING_TYPE},
+			&api.Field{Typez: api.TypezString},
 		},
 		{
 			"std::collections::HashMap<i32,i64>",
-			&api.Field{Typez: api.INT64_TYPE},
+			&api.Field{Typez: api.TypezInt64},
 		},
 		{
 			"std::collections::HashMap<i32,wkt::Any>",
-			&api.Field{Typez: api.MESSAGE_TYPE, TypezID: ".google.protobuf.Any"},
+			&api.Field{Typez: api.TypezMessage, TypezID: ".google.protobuf.Any"},
 		},
 		{
 			"std::collections::HashMap<i32,crate::model::OtherMessage>",
-			&api.Field{Typez: api.MESSAGE_TYPE, TypezID: ".test.OtherMessage"},
+			&api.Field{Typez: api.TypezMessage, TypezID: ".test.OtherMessage"},
 		},
 		{
 			"std::collections::HashMap<i32,crate::model::Message>",
-			&api.Field{Typez: api.MESSAGE_TYPE, TypezID: ".test.Message"},
+			&api.Field{Typez: api.TypezMessage, TypezID: ".test.Message"},
 		},
 	} {
 		field := &api.Field{
 			Name:    "indexed",
 			ID:      ".test.Message.indexed",
-			Typez:   api.MESSAGE_TYPE,
+			Typez:   api.TypezMessage,
 			TypezID: ".test.$MapThing",
 		}
 		other_message := &api.Message{
@@ -874,7 +874,7 @@ func TestFieldMapTypeValues(t *testing.T) {
 		key := &api.Field{
 			Name:  "key",
 			ID:    ".test.$MapThing.key",
-			Typez: api.INT32_TYPE,
+			Typez: api.TypezInt32,
 		}
 		map_thing := &api.Message{
 			Name:   "$MapThing",
@@ -904,21 +904,21 @@ func TestFieldMapTypeKey(t *testing.T) {
 	}{
 		{
 			"std::collections::HashMap<i32,i64>",
-			&api.Field{Typez: api.INT32_TYPE},
+			&api.Field{Typez: api.TypezInt32},
 		},
 		{
 			"std::collections::HashMap<std::string::String,i64>",
-			&api.Field{Typez: api.STRING_TYPE},
+			&api.Field{Typez: api.TypezString},
 		},
 		{
 			"std::collections::HashMap<crate::model::EnumType,i64>",
-			&api.Field{Typez: api.ENUM_TYPE, TypezID: ".test.EnumType"},
+			&api.Field{Typez: api.TypezEnum, TypezID: ".test.EnumType"},
 		},
 	} {
 		field := &api.Field{
 			Name:    "indexed",
 			ID:      ".test.Message.indexed",
-			Typez:   api.MESSAGE_TYPE,
+			Typez:   api.TypezMessage,
 			TypezID: ".test.$MapThing",
 		}
 		message := &api.Message{
@@ -934,7 +934,7 @@ func TestFieldMapTypeKey(t *testing.T) {
 		value := &api.Field{
 			Name:  "value",
 			ID:    ".test.$MapThing.value",
-			Typez: api.INT64_TYPE,
+			Typez: api.TypezInt64,
 		}
 		map_thing := &api.Message{
 			Name:   "$MapThing",
@@ -964,56 +964,56 @@ func TestAsQueryParameter(t *testing.T) {
 	optionsField := &api.Field{
 		Name:     "options_field",
 		JSONName: "optionsField",
-		Typez:    api.MESSAGE_TYPE,
+		Typez:    api.TypezMessage,
 		TypezID:  "..Options",
 		Optional: true,
 	}
 	requiredField := &api.Field{
 		Name:     "required_field",
 		JSONName: "requiredField",
-		Typez:    api.STRING_TYPE,
+		Typez:    api.TypezString,
 	}
 	optionalField := &api.Field{
 		Name:     "optional_field",
 		JSONName: "optionalField",
-		Typez:    api.STRING_TYPE,
+		Typez:    api.TypezString,
 		Optional: true,
 	}
 	repeatedField := &api.Field{
 		Name:     "repeated_field",
 		JSONName: "repeatedField",
-		Typez:    api.STRING_TYPE,
+		Typez:    api.TypezString,
 		Repeated: true,
 	}
 
 	requiredEnumField := &api.Field{
 		Name:     "required_enum_field",
 		JSONName: "requiredEnumField",
-		Typez:    api.ENUM_TYPE,
+		Typez:    api.TypezEnum,
 	}
 	optionalEnumField := &api.Field{
 		Name:     "optional_enum_field",
 		JSONName: "optionalEnumField",
-		Typez:    api.ENUM_TYPE,
+		Typez:    api.TypezEnum,
 		Optional: true,
 	}
 	repeatedEnumField := &api.Field{
 		Name:     "repeated_enum_field",
 		JSONName: "repeatedEnumField",
-		Typez:    api.ENUM_TYPE,
+		Typez:    api.TypezEnum,
 		Repeated: true,
 	}
 
 	requiredFieldMaskField := &api.Field{
 		Name:     "required_field_mask",
 		JSONName: "requiredFieldMask",
-		Typez:    api.MESSAGE_TYPE,
+		Typez:    api.TypezMessage,
 		TypezID:  ".google.protobuf.FieldMask",
 	}
 	optionalFieldMaskField := &api.Field{
 		Name:     "optional_field_mask",
 		JSONName: "optionalFieldMask",
-		Typez:    api.MESSAGE_TYPE,
+		Typez:    api.TypezMessage,
 		TypezID:  ".google.protobuf.FieldMask",
 		Optional: true,
 	}
@@ -1048,26 +1048,26 @@ func TestOneOfAsQueryParameter(t *testing.T) {
 	optionsField := &api.Field{
 		Name:     "options_field",
 		JSONName: "optionsField",
-		Typez:    api.MESSAGE_TYPE,
+		Typez:    api.TypezMessage,
 		TypezID:  options.ID,
 		IsOneOf:  true,
 	}
 	typeField := &api.Field{
 		Name:     "type",
 		JSONName: "type",
-		Typez:    api.INT32_TYPE,
+		Typez:    api.TypezInt32,
 		IsOneOf:  true,
 	}
 	singularField := &api.Field{
 		Name:     "singular_field",
 		JSONName: "singularField",
-		Typez:    api.STRING_TYPE,
+		Typez:    api.TypezString,
 		IsOneOf:  true,
 	}
 	repeatedField := &api.Field{
 		Name:     "repeated_field",
 		JSONName: "repeatedField",
-		Typez:    api.STRING_TYPE,
+		Typez:    api.TypezString,
 		Repeated: true,
 		IsOneOf:  true,
 	}
@@ -1075,13 +1075,13 @@ func TestOneOfAsQueryParameter(t *testing.T) {
 	singularEnumField := &api.Field{
 		Name:     "singular_enum_field",
 		JSONName: "singularEnumField",
-		Typez:    api.ENUM_TYPE,
+		Typez:    api.TypezEnum,
 		IsOneOf:  true,
 	}
 	repeatedEnumField := &api.Field{
 		Name:     "repeated_enum_field",
 		JSONName: "repeatedEnumField",
-		Typez:    api.ENUM_TYPE,
+		Typez:    api.TypezEnum,
 		Repeated: true,
 		IsOneOf:  true,
 	}
@@ -1089,7 +1089,7 @@ func TestOneOfAsQueryParameter(t *testing.T) {
 	singularFieldMaskField := &api.Field{
 		Name:     "singular_field_mask",
 		JSONName: "singularFieldMask",
-		Typez:    api.MESSAGE_TYPE,
+		Typez:    api.TypezMessage,
 		TypezID:  ".google.protobuf.FieldMask",
 		IsOneOf:  true,
 	}
@@ -2080,7 +2080,7 @@ func TestEnumNames(t *testing.T) {
 		Fields: []*api.Field{
 			{
 				Name:     "automatic",
-				Typez:    api.MESSAGE_TYPE,
+				Typez:    api.TypezMessage,
 				TypezID:  ".test.Automatic",
 				Optional: true,
 				Repeated: false,

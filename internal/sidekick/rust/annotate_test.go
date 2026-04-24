@@ -90,7 +90,7 @@ func serviceAnnotationsModel() *api.API {
 			{
 				Name:    "field",
 				ID:      ".test.v1.Response.field",
-				Typez:   api.ENUM_TYPE,
+				Typez:   api.TypezEnum,
 				TypezID: ".test.v1.UsedEnum",
 			},
 		},
@@ -522,14 +522,14 @@ func TestOneOfAnnotations(t *testing.T) {
 		Name:     "oneof_field",
 		JSONName: "oneofField",
 		ID:       ".test.Message.oneof_field",
-		Typez:    api.STRING_TYPE,
+		Typez:    api.TypezString,
 		IsOneOf:  true,
 	}
 	repeated := &api.Field{
 		Name:     "oneof_field_repeated",
 		JSONName: "oneofFieldRepeated",
 		ID:       ".test.Message.oneof_field_repeated",
-		Typez:    api.STRING_TYPE,
+		Typez:    api.TypezString,
 		Repeated: true,
 		IsOneOf:  true,
 	}
@@ -537,7 +537,7 @@ func TestOneOfAnnotations(t *testing.T) {
 		Name:     "oneof_field_map",
 		JSONName: "oneofFieldMap",
 		ID:       ".test.Message.oneof_field_map",
-		Typez:    api.MESSAGE_TYPE,
+		Typez:    api.TypezMessage,
 		TypezID:  ".test.$Map",
 		Repeated: false,
 		IsOneOf:  true,
@@ -546,14 +546,14 @@ func TestOneOfAnnotations(t *testing.T) {
 		Name:     "oneof_field_integer",
 		JSONName: "oneofFieldInteger",
 		ID:       ".test.Message.oneof_field_integer",
-		Typez:    api.INT64_TYPE,
+		Typez:    api.TypezInt64,
 		IsOneOf:  true,
 	}
 	boxed_field := &api.Field{
 		Name:     "oneof_field_boxed",
 		JSONName: "oneofFieldBoxed",
 		ID:       ".test.Message.oneof_field_boxed",
-		Typez:    api.MESSAGE_TYPE,
+		Typez:    api.TypezMessage,
 		TypezID:  ".google.protobuf.DoubleValue",
 		Optional: true,
 		IsOneOf:  true,
@@ -572,8 +572,8 @@ func TestOneOfAnnotations(t *testing.T) {
 		Fields:  []*api.Field{singular, repeated, map_field, integer_field, boxed_field},
 		OneOfs:  []*api.OneOf{group},
 	}
-	key_field := &api.Field{Name: "key", Typez: api.INT32_TYPE}
-	value_field := &api.Field{Name: "value", Typez: api.FLOAT_TYPE}
+	key_field := &api.Field{Name: "key", Typez: api.TypezInt32}
+	value_field := &api.Field{Name: "value", Typez: api.TypezFloat}
 	map_message := &api.Message{
 		Name:    "$Map",
 		ID:      ".test.$Map",
@@ -702,7 +702,7 @@ func TestOneOfConflictAnnotations(t *testing.T) {
 		Name:     "oneof_field",
 		JSONName: "oneofField",
 		ID:       ".test.Message.oneof_field",
-		Typez:    api.STRING_TYPE,
+		Typez:    api.TypezString,
 		IsOneOf:  true,
 	}
 	group := &api.OneOf{
@@ -756,7 +756,7 @@ func TestOneOfUnqualifiedConflictAnnotations(t *testing.T) {
 		Name:     "oneof_field",
 		JSONName: "oneofField",
 		ID:       ".test.Message.oneof_field",
-		Typez:    api.STRING_TYPE,
+		Typez:    api.TypezString,
 		IsOneOf:  true,
 	}
 	group := &api.OneOf{
@@ -960,32 +960,32 @@ func TestJsonNameAnnotations(t *testing.T) {
 		Name:     "parent",
 		JSONName: "parent",
 		ID:       ".test.Request.parent",
-		Typez:    api.STRING_TYPE,
+		Typez:    api.TypezString,
 	}
 	publicKey := &api.Field{
 		Name:     "public_key",
 		JSONName: "public_key",
 		ID:       ".test.Request.public_key",
-		Typez:    api.STRING_TYPE,
+		Typez:    api.TypezString,
 	}
 	readTime := &api.Field{
 		Name:     "read_time",
 		JSONName: "readTime",
 		ID:       ".test.Request.read_time",
-		Typez:    api.INT32_TYPE,
+		Typez:    api.TypezInt32,
 	}
 	optional := &api.Field{
 		Name:     "optional",
 		JSONName: "optional",
 		ID:       ".test.Request.optional",
-		Typez:    api.INT32_TYPE,
+		Typez:    api.TypezInt32,
 		Optional: true,
 	}
 	repeated := &api.Field{
 		Name:     "repeated",
 		JSONName: "repeated",
 		ID:       ".test.Request.repeated",
-		Typez:    api.INT32_TYPE,
+		Typez:    api.TypezInt32,
 		Repeated: true,
 	}
 	message := &api.Message{
@@ -1208,32 +1208,32 @@ func TestPathBindingAnnotations(t *testing.T) {
 		Name:     "name",
 		JSONName: "name",
 		ID:       ".test.Request.name",
-		Typez:    api.STRING_TYPE,
+		Typez:    api.TypezString,
 	}
 
 	f_project := &api.Field{
 		Name:     "project",
 		JSONName: "project",
 		ID:       ".test.Request.project",
-		Typez:    api.STRING_TYPE,
+		Typez:    api.TypezString,
 	}
 	f_location := &api.Field{
 		Name:     "location",
 		JSONName: "location",
 		ID:       ".test.Request.location",
-		Typez:    api.STRING_TYPE,
+		Typez:    api.TypezString,
 	}
 	f_id := &api.Field{
 		Name:     "id",
 		JSONName: "id",
 		ID:       ".test.Request.id",
-		Typez:    api.UINT64_TYPE,
+		Typez:    api.TypezUint64,
 	}
 	f_optional := &api.Field{
 		Name:     "optional",
 		JSONName: "optional",
 		ID:       ".test.Request.optional",
-		Typez:    api.STRING_TYPE,
+		Typez:    api.TypezString,
 		Optional: true,
 	}
 
@@ -1244,7 +1244,7 @@ func TestPathBindingAnnotations(t *testing.T) {
 		Name:     "child",
 		JSONName: "child",
 		ID:       ".test.Request.child",
-		Typez:    api.MESSAGE_TYPE,
+		Typez:    api.TypezMessage,
 		TypezID:  ".test.Request",
 		Optional: true,
 	}
@@ -1418,7 +1418,7 @@ func TestPathBindingAnnotationsDetailedTracing(t *testing.T) {
 		Name:     "name",
 		JSONName: "name",
 		ID:       ".test.Request.name",
-		Typez:    api.STRING_TYPE,
+		Typez:    api.TypezString,
 	}
 	request := &api.Message{
 		Name:    "Request",
@@ -1487,7 +1487,7 @@ func TestPathBindingAnnotationsStyle(t *testing.T) {
 			Name:     test.FieldName,
 			JSONName: test.FieldName,
 			ID:       fmt.Sprintf(".test.Request.%s", test.FieldName),
-			Typez:    api.STRING_TYPE,
+			Typez:    api.TypezString,
 		}
 		request := &api.Message{
 			Name:    "Request",
@@ -1555,7 +1555,7 @@ func TestPathBindingAnnotationsErrors(t *testing.T) {
 		Name:     "field",
 		JSONName: "field",
 		ID:       ".test.Request.field",
-		Typez:    api.STRING_TYPE,
+		Typez:    api.TypezString,
 	}
 	request := &api.Message{
 		Name:    "Request",
@@ -1834,13 +1834,13 @@ func TestSetterSampleAnnotations(t *testing.T) {
 			{
 				Name:    "enum_field",
 				ID:      ".test.v1.TestMessage.enum_field",
-				Typez:   api.ENUM_TYPE,
+				Typez:   api.TypezEnum,
 				TypezID: ".test.v1.TestEnum",
 			},
 			{
 				Name:    "message_field",
 				ID:      ".test.v1.TestMessage.message_field",
-				Typez:   api.MESSAGE_TYPE,
+				Typez:   api.TypezMessage,
 				TypezID: ".test.v1.TestMessage",
 			},
 		},

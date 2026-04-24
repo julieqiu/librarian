@@ -410,35 +410,35 @@ func resolveUsedPackages(model *api.API, extraPackages []*packagez) {
 func scalarFieldType(f *api.Field) (string, error) {
 	var out string
 	switch f.Typez {
-	case api.DOUBLE_TYPE:
+	case api.TypezDouble:
 		out = "f64"
-	case api.FLOAT_TYPE:
+	case api.TypezFloat:
 		out = "f32"
-	case api.INT64_TYPE:
+	case api.TypezInt64:
 		out = "i64"
-	case api.UINT64_TYPE:
+	case api.TypezUint64:
 		out = "u64"
-	case api.INT32_TYPE:
+	case api.TypezInt32:
 		out = "i32"
-	case api.FIXED64_TYPE:
+	case api.TypezFixed64:
 		out = "u64"
-	case api.FIXED32_TYPE:
+	case api.TypezFixed32:
 		out = "u32"
-	case api.BOOL_TYPE:
+	case api.TypezBool:
 		out = "bool"
-	case api.STRING_TYPE:
+	case api.TypezString:
 		out = "std::string::String"
-	case api.BYTES_TYPE:
+	case api.TypezBytes:
 		out = "::bytes::Bytes"
-	case api.UINT32_TYPE:
+	case api.TypezUint32:
 		out = "u32"
-	case api.SFIXED32_TYPE:
+	case api.TypezSfixed32:
 		out = "i32"
-	case api.SFIXED64_TYPE:
+	case api.TypezSfixed64:
 		out = "i64"
-	case api.SINT32_TYPE:
+	case api.TypezSint32:
 		out = "i32"
-	case api.SINT64_TYPE:
+	case api.TypezSint64:
 		out = "i64"
 
 	default:
@@ -459,7 +459,7 @@ func oneOfFieldTypeFormatter(f *api.Field, fieldIsMap bool, baseType string) str
 	switch {
 	case f.Repeated:
 		return fmt.Sprintf("std::vec::Vec<%s>", baseType)
-	case f.Typez == api.MESSAGE_TYPE:
+	case f.Typez == api.TypezMessage:
 		if fieldIsMap {
 			return baseType
 		}
@@ -501,14 +501,14 @@ func (c *codec) fieldType(f *api.Field, model *api.API, primitive bool, sourceSp
 
 func (c *codec) mapType(f *api.Field, model *api.API, sourceSpecificationPackageName string) (string, error) {
 	switch f.Typez {
-	case api.MESSAGE_TYPE:
+	case api.TypezMessage:
 		m := model.Message(f.TypezID)
 		if m == nil {
 			return "", fmt.Errorf("unable to lookup type (%q) for message field %s", f.TypezID, f.ID)
 		}
 		return c.fullyQualifiedMessageName(m, sourceSpecificationPackageName)
 
-	case api.ENUM_TYPE:
+	case api.TypezEnum:
 		e := model.Enum(f.TypezID)
 		if e == nil {
 			return "", fmt.Errorf("unable to lookup type (%q) for enum field %s", f.TypezID, f.ID)
@@ -523,7 +523,7 @@ func (c *codec) mapType(f *api.Field, model *api.API, sourceSpecificationPackage
 // attributes.
 func (c *codec) baseFieldType(f *api.Field, model *api.API, sourceSpecificationPackageName string) (string, error) {
 	switch f.Typez {
-	case api.MESSAGE_TYPE:
+	case api.TypezMessage:
 		m := model.Message(f.TypezID)
 		if m == nil {
 			return "", fmt.Errorf("unable to lookup field type (%q) for field %s", f.TypezID, f.ID)
@@ -540,13 +540,13 @@ func (c *codec) baseFieldType(f *api.Field, model *api.API, sourceSpecificationP
 			return "std::collections::HashMap<" + key + "," + val + ">", nil
 		}
 		return c.fullyQualifiedMessageName(m, sourceSpecificationPackageName)
-	case api.ENUM_TYPE:
+	case api.TypezEnum:
 		e := model.Enum(f.TypezID)
 		if e == nil {
 			return "", fmt.Errorf("unable to lookup field type (%q) for field %s", f.TypezID, f.ID)
 		}
 		return c.fullyQualifiedEnumName(e, sourceSpecificationPackageName)
-	case api.GROUP_TYPE:
+	case api.TypezGroup:
 		return "", nil
 	default:
 		return scalarFieldType(f)
@@ -559,12 +559,12 @@ func addQueryParameter(f *api.Field) string {
 	}
 	fieldName := toSnake(f.Name)
 	switch f.Typez {
-	case api.ENUM_TYPE:
+	case api.TypezEnum:
 		if f.Optional || f.Repeated {
 			return fmt.Sprintf(`let builder = req.%s.iter().fold(builder, |builder, p| builder.query(&[("%s", p)]));`, fieldName, f.JSONName)
 		}
 		return fmt.Sprintf(`let builder = builder.query(&[("%s", &req.%s)]);`, f.JSONName, fieldName)
-	case api.MESSAGE_TYPE:
+	case api.TypezMessage:
 		// Query parameters in nested messages are first converted to a
 		// `serde_json::Value`` and then recursively merged into the request
 		// query. The conversion to `serde_json::Value` is expensive, but very
@@ -585,9 +585,9 @@ func addQueryParameter(f *api.Field) string {
 func addQueryParameterOneOf(f *api.Field) string {
 	fieldName := toSnake(f.Name)
 	switch f.Typez {
-	case api.ENUM_TYPE:
+	case api.TypezEnum:
 		return fmt.Sprintf(`let builder = req.%s().iter().fold(builder, |builder, p| builder.query(&[("%s", p)]));`, fieldName, f.JSONName)
-	case api.MESSAGE_TYPE:
+	case api.TypezMessage:
 		// Query parameters in nested messages are first converted to a
 		// `serde_json::Value`` and then recursively merged into the request
 		// query. The conversion to `serde_json::Value` is expensive, but very
@@ -1462,14 +1462,14 @@ func findUsedPackagesMessage(message *api.Message, model *api.API, c *codec, vis
 	}
 	for _, f := range message.Fields {
 		switch f.Typez {
-		case api.MESSAGE_TYPE:
+		case api.TypezMessage:
 			if fm := model.Message(f.TypezID); fm != nil {
 				usePackage(fm.Package, model, c)
 				if f.Map {
 					findUsedPackagesMessage(fm, model, c, visited)
 				}
 			}
-		case api.ENUM_TYPE:
+		case api.TypezEnum:
 			if fe := model.Enum(f.TypezID); fe != nil {
 				usePackage(fe.Package, model, c)
 			}
