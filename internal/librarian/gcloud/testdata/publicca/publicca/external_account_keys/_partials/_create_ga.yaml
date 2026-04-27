@@ -18,8 +18,11 @@
     - GA
   auto_generated: true
   help_text:
-    brief: Create externalAccountKeys
-    description: Create a external_account_key
+    brief: Creates a new [ExternalAccountKey][google.cloud.security.publicca.v1.ExternalAccountKey] bound to the project
+    description: |-
+      Creates a new
+      [ExternalAccountKey][google.cloud.security.publicca.v1.ExternalAccountKey]
+      bound to the project.
     examples: |-
       To create the external_account_key, run:
 

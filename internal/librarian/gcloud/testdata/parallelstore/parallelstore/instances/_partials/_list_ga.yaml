@@ -18,8 +18,8 @@
     - GA
   auto_generated: true
   help_text:
-    brief: List instances
-    description: List instances
+    brief: Lists all instances in a given project and location
+    description: Lists all instances in a given project and location.
     examples: |-
       To list all instances, run:
 

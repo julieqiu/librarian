@@ -18,8 +18,8 @@
     - GA
   auto_generated: true
   help_text:
-    brief: Create instances
-    description: Create a instance
+    brief: Creates a Parallelstore instance in a given project and location
+    description: Creates a Parallelstore instance in a given project and location.
     examples: |-
       To create the instance, run:
 

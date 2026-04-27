@@ -18,8 +18,8 @@
     - GA
   auto_generated: true
   help_text:
-    brief: ""
-    description: ""
+    brief: Copies data from Parallelstore to Cloud Storage
+    description: Copies data from Parallelstore to Cloud Storage.
   arguments:
     params:
       - help_text: Name of the resource.
