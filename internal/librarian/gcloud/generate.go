@@ -88,7 +88,25 @@ func generateAPI(api *config.API, googleapisDir, outDir string) error {
 	if err != nil {
 		return err
 	}
-	return sidekickgcloud.Generate(model, &provider.Config{}, outDir, baseModule)
+	overrides := &provider.Config{
+		APIs: []provider.API{{APIVersion: apiVersionFromPath(api.Path)}},
+	}
+	return sidekickgcloud.Generate(model, overrides, outDir, baseModule)
+}
+
+// apiVersionFromPath returns the trailing version segment of an API path, for
+// example "v1" for "google/cloud/parallelstore/v1". It returns "" if the
+// trailing segment does not look like an API version.
+func apiVersionFromPath(path string) string {
+	parts := strings.Split(path, "/")
+	if len(parts) == 0 {
+		return ""
+	}
+	last := parts[len(parts)-1]
+	if len(last) < 2 || last[0] != 'v' || last[1] < '0' || last[1] > '9' {
+		return ""
+	}
+	return last
 }
 
 // collectProtos returns proto file paths under apiPath, relative to
