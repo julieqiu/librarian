@@ -117,6 +117,29 @@ func TestCollectProtos(t *testing.T) {
 	}
 }
 
+func TestAPIVersionFromPath(t *testing.T) {
+	for _, test := range []struct {
+		name string
+		path string
+		want string
+	}{
+		{"v1", "google/cloud/parallelstore/v1", "v1"},
+		{"v1beta", "google/cloud/parallelstore/v1beta", "v1beta"},
+		{"v2alpha1", "google/foo/v2alpha1", "v2alpha1"},
+		{"single segment", "v1", "v1"},
+		{"no version", "google/cloud/parallelstore", ""},
+		{"vendor not version", "vendor/foo", ""},
+		{"empty", "", ""},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got := apiVersionFromPath(test.path)
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
 func TestFindServiceConfig(t *testing.T) {
 	apiPath := "google/cloud/security/publicca/v1"
 	abs, err := filepath.Abs(testGoogleapisDir)

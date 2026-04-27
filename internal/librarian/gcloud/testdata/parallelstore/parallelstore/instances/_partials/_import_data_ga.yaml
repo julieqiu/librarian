@@ -17,7 +17,6 @@
 - release_tracks:
     - GA
   auto_generated: true
-  hidden: true
   help_text:
     brief: ""
     description: ""
@@ -144,6 +143,7 @@
             enum_value: MODE_PRESERVE
             help_text: Value for the `mode-preserve` field.
   request:
+    api_version: v1
     collection:
       - parallelstore.projects.locations.instances
     method: importData

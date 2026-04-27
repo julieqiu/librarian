@@ -17,7 +17,6 @@
 - release_tracks:
     - GA
   auto_generated: true
-  hidden: true
   help_text:
     brief: Create externalAccountKeys
     description: Create a external_account_key
@@ -48,5 +47,6 @@
           plural_name: locations
         required: true
   request:
+    api_version: v1
     collection:
       - publicca.projects.locations.externalAccountKeys
