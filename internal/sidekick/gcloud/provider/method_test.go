@@ -482,48 +482,38 @@ func TestGetMethodHelpText(t *testing.T) {
 		want      HelpText
 	}{
 		{
-			name:   "Describe Fallback",
+			name:   "Describe with no documentation",
 			method: methodMock("GetInstance"),
 			want: HelpText{
-				Brief:       "Describe instances",
-				Description: "Describe a instance",
-				Examples:    "To describe the instance, run:\n\n    $ {command}",
+				Examples: "To describe the instance, run:\n\n    $ {command}",
 			},
 		},
 		{
-			name:   "List Fallback",
+			name:   "List with no documentation",
 			method: methodMock("ListInstances"),
 			want: HelpText{
-				Brief:       "List instances",
-				Description: "List instances",
-				Examples:    "To list all instances, run:\n\n    $ {command}",
+				Examples: "To list all instances, run:\n\n    $ {command}",
 			},
 		},
 		{
-			name:   "Create Fallback",
+			name:   "Create with no documentation",
 			method: methodMock("CreateInstance"),
 			want: HelpText{
-				Brief:       "Create instances",
-				Description: "Create a instance",
-				Examples:    "To create the instance, run:\n\n    $ {command}",
+				Examples: "To create the instance, run:\n\n    $ {command}",
 			},
 		},
 		{
-			name:   "Delete Fallback",
+			name:   "Delete with no documentation",
 			method: methodMock("DeleteInstance"),
 			want: HelpText{
-				Brief:       "Delete instances",
-				Description: "Delete a instance",
-				Examples:    "To delete the instance, run:\n\n    $ {command}",
+				Examples: "To delete the instance, run:\n\n    $ {command}",
 			},
 		},
 		{
-			name:   "Update Fallback",
+			name:   "Update with no documentation",
 			method: methodMock("UpdateInstance"),
 			want: HelpText{
-				Brief:       "Update instances",
-				Description: "Update a instance",
-				Examples:    "To update the instance, run:\n\n    $ {command}",
+				Examples: "To update the instance, run:\n\n    $ {command}",
 			},
 		},
 		{
@@ -536,9 +526,80 @@ func TestGetMethodHelpText(t *testing.T) {
 				Examples:    "Override Ex1\n\nOverride Ex2",
 			},
 		},
+		{
+			name: "Documentation populates brief and description for CRUD method",
+			method: func() *api.Method {
+				m := methodMock("CreateInstance")
+				m.Documentation = "Creates a Parallelstore instance."
+				return m
+			}(),
+			want: HelpText{
+				Brief:       "Creates a Parallelstore instance",
+				Description: "Creates a Parallelstore instance.",
+				Examples:    "To create the instance, run:\n\n    $ {command}",
+			},
+		},
+		{
+			name: "Documentation populates non-CRUD method without examples",
+			method: func() *api.Method {
+				m := methodMock("ImportData")
+				m.Documentation = "Copies data from Cloud Storage to Parallelstore."
+				return m
+			}(),
+			want: HelpText{
+				Brief:       "Copies data from Cloud Storage to Parallelstore",
+				Description: "Copies data from Cloud Storage to Parallelstore.",
+			},
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			got := GetMethodHelpText(test.overrides, test.method, model)
+			if diff := cmp.Diff(test.want, got); diff != "" {
+				t.Errorf("mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestMethodBrief(t *testing.T) {
+	for _, test := range []struct {
+		name string
+		d    string
+		want string
+	}{
+		{
+			name: "single sentence with trailing period",
+			d:    "Creates a Parallelstore instance.",
+			want: "Creates a Parallelstore instance",
+		},
+		{
+			name: "two sentences",
+			d:    "Creates an instance. Returns a long-running operation.",
+			want: "Creates an instance",
+		},
+		{
+			name: "newline collapses to space",
+			d:    "First sentence.\nSecond sentence.",
+			want: "First sentence",
+		},
+		{
+			name: "single uppercase letter before period is not a sentence end",
+			d:    "Returns true if the resource is in the U.S. region. Use list to enumerate.",
+			want: "Returns true if the resource is in the U.S. region",
+		},
+		{
+			name: "no trailing period",
+			d:    "No trailing period",
+			want: "No trailing period",
+		},
+		{
+			name: "empty",
+			d:    "",
+			want: "",
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			got := methodBrief(test.d)
 			if diff := cmp.Diff(test.want, got); diff != "" {
 				t.Errorf("mismatch (-want +got):\n%s", diff)
 			}

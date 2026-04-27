@@ -18,8 +18,8 @@
     - GA
   auto_generated: true
   help_text:
-    brief: Describe resources
-    description: Describe a resource
+    brief: Gets information about a location
+    description: Gets information about a location.
     examples: |-
       To describe the resource, run:
 

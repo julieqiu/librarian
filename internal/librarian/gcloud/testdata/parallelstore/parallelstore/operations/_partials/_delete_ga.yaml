@@ -18,8 +18,8 @@
     - GA
   auto_generated: true
   help_text:
-    brief: Delete resources
-    description: Delete a resource
+    brief: Provides the [Operations][google.longrunning.Operations] service functionality in this service
+    description: Provides the [Operations][google.longrunning.Operations] service functionality in this service.
     examples: |-
       To delete the resource, run:
 

@@ -16,6 +16,7 @@ package provider
 
 import (
 	"fmt"
+	"go/doc"
 	"strings"
 
 	"github.com/googleapis/librarian/internal/sidekick/api"
@@ -220,7 +221,9 @@ type HelpText struct {
 	Examples    string
 }
 
-// GetMethodHelpText extracts help text from overrides or generates fallbacks.
+// GetMethodHelpText extracts help text from overrides or derives it from the
+// method's proto documentation. brief and description come from the proto
+// comment (or an override); examples are templated for known CRUD verbs.
 func GetMethodHelpText(overrides *Config, method *api.Method, model *api.API) HelpText {
 	rule := FindHelpTextRule(overrides, strings.TrimPrefix(method.ID, "."))
 	if rule != nil {
@@ -230,48 +233,46 @@ func GetMethodHelpText(overrides *Config, method *api.Method, model *api.API) He
 			Examples:    strings.Join(rule.HelpText.Examples, "\n\n"),
 		}
 	}
+	return HelpText{
+		Brief:       methodBrief(method.Documentation),
+		Description: method.Documentation,
+		Examples:    methodExamples(method, model),
+	}
+}
 
-	commandName, _ := GetCommandName(method)
+// methodBrief returns a short brief for a method, derived from its proto
+// documentation comment using the same first-sentence convention as
+// go/doc.Synopsis (used by godoc). The trailing period is trimmed.
+func methodBrief(d string) string {
+	return strings.TrimSuffix(doc.Synopsis(d), ".")
+}
+
+// methodExamples returns a templated example for known CRUD verbs and the
+// empty string otherwise.
+func methodExamples(method *api.Method, model *api.API) string {
+	commandName, err := GetCommandName(method)
+	if err != nil {
+		return ""
+	}
 	singular := GetSingularResourceNameForMethod(method, model)
-	plural := GetPluralResourceNameForMethod(method, model)
-
 	if singular == "" {
 		singular = "resource"
 	}
+	plural := GetPluralResourceNameForMethod(method, model)
 	if plural == "" {
 		plural = "resources"
 	}
-
-	brief := ""
-	description := ""
-	examples := ""
-
 	switch commandName {
 	case "describe":
-		brief = fmt.Sprintf("Describe %s", plural)
-		description = fmt.Sprintf("Describe a %s", singular)
-		examples = fmt.Sprintf("To describe the %s, run:\n\n    $ {command}", singular)
+		return fmt.Sprintf("To describe the %s, run:\n\n    $ {command}", singular)
 	case "list":
-		brief = fmt.Sprintf("List %s", plural)
-		description = fmt.Sprintf("List %s", plural)
-		examples = fmt.Sprintf("To list all %s, run:\n\n    $ {command}", plural)
+		return fmt.Sprintf("To list all %s, run:\n\n    $ {command}", plural)
 	case "create":
-		brief = fmt.Sprintf("Create %s", plural)
-		description = fmt.Sprintf("Create a %s", singular)
-		examples = fmt.Sprintf("To create the %s, run:\n\n    $ {command}", singular)
+		return fmt.Sprintf("To create the %s, run:\n\n    $ {command}", singular)
 	case "delete":
-		brief = fmt.Sprintf("Delete %s", plural)
-		description = fmt.Sprintf("Delete a %s", singular)
-		examples = fmt.Sprintf("To delete the %s, run:\n\n    $ {command}", singular)
+		return fmt.Sprintf("To delete the %s, run:\n\n    $ {command}", singular)
 	case "update":
-		brief = fmt.Sprintf("Update %s", plural)
-		description = fmt.Sprintf("Update a %s", singular)
-		examples = fmt.Sprintf("To update the %s, run:\n\n    $ {command}", singular)
+		return fmt.Sprintf("To update the %s, run:\n\n    $ {command}", singular)
 	}
-
-	return HelpText{
-		Brief:       brief,
-		Description: description,
-		Examples:    examples,
-	}
+	return ""
 }
