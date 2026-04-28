@@ -166,6 +166,19 @@ GLOBAL OPTIONS:
 				"USAGE": "\n   librarian generate [options]\n",
 			},
 		},
+		{
+			name: "non-consecutive sections",
+			help: `USAGE:
+   librarian generate [options]
+
+OPTIONS:
+   --api value  path to the API
+`,
+			want: map[string]string{
+				"USAGE":   "\n   librarian generate [options]\n\n",
+				"OPTIONS": "\n   --api value  path to the API\n",
+			},
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			got := splitSections(test.help)

@@ -269,6 +269,8 @@ func parseHelp(help string) CommandDoc {
 	var doc CommandDoc
 	if name, ok := sections["NAME"]; ok {
 		name = strings.TrimSpace(name)
+		// urfave/cli formats NAME as "<name> - <tagline>". Skip past the
+		// 3-byte " - " separator (i+3) to extract the tagline.
 		if i := strings.Index(name, " - "); i >= 0 {
 			doc.Summary = strings.TrimSpace(name[i+3:])
 			doc.Tagline = sentenceCase(doc.Summary)
@@ -353,11 +355,11 @@ func dedent(s string) string {
 	}
 	out := make([]string, len(lines))
 	for i, l := range lines {
-		if len(l) >= min {
-			out[i] = l[min:]
-		} else {
+		if len(l) < min {
 			out[i] = l
+			continue
 		}
+		out[i] = l[min:]
 	}
 	return strings.Join(out, "\n")
 }
